@@ -866,7 +866,13 @@ function renderSemaine(app){
 
 function closeModal(){
   if(modalDay && modalEdited && state.currentWeek[modalDay]){
-    state.currentWeek[modalDay].touched = true;
+    var dd = state.currentWeek[modalDay];
+    // La journée n'est considérée "complète" que si le DÉPART a été explicitement
+    // pointé/validé — toucher juste l'arrivée (ou une pause) ne doit pas figer le
+    // départ, qui doit rester calculé en direct tant qu'on ne l'a pas confirmé.
+    if(dd.punched && dd.punched.departure){
+      dd.touched = true;
+    }
     saveStore();
   }
   modalDay = null;
@@ -1021,18 +1027,28 @@ function renderDayModal(){
   sheet.appendChild(breaksGroup);
 
   if(day === "vendredi"){
-    var fp = dayProjection("vendredi");
-    var applyBtn = el("button","ghost","⚡ Partir à l'heure calculée ("+fp.departure+")");
-    applyBtn.onclick = function(){
-      if(!state.currentWeek[day]) state.currentWeek[day] = {};
-      state.currentWeek[day].departure = fp.departure;
-      if(!state.currentWeek[day].punched) state.currentWeek[day].punched = {};
-      state.currentWeek[day].punched.departure = true;
-      modalEdited = true;
-      saveStore();
-      render();
-    };
-    sheet.appendChild(applyBtn);
+    var depPunched = !!(d.punched && d.punched.departure);
+    if(!depPunched){
+      var fp = dayProjection("vendredi");
+      var fpTip = el("div","tip");
+      fpTip.innerHTML = '<span class="ic">✨</span><span>Le départ reste <strong>calculé en direct</strong> ('+fp.departure+' pour l’instant) tant que tu ne l’as pas validé ci-dessous — pointer l’arrivée ou une pause ne le fige pas.</span>';
+      sheet.appendChild(fpTip);
+      var applyBtn = el("button","primary","✅ Valider la fin de journée ("+fp.departure+")");
+      applyBtn.onclick = function(){
+        if(!state.currentWeek[day]) state.currentWeek[day] = {};
+        state.currentWeek[day].departure = fp.departure;
+        if(!state.currentWeek[day].punched) state.currentWeek[day].punched = {};
+        state.currentWeek[day].punched.departure = true;
+        modalEdited = true;
+        saveStore();
+        render();
+      };
+      sheet.appendChild(applyBtn);
+    } else {
+      var doneTip = el("div","tip");
+      doneTip.innerHTML = '<span class="ic">✅</span><span>Fin de journée validée à <strong>'+d.departure+'</strong>.</span>';
+      sheet.appendChild(doneTip);
+    }
   }
 
   var worked = dayWorkedMin(day);
