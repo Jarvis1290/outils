@@ -383,16 +383,16 @@ details.panel[open] summary{margin-bottom:10px}
   <!-- PLUS -->
   <section class="view" id="v-more" hidden>
     <div class="h2">Sauvegarde</div>
-    <button class="btn primary" type="button" id="btnSave">⬇ Sauvegarder en Excel</button>
-    <button class="btn" type="button" id="btnImport">⬆ Importer un fichier Excel</button>
-    <input type="file" id="fileImport" accept=".xlsx,.xls" hidden>
+    <button class="btn primary" type="button" id="btnSave">⬇ Sauvegarder</button>
+    <button class="btn" type="button" id="btnImport">⬆ Importer une sauvegarde</button>
+    <input type="file" id="fileImport" accept=".txt,.json,.xlsx,.xls,text/plain,application/json" hidden>
     <div class="card" style="display:flex;flex-direction:column;gap:10px">
       <label class="switch"><span>Sauvegarde auto 1×/jour<br><small style="color:var(--fg-3)">au premier enregistrement de la journée</small></span><input type="checkbox" id="autoBk"></label>
       <div class="cap" id="bkInfo" style="margin:0"></div>
       <div class="cap" id="bkDir" style="margin:0"></div>
       <button class="btn" type="button" id="btnDir">📁 Choisir le dossier de sauvegarde</button>
     </div>
-    <div class="cap">Nom du fichier : <span style="font-family:var(--f-num)">Vehicules_sauvegarde_AAAA-MM-JJ.xlsx</span>. Pour tout récupérer (nouveau téléphone…), importe la dernière sauvegarde. Tu peux aussi importer ton fichier <span style="font-family:var(--f-num)">Vehicules.xlsx</span> d'origine.</div>
+    <div class="cap">Fichier texte : <span style="font-family:var(--f-num)">Vehicules_sauvegarde_AAAA-MM-JJ.txt</span>. Pour tout récupérer (nouveau téléphone…), importe la dernière sauvegarde. Tu peux toujours importer aussi ton fichier <span style="font-family:var(--f-num)">Vehicules.xlsx</span> d'origine.</div>
     <div class="h2" id="tyreTitle">Pneus hiver / été</div>
     <div class="card">
       <div class="tform">
@@ -420,7 +420,7 @@ details.panel[open] summary{margin-bottom:10px}
     <button class="btn danger" type="button" id="btnWipe">Effacer toutes les données</button>
     <div class="h2">À propos</div>
     <div class="card">
-      <div class="kv"><span>Version</span><span>1.1</span><span>Données</span><span>Dans ce téléphone</span><span>Pleins notés</span><span id="abN">–</span></div>
+      <div class="kv"><span>Version</span><span>1.2</span><span>Données</span><span>Dans ce téléphone</span><span>Pleins notés</span><span id="abN">–</span></div>
       <dl class="glo">
         <dt>Plein complet / partiel</dt><dd>Complet = réservoir rempli à ras. La conso se calcule de plein complet à plein complet, en additionnant les partiels entre deux.</dd>
         <dt>Conso L/100 km</dt><dd>Litres versés depuis le dernier plein complet ÷ km parcourus × 100. Impossible si des litres manquent entre deux.</dd>
@@ -488,7 +488,7 @@ const THEME = {
   b:{K:"#E7EDF3",B:"#8FB3D9",txt:"#A8B6C5",grid:"rgba(143,179,217,.12)",tipBg:"#25323F",tipFg:"#E7EDF3",tipBd:"#8FB3D9",track:"#34455A",needle:"#E7EDF3",muted:"#738599",bad:"#F07884",warn:"#E8C062",acc:"#8FB3D9"}};
 let MODE=0; try{ const m=localStorage.getItem("sv-mode"); if(m==="1") MODE=1; }catch(e){}
 let T=THEME.k;
-const APP_VERSION="1.1";
+const APP_VERSION="1.2";
 const KEY="suivi-vehicules-v1";
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}}, lsSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 let STATE={fills:[],tyres:[],ent:[],autoBackup:true,lastBackup:null,rates:{}};
@@ -678,7 +678,7 @@ function renderInsight(){
 function renderBanner(){
   const box=$("#bannerBox"); if(!fills.length){ box.innerHTML=""; return; }
   const lb=STATE.lastBackup, days=lb?TODAY-day(lb):999;
-  if(days>=7){ box.innerHTML=`<div class="banner"><span>${lb?`Dernière sauvegarde Excel il y a ${days} jours.`:"Tu n'as encore jamais sauvegardé en Excel."}</span><button type="button" id="bnSave">Sauvegarder</button></div>`; $("#bnSave").onclick=()=>exportXlsx(false); }
+  if(days>=7){ box.innerHTML=`<div class="banner"><span>${lb?`Dernière sauvegarde il y a ${days} jours.`:"Tu n'as encore jamais fait de sauvegarde."}</span><button type="button" id="bnSave">Sauvegarder</button></div>`; $("#bnSave").onclick=()=>exportXlsx(false); }
   else box.innerHTML="";
 }
 function renderHome(){
@@ -1105,31 +1105,35 @@ function buildXlsx(){
   return new Blob([data],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
 }
 function downloadBlob(blob,name){ const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=name; a.style.display="none"; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); },60000); }
-async function shareFile(){ if(!LAST_FILE) return; const f=new File([LAST_FILE.blob],LAST_FILE.name,{type:LAST_FILE.blob.type});
-  try{ if(navigator.canShare&&navigator.canShare({files:[f]})) await navigator.share({files:[f],title:LAST_FILE.name}); else toast("Le partage de fichiers n'est pas possible sur ce téléphone."); }catch(e){} }
+async function shareFile(){ if(!LAST_FILE) return; const f=new File([LAST_FILE.blob],LAST_FILE.name,{type:"text/plain"});
+  try{ if(navigator.canShare&&navigator.canShare({files:[f]})){ await navigator.share({files:[f],title:LAST_FILE.name}); STATE.lastBackup=dOf(TODAY); persist(); renderBanner(); return; } }catch(e){ if(e&&e.name==="AbortError") return; }
+  try{ await navigator.clipboard.writeText(await LAST_FILE.blob.text()); toast("Partage impossible : la sauvegarde est copiée, colle-la dans une note."); }catch(e){ toast("Partage impossible sur ce téléphone : "+String(e)); } }
+function buildBackup(){
+  const data={app:"Suivi Véhicules",version:APP_VERSION,date:dOf(TODAY),
+    pleins:fills.map(f=>({id:f.id,d:f.d,v:V[f.v].n,km:f.km,L:f.L,P:f.P,full:f.full,ctry:f.ctry||"CH",st:f.st||null,eur:f.eur??null,rate:f.rate??null,opts:f.opts||{}})),
+    pneus:STATE.tyres.map(t=>({id:t.id,d:t.d,v:V[t.v].n,t:t.t})), entretien:STATE.ent.map(e=>({id:e.id,d:e.d,v:V[e.v].n,t:e.t,m:e.m??null,km:e.km??null}))};
+  return new Blob([JSON.stringify(data,null,1)],{type:"text/plain"});
+}
 async function exportXlsx(auto){
-  if(typeof XLSX==="undefined"){ toast("Module Excel pas encore chargé : ouvre l'app une fois avec internet."); return false; }
-  let blob; try{ blob=buildXlsx(); }catch(e){ toast("La sauvegarde a échoué : "+e.message); return false; }
-  const name=`Vehicules_sauvegarde_${dOf(TODAY)}.xlsx`; LAST_FILE={blob,name};
+  let blob; try{ blob=buildBackup(); }catch(e){ toast("La sauvegarde a échoué : "+String(e)); return false; }
+  const name=`Vehicules_sauvegarde_${dOf(TODAY)}.txt`; LAST_FILE={blob,name};
   let where="";
   if(DIR && await dirWritable(!auto)){
-    try{ const fh=await DIR.getFileHandle(name,{create:true}); const w=await fh.createWritable(); await w.write(blob); await w.close(); where=`Dossier <b>${DIR.name}</b> (celui que tu as choisi)`; }
-    catch(e){ where=""; }
+    try{ const fh=await DIR.getFileHandle(name,{create:true}); const w=await fh.createWritable(); await w.write(blob); await w.close(); where=`Dossier <b>${DIR.name}</b> (celui que tu as choisi)`; }catch(e){ where=""; }
   }
-  if(!where){ try{ downloadBlob(blob,name); where=`<b>Mes fichiers → Téléchargements</b><br><span class="muted">(Stockage interne/Download)</span>`; }catch(e){ toast("La sauvegarde a échoué : "+e.message); return false; } }
-  STATE.lastBackup=dOf(TODAY); persist(); renderBanner(); if(curView==="more") renderMore();
-  if(auto){ toast(`💾 Sauvegarde du jour : ${name.replace(".xlsx","")} → ${DIR&&where.includes(DIR.name)?DIR.name:"Téléchargements"}`); return true; }
-  const canShare=!!(navigator.canShare&&navigator.canShare({files:[new File([blob],name,{type:blob.type})]}));
-  const btns=[["📁 Changer de dossier",async()=>{ if(FS_OK){ const ok=await chooseDir(); if(ok){ closeModal(); exportXlsx(false); } } else showModal({title:"📁 Changer de dossier",html:dirHelp(),buttons:[["Retour",()=>exportXlsxModal(name,where,canShare)],["OK",closeModal]]}); }]];
-  exportXlsxModal(name,where,canShare);
-  return true;
+  if(!where){ try{ downloadBlob(blob,name); where=`<b>Mes fichiers → Téléchargements</b><br><span class="muted">(Stockage interne/Download)</span>`; }catch(e){ where=""; } }
+  if(where){ STATE.lastBackup=dOf(TODAY); persist(); renderBanner(); if(curView==="more") renderMore(); }
+  if(auto){ if(where) toast(`💾 Sauvegarde du jour → ${DIR&&where.includes(DIR.name)?DIR.name:"Téléchargements"}`); return !!where; }
+  exportXlsxModal(name,where,true);
+  return !!where;
 }
-function exportXlsxModal(name,where,canShare){
-  const btns=[["📁 Changer de dossier",async()=>{ if(FS_OK){ const ok=await chooseDir(); if(ok){ closeModal(); exportXlsx(false); } } else showModal({title:"📁 Changer de dossier",html:dirHelp(),buttons:[["Retour",()=>exportXlsxModal(name,where,canShare)],["OK",closeModal]]}); }]];
-  if(canShare) btns.push(["↗ Partager",shareFile]);
-  btns.push(["OK",closeModal]);
-  showModal({title:"💾 Sauvegarde enregistrée",html:`<div class="path">Fichier : <b>${name}</b><br>Endroit : ${where}</div>
-    <div class="muted">${DIR?"":"Pas trouvé ? Regarde la notification de téléchargement en haut de l'écran. "}Pour tout récupérer plus tard : <b>Plus → Importer</b> et choisis ce fichier.</div>`,buttons:btns});
+function exportXlsxModal(name,where){
+  const btns=[["📁 Changer de dossier",async()=>{ if(FS_OK){ const ok=await chooseDir(); if(ok){ closeModal(); exportXlsx(false); } } else showModal({title:"📁 Changer de dossier",html:dirHelp(),buttons:[["Retour",()=>exportXlsxModal(name,where)],["OK",closeModal]]}); }],
+    ["↗ Partager / enregistrer ailleurs",async()=>{ await shareFile(); }],
+    ["OK",closeModal]];
+  showModal({title:where?"💾 Sauvegarde enregistrée":"⚠ Sauvegarde à finir",html:where?`<div class="path">Fichier : <b>${name}</b><br>Endroit : ${where}</div>
+    <div class="muted">Pas trouvé ? Regarde la notification de téléchargement en haut de l'écran, ou utilise <b>Partager</b>. Pour tout récupérer : <b>Plus → Importer</b> et choisis ce fichier.</div>`
+    :`<div class="path">Le téléphone a bloqué l'enregistrement direct.</div><div class="muted">Touche <b>Partager / enregistrer ailleurs</b> et choisis <b>Mes fichiers</b>, Drive ou Synology Drive.</div>`,buttons:btns});
 }
 function autoBackup(){ if(STATE.autoBackup && STATE.lastBackup!==dOf(TODAY) && fills.length) setTimeout(()=>exportXlsx(true),900); }
 const toISO=v=>{ if(v==null||v==="") return null; if(v instanceof Date){ const d=new Date(v.getTime()+12*3600e3); return d.toISOString().slice(0,10); }
@@ -1163,11 +1167,19 @@ function parseWorkbook(wb){
       out.ent.push({id:uid(),d:toISO(row[eh.idx("date")]),v,t:String(t),m:im>=0?num(row[im]):null,km:ik>=0?num(row[ik]):null}); } } }
   return out;
 }
+function parseBackup(text){ let j; try{ j=JSON.parse(text); }catch(e){ throw new Error("ce fichier texte n'est pas une sauvegarde de l'app"); }
+  const vi=n=>vehOf(n); const out={fills:[],tyres:[],ent:[]};
+  (j.pleins||[]).forEach(f=>{ const v=vi(f.v); if(v<0||!f.d||f.km==null) return; out.fills.push({id:f.id||uid(),d:f.d,v,km:+f.km,L:f.L??null,P:f.P??null,full:!!f.full,ctry:f.ctry||"CH",st:f.st||null,eur:f.eur??null,rate:f.rate??null,opts:f.opts||{}}); });
+  (j.pneus||[]).forEach(t=>{ const v=vi(t.v); if(v>=0&&t.d) out.tyres.push({id:t.id||uid(),d:t.d,v,t:t.t==="H"?"H":"E"}); });
+  (j.entretien||[]).forEach(e=>{ const v=vi(e.v); if(v>=0&&e.t) out.ent.push({id:e.id||uid(),d:e.d||null,v,t:e.t,m:e.m??null,km:e.km??null}); });
+  return out; }
 let pendingImport=null;
 $("#btnImport").onclick=()=>$("#fileImport").click();
 $("#fileImport").onchange=async e=>{ const file=e.target.files[0]; e.target.value=""; if(!file) return;
-  if(typeof XLSX==="undefined"){ toast("Module Excel pas encore chargé : réessaie avec internet."); return; }
-  try{ const wb=XLSX.read(await file.arrayBuffer(),{cellDates:true}); const d=parseWorkbook(wb);
+  try{ let d;
+    const txt=/\.(txt|json)$/i.test(file.name)||file.type.startsWith("text")||file.type.includes("json");
+    if(txt){ d=parseBackup(await file.text()); }
+    else { if(typeof XLSX==="undefined"){ toast("Module Excel pas encore chargé : réessaie avec internet."); return; } d=parseWorkbook(XLSX.read(await file.arrayBuffer(),{cellDates:true})); }
     if(!d.fills.length){ toast("Aucun plein trouvé dans ce fichier."); return; }
     if(fills.length){ pendingImport=d; showImportConfirm(file.name,d); } else applyImport(d);
   }catch(err){ toast("Import impossible : "+err.message); } };
