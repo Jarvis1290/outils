@@ -1,5 +1,5 @@
 // Suivi Véhicules — fonctionnement hors ligne
-const CACHE = "suivi-vehicules-v1.0";
+const CACHE = "suivi-vehicules-v1.4";
 const CORE = ["./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png"];
 const LIBS = [
   "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js",

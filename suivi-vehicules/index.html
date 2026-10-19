@@ -11,8 +11,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-</body>
-</html>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 /* Layout : app téléphone une colonne, barre du haut + contenu défilant + barre d'onglets en bas, bouton « + Plein » flottant.
@@ -214,6 +212,8 @@ details.extras[open] summary{margin-bottom:8px}
 .tyre .v{font-family:var(--f-num);font-weight:700;text-align:right}
 .tyre small{display:block;color:var(--fg-3);font-size:11.5px}
 .tform{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:end}
+.tform .field input.txt{font-family:var(--f-body)}
+.tpos{font-family:var(--f-disp);font-weight:600;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--volt-hi);padding:12px 0 2px}
 .tform input{width:100%;box-sizing:border-box;background:var(--ink);border:1px solid var(--line);color:var(--fg);border-radius:10px;padding:10px;font-family:var(--f-num);font-size:15px}
 /* interrupteur de véhicule */
 .modesw{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--navy);border:1px solid var(--line);border-radius:16px;padding:5px}
@@ -312,6 +312,22 @@ details.panel[open] summary{margin-bottom:10px}
 .modal .path b{font-family:var(--f-num);font-weight:600}
 .modal .muted{font-size:12.5px}
 .modal .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+/* pavé numérique de l'app (comme l'app de calcul d'atelier) */
+body.typing nav.tabs{display:none}
+body.typing .app{padding-bottom:62vh}
+body.typing .sheet .in{padding-bottom:calc(330px + env(safe-area-inset-bottom,0px));max-height:96vh}
+.kpad{position:fixed;left:0;right:0;bottom:0;z-index:55;background:var(--navy);border-top:2px solid var(--volt);box-shadow:0 -10px 30px rgba(0,0,0,.45);
+  padding:8px max(8px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 8px) max(8px,env(safe-area-inset-left,0px))}
+.kp-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:2px 6px 8px;min-width:0;max-width:520px;margin:0 auto}
+.kp-top span{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--fg-3);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kp-top b{font:700 24px var(--f-num);color:var(--volt-hi);white-space:nowrap}
+.kp-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;max-width:520px;margin:0 auto}
+.kp-grid button{appearance:none;height:52px;border-radius:10px;border:1px solid var(--line);background:var(--navy-2);color:var(--fg);font:600 24px var(--f-num);cursor:pointer;touch-action:manipulation}
+.kp-grid button:active{background:var(--line)}
+.kp-grid .kfn{background:var(--ink);color:var(--fg-2);font-size:18px}
+.kp-grid .k0{grid-column:span 2}
+.kp-grid .kok{background:linear-gradient(160deg,var(--grad1),var(--grad2));color:var(--on-acc);border-color:var(--volt);font:700 17px var(--f-disp);letter-spacing:.04em}
+input.kpon{border-color:var(--volt)!important;box-shadow:0 0 0 3px var(--volt-glow)!important}
 </style>
 </head>
 <body>
@@ -404,26 +420,31 @@ details.panel[open] summary{margin-bottom:10px}
     <div class="h2" id="setTitle">Réglages</div>
     <div class="card">
       <div class="efrm">
-        <div class="field"><label for="sRange">Autonomie d'un plein (km)</label><input id="sRange" type="number" inputmode="numeric"></div>
-        <div class="field"><label for="sTank">Réservoir (L)</label><input id="sTank" type="number" inputmode="decimal"></div>
+        <div class="field"><label for="sRange">Autonomie d'un plein (km)</label><input id="sRange" type="text" inputmode="numeric" autocomplete="off"></div>
+        <div class="field"><label for="sTank">Réservoir (L)</label><input id="sTank" type="text" inputmode="decimal" autocomplete="off"></div>
       </div>
-      <div class="cap">Sert à l'Oracle et à repérer les pleins oubliés (plus de 1,3 × l'autonomie entre deux pleins) et les litres impossibles (plus que le réservoir + 10 %).</div>
+      <div class="field" style="margin-top:12px"><label>Saisie des chiffres</label><div class="seg" id="sPad"><button type="button" data-p="on">🔢 Pavé de l'app</button><button type="button" data-p="off">📱 Clavier du tél.</button></div></div>
+      <div class="cap">Sert à l'IA du réservoir et à repérer les pleins oubliés (plus de 1,3 × l'autonomie entre deux pleins) et les litres impossibles (plus que le réservoir + 10 %).</div>
     </div>
     <div class="h2" id="tyreTitle">Pneus hiver / été</div>
     <div class="card">
       <div class="tform">
         <div class="field"><label for="tDate">Date du changement</label><input id="tDate" type="date"></div>
-        <div class="field"><label>Pneus montés</label><div class="seg" id="tType"><button type="button" aria-pressed="true" data-t="H">❄️ Hiver</button><button type="button" aria-pressed="false" data-t="E">☀️ Été</button></div></div>
+        <div class="field"><label>Pneus montés</label><div class="seg" id="tType"></div></div>
+        <div class="field" id="tPosBox" hidden style="grid-column:1/-1"><label>Roue</label><div class="seg" id="tPos"></div></div>
+        <div class="field" id="tModBox" hidden style="grid-column:1/-1"><label>Modèle</label><div class="chiprow" id="tMod"></div>
+          <input class="txt" id="tModOther" type="text" placeholder="Marque et modèle du pneu" hidden style="margin-top:6px"></div>
+        <div class="field" id="tKmBox" hidden><label for="tKm">Km compteur (facultatif)</label><input id="tKm" type="text" inputmode="numeric" autocomplete="off" placeholder="estimé"></div>
       </div>
       <button class="btn primary" type="button" id="tAdd" style="margin-top:10px">Noter le changement</button>
       <div id="tyreList" style="margin-top:6px"></div>
-      <div class="cap">Les km sont estimés d'après le compteur de tes pleins autour de la date. Touche une ligne pour la supprimer.</div>
+      <div class="cap" id="tyreCap">Les km sont estimés d'après le compteur de tes pleins autour de la date. Touche une ligne pour la supprimer.</div>
     </div>
     <div class="h2" id="entTitle">Entretien</div>
     <div class="card">
       <div class="efrm">
         <input id="eDate" type="date" aria-label="Date">
-        <input id="eAmt" type="number" inputmode="decimal" step="0.05" placeholder="Montant CHF" aria-label="Montant CHF">
+        <input id="eAmt" type="text" inputmode="decimal" autocomplete="off" placeholder="Montant CHF" aria-label="Montant CHF">
         <input id="eDesc" class="full" type="text" placeholder="Ex. vidange, plaquettes, assurance…" aria-label="Description">
       </div>
       <button class="btn primary" type="button" id="eAdd" style="margin-top:10px">Ajouter</button>
@@ -436,12 +457,12 @@ details.panel[open] summary{margin-bottom:10px}
     <button class="btn danger" type="button" id="btnWipe">Effacer toutes les données</button>
     <div class="h2">À propos</div>
     <div class="card">
-      <div class="kv"><span>Version</span><span>1.3</span><span>Données</span><span>Dans ce téléphone</span><span>Pleins notés</span><span id="abN">–</span></div>
+      <div class="kv"><span>Version</span><span>1.4</span><span>Données</span><span>Dans ce téléphone</span><span>Pleins notés</span><span id="abN">–</span></div>
       <dl class="glo">
         <dt>Plein complet / partiel</dt><dd>Complet = réservoir rempli à ras. La conso se calcule de plein complet à plein complet, en additionnant les partiels entre deux.</dd>
         <dt>Conso L/100 km</dt><dd>Litres versés depuis le dernier plein complet ÷ km parcourus × 100. Impossible si des litres manquent entre deux.</dd>
         <dt>Prix comparé</dt><dd>Ton prix au litre comparé à ta moyenne des 3 mois précédents, pour le même véhicule.</dd>
-        <dt>🔮 L'Oracle du réservoir</dt><dd>Prédit le prochain plein complet en combinant 4 méthodes : ton rythme récent, la même saison les années d'avant, un mélange des deux, et ta cadence habituelle entre deux pleins. Il rejoue ton historique pour voir laquelle se trompe le moins chez toi et lui donne plus de poids. Il affiche une fenêtre de dates et son score.</dd>
+        <dt>🧠 L'IA du réservoir</dt><dd>Un petit modèle qui apprend tout seul dans le téléphone, sans internet, et se réentraîne à chaque plein. Il se sert des 4 méthodes de l'ancien Oracle (rythme récent, même saison les années d'avant, mélange des deux, cadence entre deux pleins), de tes derniers écarts entre pleins, du type de plein et de ton jour de plein habituel. Il essaie plusieurs réglages en rejouant tes derniers pleins comme s'il ne connaissait pas la suite, et garde celui qui se trompe le moins. Il annonce une date précise, ses chances de tomber à ±2 jours et son score. Il lui faut une quinzaine de pleins par véhicule ; avant, l'ancien Oracle prédit.</dd>
         <dt>Valeurs ignorées</dt><dd>Un plein est écarté des moyennes s'il est impossible : prix sous 1,20 ou au-dessus de 3,00 CHF/L, plus de litres que le réservoir, conso sous 3,5 ou au-dessus de 9 L/100. Plus de 1,3 × l'autonomie entre deux pleins = plein(s) oublié(s) : les km comptent, mais pas pour la conso ni les records. « Compter quand même » force la prise en compte.</dd>
         <dt>Km par mois</dt><dd>Les km entre deux pleins sont répartis jour par jour sur les mois concernés.</dd>
         <dt>Taux € → CHF</dt><dd>Taux de référence de la Banque centrale européenne du jour du plein, chargé automatiquement. Tu peux le corriger.</dd>
@@ -471,14 +492,14 @@ details.panel[open] summary{margin-bottom:10px}
     <div class="vpick" id="vpick"></div>
     <div class="fields">
       <div class="field"><label for="fDate">Date</label><input id="fDate" type="date"></div>
-      <div class="field"><label for="fKm">Km compteur</label><input id="fKm" type="number" inputmode="numeric"><div class="hint" id="hKm"></div></div>
-      <div class="field"><label for="fL">Litres</label><input id="fL" type="number" inputmode="decimal" step="0.01" placeholder="0.00"></div>
-      <div class="field"><label for="fP" id="lbP">Prix total CHF</label><input id="fP" type="number" inputmode="decimal" step="0.05" placeholder="0.00"></div>
+      <div class="field"><label for="fKm">Km compteur</label><input id="fKm" type="text" inputmode="numeric" autocomplete="off"><div class="hint" id="hKm"></div></div>
+      <div class="field"><label for="fL">Litres</label><input id="fL" type="text" inputmode="decimal" autocomplete="off" placeholder="0.00"></div>
+      <div class="field"><label for="fP" id="lbP">Prix total CHF</label><input id="fP" type="text" inputmode="decimal" autocomplete="off" placeholder="0.00"></div>
       <div class="field full"><label>Pays</label><div class="chiprow" id="fCtry"></div></div>
       <div class="typ seg" id="fCur"><button type="button" aria-pressed="true" data-c="CHF">🇨🇭 Payé en CHF</button><button type="button" aria-pressed="false" data-c="EUR">🇪🇺 Payé en €</button></div>
       <div class="field full eur" id="eurBox" hidden>
         <label for="fR">Taux du jour · 1 € = ? CHF</label>
-        <div class="eurrow"><input id="fR" type="number" inputmode="decimal" step="0.0001"><div class="conv" id="conv">= – CHF</div></div>
+        <div class="eurrow"><input id="fR" type="text" inputmode="decimal" autocomplete="off"><div class="conv" id="conv">= – CHF</div></div>
         <div class="hint" id="hRate">Taux du jour chargé automatiquement, modifiable.</div>
       </div>
       <div class="field full"><label>Station</label><div class="chiprow" id="fSt"></div>
@@ -494,6 +515,15 @@ details.panel[open] summary{margin-bottom:10px}
     <button class="btn danger del" type="button" id="btnDel" hidden>Supprimer ce plein</button>
   </div>
 </div>
+<div class="kpad" id="kpad" hidden>
+  <div class="kp-top"><span id="kp-lbl"></span><b id="kp-val"></b></div>
+  <div class="kp-grid">
+    <button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button><button type="button" class="kfn" data-k="del" aria-label="Effacer le dernier chiffre">⌫</button>
+    <button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6</button><button type="button" class="kfn" data-k="clr" aria-label="Tout effacer">C</button>
+    <button type="button" data-k="1">1</button><button type="button" data-k="2">2</button><button type="button" data-k="3">3</button><button type="button" class="kfn" data-k="hide" aria-label="Fermer le pavé">▼</button>
+    <button type="button" class="k0" data-k="0">0</button><button type="button" data-k=",">,</button><button type="button" class="kok" data-k="ok">Suiv. ✓</button>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 <div class="modal" id="modal" hidden><div class="box" id="modalBox" role="dialog" aria-modal="true"></div></div>
 
@@ -506,7 +536,7 @@ const THEME = {
   b:{K:"#E7EDF3",B:"#8FB3D9",txt:"#A8B6C5",grid:"rgba(143,179,217,.12)",tipBg:"#25323F",tipFg:"#E7EDF3",tipBd:"#8FB3D9",track:"#34455A",needle:"#E7EDF3",muted:"#738599",bad:"#F07884",warn:"#E8C062",acc:"#8FB3D9"}};
 let MODE=0; try{ const m=localStorage.getItem("sv-mode"); if(m==="1") MODE=1; }catch(e){}
 let T=THEME.k;
-const APP_VERSION="1.3";
+const APP_VERSION="1.4";
 const KEY="suivi-vehicules-v1";
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}}, lsSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 let STATE={fills:[],tyres:[],ent:[],autoBackup:true,lastBackup:null,rates:{},range:[925,350],tank:[60,20]};
@@ -534,6 +564,7 @@ const $ = s=>document.querySelector(s);
 const fmt = (x,d=0)=>x==null||isNaN(x)?"–":x.toLocaleString("fr-CH",{minimumFractionDigits:d,maximumFractionDigits:d});
 const day = s=>Math.round(new Date(s+"T12:00:00").getTime()/864e5);
 const MOIS=["janv","févr","mars","avr","mai","juin","juil","août","sept","oct","nov","déc"];
+const nv = el=>{ const n=parseFloat(String(el.value||"").replace(/[\s'’]/g,"").replace(",",".")); return isNaN(n)?NaN:n; }; // lit un champ chiffré (virgule ou point)
 const dfr = s=>{const [y,m,d]=s.split("-");return `${+d} ${MOIS[m-1]} ${y}`};
 
 function analyse(){
@@ -687,37 +718,117 @@ function oracleAt(v,upto){ // prédiction faite « comme si on était » juste a
     methods.cadence=ld+Math.round(dpk*target); }
   return {methods,left,R,ld,last,recent,target};
 }
+const dataKey=v=>v+":"+(STATE.range[v]||0)+":"+(STATE.tank[v]||0)+":"+A.per[v].map(f=>f.d+"/"+f.km+"/"+f.L+"/"+(f.full?1:0)+(f.force?"!":"")).join(",");
+const cachePut=(c,k,v)=>{ const ks=Object.keys(c); if(ks.length>5) delete c[ks[0]]; c[k]=v; return v; };
 let ORACLE_CACHE={};
 function oracleScore(v){ // il rejoue ton passé : après chaque passage, qu'aurait-il prédit pour le suivant ?
-  const key=v+":"+fills.length+":"+(STATE.range[v]||0)+":"+(STATE.tank[v]||0); if(ORACLE_CACHE[key]) return ORACLE_CACHE[key];
+  const key=dataKey(v); if(ORACLE_CACHE[key]) return ORACLE_CACHE[key];
   const l=A.per[v], err={rythme:[],saison:[],mixte:[],cadence:[]}, hits=[];
   for(let k=6;k<l.length;k++){ if(l[k].miss||!(l[k].dist>0)) continue;
     const o=oracleAt(v,k-1); if(!o) continue; const real=day(l[k].d);
     Object.keys(err).forEach(m=>{ if(o.methods[m]!=null) err[m].push(Math.abs(o.methods[m]-real)); }); }
   const mae={}; Object.keys(err).forEach(m=>{ const a=err[m].slice(-15); mae[m]=a.length>=3?a.reduce((t,x)=>t+x,0)/a.length:null; });
   for(let k=6;k<l.length;k++){ if(l[k].miss||!(l[k].dist>0)) continue; const o=oracleAt(v,k-1); if(!o) continue; const pd=blend(o.methods,mae); if(pd!=null) hits.push({d:l[k].d,e:day(l[k].d)-pd}); }
-  const res={mae,hits}; ORACLE_CACHE[key]=res; return res;
+  const res={mae,hits}; cachePut(ORACLE_CACHE,key,res); return res;
 }
 function blend(methods,mae){ let sw=0,s=0; Object.keys(methods).forEach(m=>{ const d=methods[m]; if(d==null) return; const e=mae&&mae[m]!=null?mae[m]:10; const w=1/(e+3); sw+=w; s+=w*d; }); return sw?Math.round(s/sw):null; }
+
+// =========================== 🧠 L'IA DU RÉSERVOIR ===========================
+// Un petit modèle qui apprend tout seul, dans le téléphone (rien n'est envoyé nulle part).
+// À chaque plein, il rejoue ton historique : après chaque passage, il note les indices connus à ce moment-là
+// (les 4 méthodes de l'ancien Oracle, tes derniers écarts entre pleins, plein ou partiel, la saison…) et le
+// nombre de jours jusqu'au plein suivant. Il en tire un modèle (régression ridge pondérée), essaie plusieurs
+// réglages, apprend aussi ton jour de plein habituel, puis garde la recette qui s'est le moins trompée sur
+// tes derniers pleins, en simulant à chaque fois qu'il ne connaissait pas encore la suite.
+const IA_MIN=10, IA_EVAL=60;
+const JOURS=["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
+const wdOf=n=>new Date(n*864e5).getUTCDay();
+function iaFeat(v,upto){ // indices connus juste après le passage n° upto
+  const o=oracleAt(v,upto); if(!o) return null;
+  const l=A.per[v], last=l[upto], ld=o.ld;
+  const ms=["rythme","saison","mixte","cadence"].map(m=>o.methods[m]!=null?o.methods[m]-ld:null);
+  const ok=ms.filter(x=>x!=null); if(!ok.length) return null;
+  const mean=ok.reduce((a,b)=>a+b,0)/ok.length;
+  const g1=upto>=1?Math.min(150,ld-day(l[upto-1].d)):mean, g2=upto>=2?Math.min(150,day(l[upto-1].d)-day(l[upto-2].d)):g1;
+  const mo=new Date(ld*864e5).getUTCMonth(), TK=STATE.tank[v]||(v?20:60);
+  const pace=w=>{ let j=upto; while(j>0&&ld-day(l[j-1].d)<=w) j--; const km=last.km-l[j].km; return Math.min(400,o.target/Math.max(.5,km/Math.max(7,ld-day(l[j].d)))); };
+  const x=[1,...ms.map(m=>Math.min(400,m??mean)),pace(14),pace(35),g1,g2,last.full?1:0,last.Lok?Math.min(1.2,last.L/TK):.8,Math.sin(2*Math.PI*mo/12),Math.cos(2*Math.PI*mo/12)];
+  return {x,o,ld};
+}
+function solveLin(M,b){ const n=b.length, a=M.map((r,i)=>[...r,b[i]]);
+  for(let c=0;c<n;c++){ let p=c; for(let r=c+1;r<n;r++) if(Math.abs(a[r][c])>Math.abs(a[p][c])) p=r;
+    if(Math.abs(a[p][c])<1e-12) return null; [a[c],a[p]]=[a[p],a[c]];
+    for(let r=0;r<n;r++){ if(r===c) continue; const f=a[r][c]/a[c][c]; if(f) for(let k=c;k<=n;k++) a[r][k]-=f*a[c][k]; } }
+  return a.map((r,i)=>r[n]/r[i]); }
+function ridgeFit(S,lam,hl){ // apprend les poids de chaque indice ; les pleins récents comptent plus (demi-vie hl)
+  const n=S.length, d=S[0].x.length, mu=Array(d).fill(0), sd=Array(d).fill(1);
+  for(let j=1;j<d;j++){ let m=0; S.forEach(s=>m+=s.x[j]); m/=n; let q=0; S.forEach(s=>q+=(s.x[j]-m)**2); mu[j]=m; sd[j]=Math.sqrt(q/n)||1; }
+  const ys=S.map(s=>s.y).sort((a,b)=>a-b), cap=Math.max(60,ys[Math.floor(n/2)]*2.5); // un très long arrêt n'écrase pas le reste
+  const M=Array.from({length:d},()=>Array(d).fill(0)), b=Array(d).fill(0);
+  S.forEach((s,i)=>{ const w=hl?Math.pow(.5,(n-1-i)/hl):1, z=s.x.map((x,j)=>j?(x-mu[j])/sd[j]:1), y=Math.min(cap,s.y);
+    for(let a=0;a<d;a++){ b[a]+=w*z[a]*y; for(let c=a;c<d;c++) M[a][c]+=w*z[a]*z[c]; } });
+  for(let a=0;a<d;a++){ for(let c=0;c<a;c++) M[a][c]=M[c][a]; if(a) M[a][a]+=lam; }
+  const beta=solveLin(M,b); return beta&&{beta,mu,sd}; }
+const ridgePred=(m,x)=>m.beta.reduce((t,bj,j)=>t+bj*(j?(x[j]-m.mu[j])/m.sd[j]:1),0);
+function snapDay(yh,ld,pw,mode){ // ramène vers ton jour de plein habituel, s'il est tout près (mode 2 : plutôt avant que après)
+  const sig=mode===2?3:2, a=mode===2?-4:-2, b=mode===2?1:2;
+  let best=Math.round(yh), bs=-1; for(let d=Math.round(yh)+a;d<=Math.round(yh)+b;d++){ if(d<1) continue; const sc=pw[wdOf(ld+d)]*Math.exp(-((d-yh)**2)/(2*sig*sig)); if(sc>bs){ bs=sc; best=d; } } return best; }
+const IA_CFG=[{k:"oracle"}].concat([1,6,30].flatMap(lam=>[0,40,15].flatMap(hl=>[0,1,2].map(snap=>({k:"ridge",lam,hl,snap})))));
+let IA_CACHE={};
+function iaRun(v){
+  const key=dataKey(v); if(key in IA_CACHE) return IA_CACHE[key];
+  const l=A.per[v], S=[];
+  for(let k=4;k<l.length;k++){ if(l[k].miss||!(l[k].dist>0)) continue; const f=iaFeat(v,k-1); if(!f) continue; S.push({...f,y:day(l[k].d)-f.ld,k}); }
+  // jour de la semaine : ce que tu faisais jusque-là
+  const wdc=[0,0,0,0,0,0,0], pwAt=[]; let ip=0;
+  S.forEach(s=>{ while(ip<s.k) wdc[wdOf(day(l[ip++].d))]++; const n=wdc.reduce((a,b)=>a+b,0); pwAt.push(wdc.map(c=>(c+1)/(n+7))); });
+  // l'ancien Oracle, rejoué sans tricher : chaque méthode est notée seulement sur les pleins d'avant
+  const errs={rythme:[],saison:[],mixte:[],cadence:[]}, oldP=S.map(s=>{ const mae={}; Object.keys(errs).forEach(m=>{ const a=errs[m].slice(-15); mae[m]=a.length>=3?a.reduce((t,x)=>t+x,0)/a.length:null; });
+    const p=blend(s.o.methods,mae); Object.keys(errs).forEach(m=>{ if(s.o.methods[m]!=null) errs[m].push(Math.abs(s.o.methods[m]-s.ld-s.y)); }); return p==null?null:p-s.ld; });
+  const models={};
+  const predWith=(c,i,train)=>{ // prédiction (en jours) pour l'exemple i, en n'apprenant que sur train
+    if(c.k==="oracle") return oldP[i];
+    if(train.length<IA_MIN) return null; const mk=c.lam+"|"+c.hl+"|"+i; const m=mk in models?models[mk]:(models[mk]=ridgeFit(train,c.lam,c.hl)); if(!m) return null;
+    let yh=Math.max(1,Math.min(400,ridgePred(m,S[i].x))); return c.snap?snapDay(yh,S[i].ld,pwAt[i],c.snap):Math.round(yh); };
+  const i0=Math.max(IA_MIN,S.length-IA_EVAL), res=IA_CFG.map(c=>{ const e=[]; for(let i=i0;i<S.length;i++){ const p=predWith(c,i,S.slice(0,i)); if(p!=null) e.push({i,e:S[i].y-p}); } return {c,e}; });
+  const mae=r=>r.e.length?r.e.reduce((t,x)=>t+Math.abs(x.e),0)/r.e.length:Infinity;
+  const ok=res.filter(r=>r.e.length>=5); let best=null, oldMae=mae(res[0]);
+  ok.forEach(r=>{ if(!best||mae(r)<mae(best)-1e-9) best=r; });
+  // la prédiction d'aujourd'hui, avec la recette gagnante apprise sur tout ton historique
+  const f=iaFeat(v,l.length-1); if(!f) return cachePut(IA_CACHE,key,null);
+  const n=wdc.slice(); for(let j=ip;j<l.length;j++) n[wdOf(day(l[j].d))]++; const nt=n.reduce((a,b)=>a+b,0), pw=n.map(c=>(c+1)/(nt+7));
+  let out;
+  if(!best){ // pas encore assez de pleins : l'ancien Oracle en attendant
+    const sc=oracleScore(v), due=blend(f.o.methods,sc.mae), e=sc.hits.slice(-IA_EVAL).map(h=>h.e);
+    out={due,learning:true,nTrain:S.length,e,hits:sc.hits};
+  } else {
+    let due;
+    if(best.c.k==="oracle"){ const sc=oracleScore(v); due=blend(f.o.methods,sc.mae); }
+    else { const m=ridgeFit(S,best.c.lam,best.c.hl); let yh=m?Math.max(1,Math.min(400,ridgePred(m,f.x))):null;
+      due=yh==null?null:f.ld+(best.c.snap?snapDay(yh,f.ld,pw,best.c.snap):Math.round(yh)); }
+    out={due,learning:false,nTrain:S.length,cfg:best.c,e:best.e.map(x=>x.e),hits:best.e.map(x=>({d:l[S[x.i].k].d,e:x.e})),mae:mae(best),oldMae};
+  }
+  const ae=out.e.map(Math.abs).sort((a,b)=>a-b);
+  out.win=ae.length>=5?Math.max(1,ae[Math.min(ae.length-1,Math.ceil(ae.length*.8)-1)]):7; // 8 fois sur 10, le plein tombe dans ± win jours
+  out.conf2=ae.length>=5?Math.round(ae.filter(x=>x<=2).length/ae.length*100):null;
+  const top=pw.indexOf(Math.max(...pw)); out.habit=out.cfg&&out.cfg.snap&&pw[top]>.22?JOURS[top]:null;
+  return cachePut(IA_CACHE,key,out);
+}
 function predict(v){
   if(A.per[v].length<4) return null;
   const o=oracleAt(v,A.per[v].length-1); if(!o) return null;
-  const sc=oracleScore(v); const due=blend(o.methods,sc.mae);
-  const ms=Object.keys(o.methods).filter(m=>o.methods[m]!=null&&sc.mae[m]!=null);
-  const winMae = ms.length? ms.reduce((t,m)=>t+sc.mae[m]/(sc.mae[m]+3),0)/ms.reduce((t,m)=>t+1/(sc.mae[m]+3),0) : 10;
-  const win=Math.max(2,Math.min(21,Math.round(winMae*.8)));
-  const best=ms.slice().sort((a,b)=>sc.mae[a]-sc.mae[b])[0]||null;
+  const R=iaRun(v); if(!R) return null; const due=R.due;
   const est = due!=null? Math.min(o.left, o.target*Math.max(0,(TODAY-o.ld))/Math.max(1,due-o.ld)) : 0;
-  const hits=sc.hits.slice(-12), good=hits.filter(h=>Math.abs(h.e)<=Math.max(5,win)).length;
-  return {kmFill:o.R, est, odo:o.last.km+est, tank:Math.max(0,Math.min(1,(o.left-est)/o.R)), due, late:due!=null?TODAY-due:null, win,
-    best, mae:sc.mae, hits, good, miss:hits.length-good, avgErr:hits.length?hits.reduce((t,h)=>t+Math.abs(h.e),0)/hits.length:null, since:TODAY-o.ld, perYear:o.recent*365};
+  const hits=R.hits.slice(-12), good=hits.filter(h=>Math.abs(h.e)<=2).length;
+  return {kmFill:o.R, est, odo:o.last.km+est, tank:Math.max(0,Math.min(1,(o.left-est)/o.R)), due, late:due!=null?TODAY-due:null, win:R.win, conf2:R.conf2,
+    learning:R.learning, nTrain:R.nTrain, mae:R.mae, oldMae:R.oldMae, cfg:R.cfg, habit:R.habit,
+    hits, good, miss:hits.length-good, avgErr:hits.length?hits.reduce((t,h)=>t+Math.abs(h.e),0)/hits.length:null, since:TODAY-o.ld, perYear:o.recent*365};
 }
 const ORACLE_LINES={
-  late:["Les astres sont formels : ton réservoir crie famine.","Le Grand Oracle a vu… un plein que tu as oublié de noter ?","Je sens une odeur de réserve… et de carnet pas à jour."],
-  soon:["La boule de cristal s'éclaircit : la pompe t'attend bientôt.","Prépare la carte bancaire, le destin approche.","Les signes ne trompent pas : plein en vue."],
-  far:["Rien à l'horizon, roule tranquille.","L'Oracle est serein : le réservoir tient bon.","Les astres te laissent encore quelques belles balades."],
-  rest:["L'Oracle voit un véhicule qui hiberne… 😴","Calme plat dans la boule de cristal."]};
-const METH={rythme:"ton rythme récent",saison:"la même saison les années d'avant",mixte:"le mélange rythme + saison",cadence:"ta cadence habituelle entre deux pleins"};
+  late:["Mes calculs sont formels : ton réservoir crie famine.","J'ai calculé… un plein que tu as oublié de noter ?","Je détecte une odeur de réserve… et de carnet pas à jour."],
+  soon:["Mes calculs convergent : la pompe t'attend bientôt.","Prépare la carte bancaire, je l'ai vu venir.","Probabilité de plein en hausse. Ça approche."],
+  far:["Rien à l'horizon, roule tranquille.","Réservoir sous contrôle, j'ai vérifié.","Encore quelques belles balades avant la pompe."],
+  rest:["Je vois un véhicule qui hiberne… 😴","Calme plat dans mes données."]};
 function oracleLine(kind){ const a=ORACLE_LINES[kind]; return a[(TODAY+kind.length)%a.length]; }
 
 function gauge(frac,c){
@@ -742,12 +853,16 @@ function renderFeatured(){
     if(p.due==null){ kind="rest"; when="Au repos"; sub="Pas de plein prévu avant un moment."; }
     else if(p.late>Math.max(45,p.win*3)){ kind="rest"; when="Au repos ?"; sub=`Prévu vers le <b>${dshort(p.due)}</b>, mais rien depuis <b>${fmt(p.since)} j</b> : hibernation, ou plein pas noté ?`; }
     else if(p.late>p.win){ kind="late"; when=`<span class="late">C'est l'heure !</span>`; sub=`Prévu vers le <b>${dshort(p.due)}</b> · ${fmt(p.late)} j de retard.`; }
-    else { const inD=p.due-TODAY; kind=inD<=7?"soon":"far"; when= inD<=0?"Aujourd'hui":`Dans ${fmt(inD)} j`; sub=`Vers le <b>${dshort(p.due)}</b> · fenêtre <b>${dshort(p.due-p.win)} → ${dshort(p.due+p.win)}</b>`; }
-    const score = p.hits.length>=3 ? `<div class="oscore"><span>🎯 Oracle <b>${p.good}</b> – <b>${p.miss}</b> imprévus</span><span>±${fmt(p.avgErr)} j en moyenne</span></div>` : "";
+    else { const inD=p.due-TODAY; kind=inD<=7?"soon":"far"; when= inD<0?"Maintenant":inD===0?"Aujourd'hui":inD===1?"Demain":`Dans ${fmt(inD)} j`;
+      sub=`${inD<0?"Prévu le":"Le"} <b>${JOURS[wdOf(p.due)]} ${dshort(p.due)}</b>${p.conf2!=null?` · 🎯 <b>${p.conf2} %</b> de chances à ±2 j`:""}${p.win>2?`<br>8 fois sur 10 : entre le ${dshort(p.due-p.win)} et le ${dshort(p.due+p.win)}`:""}`; }
+    const score = p.hits.length>=3 ? `<div class="oscore"><span>🎯 <b>${p.good}</b> pile à ±2 j – <b>${p.miss}</b> ratés</span><span>±${fmt(p.avgErr,1)} j en moyenne</span></div>` : "";
+    const info = p.learning ? `En apprentissage : ${p.nTrain}/${IA_MIN+5} pleins. L'ancien Oracle prédit en attendant.`
+      : `A appris sur ${p.nTrain} pleins · erreur moyenne ±${fmt(p.mae,1)} j (ancien Oracle ±${fmt(p.oldMae,1)} j)`+
+        (p.cfg.k==="oracle"?"<br>Chez toi, les 4 méthodes de l'ancien Oracle restent les meilleures : je les garde.":"")+(p.habit?`<br>J'ai remarqué : tu fais souvent le plein le ${p.habit}.`:"");
     return `<div class="card pred solo oracle" style="--c:${V[i].c}"><div>${gauge(p.tank,V[i].c)}<div class="sub" style="text-align:center;color:var(--fg-3)">réservoir estimé ${fmt(p.tank*100)} %</div></div>
-      <div style="display:flex;flex-direction:column;gap:6px;min-width:0"><div class="otag">🔮 L'Oracle du réservoir</div><div class="when">${when}</div><div class="sub">${sub}</div>
+      <div style="display:flex;flex-direction:column;gap:6px;min-width:0"><div class="otag">🧠 L'IA du réservoir</div><div class="when">${when}</div><div class="sub">${sub}</div>
       <div class="sub oline">« ${oracleLine(kind)} »</div>
-      <div class="sub" style="color:var(--fg-3)">Autonomie ≈ ${fmt(p.kmFill)} km · compteur ≈ ${fmt(Math.round(p.odo/10)*10)} km${p.best?`<br>Méthode la plus fiable pour toi : ${METH[p.best]}`:""}</div></div>${score}</div>`; }).join("");
+      <div class="sub" style="color:var(--fg-3)">${info}<br>Autonomie ≈ ${fmt(p.kmFill)} km · compteur ≈ ${fmt(Math.round(p.odo/10)*10)} km</div></div>${score}</div>`; }).join("");
   $("#priceCards").innerHTML=[MODE].map(i=>{ const list=A.per[i].filter(f=>f.Pok); if(!list.length) return `<div class="card muted">Pas encore de plein avec litres et montant.</div>`;
     const f=list.slice().sort((a,b)=>b.d.localeCompare(a.d))[0], pl=f.P/f.L, ref=refPrice(i,f.d,f);
     const diff=ref?(pl-ref)*f.L:0; const last8=list.slice().sort((a,b)=>a.d.localeCompare(b.d)).slice(-8);
@@ -901,30 +1016,80 @@ function renderHist(){
   $("#histList").querySelectorAll(".row").forEach(r=>r.onclick=()=>{ const f=fills.find(x=>x.id===r.dataset.id); if(f) openSheet(false,f); });
   const hm=$("#histMore"); if(hm) hm.onclick=()=>{ histMax+=100; renderHist(); };
 }
-let tType="H";
+// ---------- pneus : hiver/été pour le Kangoo, route/off-road avec modèle et roue AV/AR pour la BMW
+const TTYPE={H:{e:"❄️",n:"Hiver"},E:{e:"☀️",n:"Été"},R:{e:"🛣️",n:"Route"},O:{e:"⛰️",n:"Off-road"}};
+const TT_OF=[["H","E"],["R","O"]];
+const TPOS={AV:"Avant",AR:"Arrière","2":"Les deux"};
+const PNEU_NOMS=PNEUS.map(p=>p[0]+" "+p[1]);
+const tSel=[{t:"H"},{t:"R",pos:"2",mod:undefined}];
 function odoAt(v,d){ const l=A.per[v].slice().sort((a,b)=>a.d.localeCompare(b.d)); if(!l.length) return null; const n=day(d);
   let a=null,b=null; for(const f of l){ if(day(f.d)<=n) a=f; else { b=f; break; } }
   if(a&&b){ const t=(n-day(a.d))/Math.max(1,day(b.d)-day(a.d)); return a.km+t*(b.km-a.km); }
   if(a) return a.km+kmBetween(v,day(a.d),n); return b.km; }
+function tyreType(x){ return TTYPE[x.t]?x.t:"E"; }
+function tyreCovers(x,pos){ return !x.pos||x.pos==="2"||x.pos===pos; }
+function tyreSegments(v,pos){ // un train de pneus roule de sa date de montage jusqu'au montage suivant sur la même roue
+  const l=STATE.tyres.filter(x=>x.v===v&&tyreCovers(x,pos)).sort((a,b)=>a.d.localeCompare(b.d));
+  const startOdo=x=>{ if(x.km!=null&&x.km!=="") return +x.km; try{ return odoAt(v,x.d); }catch(e){ return null; } };
+  const nowOdo=(()=>{ try{ return odoAt(v,dOf(TODAY)); }catch(e){ return null; } })();
+  return l.map((x,i)=>{ const nx=l[i+1], a=startOdo(x), b=nx?startOdo(nx):nowOdo;
+    return {...x,end:nx?nx.d:dOf(TODAY),run:a!=null&&b!=null?Math.max(0,b-a):0,open:!nx}; }); }
+function tyreModels(v){ // modèles déjà utilisés d'abord, puis le comparatif
+  const used=[...new Set(STATE.tyres.filter(x=>x.v===v&&x.mod).sort((a,b)=>b.d.localeCompare(a.d)).map(x=>x.mod))];
+  return {used,list:used.concat(PNEU_NOMS.filter(n=>!used.includes(n)))}; }
+function lastModAt(v,pos){ const l=STATE.tyres.filter(x=>x.v===v&&x.mod&&tyreCovers(x,pos==="2"?"AR":pos)).sort((a,b)=>b.d.localeCompare(a.d)); return l.length?l[0].mod:null; }
 function renderTyres(){
-  $("#tyreTitle").textContent=`Pneus hiver / été · ${V[MODE].n}`;
+  const v=MODE, moto=v===1, sel=tSel[v];
+  $("#tyreTitle").textContent=`Pneus ${moto?"route / off-road":"hiver / été"} · ${V[v].n}`;
   if(!$("#tDate").value) $("#tDate").value=dOf(TODAY);
-  $("#tType").querySelectorAll("button").forEach(b=>{ b.setAttribute("aria-pressed",b.dataset.t===tType); b.onclick=()=>{tType=b.dataset.t;renderTyres();}; });
-  $("#tAdd").onclick=()=>{ const d=$("#tDate").value; if(!d) return; STATE.tyres.push({id:uid(),v:MODE,d,t:tType}); persist(); autoBackup(); renderTyres(); toast(`${tType==="H"?"❄️ Pneus hiver":"☀️ Pneus été"} notés le ${dfr(d)}`); };
-  const l=STATE.tyres.filter(x=>x.v===MODE).sort((a,b)=>a.d.localeCompare(b.d));
-  if(!l.length){ $("#tyreList").innerHTML=`<div class="muted" style="padding:10px 0">Aucun changement noté. Note le prochain et l'app comptera les km faits avec chaque train de pneus.</div>`; return; }
-  const per=l.map((x,i)=>{ const end=l[i+1]?l[i+1].d:dOf(TODAY); let km=0; try{ km=(odoAt(MODE,end)||0)-(odoAt(MODE,x.d)||0); }catch(e){} return {...x,end,km:Math.max(0,km),open:!l[i+1]}; });
-  const tot={H:0,E:0}; per.forEach(p=>tot[p.t]+=p.km);
-  $("#tyreList").innerHTML=`<div class="mini" style="margin:8px 0"><div><small>❄️ Total hiver</small><b>${fmt(tot.H)} km</b></div><div><small>☀️ Total été</small><b>${fmt(tot.E)} km</b></div></div>`+
-    per.slice().reverse().map(p=>`<div class="tyre" role="button" tabindex="0" data-id="${p.id}"><span class="ic">${p.t==="H"?"❄️":"☀️"}</span><span>${p.t==="H"?"Hiver":"Été"} ${p.d.slice(0,4)}<small>${dfr(p.d)} → ${p.open?"aujourd'hui":dfr(p.end)}</small></span><span class="v">${fmt(p.km)} km${p.open?"<small>en cours</small>":""}</span></div>`).join("");
+  if(!TT_OF[v].includes(sel.t)) sel.t=TT_OF[v][0];
+  $("#tType").innerHTML=TT_OF[v].map(t=>`<button type="button" aria-pressed="${t===sel.t}" data-t="${t}">${TTYPE[t].e} ${TTYPE[t].n}</button>`).join("");
+  $("#tType").querySelectorAll("button").forEach(b=>b.onclick=()=>{ sel.t=b.dataset.t; renderTyres(); });
+  $("#tPosBox").hidden=$("#tModBox").hidden=$("#tKmBox").hidden=!moto; $("#tType").parentElement.style.gridColumn=moto?"1/-1":"";
+  if(moto){
+    if(sel.mod===undefined) sel.mod=lastModAt(v,sel.pos);
+    $("#tPos").innerHTML=["AV","AR","2"].map(p=>`<button type="button" aria-pressed="${p===sel.pos}" data-p="${p}">${TPOS[p]}</button>`).join("");
+    $("#tPos").querySelectorAll("button").forEach(b=>b.onclick=()=>{ sel.pos=b.dataset.p; sel.mod=lastModAt(v,sel.pos); renderTyres(); });
+    const M=tyreModels(v);
+    $("#tMod").innerHTML=M.list.map(n=>`<button type="button" class="${M.used.includes(n)?"recent":""}" aria-pressed="${n===sel.mod}" data-m="${n.replace(/"/g,"&quot;")}">${n}</button>`).join("")+`<button type="button" aria-pressed="${sel.mod==="__autre"}" data-m="__autre">Autre…</button>`;
+    $("#tModOther").hidden=sel.mod!=="__autre";
+    $("#tMod").querySelectorAll("button").forEach(b=>b.onclick=()=>{ sel.mod=sel.mod===b.dataset.m?null:b.dataset.m; renderTyres(); });
+    const est=(()=>{ try{ return odoAt(v,$("#tDate").value||dOf(TODAY)); }catch(e){ return null; } })();
+    $("#tKm").placeholder=est!=null?`≈ ${Math.round(est)}`:"estimé";
+  }
+  $("#tDate").onchange=()=>{ if(MODE===1) renderTyres(); };
+  $("#tAdd").onclick=()=>{ const d=$("#tDate").value; if(!d) return;
+    const x={id:uid(),v,d,t:sel.t};
+    if(moto){ const mod=sel.mod==="__autre"?($("#tModOther").value.trim()||null):sel.mod; const km=nv($("#tKm"));
+      x.pos=sel.pos; if(mod) x.mod=mod; if(!isNaN(km)&&km>0) x.km=Math.round(km); }
+    STATE.tyres.push(x); persist(); autoBackup(); $("#tKm").value=""; $("#tModOther").value=""; if(x.mod&&sel.mod==="__autre") sel.mod=x.mod;
+    renderTyres(); toast(`${TTYPE[x.t].e} ${TTYPE[x.t].n}${x.mod?" · "+x.mod:""}${moto?" · "+TPOS[x.pos].toLowerCase():""} noté le ${dfr(d)}`); };
+  const all=STATE.tyres.filter(x=>x.v===v);
+  if(!all.length){ $("#tyreList").innerHTML=`<div class="muted" style="padding:10px 0">Aucun changement noté. Note le prochain et l'app comptera les km faits avec chaque ${moto?"pneu":"train de pneus"}.</div>`; return; }
+  const row=p=>{ const T=TTYPE[tyreType(p)];
+    return `<div class="tyre" role="button" tabindex="0" data-id="${p.id}"><span class="ic">${T.e}</span><span>${p.mod?`${T.n} · <b>${p.mod}</b>`:`${T.n} ${p.d.slice(0,4)}`}<small>${dfr(p.d)} → ${p.open?"aujourd'hui":dfr(p.end)}${p.pos==="2"?" · AV + AR":""}${p.km!=null?` · monté à ${fmt(p.km)} km`:""}</small></span><span class="v">${fmt(p.run)} km${p.open?"<small>en cours</small>":""}</span></div>`; };
+  let html="";
+  if(!moto){
+    const per=tyreSegments(v,"AV"); const tot={H:0,E:0,R:0,O:0}; per.forEach(p=>tot[tyreType(p)]+=p.run);
+    html=`<div class="mini" style="margin:8px 0"><div><small>❄️ Total hiver</small><b>${fmt(tot.H)} km</b></div><div><small>☀️ Total été</small><b>${fmt(tot.E)} km</b></div></div>`+per.slice().reverse().map(row).join("");
+  } else {
+    const segs={AV:tyreSegments(v,"AV"),AR:tyreSegments(v,"AR")};
+    html=`<div class="mini" style="margin:8px 0">${["AV","AR"].map(p=>{ const c=segs[p].find(x=>x.open);
+      return `<div><small>${TPOS[p]} actuel</small>${c?`<b>${fmt(c.run)} km</b><small>${TTYPE[tyreType(c)].e} ${c.mod||TTYPE[tyreType(c)].n}</small>`:`<b>–</b><small>pas noté</small>`}</div>`; }).join("")}</div>`;
+    const tot={R:0,O:0}; segs.AR.forEach(p=>{ if(tot[tyreType(p)]!=null) tot[tyreType(p)]+=p.run; });
+    if(tot.R||tot.O) html+=`<div class="cap" style="margin:0 0 4px">Arrière : 🛣️ ${fmt(tot.R)} km en route · ⛰️ ${fmt(tot.O)} km en off-road</div>`;
+    ["AV","AR"].forEach(p=>{ if(segs[p].length) html+=`<div class="tpos">${TPOS[p]}</div>`+segs[p].slice().reverse().map(row).join(""); });
+  }
+  $("#tyreList").innerHTML=html;
+  $("#tyreCap").textContent=moto?"Les km sont estimés d'après le compteur de tes pleins autour de la date, ou pris du km que tu notes. « Les deux » compte pour l'avant et l'arrière. Touche une ligne pour la supprimer.":"Les km sont estimés d'après le compteur de tes pleins autour de la date. Touche une ligne pour la supprimer.";
   $("#tyreList").querySelectorAll(".tyre").forEach(r=>r.onclick=()=>confirmTap(r,"Toucher encore pour supprimer",()=>{ STATE.tyres=STATE.tyres.filter(x=>x.id!==r.dataset.id); persist(); renderTyres(); toast("Changement de pneus supprimé"); }));
 }
 function confirmTap(el,msg,fn){ if(el._armed){ fn(); return; } el._armed=true; const old=el.style.outline; el.style.outline="2px solid var(--bad)"; toast(msg); setTimeout(()=>{ el._armed=false; el.style.outline=old; },3000); }
 function renderSettings(){
   $("#setTitle").textContent=`Réglages · ${V[MODE].n}`;
   $("#sRange").value=STATE.range[MODE]; $("#sTank").value=STATE.tank[MODE];
-  $("#sRange").onchange=()=>{ const v=parseFloat($("#sRange").value); if(v>50&&v<3000){ STATE.range[MODE]=Math.round(v); persist(); ORACLE_CACHE={}; A=analyse(); toast(`Autonomie ${V[MODE].n} : ${fmt(v)} km`); } };
-  $("#sTank").onchange=()=>{ const v=parseFloat($("#sTank").value); if(v>3&&v<200){ STATE.tank[MODE]=v; persist(); A=analyse(); toast(`Réservoir ${V[MODE].n} : ${fmt(v)} L`); } };
+  $("#sRange").onchange=()=>{ const v=nv($("#sRange")); if(v>50&&v<3000){ STATE.range[MODE]=Math.round(v); persist(); ORACLE_CACHE={}; A=analyse(); toast(`Autonomie ${V[MODE].n} : ${fmt(v)} km`); } };
+  $("#sTank").onchange=()=>{ const v=nv($("#sTank")); if(v>3&&v<200){ STATE.tank[MODE]=v; persist(); A=analyse(); toast(`Réservoir ${V[MODE].n} : ${fmt(v)} L`); } };
 }
 function renderMore(){
   renderSettings();
@@ -942,7 +1107,7 @@ function renderMore(){
     el.map(x=>`<div class="row" role="button" tabindex="0" data-id="${x.id}" style="--c:${V[x.v].c}"><div class="ic">${V[x.v].n.slice(0,3)}</div><div class="t"><b>${x.t}</b><div>${x.d?dfr(x.d):"date non notée"}${x.km?` · ${fmt(x.km)} km`:""}</div></div><div class="v">${x.m!=null&&x.m!==""?fmt(+x.m,2)+" CHF":"–"}</div></div>`).join("");
   $("#entList").querySelectorAll(".row").forEach(r=>r.onclick=()=>confirmTap(r,"Toucher encore pour supprimer",()=>{ STATE.ent=STATE.ent.filter(x=>x.id!==r.dataset.id); persist(); renderMore(); toast("Ligne d'entretien supprimée"); }));
   $("#eAdd").onclick=()=>{ const t=$("#eDesc").value.trim(); if(!t){ toast("Écris ce qui a été fait."); return; }
-    const m=parseFloat($("#eAmt").value); STATE.ent.push({id:uid(),d:$("#eDate").value||null,v:MODE,t,m:isNaN(m)?null:m}); persist(); autoBackup();
+    const m=nv($("#eAmt")); STATE.ent.push({id:uid(),d:$("#eDate").value||null,v:MODE,t,m:isNaN(m)?null:m}); persist(); autoBackup();
     $("#eDesc").value=""; $("#eAmt").value=""; renderMore(); toast("✓ Entretien noté"); };
   $("#tblCouples").innerHTML=`<table class="tbl"><tr><th>Pièce</th><th>Nm</th><th>Outils</th><th>Divers</th></tr>${COUPLES.map(c=>`<tr><td>${c[0]}<br><small style="color:var(--fg-3)">${c[5]||""}</small></td><td class="n"><b>${c[1]??"–"}</b></td><td>${[c[2],c[3]].filter(Boolean).join(", ")}</td><td>${c[4]||""}</td></tr>`).join("")}</table>
     <div class="cap">Trousse : ${OUTILS.join(" · ")}</div>`;
@@ -1040,7 +1205,7 @@ $(".badge").textContent="⚙ v"+APP_VERSION;
 // swipe entre onglets
 (function(){ let x0=null,y0=null,t0=0;
   document.addEventListener("touchstart",e=>{ if($("#sheet").classList.contains("on")||e.touches.length!==1) return; const t=e.touches[0]; x0=t.clientX; y0=t.clientY; t0=Date.now();
-    if(e.target.closest(".chips")) x0=null; },{passive:true});
+    if(e.target.closest(".chips")||e.target.closest("#kpad")) x0=null; },{passive:true});
   document.addEventListener("touchend",e=>{ if(x0==null) return; const t=e.changedTouches[0], dx=t.clientX-x0, dy=t.clientY-y0; x0=null;
     if(Math.abs(dx)>70 && Math.abs(dx)>Math.abs(dy)*1.6 && Date.now()-t0<700){ const i=ORDER.indexOf(curView), j=i+(dx<0?1:-1); if(j>=0&&j<ORDER.length) go(ORDER[j],dx<0?1:-1); } },{passive:true});
 })();
@@ -1095,7 +1260,7 @@ function openSheet(fresh,edit){
   live();
   $("#scrim").classList.add("on"); $("#sheet").classList.add("on");
 }
-function closeSheet(){ $("#scrim").classList.remove("on"); $("#sheet").classList.remove("on"); EDIT=null; }
+function closeSheet(){ if(kpTarget) closePad(); $("#scrim").classList.remove("on"); $("#sheet").classList.remove("on"); EDIT=null; }
 // taux € → CHF (BCE, via frankfurter)
 async function fetchRate(d){
   if(STATE.rates[d]) return STATE.rates[d];
@@ -1118,8 +1283,8 @@ $("#fab").onclick=()=>openSheet(true); $("#fab2").onclick=()=>openSheet(true); $
 $("#fCur").querySelectorAll("button").forEach(b=>b.onclick=()=>setCur(b.dataset.c));
 $("#fType").querySelectorAll("button").forEach(b=>b.onclick=()=>{sFull=b.dataset.t==="1";$("#fType").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b));live();});
 function preview(){
-  const km=+$("#fKm").value, L=parseFloat($("#fL").value), P0=parseFloat($("#fP").value), l=EDIT?null:lastOf(sv);
-  const rate=parseFloat($("#fR").value); const P = sCur==="EUR" ? (isNaN(rate)?NaN:P0*rate) : P0;
+  const km=nv($("#fKm"))||0, L=nv($("#fL")), P0=nv($("#fP")), l=EDIT?null:lastOf(sv);
+  const rate=nv($("#fR")); const P = sCur==="EUR" ? (isNaN(rate)?NaN:P0*rate) : P0;
   const res={km,L:isNaN(L)?null:L,P:isNaN(P)?null:Math.round(P*100)/100,eur:sCur==="EUR"&&!isNaN(P0)?P0:null,rate:sCur==="EUR"?rate:null,dist:l&&km?km-l.km:null,conso:null};
   res.why="";
   if(!sFull) res.why="Partiel : la conso sera calculée au prochain plein complet.";
@@ -1161,7 +1326,7 @@ function save(){
     persist(); A=analyse(); closeSheet(); views[curView](); toast("✓ Plein modifié"); autoBackup(); return;
   }
   const prevBest=Math.min(...A.per[sv].filter(f=>f.conso!=null).map(f=>f.conso)), lastKm=lastOf(sv)?lastOf(sv).km:0;
-  let verdict=""; try{ const pr=predict(sv); if(pr&&pr.due!=null&&sFull){ const e=day($("#fDate").value)-pr.due; verdict=Math.abs(e)<=2?` · 🔮 L'Oracle avait prévu le ${dshort(pr.due)} : 🎯 dans le mille !`:Math.abs(e)<=pr.win?` · 🔮 Prévu le ${dshort(pr.due)} : à ${Math.abs(e)} j près 👍`:` · 🔮 Prévu le ${dshort(pr.due)} : raté de ${Math.abs(e)} j 😅`; } }catch(_){}
+  let verdict=""; try{ const pr=predict(sv); if(pr&&pr.due!=null&&sFull){ const e=day($("#fDate").value)-pr.due; verdict=Math.abs(e)<=2?` · 🧠 L'IA avait prévu le ${dshort(pr.due)} : 🎯 dans le mille !`:Math.abs(e)<=pr.win?` · 🧠 Prévu le ${dshort(pr.due)} : à ${Math.abs(e)} j près 👍`:` · 🧠 Prévu le ${dshort(pr.due)} : raté de ${Math.abs(e)} j 😅`; } }catch(_){}
   fills.push({id:uid(),d:$("#fDate").value,v:sv,km:r.km,L:r.L,P:r.P,eur:r.eur,rate:r.rate,full:sFull,ctry:sCtry,st:curStation(),opts:{...sOpts}});
   if(r.rate) STATE.lastRate=r.rate;
   persist(); ORACLE_CACHE={}; A=analyse(); closeSheet(); go(curView==="more"?"home":curView);
@@ -1203,7 +1368,7 @@ function buildXlsx(){
   const wb=XLSX.utils.book_new();
   const w1=XLSX.utils.aoa_to_sheet([H,...rows],{cellDates:true,dateNF:"dd.mm.yyyy"}); w1["!cols"]=[{wch:11},{wch:9},{wch:11},{wch:8},{wch:12},{wch:8},{wch:6},{wch:14},{wch:10},{wch:10},{wch:5},{wch:8},{wch:9},{wch:10}];
   XLSX.utils.book_append_sheet(wb,w1,"Pleins");
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["Date","Véhicule","Pneus montés"],...STATE.tyres.map(t=>[XD(t.d),V[t.v].n,t.t==="H"?"Hiver":"Été"])],{cellDates:true,dateNF:"dd.mm.yyyy"}),"Pneus");
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["Date","Véhicule","Pneus montés","Roue","Modèle","Km compteur"],...STATE.tyres.map(t=>[XD(t.d),V[t.v].n,TTYPE[tyreType(t)].n,t.pos?TPOS[t.pos]:"",t.mod||"",t.km??""])],{cellDates:true,dateNF:"dd.mm.yyyy"}),"Pneus");
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["Date","Véhicule","Description","Montant CHF","Km"],...STATE.ent.map(e=>[XD(e.d),V[e.v].n,e.t,e.m??"",e.km??""])],{cellDates:true,dateNF:"dd.mm.yyyy"}),"Entretien");
   const data=XLSX.write(wb,{bookType:"xlsx",type:"array"});
   return new Blob([data],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
@@ -1216,7 +1381,7 @@ function buildBackup(){
   const data={app:"Suivi Véhicules",version:APP_VERSION,date:dOf(TODAY),
     reglages:{autonomie:{Kangoo:STATE.range[0],BMW:STATE.range[1]},reservoir:{Kangoo:STATE.tank[0],BMW:STATE.tank[1]}},
     pleins:fills.map(f=>({id:f.id,d:f.d,v:V[f.v].n,km:f.km,L:f.L,P:f.P,full:f.full,ctry:f.ctry||"CH",st:f.st||null,eur:f.eur??null,rate:f.rate??null,opts:f.opts||{},force:!!f.force})),
-    pneus:STATE.tyres.map(t=>({id:t.id,d:t.d,v:V[t.v].n,t:t.t})), entretien:STATE.ent.map(e=>({id:e.id,d:e.d,v:V[e.v].n,t:e.t,m:e.m??null,km:e.km??null}))};
+    pneus:STATE.tyres.map(t=>({id:t.id,d:t.d,v:V[t.v].n,t:t.t,pos:t.pos??null,mod:t.mod??null,km:t.km??null})), entretien:STATE.ent.map(e=>({id:e.id,d:e.d,v:V[e.v].n,t:e.t,m:e.m??null,km:e.km??null}))};
   return new Blob([JSON.stringify(data,null,1)],{type:"text/plain"});
 }
 async function exportXlsx(auto){
@@ -1248,6 +1413,10 @@ const toISO=v=>{ if(v==null||v==="") return null; if(v instanceof Date){ const d
 const num=v=>{ if(v==null||v==="") return null; const n=typeof v==="number"?v:parseFloat(String(v).replace(",",".").replace(/[^\d.\-]/g,"")); return isNaN(n)?null:n; };
 const vehOf=v=>{ const s=String(v||"").toLowerCase(); return s.includes("kangoo")?0:(s.includes("bmw")||s.includes("gs"))?1:-1; };
 function findHeader(rows,need){ for(let i=0;i<Math.min(rows.length,40);i++){ const r=(rows[i]||[]).map(x=>String(x??"").trim().toLowerCase()); if(need.every(n=>r.includes(n))) return {i,idx:n=>r.indexOf(n)}; } return null; }
+function tyreFrom(id,d,v,t,pos,mod,km){ // relit un changement de pneus (sauvegarde ou Excel)
+  const s=String(t||"").trim().toLowerCase(); const tt=TTYPE[String(t||"").toUpperCase()]&&s.length===1?s.toUpperCase():s.startsWith("h")?"H":s.startsWith("o")?"O":s.startsWith("r")?"R":"E";
+  const ps=String(pos||"").trim().toLowerCase(); const P=ps==="av"||ps.startsWith("avant")?"AV":ps==="ar"||ps.startsWith("arri")?"AR":ps==="2"||ps.startsWith("les")?"2":null;
+  const x={id,d,v,t:tt}; if(P) x.pos=P; if(mod) x.mod=String(mod); if(km!=null&&km!==""&&!isNaN(+km)) x.km=+km; return x; }
 function parseWorkbook(wb){
   const out={fills:[],tyres:[],ent:[]};
   const sh=n=>wb.Sheets[n]?XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:null}):null;
@@ -1266,7 +1435,7 @@ function parseWorkbook(wb){
     iO.forEach((k,j)=>{ if(k>=0&&row[k]) f.opts[["clim","rem","auto","charge"][j]]=true; });
     if(iR>=0&&row[iR]){ const m=String(row[iR]).match(/EUR\s*:\s*([\d.,]+)\s*€\/L\s*×\s*change\s*([\d.,]+)/); if(m){ const el=num(m[1]),rt=num(m[2]); f.ctry=f.ctry==="CH"?"EU":f.ctry; f.rate=rt; f.eur=f.L?Math.round(f.L*el*100)/100:null; } }
     out.fills.push(f); }
-  const Tz=sh("Pneus"); if(Tz){ const th=findHeader(Tz,["date","véhicule"]); if(th){ for(let r=th.i+1;r<Tz.length;r++){ const row=Tz[r]||[]; const d=toISO(row[th.idx("date")]), v=vehOf(row[th.idx("véhicule")]); const t=String(row[th.idx("pneus montés")]||"").toLowerCase(); if(d&&v>=0&&t) out.tyres.push({id:uid(),d,v,t:t.startsWith("h")?"H":"E"}); } } }
+  const Tz=sh("Pneus"); if(Tz){ const th=findHeader(Tz,["date","véhicule"]); if(th){ for(let r=th.i+1;r<Tz.length;r++){ const row=Tz[r]||[]; const d=toISO(row[th.idx("date")]), v=vehOf(row[th.idx("véhicule")]); const t=String(row[th.idx("pneus montés")]||"").toLowerCase(); if(d&&v>=0&&t) out.tyres.push(tyreFrom(uid(),d,v,t,row[th.idx("roue")],row[th.idx("modèle")],num(row[th.idx("km compteur")]))); } } }
   const E=sh("Entretien"); if(E){ const eh=findHeader(E,["date","véhicule","description"]); if(eh){ const im=eh.idx("montant chf"), ik=eh.idx("km");
     for(let r=eh.i+1;r<E.length;r++){ const row=E[r]||[]; const v=vehOf(row[eh.idx("véhicule")]), t=row[eh.idx("description")]; if(v<0||!t) continue;
       out.ent.push({id:uid(),d:toISO(row[eh.idx("date")]),v,t:String(t),m:im>=0?num(row[im]):null,km:ik>=0?num(row[ik]):null}); } } }
@@ -1276,7 +1445,7 @@ function parseBackup(text){ let j; try{ j=JSON.parse(text); }catch(e){ throw new
   const vi=n=>vehOf(n); const out={fills:[],tyres:[],ent:[]};
   (j.pleins||[]).forEach(f=>{ const v=vi(f.v); if(v<0||!f.d||f.km==null) return; out.fills.push({id:f.id||uid(),d:f.d,v,km:+f.km,L:f.L??null,P:f.P??null,full:!!f.full,ctry:f.ctry||"CH",st:f.st||null,eur:f.eur??null,rate:f.rate??null,opts:f.opts||{},force:!!f.force}); });
   if(j.reglages){ const a=j.reglages.autonomie||{}, t=j.reglages.reservoir||{}; out.range=[+a.Kangoo||925,+a.BMW||350]; out.tank=[+t.Kangoo||60,+t.BMW||20]; }
-  (j.pneus||[]).forEach(t=>{ const v=vi(t.v); if(v>=0&&t.d) out.tyres.push({id:t.id||uid(),d:t.d,v,t:t.t==="H"?"H":"E"}); });
+  (j.pneus||[]).forEach(t=>{ const v=vi(t.v); if(v>=0&&t.d) out.tyres.push(tyreFrom(t.id||uid(),t.d,v,t.t,t.pos,t.mod,t.km)); });
   (j.entretien||[]).forEach(e=>{ const v=vi(e.v); if(v>=0&&e.t) out.ent.push({id:e.id||uid(),d:e.d||null,v,t:e.t,m:e.m??null,km:e.km??null}); });
   return out; }
 let pendingImport=null;
@@ -1297,9 +1466,51 @@ function applyImport(d){ fills.length=0; d.fills.forEach(f=>fills.push(f)); STAT
   toast(`✓ ${d.fills.length} pleins importés${d.ent.length?`, ${d.ent.length} entretiens`:""}${d.tyres.length?`, ${d.tyres.length} changements de pneus`:""}`); }
 $("#btnSave").onclick=()=>exportXlsx(false);
 
+// ---------- pavé numérique de l'app (repris de l'app de calcul d'atelier)
+let padPref = lsGet("sv-pad")==="off" ? "off" : "on";
+const touchMQ = window.matchMedia ? window.matchMedia("(pointer: coarse)") : null;
+const padOn = ()=>padPref==="on" && !!touchMQ && touchMQ.matches;
+const NUM_SEL = 'input[inputmode="decimal"], input[inputmode="numeric"], input[data-im]';
+let kpTarget=null, kpStart="";
+function applyPad(){ const on=padOn();
+  document.querySelectorAll(NUM_SEL).forEach(el=>{ if(!el.dataset.im) el.dataset.im=el.getAttribute("inputmode"); el.setAttribute("inputmode",on?"none":el.dataset.im); });
+  $("#sPad").querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.p===padPref));
+  if(!on) closePad(); }
+const isNum = el=>!!el && el.tagName==="INPUT" && !!el.dataset.im;
+function labelOf(el){ const f=el.closest(".field"), l=f&&f.querySelector("label"); return (l&&l.textContent.trim())||el.getAttribute("aria-label")||el.placeholder||""; }
+const showVal = ()=>{ if(kpTarget) $("#kp-val").textContent=kpTarget.value||"–"; };
+function openPad(el){ if(kpTarget&&kpTarget!==el) leaveField();
+  kpTarget=el; kpStart=el.value; el.classList.add("kpon");
+  $("#kp-lbl").textContent=labelOf(el); showVal(); $("#kpad").hidden=false; document.body.classList.add("typing");
+  setTimeout(()=>el.scrollIntoView({block:"center",behavior:"smooth"}),30); }
+function leaveField(){ if(!kpTarget) return; const t=kpTarget; t.classList.remove("kpon"); kpTarget=null; if(t.value!==kpStart) t.dispatchEvent(new Event("change",{bubbles:true})); }
+function closePad(){ leaveField(); $("#kpad").hidden=true; document.body.classList.remove("typing"); }
+function setVal(v){ kpTarget.value=v; kpTarget.dispatchEvent(new Event("input",{bubbles:true})); showVal(); }
+function nextField(el){ // champ chiffré suivant visible dans la même feuille ou la même carte, sinon fin de saisie
+  const box=el.closest(".fields")||el.closest(".card")||el.closest("section")||document.body;
+  const list=[...box.querySelectorAll("input")].filter(x=>isNum(x)&&x.offsetParent!==null&&!x.disabled);
+  const nx=list[list.indexOf(el)+1];
+  if(nx){ nx.focus({preventScroll:true}); openPad(nx); return; }
+  closePad(); el.blur(); }
+document.addEventListener("focusin",e=>{ const el=e.target; if(isNum(el)&&padOn()){ openPad(el); return; } if(kpTarget) closePad(); });
+$("#kpad").addEventListener("mousedown",e=>e.preventDefault()); // le pavé ne prend pas le focus
+$("#kpad").addEventListener("touchstart",e=>{ const b=e.target.closest("button"); if(b){ e.preventDefault(); b.click(); } },{passive:false});
+$("#kpad").addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b||!kpTarget) return;
+  const k=b.dataset.k, v=kpTarget.value, dec=kpTarget.dataset.im==="decimal";
+  if(/^\d$/.test(k)) setVal(v+k);
+  else if(k===","){ if(dec&&!/[.,]/.test(v)) setVal((v===""?"0":v)+","); }
+  else if(k==="del") setVal(v.slice(0,-1));
+  else if(k==="clr") setVal("");
+  else if(k==="hide"){ const t=kpTarget; closePad(); t.blur(); }
+  else if(k==="ok") nextField(kpTarget); });
+document.addEventListener("pointerdown",e=>{ if(kpTarget&&!e.target.closest("#kpad")&&e.target!==kpTarget&&!isNum(e.target)){ const t=kpTarget; closePad(); t.blur(); } });
+$("#sPad").querySelectorAll("button").forEach(b=>b.onclick=()=>{ padPref=b.dataset.p; lsSet("sv-pad",padPref); applyPad(); toast(padPref==="on"?"🔢 Pavé de l'app pour les chiffres":"📱 Clavier du téléphone pour les chiffres"); });
+if(touchMQ&&touchMQ.addEventListener) touchMQ.addEventListener("change",applyPad);
+
 // ---------- hors ligne
 if("serviceWorker" in navigator){ window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js",{scope:"./"}).catch(()=>{})); }
 applyTheme();
+applyPad();
 go("home");
 })();
 </script>
