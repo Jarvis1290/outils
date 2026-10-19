@@ -1,0 +1,2095 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1b212b">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Calcul Atelier</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Mise en page : barre d'onglets fixe, une colonne sur téléphone, cas + saisie à gauche et résultat à droite sur grand écran. Thème foncé unique. */
+:root {
+  --bg: #12161d;
+  --panel: #1b212b;
+  --panel-2: #232b37;
+  --line: #313b4a;
+  --fg: #e8edf4;
+  --muted: #95a1b3;
+  --accent: #ffb547;
+  --ok: #4fd18b;
+  --warn: #ffb547;
+  --bad: #ff6b6b;
+  --c1: #5fb8ff; --c2: #b98cff; --c3: #ff8fb8; --c4: #4fd1c5; --c5: #ffd166; --c6: #ff9f5a; --c7: #7ee081; --c8: #8fa8ff;
+  --f-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --f-body: "IBM Plex Sans", system-ui, sans-serif;
+  --f-num: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 15px; line-height: 1.45; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--panel); }
+.wrap { max-width: 1100px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--panel); border-bottom: 1px solid var(--line); }
+.head { display: flex; align-items: center; gap: 12px; padding-block: 10px 0; }
+.logo { font-family: var(--f-display); font-size: 26px; font-weight: 700; letter-spacing: .02em; text-transform: uppercase; }
+.logo span { color: var(--accent); }
+.tag { font-size: 12px; color: var(--muted); margin-left: auto; }
+.tabs { display: flex; gap: 4px; overflow-x: auto; padding-block: 8px 0; }
+.tab { appearance: none; border: 0; background: transparent; color: var(--muted); font: 600 15px var(--f-body); padding: 10px 14px; border-bottom: 3px solid transparent; cursor: pointer; white-space: nowrap; }
+.tab[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent); }
+.tab:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+main { padding-block: 18px 40px; }
+h2 { font-family: var(--f-display); font-size: 20px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 10px; }
+.grid2 { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 820px) { .grid2 { grid-template-columns: minmax(0, 1fr); } }
+.col { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+/* Cas de figure */
+.cases { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 560px) { .cases { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.case { appearance: none; text-align: left; background: var(--panel-2); color: var(--fg); border: 2px solid transparent; border-radius: 10px; padding: 10px; cursor: pointer; display: flex; flex-direction: column; gap: 6px; font-family: var(--f-body); }
+.case svg { width: 100%; height: 44px; }
+.case b { font-size: 14px; line-height: 1.2; }
+.case small { font-size: 12px; color: var(--muted); line-height: 1.25; }
+.case[aria-pressed="true"] { border-color: var(--k); background: color-mix(in srgb, var(--k) 14%, var(--panel-2)); }
+.case .ax { font: 700 11px var(--f-num); color: var(--k); }
+/* Formulaire */
+.fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 420px) { .fields { grid-template-columns: minmax(0, 1fr); } }
+.full { grid-column: 1 / -1; }
+/* Onglets épinglés en bas sur téléphone */
+:root { --bnav-h: 0px; }
+.bnav { display: none; }
+@media (max-width: 700px) {
+  :root { --bnav-h: calc(58px + env(safe-area-inset-bottom, 0px)); }
+  header .tabs { display: none; }
+  .head { padding-block: 8px; }
+  .bnav { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); position: fixed; left: 0; right: 0; bottom: 0; z-index: 7; height: var(--bnav-h);
+    padding: 0 env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); background: var(--panel); border-top: 1px solid var(--line); }
+  .bnav .tab { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 4px 0; font: 600 10px var(--f-body); border-bottom: 0; border-top: 3px solid transparent; min-width: 0; white-space: nowrap; }
+  .bnav .tab svg { width: 22px; height: 22px; }
+  .bnav .tab[aria-selected="true"] { color: var(--accent); border-top-color: var(--accent); }
+  main { padding-bottom: calc(var(--bnav-h) + 24px); }
+  footer { padding-bottom: calc(var(--bnav-h) + 24px); }
+}
+/* Saisie : barres cachées et pavé numérique de l'app */
+body.typing .bnav, body.typing .wiznav { display: none !important; }
+body.typing main { padding-bottom: 60vh !important; }
+body.pad .neg { display: none; }
+.kpad { position: fixed; left: 0; right: 0; bottom: 0; z-index: 9; background: var(--panel); border-top: 2px solid var(--accent);
+  padding: 8px max(8px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 8px) max(8px, env(safe-area-inset-left, 0px)); }
+.kp-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 2px 6px 8px; min-width: 0; }
+.kp-top span { font-size: 13px; color: var(--muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kp-top b { font: 700 24px var(--f-num); color: var(--accent); white-space: nowrap; }
+.kp-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; max-width: 520px; margin: 0 auto; }
+.kp-grid button { appearance: none; height: 52px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel-2); color: var(--fg); font: 600 24px var(--f-num); cursor: pointer; touch-action: manipulation; }
+.kp-grid button:active { background: var(--line); }
+.kp-grid .kfn { background: var(--bg); color: var(--muted); font-size: 18px; }
+.kp-grid .kneg { color: var(--c1); font-size: 26px; }
+.kp-grid .kok { background: var(--accent); color: #1b1408; border-color: var(--accent); font-size: 18px; font-family: var(--f-body); }
+input.kpon { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* Paramètres et mode pas à pas */
+.gear { appearance: none; background: transparent; border: 1px solid var(--line); color: var(--fg); border-radius: 8px; width: 38px; height: 38px; font-size: 20px; line-height: 1; cursor: pointer; flex: none; }
+.setopt { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+.setopt button { appearance: none; text-align: left; background: var(--panel-2); color: var(--fg); border: 2px solid var(--line); border-radius: 10px; padding: 12px 14px; font: 500 15px var(--f-body); cursor: pointer; }
+.setopt button small { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
+.setopt button[aria-pressed="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--panel-2)); }
+.wizbar { margin-bottom: 14px; }
+.wizstep { font: 700 22px var(--f-display); text-transform: uppercase; letter-spacing: .04em; }
+.wizstep small { display: block; font: 500 13px var(--f-body); color: var(--muted); text-transform: none; letter-spacing: 0; }
+.wizdots { display: flex; gap: 6px; margin-top: 8px; }
+.wizdots button { appearance: none; flex: 1; height: 8px; border-radius: 4px; border: 0; background: var(--line); cursor: pointer; padding: 0; }
+.wizdots button.done { background: color-mix(in srgb, var(--accent) 55%, var(--line)); }
+.wizdots button.cur { background: var(--accent); }
+/* Retour / Suivant toujours au même endroit, en bas de l'écran */
+.wiznav { position: fixed; left: 0; right: 0; bottom: var(--bnav-h); z-index: 6; display: grid; grid-template-columns: 1fr 1.4fr; gap: 10px;
+  padding: 10px max(16px, env(safe-area-inset-right, 0px), calc((100vw - 1100px) / 2 + 16px)) 10px max(16px, env(safe-area-inset-left, 0px), calc((100vw - 1100px) / 2 + 16px));
+  background: var(--bg); border-top: 1px solid var(--line); }
+body.haswiz main { padding-bottom: calc(var(--bnav-h) + 96px); }
+.wiznav .btn, .wiznext .btn { padding: 14px; font-size: 16px; font-weight: 600; }
+.btn.go { background: var(--accent); color: #1b1408; border-color: var(--accent); }
+.wiznext { display: grid; gap: 10px; margin-top: 14px; }
+#p-corr.wiz [data-step]:not(.on) { display: none !important; }
+#p-corr.wiz .grid2 { grid-template-columns: minmax(0, 1fr); gap: 0; }
+#p-corr.wiz .col { gap: 0; }
+#p-corr.wiz .cases { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+#p-corr.wiz .case { padding: 6px 8px; gap: 2px; }
+#p-corr.wiz .case svg { height: 30px; }
+#p-corr.wiz .case b { font-size: 14px; }
+#p-corr.wiz .case small { font-size: 11px; line-height: 1.2; }
+#p-corr.wiz .subtabs { grid-template-columns: minmax(0, 1fr); }
+#p-corr.wiz .subtabs button { padding: 18px; }
+#p-corr.wiz [data-step] h2 { display: none; }
+#p-corr.wiz input, #p-corr.wiz select { font-size: 20px; padding: 14px; }
+/* Touche +/− (le clavier numérique du téléphone n'a pas de signe moins) */
+.signrow { display: flex; gap: 6px; min-width: 0; }
+.signrow input { flex: 1; min-width: 0; }
+.neg { appearance: none; flex: none; width: 56px; background: var(--panel-2); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; font: 700 17px var(--f-num); cursor: pointer; }
+.mach td.v.hot { cursor: pointer; box-shadow: 0 0 0 2px #10181e inset; }
+.toast { position: fixed; left: 50%; bottom: calc(var(--bnav-h) + 90px); transform: translateX(-50%); z-index: 30; width: min(92vw, 420px); background: var(--ok); color: #0c1a12; font: 600 15px var(--f-body); padding: 12px 16px; border-radius: 10px; box-shadow: 0 6px 24px rgba(0,0,0,.4); }
+/* Sous-onglets de Corrections */
+.subtabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 20px; }
+.subtabs button { appearance: none; text-align: left; background: var(--panel); color: var(--muted); border: 2px solid var(--line); border-radius: 12px; padding: 10px 14px; cursor: pointer; font-family: var(--f-body); display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.subtabs button b { font: 700 19px var(--f-display); text-transform: uppercase; letter-spacing: .04em; color: var(--fg); }
+.subtabs button small { font-size: 12px; line-height: 1.25; }
+.subtabs button[aria-selected="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--panel)); }
+.subtabs button[aria-selected="true"] b { color: var(--accent); }
+/* Tableau au format de l'écran « Usure outil » (toujours clair, comme la CNC) */
+.mach { margin-top: 14px; background: #c5d3dc; color: #1d2a33; border-radius: 6px; padding: 10px 10px 0; font-family: var(--f-num); overflow: hidden; }
+.mach-top { display: flex; justify-content: space-between; gap: 10px; font: 700 14px var(--f-num); padding: 0 2px 8px; border-bottom: 2px solid #8fa2ae; flex-wrap: wrap; }
+.mach table { width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 5px 6px; font-variant-numeric: tabular-nums; }
+.mach th { font: 700 15px var(--f-num); text-align: center; color: #1d2a33; padding: 2px 0; }
+.mach th.grp { border-bottom: 2px solid #8fa2ae; font-weight: 600; }
+.mach td.rl, .mach th.rl { font: 600 12px var(--f-body); color: #3b4d59; text-align: left; white-space: nowrap; width: 76px; }
+.mach td.v { background: #f4f7f9; color: #10181e; font: 700 clamp(16px, 4.6vw, 22px) var(--f-num); text-align: right; padding: 4px 6px; white-space: nowrap; }
+.mach td.v.hot { background: #e2661f; color: #10181e; }
+.mach tr.put td.v { font-size: clamp(18px, 5.2vw, 26px); }
+.mach tr.put td.rl { color: #10181e; font-weight: 700; }
+.mach td.v.nochg { color: #6f808b; }
+.mach td.v .arrow { color: #10181e; margin-left: 3px; font-size: .7em; vertical-align: middle; }
+.mach-foot { display: flex; gap: 6px; margin: 4px -10px 0; padding: 6px 10px; background: #e9eef1; border-top: 1px solid #8fa2ae; }
+.mach-foot span { font: 600 13px var(--f-num); padding: 4px 10px; border-radius: 3px; background: #7fb6cf; color: #f4f7f9; }
+.mach-note { font-size: 13px; color: var(--muted); margin: 8px 0 0; }
+label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); min-width: 0; }
+input, select { width: 100%; background: var(--bg); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font: 500 17px var(--f-num); }
+select { font: 500 15px var(--f-body); }
+input::placeholder { color: #5d6878; }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button { appearance: none; background: var(--panel-2); color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font: 500 13px var(--f-body); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: #1b1408; border-color: var(--accent); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.chips button { appearance: none; background: transparent; color: var(--fg); border: 1px dashed var(--line); border-radius: 6px; padding: 3px 8px; font: 500 13px var(--f-num); cursor: pointer; }
+.hint { font-size: 12px; color: var(--muted); margin: 8px 0 0; }
+.example { display: inline-block; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); border: 1px solid var(--accent); border-radius: 4px; padding: 1px 6px; margin-left: 8px; vertical-align: middle; }
+/* Résultats */
+.verdict { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 10px; font-weight: 600; }
+.verdict .pill { font: 700 13px var(--f-num); letter-spacing: .05em; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; color: #10151c; white-space: nowrap; }
+.v-ok { background: color-mix(in srgb, var(--ok) 14%, transparent); } .v-ok .pill { background: var(--ok); }
+.v-reprendre { background: color-mix(in srgb, var(--warn) 16%, transparent); } .v-reprendre .pill { background: var(--warn); }
+.v-rebut { background: color-mix(in srgb, var(--bad) 16%, transparent); } .v-rebut .pill { background: var(--bad); }
+.v-none { background: var(--panel-2); color: var(--muted); }
+.big { margin-top: 14px; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+.bigbox { background: var(--panel-2); border-radius: 10px; padding: 12px; min-width: 0; }
+.bigbox .lbl { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.bigbox .val { font: 700 30px var(--f-num); line-height: 1.15; margin-top: 4px; overflow-wrap: anywhere; }
+.bigbox .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.bigbox.main { outline: 2px solid var(--accent); }
+.bigbox.main .val { color: var(--accent); }
+dl.rows { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 14px 0 0; font-variant-numeric: tabular-nums; }
+dl.rows dt { color: var(--muted); font-size: 14px; }
+dl.rows dd { margin: 0; text-align: right; font: 500 15px var(--f-num); }
+.say { margin: 14px 0 0; font-size: 15px; }
+.alert { margin-top: 12px; padding: 10px 12px; border-radius: 8px; border-left: 4px solid var(--bad); background: color-mix(in srgb, var(--bad) 12%, transparent); font-size: 14px; }
+.note { margin-top: 12px; font-size: 13px; color: var(--muted); }
+.err { color: var(--bad); font-size: 14px; margin-top: 10px; }
+.minus { color: var(--c1); } .plus { color: var(--c6); }
+.bigbox .lbl i { text-transform: none; font-style: normal; color: var(--accent); }
+.tri { width: 100%; max-width: 320px; height: auto; display: block; margin: 0 auto 10px; }
+.tri .tl { font: 600 15px var(--f-num); fill: var(--fg); }
+.tri .acc { fill: var(--accent); }
+.btn { appearance: none; width: 100%; background: var(--panel-2); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font: 500 14px var(--f-body); cursor: pointer; }
+.f4 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+@media (max-width: 700px) { .f4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.tblwrap { overflow-x: auto; margin-top: 14px; }
+table.pts { border-collapse: collapse; width: 100%; font: 500 15px var(--f-num); font-variant-numeric: tabular-nums; }
+table.pts th { font: 600 12px var(--f-body); color: var(--muted); text-transform: uppercase; letter-spacing: .06em; text-align: right; padding: 6px 10px; border-bottom: 1px solid var(--line); }
+table.pts td { text-align: right; padding: 6px 10px; border-bottom: 1px solid var(--panel-2); }
+table.pts th:first-child, table.pts td:first-child { text-align: left; color: var(--muted); }
+.bcwrap { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 560px) { .bcwrap { grid-template-columns: minmax(0, 1fr); } }
+.bc { width: 100%; max-width: 220px; height: auto; margin: 14px auto 0; display: block; }
+.bc text { font: 600 11px var(--f-num); fill: var(--fg); }
+.norm { font-size: 12px; color: var(--muted); margin: 10px 0 0; }
+.norm b { color: var(--fg); font-weight: 600; }
+.btnrow { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.tbtn { appearance: none; background: transparent; color: var(--accent); border: 1px solid var(--accent); border-radius: 8px; padding: 8px 12px; font: 600 13px var(--f-body); cursor: pointer; }
+.letters { display: grid; grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 6px; }
+.letters button, .grades button { appearance: none; background: var(--panel-2); color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: 8px 0; font: 600 14px var(--f-num); cursor: pointer; }
+.letters button[aria-pressed="true"], .grades button[aria-pressed="true"] { background: var(--accent); color: #1b1408; border-color: var(--accent); }
+.grades { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 6px; }
+.sublbl { font-size: 13px; color: var(--muted); margin: 12px 0 6px; }
+.codebig { font: 700 34px var(--f-num); color: var(--accent); }
+.check { flex-direction: row; align-items: center; gap: 8px; color: var(--fg); font-size: 14px; }
+.check input { width: auto; }
+.modal { position: fixed; inset: 0; z-index: 20; background: rgba(5, 8, 12, .72); display: flex; align-items: flex-start; justify-content: center;
+  padding: calc(env(safe-area-inset-top, 0px) + 16px) max(16px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 16px) max(16px, env(safe-area-inset-left, 0px)); }
+.mbox { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; width: 100%; max-width: 980px; max-height: 100%; display: flex; flex-direction: column; min-width: 0; }
+.mhead { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.mhead h3 { margin: 0; font-family: var(--f-display); font-size: 22px; text-transform: uppercase; letter-spacing: .04em; flex: 1; min-width: 0; }
+.mbody { overflow: auto; padding: 0 16px 16px; }
+.mbody .norm { margin-top: 12px; }
+table.pts.wide td, table.pts.wide th { white-space: nowrap; }
+table.pts tr.hl td { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--fg); }
+footer { color: var(--muted); font-size: 12px; padding-block: 0 30px; }
+@media (prefers-reduced-motion: no-preference) { .bigbox.main { transition: outline-color .2s; } }
+</style>
+
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="head"><div class="logo">Calcul <span>Atelier</span></div><div class="tag">DMU 50 · Sinumerik</div><button type="button" class="gear" id="b-set" aria-label="Paramètres" title="Paramètres">⚙</button></div>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" id="t-corr" aria-selected="true" data-tab="corr">Corrections</button>
+      <button class="tab" role="tab" id="t-iso" aria-selected="false" data-tab="iso">Tolérances</button>
+      <button class="tab" role="tab" id="t-thr" aria-selected="false" data-tab="thr">Taraudage</button>
+      <button class="tab" role="tab" id="t-vis" aria-selected="false" data-tab="vis">Vis</button>
+      <button class="tab" role="tab" id="t-sur" aria-selected="false" data-tab="sur">Surépaisseur</button>
+      <button class="tab" role="tab" id="t-trig" aria-selected="false" data-tab="trig">Trigo</button>
+      <button class="tab" role="tab" id="t-emu" aria-selected="false" data-tab="emu">Émulsion</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- CORRECTIONS -->
+  <section id="p-corr" role="tabpanel">
+    <div class="wizbar" id="wizbar" hidden>
+      <div class="wizstep" id="wiz-lbl"></div>
+      <div class="wizdots" id="wiz-dots"></div>
+    </div>
+    <div data-step="1">
+      <div class="subtabs" role="tablist" aria-label="Type de correction">
+        <button type="button" role="tab" id="m-cnc" data-mode="cnc" aria-selected="true"><b>Outil CNC</b><small>ce qu'on tape dans « Usure outil »</small></button>
+        <button type="button" role="tab" id="m-fao" data-mode="fao" aria-selected="false"><b>Cote FAO / programme</b><small>la cote à programmer, l'outil ne change pas</small></button>
+      </div>
+    </div>
+    <div class="grid2" id="corr-grid">
+      <div class="col">
+        <div class="card" data-step="2">
+          <h2>1. Cotes <span class="example" id="exTag">exemple</span></h2>
+          <div class="fields">
+            <label>Cote nominale (mm)<input id="c-nom" inputmode="decimal" placeholder="20"></label>
+            <label>Cote mesurée (mm)<input id="c-mes" inputmode="decimal" placeholder="19,96"></label>
+          </div>
+        </div>
+        <div data-step="3">
+          <h2>2. Cas de figure</h2>
+          <div class="cases" id="cases"></div>
+        </div>
+        <div class="card" data-step="4">
+          <h2>3. Cartouche du plan</h2>
+          <div class="fields">
+            <label class="full">Tolérances générales (ISO 2768)
+              <select id="c-gen"><option value="f">ISO 2768-fH (f fin)</option><option value="m" selected>ISO 2768-mK (m moyen)</option><option value="c">ISO 2768-cL (c grossier)</option><option value="v">ISO 2768-vL (v très grossier)</option></select></label>
+            <label class="full">Traitement<select id="c-trt">
+              <option value="0">Aucun</option>
+              <option value="50|ad">Anodisation dure (la moitié de la couche sort de la pièce)</option>
+              <option value="67|ac">Anodisation classique (les 2/3 de la couche sortent)</option>
+              <option value="100|or">Dorage (dépôt)</option>
+              <option value="100|ag">Argentage (dépôt)</option>
+              <option value="100|ni">Nickel chimique (dépôt)</option>
+              <option value="100|zn">Zingage (dépôt)</option>
+              <option value="100|cr">Chromage dur (dépôt)</option>
+</select></label>
+            <label data-trt>Épaisseur de couche mini (µm)<input id="c-thk" inputmode="decimal" value="25"></label>
+            <label data-trt>Épaisseur de couche maxi (µm, facultatif)<input id="c-thk2" inputmode="decimal" placeholder="= mini"></label>
+            <p class="hint full" data-trt id="c-trt-eff" style="margin:0"></p>
+          </div>
+          <p class="hint" data-trt>Sur le plan « 10-17 µm » : mini 10, maxi 17, on vise le milieu. La couche est la même partout ; l'app sait si la cote grossit ou diminue d'après le cas de figure.</p>
+        </div>
+        <div class="card" data-step="5">
+          <h2>4. Tolérance de la cote</h2>
+          <div class="seg" id="tolmode">
+            <button type="button" data-m="iso" aria-pressed="true">ISO (H7, g6…)</button>
+            <button type="button" data-m="pm" aria-pressed="false">Écarts ±</button>
+            <button type="button" data-m="gen" aria-pressed="false">Générale (cartouche)</button>
+            <button type="button" data-m="none" aria-pressed="false">Aucune</button>
+          </div>
+          <div class="fields" style="margin-top:12px">
+            <label class="full" data-show="iso">Code ISO<input id="c-iso" placeholder="H7" autocapitalize="off" autocomplete="off" style="font-family:var(--f-num)">
+              <span class="chips" id="c-chips"></span></label>
+            <label data-show="pm">Écart supérieur (mm)<span class="signrow"><input id="c-up" inputmode="decimal" placeholder="+0,05"><button type="button" class="neg" data-neg="c-up" aria-label="Changer le signe">+/−</button></span></label>
+            <label data-show="pm">Écart inférieur (mm)<span class="signrow"><input id="c-lo" inputmode="decimal" placeholder="-0,05"><button type="button" class="neg" data-neg="c-lo" aria-label="Changer le signe">+/−</button></span></label>
+            <p class="hint full" data-show="gen" id="c-gen-hint" style="margin:0"></p>
+          </div>
+          <p class="hint" id="c-case-hint"></p>
+        </div>
+        <div class="card" data-step="6">
+          <h2 data-mode="cnc">5. Valeurs actuelles dans Usure outil</h2>
+          <h2 data-mode="fao">5. Programme actuel</h2>
+          <div class="fields">
+            <label data-mode="cnc" class="full">Outil (facultatif)<input id="c-tool" placeholder="FRAISE D10" autocomplete="off"></label>
+            <label data-mode="cnc">Δlongu. actuel (mm)<span class="signrow"><input id="c-wl" inputmode="decimal" placeholder="0.000"><button type="button" class="neg" data-neg="c-wl" aria-label="Changer le signe">+/−</button></span></label>
+            <label data-mode="cnc">Δrayon actuel (mm)<span class="signrow"><input id="c-wr" inputmode="decimal" placeholder="0.000"><button type="button" class="neg" data-neg="c-wr" aria-label="Changer le signe">+/−</button></span></label>
+            <p class="hint full" data-mode="cnc" style="margin:0">Recopie les deux valeurs actuelles de la ligne de l'outil dans « Usure outil ».</p>
+            <label data-mode="fao">Cote programmée actuelle (mm, facultatif)<input id="c-prog" inputmode="decimal" placeholder="= nominale"></label>
+            <label data-mode="fao">Surépaisseur actuelle FAO (mm, facultatif)<span class="signrow"><input id="c-stock" inputmode="decimal" placeholder="0"><button type="button" class="neg" data-neg="c-stock" aria-label="Changer le signe">+/−</button></span></label>
+            <p class="hint full" data-mode="fao" style="margin:0">Cote programmée : celle de la géométrie dans AlphaCam ou du programme, si elle a déjà été corrigée. Vide = cote nominale.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col" data-step="7">
+        <div class="card" id="c-res" aria-live="polite"></div>
+        <div class="wiznext" id="wiz-end" hidden>
+          <button type="button" class="btn" id="wiz-next-part">Cote suivante (même outil, même plan)</button>
+          <button type="button" class="btn" id="wiz-new">Nouvelle cote (tout reprendre)</button>
+        </div>
+      </div>
+    </div>
+    <div class="wiznav" id="wiznav" hidden>
+      <button type="button" class="btn" id="wiz-prev">◄ Retour</button>
+      <button type="button" class="btn go" id="wiz-fwd">Suivant ►</button>
+    </div>
+  </section>
+
+  <!-- TOLERANCES -->
+  <section id="p-iso" role="tabpanel" hidden>
+    <div class="grid2">
+      <div class="card">
+        <h2>ISO 286 : alésages et arbres</h2>
+        <div class="fields">
+          <label>Ø nominal (mm)<input id="i-nom" inputmode="decimal" value="20"></label>
+          <label>Code<input id="i-code" value="H7" autocomplete="off" autocapitalize="off" style="font-family:var(--f-num)"></label>
+        </div>
+        <div class="sublbl">Type de cote</div>
+        <div class="seg" id="i-kind">
+          <button type="button" data-k="hole" aria-pressed="true">Intérieur : alésage (MAJUSCULES)</button>
+          <button type="button" data-k="shaft" aria-pressed="false">Extérieur : arbre (minuscules)</button>
+        </div>
+        <div class="sublbl">Lettre (position)</div>
+        <div class="letters" id="i-letters"></div>
+        <div class="sublbl">Qualité IT</div>
+        <div class="grades" id="i-grades"></div>
+        <div class="fields" style="margin-top:14px">
+          <label>Ajustement avec (facultatif)<input id="i-pair" value="g6" placeholder="g6" autocomplete="off" autocapitalize="off" style="font-family:var(--f-num)"></label>
+          <label>Cote mesurée (facultatif)<input id="i-mes" inputmode="decimal" placeholder="20,012"></label>
+        </div>
+        <div class="btnrow">
+          <button type="button" class="tbtn" id="i-tab1">Tableau de la classe</button>
+          <button type="button" class="tbtn" id="i-tab3">Toutes les lettres à ce Ø</button>
+          <button type="button" class="tbtn" id="i-tab2">Tableau des IT</button>
+        </div>
+        <p class="norm" id="i-norm"></p>
+      </div>
+      <div class="card" id="i-res" aria-live="polite"></div>
+    </div>
+    <div class="grid2" style="margin-top:20px">
+      <div class="card">
+        <h2>Tolérances générales ISO 2768</h2>
+        <div class="fields">
+          <label>Cote ou longueur (mm)<input id="n-len" inputmode="decimal" value="45"></label>
+          <div></div>
+        </div>
+        <div class="sublbl">Classe linéaire (ISO 2768-1)</div>
+        <div class="seg" id="n-cls">
+          <button type="button" data-c="f" aria-pressed="false">f fin</button>
+          <button type="button" data-c="m" aria-pressed="true">m moyen</button>
+          <button type="button" data-c="c" aria-pressed="false">c grossier</button>
+          <button type="button" data-c="v" aria-pressed="false">v très grossier</button>
+        </div>
+        <div class="sublbl">Classe géométrique (ISO 2768-2)</div>
+        <div class="seg" id="n-geo">
+          <button type="button" data-g="H" aria-pressed="false">H</button>
+          <button type="button" data-g="K" aria-pressed="true">K</button>
+          <button type="button" data-g="L" aria-pressed="false">L</button>
+        </div>
+        <div class="btnrow">
+          <button type="button" class="tbtn" id="n-tab1">Tableau ISO 2768-1</button>
+          <button type="button" class="tbtn" id="n-tab2">Tableau ISO 2768-2</button>
+        </div>
+        <p class="norm" id="n-norm"></p>
+      </div>
+      <div class="card" id="n-res" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- TARAUDAGE -->
+  <section id="p-thr" role="tabpanel" hidden>
+    <div class="grid2">
+      <div class="card">
+        <h2>Filetage</h2>
+        <div class="fields">
+          <label>Type<select id="f-type">
+            <option value="M">M métrique gros pas</option>
+            <option value="MF">MF métrique pas fin</option>
+            <option value="UNC">UNC</option>
+            <option value="UNF">UNF</option>
+            <option value="UNEF">UNEF</option>
+            <option value="G">G gaz cylindrique (GAS / BSPP)</option>
+            <option value="RP">R / Rp / Rc gaz conique (BSPT)</option>
+            <option value="NPT">NPT</option>
+            <option value="STI">Helicoil métrique (filet rapporté)</option>
+            <option value="STIF">Helicoil métrique pas fin</option>
+            <option value="STIU">Helicoil UNC / UNF</option></select></label>
+          <label>Taille<select id="f-size"></select></label>
+        </div>
+        <div id="f-res" aria-live="polite"></div>
+        <div class="btnrow"><button type="button" class="tbtn" id="f-tab">Tableau complet</button></div>
+        <p class="norm" id="f-norm"></p>
+      </div>
+      <div class="col">
+        <div class="card">
+          <h2>Profondeur de perçage (trou borgne)</h2>
+          <div class="fields">
+            <label>Longueur filetée utile (mm)<input id="p-L" inputmode="decimal" value="12"></label>
+            <label>Angle de pointe du foret (°)<input id="p-pa" inputmode="decimal" value="118"></label>
+            <label class="full">Taraud<select id="p-form">
+              <option value="C">Forme C, trou borgne (2 à 3 filets d'entrée)</option>
+              <option value="E">Forme E, fond de trou (1,5 à 2 filets)</option>
+              <option value="B">Forme B, trou débouchant (4 à 5 filets)</option>
+              <option value="F">Taraud à refouler (2 à 3 filets)</option></select></label>
+          </div>
+          <div id="p-res" aria-live="polite"></div>
+        </div>
+        <div class="card">
+          <h2>Chanfrein d'entrée</h2>
+          <div class="fields">
+            <label>Ø du chanfrein (mm)<input id="h-d" inputmode="decimal"></label>
+            <label>Angle de pointe de la fraise (°)<input id="h-a" inputmode="decimal" value="90"></label>
+            <label>Ø de pointe de la fraise (mm)<input id="h-d0" inputmode="decimal" value="0"></label>
+          </div>
+          <p class="hint">Vide = Ø conseillé par DIN 76-1 (environ 1,05 × Ø nominal) pour le taraudage.</p>
+          <div id="h-res" aria-live="polite"></div>
+          <p class="norm" id="h-norm"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VIS -->
+  <section id="p-vis" role="tabpanel" hidden>
+    <div class="grid2">
+      <div class="card">
+        <h2>Lamage pour vis CHC</h2>
+        <div class="fields">
+          <label>Vis<select id="v-m"></select></label>
+          <label>Enfoncement en plus (mm)<input id="v-extra" inputmode="decimal" value="0"></label>
+          <label class="full check"><input type="checkbox" id="v-wash"> Avec rondelle ISO 7092</label>
+        </div>
+        <div class="sublbl">Trou de passage (ISO 273)</div>
+        <div class="seg" id="v-pass">
+          <button type="button" data-p="0" aria-pressed="false">Fin</button>
+          <button type="button" data-p="1" aria-pressed="true">Moyen</button>
+          <button type="button" data-p="2" aria-pressed="false">Large</button>
+        </div>
+        <div id="v-res" aria-live="polite"></div>
+        <div class="btnrow"><button type="button" class="tbtn" id="v-tab">Tableau des lamages</button></div>
+        <p class="norm" id="v-norm"></p>
+      </div>
+      <div class="card">
+        <h2>Fraisure pour vis tête fraisée (FHC)</h2>
+        <div class="fields">
+          <label>Vis<select id="w-m"></select></label>
+          <label>Retrait sous la surface (mm)<input id="w-ret" inputmode="decimal" value="0,2"></label>
+          <label>Angle de pointe de la fraise (°)<input id="w-ang" inputmode="decimal" value="90"></label>
+          <label>Ø de pointe de la fraise (mm)<input id="w-d0" inputmode="decimal" value="0"></label>
+        </div>
+        <div id="w-res" aria-live="polite"></div>
+        <div class="btnrow"><button type="button" class="tbtn" id="w-tab">Tableau des fraisures</button></div>
+        <p class="norm" id="w-norm"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUREPAISSEUR -->
+  <section id="p-sur" role="tabpanel" hidden>
+    <div class="grid2">
+      <div class="card">
+        <h2>Cote d'ébauche à prévoir</h2>
+        <div class="fields">
+          <label>Cote finie (mm)<input id="s-fin" inputmode="decimal" value="40"></label>
+          <label>Surépaisseur par face (mm)<input id="s-stock" inputmode="decimal" value="0,3"></label>
+          <label class="full">Type de cote<select id="s-kind">
+            <option value="ext">Extérieure (tourillon, tenon) : Ø ou largeur</option>
+            <option value="int">Intérieure (poche, alésage, rainure) : Ø ou largeur</option>
+            <option value="face">Une face (épaulement, profondeur, hauteur)</option></select></label>
+        </div>
+        <div id="s-res1" aria-live="polite"></div>
+      </div>
+      <div class="card">
+        <h2>Ce qu'il reste à enlever</h2>
+        <div class="fields">
+          <label>Cote actuelle (mm)<input id="r-cur" inputmode="decimal" value="40,52"></label>
+          <label>Cote finie visée (mm)<input id="r-fin" inputmode="decimal" value="40"></label>
+          <label>Type de cote<select id="r-kind">
+            <option value="ext">Extérieure</option>
+            <option value="int">Intérieure</option>
+            <option value="face">Une face</option></select></label>
+          <label>Passe maxi de finition (mm)<input id="r-max" inputmode="decimal" value="0,1"></label>
+        </div>
+        <div id="s-res2" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRIGO -->
+  <section id="p-trig" role="tabpanel" hidden>
+    <div class="grid2">
+      <div class="card">
+        <h2>Triangle rectangle</h2>
+        <svg class="tri" viewBox="0 0 240 120" aria-hidden="true">
+          <path d="M20 100 H210 V20 Z" fill="#2b3442" stroke="var(--c1)" stroke-width="2"/>
+          <path d="M198 100 V88 H210" fill="none" stroke="var(--muted)" stroke-width="1.5"/>
+          <path d="M52 100 A32 32 0 0 0 49.5 87.6" fill="none" stroke="var(--accent)" stroke-width="2"/>
+          <text x="112" y="116" class="tl">a</text><text x="218" y="64" class="tl">b</text><text x="100" y="52" class="tl">c</text>
+          <text x="58" y="96" class="tl acc">α</text><text x="190" y="40" class="tl acc">β</text>
+        </svg>
+        <div class="fields">
+          <label>a : côté adjacent à α<input id="g-a" inputmode="decimal" value="30"></label>
+          <label>b : côté opposé à α<input id="g-b" inputmode="decimal"></label>
+          <label>c : hypoténuse<input id="g-c" inputmode="decimal"></label>
+          <label>Angle α (°)<input id="g-al" inputmode="decimal" value="20"></label>
+          <label>Angle β (°)<input id="g-be" inputmode="decimal"></label>
+          <div style="display:flex;align-items:flex-end"><button type="button" class="btn" id="g-clear">Tout effacer</button></div>
+        </div>
+        <p class="hint">Remplis 2 valeurs (au moins un côté) et laisse vide ce que tu cherches.</p>
+        <div id="g-res" aria-live="polite"></div>
+      </div>
+      <div class="col">
+        <div class="card">
+          <h2>Chanfrein</h2>
+          <div class="fields">
+            <label>Largeur (mm)<input id="k-w" inputmode="decimal" value="1"></label>
+            <label>Angle (°)<input id="k-a" inputmode="decimal" value="45"></label>
+          </div>
+          <p class="hint">Chanfrein noté « 1 × 45° » : largeur mesurée le long d'une face, angle par rapport à cette face.</p>
+          <div id="k-res" aria-live="polite"></div>
+        </div>
+        <div class="card">
+          <h2>Fraise à chanfreiner</h2>
+          <div class="fields">
+            <label>Angle de pointe (°)<input id="m-ang" inputmode="decimal" value="90"></label>
+            <label>Ø de pointe (mm)<input id="m-d0" inputmode="decimal" value="0"></label>
+            <label>Largeur du chanfrein (mm)<input id="m-h" inputmode="decimal" value="0,5"></label>
+            <label>Plongée de la pointe (mm)<input id="m-p" inputmode="decimal" value="2"></label>
+          </div>
+          <div id="m-res" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:20px">
+      <h2>Cercle de perçage</h2>
+      <div class="fields f4">
+        <label>Ø du cercle (mm)<input id="b-d" inputmode="decimal" value="80"></label>
+        <label>Nombre de trous<input id="b-n" inputmode="numeric" value="6"></label>
+        <label>Angle du 1er trou (°)<input id="b-s" inputmode="decimal" value="0"></label>
+        <label>Centre X<input id="b-x" inputmode="decimal" value="0"></label>
+        <label>Centre Y<input id="b-y" inputmode="decimal" value="0"></label>
+      </div>
+      <p class="hint">0° = côté +X, les angles tournent dans le sens inverse des aiguilles d'une montre (vue de dessus).</p>
+      <div id="b-res" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- EMULSION -->
+  <section id="p-emu" role="tabpanel" hidden>
+    <div class="grid2">
+      <div class="card">
+        <h2>Préparer un mélange</h2>
+        <div class="fields">
+          <label>Volume à préparer (L)<input id="x-v" inputmode="decimal" value="200"></label>
+          <label>Concentration voulue (%)<input id="x-p" inputmode="decimal" value="5"></label>
+        </div>
+        <div id="x-res" aria-live="polite"></div>
+        <p class="note">Verse toujours l'huile dans l'eau, jamais l'eau dans l'huile, sinon le mélange tourne.</p>
+      </div>
+      <div class="card">
+        <h2>Corriger le bac</h2>
+        <div class="fields">
+          <div class="full">
+            <div class="seg" id="y-vmode">
+              <button type="button" data-v="L" aria-pressed="true">Volume en litres</button>
+              <button type="button" data-v="P" aria-pressed="false">Remplissage estimé en %</button>
+            </div>
+          </div>
+          <label data-vm="L">Volume dans le bac (L)<input id="y-v" inputmode="decimal" value="180"></label>
+          <label data-vm="P" hidden>Remplissage estimé (%)<input id="y-pct" inputmode="decimal" value="75"></label>
+          <label>Capacité du bac (L<span data-vm="L">, facultatif</span>)<input id="y-cap" inputmode="decimal" placeholder="250"></label>
+          <label>Lecture réfractomètre (°Brix)<input id="y-b" inputmode="decimal" value="3,2"></label>
+          <label>Facteur de l'huile<input id="y-f" inputmode="decimal" value="1"></label>
+          <label>Concentration voulue (%)<input id="y-t" inputmode="decimal" value="5"></label>
+          <label>Appoint à (%)<input id="y-top" inputmode="decimal" value="100"></label>
+        </div>
+        <p class="hint">Le facteur est sur la fiche technique de l'huile (concentration = Brix × facteur). Appoint : 100 = huile pure, ou la concentration de ton pré-mélange.</p>
+        <div id="y-res" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+</main>
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="m-title" hidden>
+  <div class="mbox">
+    <div class="mhead"><h3 id="m-title">Tableau</h3><button type="button" class="tbtn" id="m-close">Fermer</button></div>
+    <div class="mbody"><p class="norm" id="m-norm"></p><div class="tblwrap" id="m-body"></div></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+<div class="kpad" id="kpad" hidden>
+  <div class="kp-top"><span id="kp-lbl"></span><b id="kp-val"></b></div>
+  <div class="kp-grid">
+    <button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button><button type="button" class="kfn" data-k="del" aria-label="Effacer le dernier chiffre">⌫</button>
+    <button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6</button><button type="button" class="kneg" data-k="neg" aria-label="Changer le signe">+/−</button>
+    <button type="button" data-k="1">1</button><button type="button" data-k="2">2</button><button type="button" data-k="3">3</button><button type="button" data-k=",">,</button>
+    <button type="button" class="kfn" data-k="clr" aria-label="Tout effacer">C</button><button type="button" data-k="0">0</button><button type="button" class="kfn" data-k="hide" aria-label="Fermer le pavé">▼</button><button type="button" class="kok" data-k="ok">Suiv. ✓</button>
+  </div>
+</div>
+<nav class="bnav" aria-label="Onglets"><button class="tab" type="button" data-tab="corr" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 1v5M12 18v5M1 12h5M18 12h5"/></svg>Corriger</button><button class="tab" type="button" data-tab="iso" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v10M7 9h10M7 19h10"/></svg>Tolér.</button><button class="tab" type="button" data-tab="thr" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M8 3h8M9 3v18h6V3M9 7l6 2M9 11l6 2M9 15l6 2"/></svg>Taraud</button><button class="tab" type="button" data-tab="vis" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10l-2 4H9z"/><path d="M10 8v12h4V8"/></svg>Vis</button><button class="tab" type="button" data-tab="sur" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="13" width="16" height="7"/><path d="M4 9h16M4 5h16" stroke-dasharray="2 2"/></svg>Surép.</button><button class="tab" type="button" data-tab="trig" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16V6z"/><path d="M16 20v-4h4"/></svg>Trigo</button><button class="tab" type="button" data-tab="emu" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c4 5 6 8 6 11a6 6 0 0 1-12 0c0-3 2-6 6-11z"/></svg>Émulsion</button></nav>
+<footer class="wrap">Les valeurs ne sont jamais envoyées à la machine : vérifie le signe et recopie-les toi-même dans la table d'outils. Une correction négative fait enlever plus de matière. · v1.0</footer>
+
+<script>
+// ISO 286-1:2010 / ISO 286-2:2010 : intervalles de tolérance IT1 à IT18 et écarts fondamentaux
+// de toutes les lettres, de 0 à 3150 mm. Valeurs en µm.
+var ISO286 = (function () {
+  // Tranches principales (IT, et écarts qui ne changent pas dans les sous-tranches)
+  var MAIN = [3, 6, 10, 18, 30, 50, 80, 120, 180, 250, 315, 400, 500,
+              630, 800, 1000, 1250, 1600, 2000, 2500, 3150];
+  // Sous-tranches (lettres a, b, c et r à zc)
+  var FINE = [3, 6, 10, 14, 18, 24, 30, 40, 50, 65, 80, 100, 120, 140, 160, 180, 200, 225, 250, 280, 315,
+              355, 400, 450, 500, 560, 630, 710, 800, 900, 1000, 1120, 1250, 1400, 1600, 1800, 2000,
+              2240, 2500, 2800, 3150];
+
+  // Intervalles de tolérance IT1 à IT18 (µm), par tranche principale
+  var IT = {
+    1:  [0.8, 1, 1, 1.2, 1.5, 1.5, 2, 2.5, 3.5, 4.5, 6, 7, 8, 9, 10, 11, 13, 15, 18, 22, 26],
+    2:  [1.2, 1.5, 1.5, 2, 2.5, 2.5, 3, 4, 5, 7, 8, 9, 10, 11, 13, 15, 18, 21, 25, 30, 36],
+    3:  [2, 2.5, 2.5, 3, 4, 4, 5, 6, 8, 10, 12, 13, 15, 16, 18, 21, 24, 29, 35, 41, 50],
+    4:  [3, 4, 4, 5, 6, 7, 8, 10, 12, 14, 16, 18, 20, 22, 25, 28, 33, 39, 46, 55, 68],
+    5:  [4, 5, 6, 8, 9, 11, 13, 15, 18, 20, 23, 25, 27, 32, 36, 40, 47, 55, 65, 78, 96],
+    6:  [6, 8, 9, 11, 13, 16, 19, 22, 25, 29, 32, 36, 40, 44, 50, 56, 66, 78, 92, 110, 135],
+    7:  [10, 12, 15, 18, 21, 25, 30, 35, 40, 46, 52, 57, 63, 70, 80, 90, 105, 125, 150, 175, 210],
+    8:  [14, 18, 22, 27, 33, 39, 46, 54, 63, 72, 81, 89, 97, 110, 125, 140, 165, 195, 230, 280, 330],
+    9:  [25, 30, 36, 43, 52, 62, 74, 87, 100, 115, 130, 140, 155, 175, 200, 230, 260, 310, 370, 440, 540],
+    10: [40, 48, 58, 70, 84, 100, 120, 140, 160, 185, 210, 230, 250, 280, 320, 360, 420, 500, 600, 700, 860],
+    11: [60, 75, 90, 110, 130, 160, 190, 220, 250, 290, 320, 360, 400, 440, 500, 560, 660, 780, 920, 1100, 1350],
+    12: [100, 120, 150, 180, 210, 250, 300, 350, 400, 460, 520, 570, 630, 700, 800, 900, 1050, 1250, 1500, 1750, 2100],
+    13: [140, 180, 220, 270, 330, 390, 460, 540, 630, 720, 810, 890, 970, 1100, 1250, 1400, 1650, 1950, 2300, 2800, 3300],
+    14: [250, 300, 360, 430, 520, 620, 740, 870, 1000, 1150, 1300, 1400, 1550, 1750, 2000, 2300, 2600, 3100, 3700, 4400, 5400],
+    15: [400, 480, 580, 700, 840, 1000, 1200, 1400, 1600, 1850, 2100, 2300, 2500, 2800, 3200, 3600, 4200, 5000, 6000, 7000, 8600],
+    16: [600, 750, 900, 1100, 1300, 1600, 1900, 2200, 2500, 2900, 3200, 3600, 4000, 4400, 5000, 5600, 6600, 7800, 9200, 11000, 13500],
+    17: [1000, 1200, 1500, 1800, 2100, 2500, 3000, 3500, 4000, 4600, 5200, 5700, 6300, 7000, 8000, 9000, 10500, 12500, 15000, 17500, 21000],
+    18: [1400, 1800, 2200, 2700, 3300, 3900, 4600, 5400, 6300, 7200, 8100, 8900, 9700, 11000, 12500, 14000, 16500, 19500, 23000, 28000, 33000]
+  };
+
+  // Écart supérieur es des arbres a à h (µm). Tables « main » sur les tranches principales, « fine » sur les sous-tranches.
+  // null = non défini par la norme pour cette tranche.
+  var N = null;
+  var ES = {
+    a:  { fine: [-270, -270, -280, -290, -290, -300, -300, -310, -320, -340, -360, -380, -410, -460, -520, -580, -660, -740, -820, -920, -1050, -1200, -1350, -1500, -1650] },
+    b:  { fine: [-140, -140, -150, -150, -150, -160, -160, -170, -180, -190, -200, -220, -240, -260, -280, -310, -340, -380, -420, -480, -540, -600, -680, -760, -840] },
+    c:  { fine: [-60, -70, -80, -95, -95, -110, -110, -120, -130, -140, -150, -170, -180, -200, -210, -230, -240, -260, -280, -300, -330, -360, -400, -440, -480] },
+    cd: { main: [-34, -46, -56] },
+    d:  { main: [-20, -30, -40, -50, -65, -80, -100, -120, -145, -170, -190, -210, -230, -260, -290, -320, -350, -390, -430, -480, -520] },
+    e:  { main: [-14, -20, -25, -32, -40, -50, -60, -72, -85, -100, -110, -125, -135, -145, -160, -170, -195, -220, -240, -260, -290] },
+    ef: { main: [-10, -14, -18] },
+    f:  { main: [-6, -10, -13, -16, -20, -25, -30, -36, -43, -50, -56, -62, -68, -76, -80, -86, -98, -110, -120, -130, -145] },
+    fg: { main: [-4, -6, -8] },
+    g:  { main: [-2, -4, -5, -6, -7, -9, -10, -12, -14, -15, -17, -18, -20, -22, -24, -26, -28, -30, -32, -34, -38] },
+    h:  { main: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }
+  };
+  // Écart inférieur ei des arbres k à zc (µm)
+  var EI = {
+    k:  { main: [0, 1, 1, 1, 2, 2, 2, 3, 3, 4, 4, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0] },
+    m:  { main: [2, 4, 6, 7, 8, 9, 11, 13, 15, 17, 20, 21, 23, 26, 30, 34, 40, 48, 58, 68, 76] },
+    n:  { main: [4, 8, 10, 12, 15, 17, 20, 23, 27, 31, 34, 37, 40, 44, 50, 56, 66, 78, 92, 110, 135] },
+    p:  { main: [6, 12, 15, 18, 22, 26, 32, 37, 43, 50, 56, 62, 68, 78, 88, 100, 120, 140, 170, 195, 240] },
+    r:  { fine: [10, 15, 19, 23, 23, 28, 28, 34, 34, 41, 43, 51, 54, 63, 65, 68, 77, 80, 84, 94, 98, 108, 114, 126, 132,
+                 150, 155, 175, 185, 210, 220, 250, 260, 300, 330, 370, 400, 440, 460, 550, 580] },
+    s:  { fine: [14, 19, 23, 28, 28, 35, 35, 43, 43, 53, 59, 71, 79, 92, 100, 108, 122, 130, 140, 158, 170, 190, 208, 232, 252,
+                 280, 310, 340, 380, 430, 470, 520, 580, 640, 720, 820, 920, 1000, 1100, 1250, 1400] },
+    t:  { fine: [N, N, N, N, N, N, 41, 48, 54, 66, 75, 91, 104, 122, 134, 146, 166, 180, 196, 218, 240, 268, 294, 330, 360,
+                 400, 450, 500, 560, 620, 680, 780, 840, 960, 1050, 1200, 1350, 1500, 1650, 1900, 2100] },
+    u:  { fine: [18, 23, 28, 33, 33, 41, 48, 60, 70, 87, 102, 124, 144, 170, 190, 210, 236, 258, 284, 315, 350, 390, 435, 490, 540,
+                 600, 660, 740, 840, 940, 1050, 1150, 1300, 1450, 1600, 1850, 2000, 2300, 2500, 2900, 3200] },
+    v:  { fine: [N, N, N, N, 39, 47, 55, 68, 81, 102, 120, 146, 172, 202, 228, 252, 284, 310, 340, 385, 425, 475, 530, 595, 660] },
+    x:  { fine: [20, 28, 34, 40, 45, 54, 64, 80, 97, 122, 146, 178, 210, 248, 280, 310, 350, 385, 425, 475, 525, 590, 660, 740, 820] },
+    y:  { fine: [N, N, N, N, N, 63, 75, 94, 114, 144, 174, 214, 254, 300, 340, 380, 425, 470, 520, 580, 650, 730, 820, 920, 1000] },
+    z:  { fine: [26, 35, 42, 50, 60, 73, 88, 112, 136, 172, 210, 258, 310, 365, 415, 465, 520, 575, 640, 710, 790, 900, 1000, 1100, 1250] },
+    za: { fine: [32, 42, 52, 64, 77, 98, 118, 148, 180, 226, 274, 335, 400, 470, 535, 600, 670, 740, 820, 920, 1000, 1150, 1300, 1450, 1600] },
+    zb: { fine: [40, 50, 67, 90, 108, 136, 160, 200, 242, 300, 360, 445, 525, 620, 700, 780, 880, 960, 1050, 1200, 1300, 1500, 1650, 1850, 2100] },
+    zc: { fine: [60, 80, 97, 130, 150, 188, 218, 274, 325, 405, 480, 585, 690, 800, 900, 1000, 1150, 1250, 1350, 1550, 1700, 1900, 2100, 2400, 2600] }
+  };
+  // Arbres j : ei pour j5/j6, j7, j8 (jusqu'à 500 mm)
+  var J_SHAFT = {
+    6: [-2, -2, -2, -3, -4, -5, -7, -9, -11, -13, -16, -18, -20],
+    7: [-4, -4, -5, -6, -8, -10, -12, -15, -18, -21, -26, -28, -32],
+    8: [-6]
+  };
+  // Alésages J : ES pour J6, J7, J8 (jusqu'à 500 mm)
+  var J_HOLE = {
+    6: [2, 5, 5, 6, 8, 10, 13, 16, 18, 22, 25, 29, 33],
+    7: [4, 6, 8, 10, 12, 14, 18, 22, 26, 30, 36, 39, 43],
+    8: [6, 10, 12, 15, 20, 24, 28, 34, 41, 47, 55, 60, 66]
+  };
+  // Valeur Δ (alésages K à ZC), par degré IT3 à IT8, tranches jusqu'à 500 mm
+  var DELTA = {
+    3: [0, 1, 1, 1, 1.5, 1.5, 2, 2, 3, 3, 4, 4, 5],
+    4: [0, 1.5, 1.5, 2, 2, 3, 3, 4, 4, 4, 4, 5, 5],
+    5: [0, 1, 2, 3, 3, 4, 5, 5, 6, 6, 7, 7, 7],
+    6: [0, 3, 3, 3, 4, 5, 6, 7, 7, 9, 9, 11, 13],
+    7: [0, 4, 6, 7, 8, 9, 11, 13, 15, 17, 20, 21, 23],
+    8: [0, 6, 7, 9, 12, 14, 16, 19, 23, 26, 29, 32, 34]
+  };
+
+  var SHAFT_LETTERS = ["a", "b", "c", "cd", "d", "e", "ef", "f", "fg", "g", "h", "js", "j", "k", "m", "n", "p", "r", "s", "t", "u", "v", "x", "y", "z", "za", "zb", "zc"];
+
+  function idx(list, d) {
+    if (!(d > 0) || d > 3150) return -1;
+    for (var i = 0; i < list.length; i++) if (d <= list[i]) return i;
+    return -1;
+  }
+  function label(list, i) { return (i === 0 ? 0 : list[i - 1]) + " à " + list[i] + " mm"; }
+  function pick(tbl, iM, iF) {
+    if (tbl.main) return iM < tbl.main.length ? tbl.main[iM] : null;
+    return iF < tbl.fine.length ? tbl.fine[iF] : null;
+  }
+
+  function itValue(grade, d) {
+    var i = idx(MAIN, d);
+    if (i < 0 || !IT[grade]) return null;
+    if (grade >= 14 && d <= 1) return null; // IT14 à IT18 non prévus jusqu'à 1 mm
+    return IT[grade][i];
+  }
+
+  function parse(code) {
+    var m = String(code || "").trim().match(/^([A-Za-z]{1,2})\s*(\d{1,2})$/);
+    if (!m) return null;
+    var L = m[1];
+    var hole = L === L.toUpperCase(), low = L.toLowerCase();
+    if (L !== L.toUpperCase() && L !== L.toLowerCase()) {
+      if (low !== "js") return null;
+      hole = L[0] === "J"; // « Js » compté comme alésage
+    }
+    if (low !== "js" && SHAFT_LETTERS.indexOf(low) < 0) return null;
+    return { letter: hole ? L.toUpperCase() : low, low: low, grade: parseInt(m[2], 10), hole: hole };
+  }
+
+  // Écarts en µm : { up, lo, it, ... } ou { error }
+  function limits(d, code) {
+    var p = parse(code);
+    if (!p) return { error: "Code ISO non reconnu. Exemples : H7, g6, js7, K6, ZC9." };
+    var iM = idx(MAIN, d), iF = idx(FINE, d);
+    if (iM < 0) return { error: "La norme couvre les diamètres de 0 à 3150 mm." };
+    if (!(p.grade >= 1 && p.grade <= 18)) return { error: "Degrés de qualité disponibles : IT1 à IT18." };
+    var it = itValue(p.grade, d);
+    if (it == null) return { error: "IT" + p.grade + " n'est pas prévu jusqu'à 1 mm." };
+    var L = p.low, big = d > 500, up, lo, note = "";
+    var nd = function () { return { error: (p.hole ? L.toUpperCase() : L) + p.grade + " n'est pas défini par la norme pour Ø " + d + " mm." }; };
+
+    if (L === "js") {
+      var half = it / 2;
+      if (p.grade >= 7 && p.grade <= 11 && it % 2 === 1) { half = (it - 1) / 2; note = "IT impair : arrondi à la valeur paire inférieure (ISO 286-1)."; }
+      up = half; lo = -half;
+    } else if (L === "j") {
+      if (big) return nd();
+      var tbl = p.hole ? J_HOLE : J_SHAFT, g = p.hole ? p.grade : (p.grade === 5 ? 6 : p.grade);
+      if (!tbl[g] || tbl[g][iM] == null) return { error: (p.hole ? "J" : "j") + p.grade + " n'est pas défini. Disponibles : " + (p.hole ? "J6, J7, J8" : "j5, j6, j7, j8 (j8 jusqu'à 3 mm)") + "." };
+      if (p.hole) { up = tbl[g][iM]; lo = up - it; } else { lo = tbl[g][iM]; up = lo + it; }
+    } else if (ES[L]) {
+      var es = pick(ES[L], iM, iF);
+      if (es == null) return nd();
+      if ((L === "a" || L === "b") && d <= 1) return nd();
+      if (p.hole) { lo = -es; up = lo + it; } else { up = es; lo = es - it; }
+    } else {
+      var ei = pick(EI[L], iM, iF);
+      if (ei == null) return nd();
+      if (!p.hole) {
+        if (L === "k" && (p.grade <= 3 || p.grade > 7)) ei = 0;
+        lo = ei; up = ei + it;
+      } else {
+        var delta = (!big && DELTA[p.grade]) ? DELTA[p.grade][iM] : 0;
+        if (L === "k") {
+          if (big) { if (p.grade < 6 || p.grade > 8) return nd(); up = 0; }
+          else up = p.grade <= 8 ? -ei + delta : 0;
+        } else if (L === "m") {
+          if (!big && p.grade === 6 && iM === 10) up = -9; // exception M6, 250 à 315 mm
+          else up = (!big && p.grade <= 8) ? -ei + delta : -ei;
+        } else if (L === "n") {
+          if (big) up = -ei;
+          else if (p.grade <= 8) up = -ei + delta;
+          else { if (d <= 1) return nd(); up = iM === 0 ? -4 : 0; }
+        } else {
+          up = (!big && p.grade <= 7) ? -ei + delta : -ei;
+        }
+        lo = up - it;
+      }
+    }
+    var fine = (ES[L] && ES[L].fine) || (EI[L] && EI[L].fine);
+    return { up: up, lo: lo, it: it, grade: p.grade, hole: p.hole, letter: p.letter,
+             range: fine ? label(FINE, iF) : label(MAIN, iM), note: note };
+  }
+
+  // Tranches utilisées pour afficher le tableau d'une classe
+  function rangesFor(code) {
+    var p = parse(code); if (!p) return [];
+    var L = p.low;
+    var useFine = (ES[L] && ES[L].fine) || (EI[L] && EI[L].fine);
+    var list = useFine ? FINE : MAIN, out = [];
+    for (var i = 0; i < list.length; i++) {
+      var lo = i === 0 ? 0 : list[i - 1], hi = list[i];
+      out.push({ from: lo, to: hi, mid: (lo + hi) / 2 || hi / 2 });
+    }
+    return out;
+  }
+
+  return { MAIN: MAIN, FINE: FINE, IT: IT, SHAFT_LETTERS: SHAFT_LETTERS, limits: limits, parse: parse, itValue: itValue, rangesFor: rangesFor };
+})();
+if (typeof module !== "undefined") module.exports = ISO286;
+
+</script>
+<script>
+// Normes : années, filetages, Helicoil, lamages, fraisures, tolérances générales ISO 2768.
+var NORMS = (function () {
+  var YEARS = {
+    iso286: "ISO 286-1:2010 et ISO 286-2:2010",
+    iso2768_1: "ISO 2768-1:1989", iso2768_2: "ISO 2768-2:1989",
+    metric: "ISO 261:1998 (dimensions), ISO 262:2023 (sélection), ISO 965-1:2013 (tolérances 6H)",
+    unified: "ASME B1.1-2024 (UNC, UNF, UNEF, classe 2B)",
+    gas: "ISO 228-1:2000 (G, filetage cylindrique)",
+    rp: "ISO 7-1:1994 (R, Rp, Rc)", npt: "ASME B1.20.1-2013 (NPT)",
+    sti: "Filets rapportés Helicoil / STI (DIN 8140-1, NASM 33537 pour les pouces)",
+    chc: "ISO 4762:2004 (vis CHC), DIN 974-1:2008 (lamages), ISO 273:1979 (trous de passage), ISO 7092:2000 (rondelles)",
+    fhc: "ISO 10642:2004 (vis FHC 90°)", din76: "DIN 76-1:2004 (chanfreins et sorties de filet)"
+  };
+
+  /* ---------- ISO 2768 ---------- */
+  var LIN_R = [3, 6, 30, 120, 400, 1000, 2000, 4000];
+  var LIN = { f: [0.05, 0.05, 0.1, 0.15, 0.2, 0.3, 0.5, null], m: [0.1, 0.1, 0.2, 0.3, 0.5, 0.8, 1.2, 2],
+              c: [0.2, 0.3, 0.5, 0.8, 1.2, 2, 3, 4], v: [null, 0.5, 1, 1.5, 2.5, 4, 6, 8] };
+  var EDGE_R = [3, 6, Infinity];
+  var EDGE = { f: [0.2, 0.5, 1], m: [0.2, 0.5, 1], c: [0.4, 1, 2], v: [0.4, 1, 2] };
+  var ANG_R = [10, 50, 120, 400, Infinity];   // longueur du plus petit côté (mm)
+  var ANG = { f: ["1°", "0°30'", "0°20'", "0°10'", "0°5'"], m: ["1°", "0°30'", "0°20'", "0°10'", "0°5'"],
+              c: ["1°30'", "1°", "0°30'", "0°15'", "0°10'"], v: ["3°", "2°", "1°", "0°30'", "0°20'"] };
+  var GEO_R = [10, 30, 100, 300, 1000, 3000];
+  var FLAT = { H: [0.02, 0.05, 0.1, 0.2, 0.3, 0.4], K: [0.05, 0.1, 0.2, 0.4, 0.6, 0.8], L: [0.1, 0.2, 0.4, 0.8, 1.2, 1.6] };
+  var PERP_R = [100, 300, 1000, 3000];
+  var PERP = { H: [0.2, 0.3, 0.4, 0.5], K: [0.4, 0.6, 0.8, 1], L: [0.6, 1, 1.5, 2] };
+  var SYM = { H: [0.5, 0.5, 0.5, 0.5], K: [0.6, 0.6, 0.8, 1], L: [0.6, 1, 1.5, 2] };
+  var RUN = { H: 0.1, K: 0.2, L: 0.5 };
+  function find(r, x) { for (var i = 0; i < r.length; i++) if (x <= r[i]) return i; return -1; }
+  function iso2768(len, cls) {
+    if (!(len >= 0.5)) return { error: "ISO 2768-1 commence à 0,5 mm." };
+    var i = find(LIN_R, len); if (i < 0) return { error: "ISO 2768-1 va jusqu'à 4000 mm." };
+    var t = LIN[cls][i];
+    var e = EDGE[cls][find(EDGE_R, len)];
+    var a = ANG[cls][find(ANG_R, len)];
+    return { lin: t, edge: e, angle: a };
+  }
+  function iso2768_2(len, cls) {
+    var i = find(GEO_R, len), j = find(PERP_R, len);
+    return { flat: i < 0 ? null : FLAT[cls][i], perp: j < 0 ? null : PERP[cls][j], sym: j < 0 ? null : SYM[cls][j], run: RUN[cls] };
+  }
+
+  /* ---------- Filetages ---------- */
+  // Tolérance TD1 (µm) du diamètre intérieur, degré 6 (ISO 965-1), par pas
+  var TD1_6 = { 0.2: 56, 0.25: 71, 0.3: 85, 0.35: 100, 0.4: 112, 0.45: 125, 0.5: 140, 0.6: 160, 0.7: 180, 0.75: 190,
+                0.8: 200, 1: 236, 1.25: 265, 1.5: 300, 1.75: 335, 2: 375, 2.5: 450, 3: 500, 3.5: 560, 4: 600,
+                4.5: 670, 5: 710, 5.5: 750, 6: 800 };
+  var M_COARSE = [[1, 0.25], [1.2, 0.25], [1.4, 0.3], [1.6, 0.35], [1.8, 0.35], [2, 0.4], [2.2, 0.45], [2.5, 0.45], [3, 0.5],
+    [3.5, 0.6], [4, 0.7], [5, 0.8], [6, 1], [7, 1], [8, 1.25], [10, 1.5], [12, 1.75], [14, 2], [16, 2], [18, 2.5], [20, 2.5],
+    [22, 2.5], [24, 3], [27, 3], [30, 3.5], [33, 3.5], [36, 4], [39, 4], [42, 4.5], [45, 4.5], [48, 5], [52, 5], [56, 5.5],
+    [60, 5.5], [64, 6], [68, 6]];
+  var M_FINE = [[2, 0.25], [2.5, 0.35], [3, 0.35], [3.5, 0.35], [4, 0.5], [5, 0.5], [6, 0.75], [7, 0.75], [8, 1], [8, 0.75],
+    [10, 1.25], [10, 1], [10, 0.75], [12, 1.5], [12, 1.25], [12, 1], [14, 1.5], [14, 1.25], [14, 1], [16, 1.5], [16, 1],
+    [18, 2], [18, 1.5], [18, 1], [20, 2], [20, 1.5], [20, 1], [22, 2], [22, 1.5], [22, 1], [24, 2], [24, 1.5], [24, 1],
+    [27, 2], [27, 1.5], [30, 3], [30, 2], [30, 1.5], [33, 3], [33, 2], [36, 3], [36, 2], [36, 1.5], [39, 3], [42, 4],
+    [42, 3], [42, 2], [45, 3], [48, 4], [48, 3], [48, 2], [52, 4], [52, 3], [56, 4], [60, 4], [64, 4]];
+  function r05(x) { return Math.round(x * 20) / 20; }
+  var M_CUT = { 1: 0.75, 1.2: 0.95, 1.4: 1.1, 1.6: 1.25, 1.8: 1.45, 2: 1.6, 2.2: 1.75, 2.5: 2.05, 3: 2.5, 3.5: 2.9, 4: 3.3, 5: 4.2,
+                6: 5, 7: 6, 8: 6.8, 10: 8.5, 12: 10.2, 14: 12, 16: 14, 18: 15.5, 20: 17.5, 22: 19.5, 24: 21, 27: 24, 30: 26.5,
+                33: 29.5, 36: 32, 39: 35, 42: 37.5, 45: 40.5, 48: 43, 52: 47, 56: 50.5, 60: 54.5, 64: 58, 68: 62 };
+  function metric(D, P, coarse) {
+    var td1 = TD1_6[P];
+    var d1min = D - 1.082532 * P;
+    return { D: D, P: P, cut: coarse && M_CUT[D] != null ? M_CUT[D] : r05(D - P), form: r05(D - 0.45 * P), minMin: d1min, minMax: td1 ? d1min + td1 / 1000 : null,
+             d3: D - 1.226869 * P, tol: "6H" };
+  }
+  // Pas unifiés : [nom, Ø en pouces, filets/pouce]
+  var NUM = { "#0": 0.06, "#1": 0.073, "#2": 0.086, "#3": 0.099, "#4": 0.112, "#5": 0.125, "#6": 0.138, "#8": 0.164, "#10": 0.19, "#12": 0.216 };
+  function frac(s) { if (NUM[s] != null) return NUM[s]; var p = s.split(" "), v = 0; p.forEach(function (x) { var q = x.split("/"); v += q.length === 2 ? q[0] / q[1] : Number(q[0]); }); return v; }
+  var UNC = [["#1", 64], ["#2", 56], ["#3", 48], ["#4", 40], ["#5", 40], ["#6", 32], ["#8", 32], ["#10", 24], ["#12", 24],
+    ["1/4", 20], ["5/16", 18], ["3/8", 16], ["7/16", 14], ["1/2", 13], ["9/16", 12], ["5/8", 11], ["3/4", 10], ["7/8", 9],
+    ["1", 8], ["1 1/8", 7], ["1 1/4", 7], ["1 3/8", 6], ["1 1/2", 6], ["1 3/4", 5], ["2", 4.5]];
+  var UNF = [["#0", 80], ["#1", 72], ["#2", 64], ["#3", 56], ["#4", 48], ["#5", 44], ["#6", 40], ["#8", 36], ["#10", 32],
+    ["#12", 28], ["1/4", 28], ["5/16", 24], ["3/8", 24], ["7/16", 20], ["1/2", 20], ["9/16", 18], ["5/8", 18], ["3/4", 16],
+    ["7/8", 14], ["1", 12], ["1 1/8", 12], ["1 1/4", 12], ["1 3/8", 12], ["1 1/2", 12]];
+  var UNEF = [["#12", 32], ["1/4", 32], ["5/16", 32], ["3/8", 32], ["7/16", 28], ["1/2", 28], ["9/16", 24], ["5/8", 24],
+    ["11/16", 24], ["3/4", 20], ["13/16", 20], ["7/8", 20], ["15/16", 20], ["1", 20]];
+  // Diamètre intérieur 2B (ASME B1.1) : mini = Ø de base ; tolérance selon le Ø et le pas (pouces)
+  function unMinor(Din, tpi) {
+    var P = 1 / tpi, min = Din - 1.082532 * P, tol;
+    var big = 0.25 * P - 0.4 * P * P;
+    if (Din < 0.25) tol = Math.max(0.12 * P, 0.05 * Math.pow(P, 2 / 3) + 0.03 * P / Din - 0.002);
+    else tol = tpi <= 4 ? 0.15 * P : big;
+    return { min: min, max: min + tol };
+  }
+  function unified(name, tpi, series) {
+    var Din = frac(name), P = 25.4 / tpi, D = Din * 25.4, m = unMinor(Din, tpi);
+    return { name: name + "-" + tpi + " " + series, D: D, P: P, tpi: tpi, cut: r05(D - P), form: r05(D - 0.45 * P),
+             minMin: m.min * 25.4, minMax: m.max * 25.4, d3: D - 1.226869 * P, tol: "2B" };
+  }
+  // Gaz cylindrique G (ISO 228-1) : [nom, filets/pouce, Ø ext, Ø int (mm), perçage]
+  var G = [["1/16", 28, 7.723, 6.561, 6.8], ["1/8", 28, 9.728, 8.566, 8.8], ["1/4", 19, 13.157, 11.445, 11.8],
+    ["3/8", 19, 16.662, 14.95, 15.25], ["1/2", 14, 20.955, 18.631, 19], ["5/8", 14, 22.911, 20.587, 21], ["3/4", 14, 26.441, 24.117, 24.5],
+    ["7/8", 14, 30.201, 27.877, 28.25], ["1", 11, 33.249, 30.291, 30.75], ["1 1/8", 11, 37.897, 34.939, 35.5], ["1 1/4", 11, 41.91, 38.952, 39.25],
+    ["1 1/2", 11, 47.803, 44.845, 45.25], ["1 3/4", 11, 53.746, 50.788, 51], ["2", 11, 59.614, 56.656, 57], ["2 1/4", 11, 65.71, 62.752, 63],
+    ["2 1/2", 11, 75.184, 72.226, 72.5], ["2 3/4", 11, 81.534, 78.576, 79], ["3", 11, 87.884, 84.926, 85.5], ["3 1/2", 11, 100.33, 97.372, 98],
+    ["4", 11, 113.03, 110.072, 110.5]];
+  var G_TOL = { 28: 0.282, 19: 0.445, 14: 0.541, 11: 0.64 }; // tolérance + du Ø intérieur
+  // Gaz conique R/Rc et Rp (ISO 7-1) : [nom, filets/pouce, Ø ext. au plan de jauge, Ø int. au plan de jauge, longueur de jauge]
+  var RP = [["1/16", 28, 7.723, 6.561, 4], ["1/8", 28, 9.728, 8.566, 4], ["1/4", 19, 13.157, 11.445, 6], ["3/8", 19, 16.662, 14.95, 6.4],
+    ["1/2", 14, 20.955, 18.631, 8.2], ["3/4", 14, 26.441, 24.117, 9.5], ["1", 11, 33.249, 30.291, 10.4], ["1 1/4", 11, 41.91, 38.952, 12.7],
+    ["1 1/2", 11, 47.803, 44.845, 12.7], ["2", 11, 59.614, 56.656, 15.9]];
+  // Perçages Rc relevés chez un fabricant (Hoffmann) : sans alésoir / avec alésoir conique 1:16
+  var RC_DRILL = { "1/2": [17.8, 17.7], "3/4": [23.2, 23.1] };
+  // NPT (ASME B1.20.1) : [nom, filets/pouce, Ø ext. du tube (mm), foret conseillé (pouce), foret (mm)]
+  var NPT = [["1/16", 27, 7.938, "D (0,246\")", 6.25], ["1/8", 27, 10.287, "R (0,339\")", 8.6], ["1/4", 18, 13.716, "7/16\"", 11.1],
+    ["3/8", 18, 17.145, "37/64\"", 14.7], ["1/2", 14, 21.336, "23/32\"", 18.25], ["3/4", 14, 26.67, "59/64\"", 23.4],
+    ["1", 11.5, 33.401, "1 5/32\"", 29.4], ["1 1/4", 11.5, 42.164, "1 1/2\"", 38.1], ["1 1/2", 11.5, 48.26, "1 47/64\"", 44],
+    ["2", 11.5, 60.325, "2 7/32\"", 56.35]];
+
+  /* ---------- Helicoil / STI ---------- */
+  // Perçages Helicoil courants pour M gros pas (mm)
+  var STI_DRILL = { "1.6": 1.7, "2": 2.1, "2.5": 2.6, "3": 3.2, "3.5": 3.7, "4": 4.2, "5": 5.2, "6": 6.3, "7": 7.3, "8": 8.4,
+                    "10": 10.5, "12": 12.5, "14": 14.5, "16": 16.5, "18": 18.75, "20": 20.75, "22": 22.75, "24": 24.75,
+                    "27": 27.75, "30": 31, "33": 34, "36": 37.25 };
+  function sti(D, P, key) {
+    var stiMajor = D + 1.299038 * P, minMin = D + 0.216506 * P, td1 = TD1_6[P];
+    var drill = STI_DRILL[key] != null ? STI_DRILL[key] : r05(minMin + (td1 ? 0.45 * td1 / 1000 : 0.1 * P));
+    return { D: D, P: P, stiMajor: stiMajor, minMin: minMin, minMax: td1 ? minMin + td1 / 1000 : null, drill: drill,
+             lengths: [1, 1.5, 2, 2.5, 3].map(function (k) { return { k: k, L: k * D }; }) };
+  }
+
+  /* ---------- Vis CHC et FHC ---------- */
+  // [M, dk, k, passage fin, moyen, large, lamage Ø, lamage prof., rondelle ISO 7092 d2, h]
+  var CHC = [[1.6, 3, 1.6, 1.7, 1.8, 2, 3.5, 1.8, 3.5, 0.3], [2, 3.8, 2, 2.2, 2.4, 2.6, 4.4, 2.3, 4.5, 0.3],
+    [2.5, 4.5, 2.5, 2.7, 2.9, 3.1, 5.5, 2.8, 5, 0.5], [3, 5.5, 3, 3.2, 3.4, 3.6, 6.5, 3.4, 6, 0.5],
+    [4, 7, 4, 4.3, 4.5, 4.8, 8, 4.4, 8, 0.5], [5, 8.5, 5, 5.3, 5.5, 5.8, 10, 5.4, 9, 1], [6, 10, 6, 6.4, 6.6, 7, 11, 6.4, 11, 1.6],
+    [8, 13, 8, 8.4, 9, 10, 15, 8.6, 15, 1.6], [10, 16, 10, 10.5, 11, 12, 18, 10.6, 18, 1.6], [12, 18, 12, 13, 13.5, 14.5, 20, 12.6, 20, 2],
+    [14, 21, 14, 15, 15.5, 16.5, 24, 14.6, 24, 2.5], [16, 24, 16, 17, 17.5, 18.5, 26, 16.6, 28, 2.5], [20, 30, 20, 21, 22, 24, 33, 20.6, 34, 3],
+    [24, 36, 24, 25, 26, 28, 40, 24.8, 39, 4], [30, 45, 30, 31, 33, 35, 50, 30.8, 50, 4], [36, 54, 36, 37, 39, 42, 58, 37, 60, 5]];
+  // [M, dk théorique maxi, k maxi] ISO 10642
+  var FHC = [[3, 6.72, 1.86], [4, 8.96, 2.48], [5, 11.2, 3.1], [6, 13.44, 3.72], [8, 17.92, 4.96], [10, 22.4, 6.2],
+    [12, 26.88, 7.44], [14, 30.8, 8.4], [16, 33.6, 8.8], [20, 40.32, 10.16]];
+
+  // Profondeur de perçage d'un taraudage borgne : entrée du taraud en pas, angle de pointe du foret
+  var TAP_FORMS = { C: { lead: 3, txt: "Forme C, trou borgne (2 à 3 filets d'entrée)" }, E: { lead: 2, txt: "Forme E, fond de trou (1,5 à 2 filets)" },
+                    B: { lead: 5, txt: "Forme B, trou débouchant (4 à 5 filets)" }, F: { lead: 2.5, txt: "Taraud à refouler (2 à 3 filets)" } };
+  function drillDepth(L, P, drillD, form, pointAngle) {
+    var lead = TAP_FORMS[form].lead * P;
+    var tip = drillD / 2 / Math.tan(pointAngle / 2 * Math.PI / 180);
+    return { lead: lead, tip: tip, depth: L + lead, total: L + lead + tip };
+  }
+
+  return { YEARS: YEARS, iso2768: iso2768, iso2768_2: iso2768_2, LIN_R: LIN_R, LIN: LIN, EDGE: EDGE, ANG_R: ANG_R, ANG: ANG,
+           GEO_R: GEO_R, FLAT: FLAT, PERP_R: PERP_R, PERP: PERP, SYM: SYM, RUN: RUN,
+           TD1_6: TD1_6, M_COARSE: M_COARSE, M_FINE: M_FINE, metric: metric, UNC: UNC, UNF: UNF, UNEF: UNEF, unified: unified, frac: frac,
+           G: G, G_TOL: G_TOL, RP: RP, RC_DRILL: RC_DRILL, NPT: NPT, sti: sti, STI_DRILL: STI_DRILL, CHC: CHC, FHC: FHC, TAP_FORMS: TAP_FORMS,
+           drillDepth: drillDepth, r05: r05 };
+})();
+if (typeof module !== "undefined") module.exports = NORMS;
+
+</script>
+<script>
+// Calculs d'atelier : tolérances ISO 286, tolérances générales ISO 2768, corrections d'usure, surépaisseurs.
+// Toutes les cotes en mm, les écarts ISO en µm.
+var Calc = (function () {
+  var ISO = typeof ISO286 !== "undefined" ? ISO286 : require("./iso286.js");
+  var NRM = typeof NORMS !== "undefined" ? NORMS : require("./norms.js");
+  function parseIso(code) { return ISO.parse(code); }
+  // Écarts ISO 286 en µm { up, lo, it, ... } ou { error }
+  function iso(d, code) { return ISO.limits(d, code); }
+
+  // Tolérances générales ISO 2768-1 (cotes linéaires), en mm
+  function general(d, cls) {
+    var r = NRM.iso2768(d, cls);
+    if (r.error) return r;
+    if (r.lin == null) return { error: "Pas de tolérance " + cls + " définie pour cette cote." };
+    return { up: r.lin, lo: -r.lin };
+  }
+
+  // Cas de figure : axe, sens et facteur pour passer de l'écart à la correction.
+  // Une correction négative fait enlever plus de matière (rayon ou longueur plus petits).
+  var CASES = {
+    poche:     { axis: "R", sign: 1,  div: 2 },
+    alesage:   { axis: "R", sign: 1,  div: 2 },
+    rainure:   { axis: "R", sign: 1,  div: 2 },
+    tourillon: { axis: "R", sign: -1, div: 2 },
+    tenon:     { axis: "R", sign: -1, div: 2 },
+    epaulement:{ axis: "R", sign: -1, div: 1 },
+    profondeur:{ axis: "L", sign: 1,  div: 1 },
+    hauteur:   { axis: "L", sign: -1, div: 1 }
+  };
+
+  // Arrondi symétrique (0,5 s'éloigne de zéro), avec une marge pour les erreurs de virgule flottante
+  function roundN(x, f) { var a = Math.round(Math.abs(x) * f + 1e-7) / f; return (x < 0 ? -a : a) + 0; }
+  function round3(x) { return roundN(x, 1000); }
+  function round4(x) { return roundN(x, 10000); }
+
+  // nominal, mesure en mm ; up/lo en mm ; wear = usure actuelle (mm) ou null
+  function correction(caseKey, nominal, measured, up, lo, wear) {
+    var c = CASES[caseKey];
+    var min = nominal + lo, max = nominal + up;
+    var target = nominal + (up + lo) / 2;
+    var dev = measured - target;
+    var delta = round3(c.sign * dev / c.div);
+    var eps = 1e-9;
+    var inTol = measured >= min - eps && measured <= max + eps;
+    var verdict = inTol ? "ok" : (delta < 0 ? "reprendre" : "rebut");
+    return {
+      axis: c.axis, min: round4(min), max: round4(max), target: round4(target),
+      deviation: round3(measured - nominal), devTarget: round3(dev),
+      delta: delta, deltaDia: c.axis === "R" ? round3(2 * delta) : null,
+      newWear: wear == null ? null : round3(wear + delta),
+      verdict: verdict
+    };
+  }
+
+
+  // Correction de cote pour la FAO ou le programme (l'usure outil ne change pas).
+  // prog = cote programmée actuelle (défaut : nominale), stock = surépaisseur actuelle dans la FAO (ou null).
+  // offset = décalage du contour par côté (ou en Z) ; négatif = enlève plus de matière.
+  function cam(caseKey, nominal, measured, up, lo, prog, stock) {
+    var c = CASES[caseKey];
+    var r = correction(caseKey, nominal, measured, up, lo, null);
+    if (prog == null) prog = nominal;
+    var dev = measured - r.target;
+    r.prog = prog;
+    r.newProg = round4(prog - dev);
+    r.change = round4(-dev);
+    r.offset = round4(c.sign * dev / c.div);
+    r.newStock = stock == null ? null : round4(stock + r.offset);
+    return r;
+  }
+
+  // Surépaisseur : kind = "ext" (Ø ou largeur extérieure), "int", "face"
+  function roughSize(finished, stock, kind) {
+    if (kind === "ext") return round3(finished + 2 * stock);
+    if (kind === "int") return round3(finished - 2 * stock);
+    return round3(finished + stock);
+  }
+  function remaining(current, finished, kind, maxPass) {
+    var perSide;
+    if (kind === "ext") perSide = (current - finished) / 2;
+    else if (kind === "int") perSide = (finished - current) / 2;
+    else perSide = current - finished;
+    perSide = round3(perSide);
+    var passes = null, pass = null;
+    if (perSide > 0 && maxPass > 0) {
+      passes = Math.ceil(perSide / maxPass - 1e-9);
+      pass = round3(perSide / passes);
+    }
+    return { perSide: perSide, passes: passes, pass: pass };
+  }
+
+
+  /* ---------- Trigo ---------- */
+  var RAD = Math.PI / 180;
+
+  // Triangle rectangle. a = côté adjacent à l'angle α, b = côté opposé, c = hypoténuse.
+  // v = { a, b, c, alpha, beta } avec NaN pour les cases vides ; exactement 2 valeurs dont au moins un côté.
+  function rightTriangle(v) {
+    var keys = ["a", "b", "c", "alpha", "beta"].filter(function (k) { return isFinite(v[k]); });
+    if (keys.length < 2) return { error: "Remplis 2 valeurs, dont au moins un côté." };
+    if (keys.length > 2) return { error: "Remplis seulement 2 valeurs et laisse vide ce que tu cherches." };
+    if (keys.indexOf("alpha") >= 0 && keys.indexOf("beta") >= 0) return { error: "Avec deux angles, il faut aussi un côté : remplis un angle et un côté." };
+    for (var i = 0; i < keys.length; i++) if (!(v[keys[i]] > 0)) return { error: "Les valeurs doivent être positives." };
+    var a = v.a, b = v.b, c = v.c, al = v.alpha;
+    if (isFinite(v.beta)) al = 90 - v.beta;
+    if (isFinite(al) && !(al > 0 && al < 90)) return { error: "Un angle de triangle rectangle est entre 0 et 90°." };
+    if (isFinite(a) && isFinite(b)) { c = Math.hypot(a, b); al = Math.atan2(b, a) / RAD; }
+    else if (isFinite(a) && isFinite(c)) { if (c <= a) return { error: "L'hypoténuse doit être plus grande que les côtés." }; b = Math.sqrt(c * c - a * a); al = Math.acos(a / c) / RAD; }
+    else if (isFinite(b) && isFinite(c)) { if (c <= b) return { error: "L'hypoténuse doit être plus grande que les côtés." }; a = Math.sqrt(c * c - b * b); al = Math.asin(b / c) / RAD; }
+    else if (isFinite(a)) { b = a * Math.tan(al * RAD); c = a / Math.cos(al * RAD); }
+    else if (isFinite(b)) { a = b / Math.tan(al * RAD); c = b / Math.sin(al * RAD); }
+    else { a = c * Math.cos(al * RAD); b = c * Math.sin(al * RAD); }
+    return { a: a, b: b, c: c, alpha: al, beta: 90 - al, area: a * b / 2 };
+  }
+
+  // Chanfrein « largeur × angle » : largeur mesurée le long d'une face, angle par rapport à cette face.
+  function chamfer(width, angle) {
+    if (!(width > 0)) return { error: "Saisis la largeur du chanfrein." };
+    if (!(angle > 0 && angle < 90)) return { error: "L'angle doit être entre 0 et 90°." };
+    return { other: width * Math.tan(angle * RAD), face: width / Math.cos(angle * RAD) };
+  }
+
+  // Fraise à chanfreiner en contournage, axe vertical.
+  // tipAngle = angle de pointe (90° pour un chanfrein à 45°), d0 = Ø de pointe, h = largeur horizontale voulue,
+  // depth = plongée de la pointe sous le dessus. Rend le rayon à saisir pour la correction (G41/G42 sur le contour fini).
+  function chamferMill(tipAngle, d0, h, depth) {
+    if (!(tipAngle > 0 && tipAngle < 180)) return { error: "Angle de pointe entre 0 et 180° (souvent 90°)." };
+    if (!(d0 >= 0)) return { error: "Ø de pointe : 0 si la fraise est pointue." };
+    if (!(h > 0)) return { error: "Saisis la largeur du chanfrein." };
+    if (!(depth > 0)) return { error: "Saisis la plongée de la pointe." };
+    var t = Math.tan(tipAngle / 2 * RAD);
+    var v = h / t;                              // hauteur du chanfrein sur la paroi
+    var rTop = d0 / 2 + depth * t;              // rayon de la fraise au niveau du dessus
+    var R = rTop - h;                           // distance axe fraise / arête à programmer
+    var margin = depth - v;                     // hauteur entre le bas du chanfrein et la pointe
+    var minDepth = v + 0.2;
+    return { v: v, R: R, rTop: rTop, margin: margin, minDepth: minDepth, chamferAngle: 90 - tipAngle / 2 };
+  }
+
+  // Cercle de perçage : Ø, nombre de trous, angle du premier trou (0° = +X, sens trigo), centre.
+  function boltCircle(dia, n, start, cx, cy) {
+    if (!(dia > 0)) return { error: "Saisis le Ø du cercle." };
+    n = Math.round(n);
+    if (!(n >= 1 && n <= 72)) return { error: "Nombre de trous entre 1 et 72." };
+    var pts = [], r = dia / 2;
+    for (var i = 0; i < n; i++) {
+      var a = (start + i * 360 / n) * RAD;
+      pts.push({ n: i + 1, angle: start + i * 360 / n, x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
+    }
+    return { pts: pts, pitch: n > 1 ? dia * Math.sin(Math.PI / n) : 0, step: 360 / n };
+  }
+
+  /* ---------- Émulsion (eau blanche) ---------- */
+  function mix(volume, pct) {
+    if (!(volume > 0)) return { error: "Saisis le volume à préparer." };
+    if (!(pct > 0 && pct < 100)) return { error: "Concentration entre 0 et 100 %." };
+    var oil = volume * pct / 100;
+    return { oil: oil, water: volume - oil };
+  }
+  // Correction du bac. brix = lecture réfractomètre, factor = facteur de l'huile (fiche technique),
+  // target = % voulu, topPct = concentration de l'appoint (100 = huile pure), capacity = capacité du bac (facultatif).
+  function tank(volume, brix, factor, target, topPct, capacity) {
+    if (!(volume > 0)) return { error: "Saisis le volume actuel du bac." };
+    if (!(brix >= 0) || !(factor > 0)) return { error: "Saisis la lecture du réfractomètre et le facteur de l'huile." };
+    if (!(target > 0 && target < 100)) return { error: "Concentration voulue entre 0 et 100 %." };
+    var cur = brix * factor;
+    var res = { current: cur, target: target };
+    if (Math.abs(cur - target) < 0.05) { res.action = "ok"; res.add = 0; }
+    else if (cur < target) {
+      if (!(topPct > target && topPct <= 100)) return { error: "L'appoint doit être plus concentré que la cible." };
+      res.action = "huile"; res.add = volume * (target - cur) / (topPct - target);
+      res.oilInside = res.add * topPct / 100;
+    } else {
+      res.action = "eau"; res.add = volume * (cur - target) / target;
+    }
+    res.final = volume + res.add;
+    if (capacity > 0 && res.final > capacity) {
+      res.overflow = true;
+      // vidanger d'abord une quantité x puis ajouter : on garde le volume plein
+      // huile : (V' cur + y top) / C = target avec V' + y = C
+      var C = capacity, y;
+      if (res.action === "huile") y = C * (target - cur) / (topPct - cur);
+      else y = C * (cur - target) / cur;
+      res.drain = Math.max(0, volume - (C - y));
+      res.addAfterDrain = y;
+    }
+    return res;
+  }
+
+  return { rightTriangle: rightTriangle, chamfer: chamfer, chamferMill: chamferMill, boltCircle: boltCircle, mix: mix, tank: tank,
+           iso: iso, parseIso: parseIso, general: general, correction: correction, cam: cam,
+           roughSize: roughSize, remaining: remaining, CASES: CASES, round3: round3 };
+})();
+if (typeof module !== "undefined") module.exports = Calc;
+
+</script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  function num(v) {
+    if (v == null) return NaN;
+    v = String(v).trim().replace(",", ".").replace("−", "-");
+    if (v === "" || v === "+" || v === "-") return NaN;
+    return Number(v);
+  }
+  function fmt(x, dec) {
+    if (x == null || isNaN(x)) return "–";
+    dec = dec == null ? 3 : dec;
+    var s = Math.abs(x).toFixed(dec);
+    if (dec > 3) s = s.replace(/0$/, "");
+    return (x < 0 ? "−" : "") + s.replace(".", ",");
+  }
+  function escapeHtml(t) { return String(t).replace(/[&<>"']/g, function (ch) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]; }); }
+  function sgn(x, dec) { return (x > 0 ? "+" : x === 0 ? "±" : "") + fmt(x, dec); }
+  function mm4(x) { return fmt(x, Math.abs(Math.round(x * 1000) - x * 1000) > 1e-6 ? 4 : 3); }
+  function store(k, v) { try { localStorage.setItem("calcAtelier." + k, v); } catch (e) {} }
+  function load(k) { try { return localStorage.getItem("calcAtelier." + k); } catch (e) { return null; } }
+
+  /* Onglets */
+  var tabs = document.querySelectorAll(".tab");
+  function showTab(name) {
+    tabs.forEach(function (t) {
+      var on = t.dataset.tab === name;
+      t.setAttribute("aria-selected", on ? "true" : "false");
+      $("p-" + t.dataset.tab).hidden = !on;
+    });
+    store("tab", name);
+    window.scrollTo(0, 0);
+  }
+  tabs.forEach(function (t) { t.addEventListener("click", function () { showTab(t.dataset.tab); }); });
+
+  /* Cas de figure : nom, sous-titre, couleur, pictogramme (coupe : gris = pièce, couleur = cote) */
+  var S = 'stroke="currentColor" stroke-width="2" fill="none"';
+  function dim(x1, x2, y) { return '<path d="M' + x1 + ' ' + y + 'H' + x2 + 'M' + (x1 + 5) + ' ' + (y - 4) + 'L' + x1 + ' ' + y + 'L' + (x1 + 5) + ' ' + (y + 4) + 'M' + (x2 - 5) + ' ' + (y - 4) + 'L' + x2 + ' ' + y + 'L' + (x2 - 5) + ' ' + (y + 4) + '" stroke="var(--k)" stroke-width="2" fill="none"/>'; }
+  function vdim(x, y1, y2) { return '<path d="M' + x + ' ' + y1 + 'V' + y2 + 'M' + (x - 4) + ' ' + (y1 + 5) + 'L' + x + ' ' + y1 + 'L' + (x + 4) + ' ' + (y1 + 5) + 'M' + (x - 4) + ' ' + (y2 - 5) + 'L' + x + ' ' + y2 + 'L' + (x + 4) + ' ' + (y2 - 5) + '" stroke="var(--k)" stroke-width="2" fill="none"/>'; }
+  var PART = 'fill="#3a4556"';
+  var CASE_LIST = [
+    { k: "poche", name: "Poche intérieure", sub: "largeur ou longueur", col: "--c1",
+      svg: '<rect x="8" y="6" width="104" height="34" ' + PART + '/><rect x="34" y="6" width="52" height="22" fill="var(--panel-2)"/>' + dim(34, 86, 17) },
+    { k: "alesage", name: "Alésage fraisé", sub: "Ø intérieur contourné", col: "--c2",
+      svg: '<rect x="8" y="6" width="104" height="34" ' + PART + '/><circle cx="60" cy="23" r="15" fill="var(--panel-2)"/>' + dim(45, 75, 23) },
+    { k: "rainure", name: "Rainure", sub: "largeur contournée", col: "--c3",
+      svg: '<rect x="8" y="6" width="104" height="34" ' + PART + '/><rect x="46" y="6" width="28" height="24" fill="var(--panel-2)"/>' + dim(46, 74, 16) },
+    { k: "tourillon", name: "Tourillon", sub: "Ø extérieur", col: "--c4",
+      svg: '<rect x="8" y="30" width="104" height="10" ' + PART + '/><rect x="40" y="8" width="40" height="22" ' + PART + '/>' + dim(40, 80, 4) },
+    { k: "tenon", name: "Tenon", sub: "largeur extérieure, 2 faces", col: "--c5",
+      svg: '<rect x="8" y="30" width="104" height="10" ' + PART + '/><rect x="30" y="10" width="60" height="20" ' + PART + '/>' + dim(30, 90, 5) },
+    { k: "epaulement", name: "Épaulement", sub: "1 face, ou paroi restante", col: "--c6",
+      svg: '<rect x="8" y="24" width="104" height="16" ' + PART + '/><rect x="8" y="8" width="62" height="16" ' + PART + '/>' + dim(8, 70, 4) },
+    { k: "profondeur", name: "Profondeur", sub: "mesurée depuis le dessus", col: "--c7",
+      svg: '<rect x="8" y="6" width="104" height="34" ' + PART + '/><rect x="36" y="6" width="48" height="20" fill="var(--panel-2)"/>' + vdim(60, 6, 26) },
+    { k: "hauteur", name: "Hauteur restante", sub: "épaisseur, depuis le dessous", col: "--c8",
+      svg: '<rect x="8" y="14" width="104" height="26" ' + PART + '/>' + vdim(60, 14, 40) }
+  ];
+  var curCase = load("case") || "poche";
+  if (!CASE_LIST.some(function (c) { return c.k === curCase; })) curCase = "poche";
+  var casesEl = $("cases");
+  CASE_LIST.forEach(function (c) {
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "case"; b.dataset.k = c.k;
+    b.style.setProperty("--k", "var(" + c.col + ")");
+    b.setAttribute("aria-pressed", c.k === curCase ? "true" : "false");
+    var ax = Calc.CASES[c.k].axis === "R" ? "Δrayon" : "Δlongu.";
+    b.innerHTML = '<svg viewBox="0 0 120 44" aria-hidden="true">' + c.svg + '</svg><b>' + c.name + '</b><small>' + c.sub + '</small><span class="ax">' + ax + '</span>';
+    b.addEventListener("click", function () {
+      curCase = c.k; store("case", c.k); fixCase();
+      casesEl.querySelectorAll(".case").forEach(function (x) { x.setAttribute("aria-pressed", x.dataset.k === c.k ? "true" : "false"); });
+      setChips(); calcCorr(); if (typeof saveMode === "function") saveMode();
+      if (typeof isWiz === "function" && isWiz()) goStep(4);
+    });
+    casesEl.appendChild(b);
+  });
+
+  /* Tolérance : mode */
+  var tolMode = "iso";
+  function setMode(m) {
+    tolMode = m;
+    document.querySelectorAll("#tolmode button").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.m === m ? "true" : "false"); });
+    document.querySelectorAll("#p-corr [data-show]").forEach(function (el) { el.hidden = el.dataset.show !== m; });
+    calcCorr();
+  }
+  document.querySelectorAll("#tolmode button").forEach(function (b) { b.addEventListener("click", function () { setMode(b.dataset.m); saveMode(); }); });
+
+  var KIND = { poche: "int", alesage: "int", rainure: "int", tourillon: "ext", tenon: "ext", epaulement: "ext", profondeur: null, hauteur: "ext" };
+  var FACES = { poche: "-2", alesage: "-2", rainure: "-2", tourillon: "2", tenon: "2", epaulement: "2", profondeur: "0", hauteur: "2" };
+  // Met la lettre ISO en majuscules (intérieur) ou minuscules (extérieur)
+  function normCode(code, kind) {
+    var m = String(code || "").trim().match(/^([A-Za-z]{1,2})\s*(\d{0,2})$/);
+    if (!m || !kind) return String(code || "").trim();
+    return (kind === "int" ? m[1].toUpperCase() : m[1].toLowerCase()) + m[2];
+  }
+  function fixCase() {
+    var el = $("c-iso"), v = normCode(el.value, KIND[curCase]);
+    if (v !== el.value) el.value = v;
+    var k = KIND[curCase];
+    $("c-case-hint").textContent = k === "int" ? "Cote intérieure : la lettre ISO est en majuscule (H7)." : k === "ext" ? "Cote extérieure : la lettre ISO est en minuscule (h7)." : "Profondeur : choisis la lettre comme sur le plan (souvent js ou h).";
+  }
+  function setChips() {
+    var c = Calc.CASES[curCase];
+    var inner = curCase === "poche" || curCase === "alesage" || curCase === "rainure";
+    var list = c.axis === "L" ? ["js12", "js14", "h11", "H11", "js10"] : inner ? ["H7", "H8", "H9", "H11", "G7", "F7", "JS9", "N9", "P9", "K7"] : ["h6", "h7", "h9", "h11", "g6", "f7", "k6", "m6", "p6", "js7"];
+    var el = $("c-chips"); el.innerHTML = "";
+    list.forEach(function (code) {
+      var b = document.createElement("button"); b.type = "button"; b.textContent = code;
+      b.addEventListener("click", function () { $("c-iso").value = code; calcCorr(); });
+      el.appendChild(b);
+    });
+  }
+
+  var CASE_TXT = {
+    poche: ["La poche", "petite", "grande"], alesage: ["L'alésage", "petit", "grand"], rainure: ["La rainure", "étroite", "large"],
+    tourillon: ["Le tourillon", "petit", "gros"], tenon: ["Le tenon", "étroit", "large"], epaulement: ["La cote", "courte", "longue"],
+    profondeur: ["La profondeur", "faible", "profonde"], hauteur: ["La hauteur", "basse", "haute"]
+  };
+
+  function calcCorr() {
+    var out = $("c-res");
+    genHint();
+    var nom = num($("c-nom").value), mes = num($("c-mes").value);
+    var up, lo, tolTxt = "", err = "";
+    if (isNaN(nom) || isNaN(mes)) { out.innerHTML = '<div class="verdict v-none">Saisis la cote nominale et la cote mesurée.</div>'; return; }
+    if (tolMode === "iso") {
+      var r = Calc.iso(nom, $("c-iso").value);
+      if (r.error) err = r.error; else { up = r.up / 1000; lo = r.lo / 1000; tolTxt = $("c-iso").value.trim() + " (" + sgn(r.up, 0) + " / " + sgn(r.lo, 0) + " µm)"; }
+    } else if (tolMode === "pm") {
+      up = num($("c-up").value); lo = num($("c-lo").value);
+      if (isNaN(up) || isNaN(lo)) err = "Saisis l'écart supérieur et l'écart inférieur (par ex. +0,05 et −0,05).";
+      else if (up < lo) err = "L'écart supérieur doit être plus grand que l'écart inférieur.";
+      tolTxt = sgn(up) + " / " + sgn(lo);
+    } else if (tolMode === "gen") {
+      var g = Calc.general(nom, $("c-gen").value);
+      if (g.error) err = g.error; else { up = g.up; lo = g.lo; tolTxt = $("c-gen").options[$("c-gen").selectedIndex].text.replace(/ \(.*\)$/, "") + " (±" + fmt(g.up) + ")"; }
+    } else { up = 0; lo = 0; tolTxt = "aucune, on vise la nominale"; }
+    // Traitement de surface : la cote à usiner est décalée de l'épaisseur qui sort de la pièce
+    var trt = $("c-trt").value, shift = 0, trtTxt = "", trtName = "";
+    if (trt !== "0" && !err) {
+      var thkMin = num($("c-thk").value), thkMax = $("c-thk2").value.trim() === "" ? thkMin : num($("c-thk2").value);
+      var thk = (thkMin + thkMax) / 2, grow = Number(trt.split("|")[0]), faces = Number(FACES[curCase]);
+      if (isNaN(thkMin) || isNaN(thkMax)) err = "Saisis l'épaisseur de couche.";
+      else if (thkMax < thkMin) err = "L'épaisseur maxi doit être plus grande que la mini.";
+      else {
+        shift = -faces * grow / 100 * thk / 1000;
+        trtName = $("c-trt").options[$("c-trt").selectedIndex].text.replace(/ \(.*\)$/, "");
+        var thkTxt = thkMax > thkMin ? fmt(thkMin, 0) + "-" + fmt(thkMax, 0) + " µm (on vise " + fmt(thk, 1).replace(/,0$/, "") + " µm)" : fmt(thk, 1).replace(/,0$/, "") + " µm";
+        var outTxt = grow === 100 ? "" : " dont " + fmt(thk * grow / 100, 1).replace(/,0$/, "") + " µm qui sortent de la pièce";
+        trtTxt = trtName + " " + thkTxt + outTxt;
+        var effTxt = faces === 0 ? "Cette cote ne bouge pas avec le traitement (les deux faces se déplacent pareil)."
+          : "La couche " + (faces > 0 ? "agrandit" : "réduit") + " cette cote de " + (Math.abs(faces) === 2 ? "2 × " : "") + fmt(thk * grow / 100 / 1000, 4).replace(/0$/, "") + " = " + fmt(Math.abs(shift), 4).replace(/0$/, "") + " mm.";
+        $("c-trt-eff").textContent = effTxt;
+      }
+    }
+    var upF = up, loF = lo;
+    if (shift) { up = up + shift; lo = lo + shift; }
+    // Valeurs propres au mode
+    function opt(id) { var v = $(id).value.trim(); return v === "" ? null : num(v); }
+    var wl = opt("c-wl"), wr = opt("c-wr"), prog = opt("c-prog"), stock = opt("c-stock");
+    if (!err && corrMode === "cnc" && ((wl != null && isNaN(wl)) || (wr != null && isNaN(wr)))) err = "Une valeur actuelle de Usure outil n'est pas un nombre.";
+    if (!err && corrMode === "fao" && ((prog != null && isNaN(prog)) || (stock != null && isNaN(stock)))) err = "La cote programmée ou la surépaisseur n'est pas un nombre.";
+    if (err) { out.innerHTML = '<div class="verdict v-none">Calcul impossible</div><p class="err">' + err + '</p>'; return; }
+
+    var c = corrMode === "fao" ? Calc.cam(curCase, nom, mes, up, lo, prog, stock) : Calc.correction(curCase, nom, mes, up, lo, null);
+    var t = CASE_TXT[curCase];
+    var isR = c.axis === "R";
+    var vTxt = { ok: "Dans la tolérance", reprendre: "Hors tolérance, encore de la matière : à reprendre", rebut: "Hors tolérance, trop de matière enlevée" }[c.verdict];
+    if (tolMode === "none") vTxt = c.delta === 0 ? "Pile sur la nominale" : "Sans tolérance : correction vers la nominale";
+    var pill = tolMode === "none" ? (c.delta === 0 ? "ok" : "info") : { ok: "OK", reprendre: "Reprendre", rebut: "Rebut" }[c.verdict];
+    var vClass = tolMode === "none" ? (c.delta === 0 ? "v-ok" : "v-none") : "v-" + c.verdict;
+
+    var fao = corrMode === "fao";
+    var dev = fao ? -c.change : c.devTarget;
+    var amount = fao ? c.offset : c.delta;
+    var say;
+    if (Math.abs(dev) < 0.0005) say = t[0] + " est sur la cote visée, aucune correction à faire.";
+    else {
+      say = t[0] + " est trop " + (dev < 0 ? t[1] : t[2]) + " de " + (fao ? mm4(Math.abs(dev)) : fmt(Math.abs(dev))) + " mm par rapport à la cote visée. ";
+      if (fao) say += "Programme " + mm4(c.newProg) + " au lieu de " + mm4(c.prog) + " et ne touche pas à Usure outil.";
+      else if (isR) say += "L'outil doit enlever " + fmt(Math.abs(c.delta)) + " mm " + (c.delta < 0 ? "de plus" : "de moins") + (Calc.CASES[curCase].div === 2 ? " par côté." : " sur la face.");
+      else say += "L'outil doit descendre " + (c.delta < 0 ? "plus bas" : "moins bas") + " de " + fmt(Math.abs(c.delta)) + " mm.";
+    }
+    if (c.verdict === "rebut" && tolMode !== "none") say += " Cette pièce ne se rattrape pas ; la correction sert pour les suivantes.";
+
+    var html = '<div class="verdict ' + vClass + '"><span class="pill">' + pill + '</span><span>' + vTxt + '</span></div>';
+    if (fao) {
+      var progLbl = { profondeur: "Profondeur à programmer", hauteur: "Hauteur à programmer", epaulement: "Cote à programmer" }[curCase] || (KIND[curCase] === "int" || curCase === "tourillon" ? "Cote (Ø ou largeur) à programmer" : "Cote à programmer");
+      var offLbl = isR ? (Calc.CASES[curCase].div === 2 ? "Décalage par côté" : "Décalage de la face") : "Décalage en Z";
+      var offSub = isR ? (c.offset < 0 ? "enlève plus de matière" : c.offset > 0 ? "enlève moins de matière" : "rien à changer") : (c.offset < 0 ? "descendre" : c.offset > 0 ? "remonter" : "rien à changer");
+      html += '<div class="big"><div class="bigbox main"><div class="lbl">' + progLbl + '</div><div class="val">' + mm4(c.newProg) + '</div><div class="sub">avant ' + mm4(c.prog) + ' (' + sgn(c.change, Math.abs(Math.round(c.change * 1000) - c.change * 1000) > 1e-6 ? 4 : 3) + ')</div></div>';
+      html += '<div class="bigbox"><div class="lbl">' + offLbl + '</div><div class="val ' + (c.offset < 0 ? "minus" : c.offset > 0 ? "plus" : "") + '">' + sgn(c.offset, Math.abs(Math.round(c.offset * 1000) - c.offset * 1000) > 1e-6 ? 4 : 3) + '</div><div class="sub">' + offSub + '</div></div></div>';
+      html += '<p class="say">' + say + '</p>';
+      html += '<dl class="rows">';
+      html += '<dt>Surépaisseur FAO' + (isR ? " (par côté)" : " (fond / Z)") + '</dt><dd>' + (c.newStock != null ? (stock === 0 ? "0,000" : sgn(stock, 3)) + ' → <b>' + sgn(c.newStock, 4) + '</b>' : 'actuelle + (' + sgn(c.offset, 4) + ')') + '</dd>';
+      if (curCase === "profondeur") html += '<dt>Z du fond (dessus à Z0)</dt><dd>' + (c.newProg === 0 ? "0" : "-" + mm4(c.newProg)) + '</dd>';
+      if (isR && Calc.CASES[curCase].div === 2) html += '<dt>Au Ø / à la largeur</dt><dd>' + sgn(c.change, 4) + '</dd>';
+      html += '</dl>';
+      html += '<div class="alert" style="border-left-color:var(--c1);background:color-mix(in srgb, var(--c1) 12%, transparent)"><b>Une seule méthode à la fois.</b> Dans AlphaCam, soit tu changes la géométrie à ' + mm4(c.newProg) + ', soit tu gardes la géométrie et tu mets le décalage en surépaisseur sur la finition. Les deux ensemble doublent la correction.</div>';
+    } else {
+      var isRk = isR, name = isR ? "Δrayon" : "Δlongu.";
+      function mv(x) { x = Calc.round3(x); return (x < 0 ? "-" : "") + Math.abs(x).toFixed(3); }
+      function mc(x) { x = Calc.round3(x); return x === 0 ? "0.000" : (x > 0 ? "+" : "-") + Math.abs(x).toFixed(3); }
+      var aL = wl == null ? 0 : wl, aR = wr == null ? 0 : wr;
+      var chL = isRk ? 0 : c.delta, chR = isRk ? c.delta : 0;
+      var hot = c.delta !== 0;
+      function cell(v, changed, key) { var on = changed && hot; return '<td class="v' + (on ? ' hot" role="button" tabindex="0" data-put="' + key + '" data-val="' + v + '" title="Touche quand c\'est tapé dans la machine' : '') + '">' + v + (on ? '<span class="arrow">◄</span>' : '') + '</td>'; }
+      var tool = $("c-tool").value.trim();
+      html += '<div class="mach" role="table" aria-label="À saisir dans Usure outil">';
+      html += '<div class="mach-top"><span>À SAISIR DANS « USURE OUTIL »</span><span>' + (tool ? escapeHtml(tool) : '') + '</span></div>';
+      html += '<table><thead><tr><th class="rl"></th><th colspan="2" class="grp">' + "1er tranchant" + '</th></tr><tr><th class="rl"></th><th>Δlongu.</th><th>Δrayon</th></tr></thead><tbody>';
+      html += '<tr><td class="rl">Actuel</td><td class="v">' + mv(aL) + '</td><td class="v">' + mv(aR) + '</td></tr>';
+      html += '<tr><td class="rl">Changement</td><td class="v' + (isRk ? " nochg" : "") + '">' + mc(chL) + '</td><td class="v' + (isRk ? "" : " nochg") + '">' + mc(chR) + '</td></tr>';
+      html += '<tr class="put"><td class="rl">À taper</td>' + cell(mv(aL + chL), !isRk, "wl") + cell(mv(aR + chR), isRk, "wr") + '</tr>';
+      html += '</tbody></table><div class="mach-foot"><span>Usure outil</span></div></div>';
+      var miss = (wl == null ? 1 : 0) + (wr == null ? 1 : 0);
+      html += '<p class="mach-note">' + (hot ? 'Change seulement la case <b style="color:#e2661f">orange</b> (' + name + '). L\'autre valeur reste comme elle est. <b>Quand c\'est tapé dans la machine, touche la case orange</b> : elle devient la valeur actuelle.' : 'Rien à changer dans Usure outil.') + (miss ? ' Valeur actuelle non saisie : 0.000 supposé, recopie celle de la machine.' : '') + '</p>';
+      html += '<p class="say">' + say + '</p>';
+    }
+    if (Math.abs(amount) > 0.1) html += '<div class="alert"><b>Grosse correction (plus de 0,1 mm).</b> Vérifie la mesure, le bon outil et le signe avant de la saisir. Une erreur de cette taille vient souvent d\'une mauvaise cote ou d\'un outil cassé.</div>';
+    if (trt !== "0" && !shift) html += '<div class="alert" style="border-left-color:var(--c4);background:color-mix(in srgb, var(--c4) 12%, transparent)"><b>' + trtTxt + ' :</b> cette cote ne bouge pas avec le traitement, rien à enlever ni à ajouter.</div>';
+    if (shift) html += '<div class="alert" style="border-left-color:var(--c4);background:color-mix(in srgb, var(--c4) 12%, transparent)"><b>Avant ' + trtName.toLowerCase() + ', usine à ' + mm4(nom + (upF + loF) / 2 + shift) + ' (' + mm4(nom + loF + shift) + ' à ' + mm4(nom + upF + shift) + ').</b> C\'est ' + fmt(Math.abs(shift), 4).replace(/0$/, "") + ' mm ' + (shift < 0 ? "plus petit" : "plus grand") + ' que la cote finie visée (' + mm4(nom + (upF + loF) / 2) + '), parce que la couche ' + (shift < 0 ? "va l\'agrandir" : "va la réduire") + ' de cette valeur. ' + trtTxt + '. La cote mesurée doit être prise avant traitement.</div>';
+    html += '<dl class="rows"><dt>Tolérance</dt><dd>' + tolTxt + '</dd>' + (shift ? '<dt>Cote finie (après traitement)</dt><dd>' + mm4(nom + loF) + ' à ' + mm4(nom + upF) + '</dd>' : '') + '<dt>' + (shift ? 'Mini à usiner' : 'Mini') + '</dt><dd>' + mm4(c.min) + '</dd><dt>' + (shift ? 'Maxi à usiner' : 'Maxi') + '</dt><dd>' + mm4(c.max) + '</dd><dt>Cote visée (milieu)</dt><dd>' + mm4(c.target) + '</dd><dt>Mesurée</dt><dd>' + mm4(mes) + '</dd><dt>Écart / nominale</dt><dd>' + sgn(c.deviation) + '</dd><dt>Écart / cote visée</dt><dd>' + (fao ? sgn(dev, Math.abs(Math.round(dev * 1000) - dev * 1000) > 1e-6 ? 4 : 3) : sgn(Calc.round3(c.devTarget))) + '</dd></dl>';
+    if (curCase === "rainure") html += fao ? '<p class="note">Si la fraise fait la largeur en une passe, changer la cote ne sert à rien : il faut une fraise d\'un autre Ø ou un contournage.</p>' : '<p class="note">Valable si la rainure est contournée avec correction de rayon (G41/G42). Si la fraise fait la largeur en une passe, c\'est le Ø de la fraise qu\'il faut changer.</p>';
+    if (curCase === "profondeur" || curCase === "hauteur") html += '<p class="note">Valable si le zéro pièce en Z n\'a pas bougé. Si plusieurs outils sont faux de la même valeur, contrôle plutôt le zéro pièce.</p>';
+    out.innerHTML = html;
+    $("exTag").hidden = !isExample();
+  }
+  var EX = { nom: "20", mes: "19,96", iso: "H7" };
+  function isExample() { return $("c-nom").value === EX.nom && $("c-mes").value === EX.mes && $("c-iso").value === EX.iso && curCase === "poche"; }
+
+  ["c-nom", "c-mes", "c-up", "c-lo", "c-gen", "c-thk", "c-tool", "c-thk2", "c-wl", "c-wr", "c-prog", "c-stock"].forEach(function (id) { $(id).addEventListener("input", function () { calcCorr(); saveMode(); }); });
+  $("c-gen").addEventListener("input", genHint);
+  function genHint() {
+    var g = Calc.general(num($("c-nom").value), $("c-gen").value), name = $("c-gen").options[$("c-gen").selectedIndex].text.replace(/ \(.*\)$/, "");
+    $("c-gen-hint").textContent = "Classe du cartouche : " + name + (g && !g.error ? " → ±" + fmt(g.up) + " mm pour cette cote." : ". Change-la à l'étape Cartouche.");
+  }
+  ["c-iso", "c-trt"].forEach(function (id) { $(id).addEventListener("input", saveMode); });
+
+  /* Sous-onglets : chaque mode garde sa propre saisie */
+  var MODE_IDS = ["c-nom", "c-mes", "c-iso", "c-up", "c-lo", "c-gen", "c-trt", "c-thk", "c-thk2", "c-tool", "c-wl", "c-wr", "c-prog", "c-stock"];
+  var corrMode = load("corrMode") === "fao" ? "fao" : "cnc";
+  var modeState = {};
+  ["cnc", "fao"].forEach(function (m) { try { modeState[m] = JSON.parse(load("corr." + m) || "null"); } catch (e) { modeState[m] = null; } });
+  function saveMode() {
+    var st = { caseKey: curCase, tol: tolMode, v: {} };
+    MODE_IDS.forEach(function (id) { st.v[id] = $(id).value; });
+    modeState[corrMode] = st; store("corr." + corrMode, JSON.stringify(st));
+  }
+  function selectCase(k) {
+    curCase = k; store("case", k);
+    casesEl.querySelectorAll(".case").forEach(function (x) { x.setAttribute("aria-pressed", x.dataset.k === k ? "true" : "false"); });
+  }
+  function applyMode(m) {
+    corrMode = m; store("corrMode", m);
+    document.querySelectorAll(".subtabs button").forEach(function (b) { b.setAttribute("aria-selected", b.dataset.mode === m ? "true" : "false"); });
+    document.querySelectorAll('#p-corr [data-step="6"] [data-mode]').forEach(function (el) { el.hidden = el.dataset.mode !== m; });
+    var st = modeState[m];
+    if (st) {
+      MODE_IDS.forEach(function (id) { if (st.v && st.v[id] != null) $(id).value = st.v[id]; });
+      if ($("c-trt").selectedIndex < 0) $("c-trt").value = "0";
+      if (st.caseKey && Calc.CASES[st.caseKey]) selectCase(st.caseKey);
+    } else {
+      MODE_IDS.forEach(function (id) { $(id).value = ""; });
+      $("c-nom").value = EX.nom; $("c-mes").value = EX.mes; $("c-iso").value = EX.iso;
+      $("c-gen").value = "m"; $("c-trt").value = "0"; $("c-thk").value = "25"; $("c-thk2").value = "";
+      selectCase("poche");
+    }
+    setChips(); fixCase(); setTrt(); setMode(st && st.tol ? st.tol : "iso");
+    if (typeof renderWiz === "function") renderWiz();
+  }
+  document.querySelectorAll(".subtabs button").forEach(function (b) { b.addEventListener("click", function () {
+    if (b.dataset.mode !== corrMode) { saveMode(); applyMode(b.dataset.mode); }
+    if (isWiz()) goStep(2);
+  }); });
+
+  /* Touche +/− */
+  document.querySelectorAll(".neg").forEach(function (b) { b.addEventListener("click", function () {
+    var el = $(b.dataset.neg), v = el.value.trim().replace(/^[−]/, "-");
+    el.value = v.charAt(0) === "-" ? v.slice(1) : "-" + v.replace(/^\+/, "");
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+  }); });
+  /* Case orange : la valeur tapée dans la machine devient la valeur actuelle */
+  var toastT = null;
+  function toast(msg) {
+    var t = $("toast"); t.textContent = msg; t.hidden = false;
+    clearTimeout(toastT); toastT = setTimeout(function () { t.hidden = true; }, 4000);
+  }
+  function putValue(td) {
+    var id = td.dataset.put === "wr" ? "c-wr" : "c-wl", name = td.dataset.put === "wr" ? "Δrayon" : "Δlongu.";
+    $(id).value = td.dataset.val; $("c-mes").value = "";
+    calcCorr(); saveMode();
+    toast("✓ " + name + " actuel = " + td.dataset.val + ". Mesure la pièce suivante.");
+    if (isWiz()) goStep(2);
+    $("c-mes").focus();
+  }
+  $("c-res").addEventListener("click", function (e) { var td = e.target.closest("td.hot"); if (td) putValue(td); });
+  $("c-res").addEventListener("keydown", function (e) { var td = e.target.closest("td.hot"); if (td && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); putValue(td); } });
+
+  /* Affichage : formulaire complet ou pas à pas (bouton Paramètres) */
+  var VIEWS = [["auto", "Automatique", "pas à pas sur téléphone, formulaire complet sur ordinateur"], ["wiz", "Toujours pas à pas", "une question par écran"], ["form", "Toujours formulaire complet", "tout sur une page"]];
+  var view = load("view"); if (!VIEWS.some(function (v) { return v[0] === view; })) view = "auto";
+  var narrow = window.matchMedia ? window.matchMedia("(max-width: 700px)") : null;
+  function isWiz() { return view === "wiz" || (view === "auto" && !!narrow && narrow.matches); }
+  var wizStep = Number(load("wizStep")) || 1;
+  if (!(wizStep >= 1 && wizStep <= 7)) wizStep = 1;
+  var STEP_TXT = {
+    1: ["Que veux-tu corriger ?", "Étape 1 sur 7"],
+    2: ["Cotes", "Étape 2 sur 7 : nominale et mesurée"],
+    3: ["Quelle forme ?", "Étape 3 sur 7 : la cote que tu as mesurée"],
+    4: ["Cartouche du plan", "Étape 4 sur 7 : tolérances générales et traitement"],
+    5: ["Tolérance de la cote", "Étape 5 sur 7 : comme écrit à côté de la cote"],
+    6: ["", "Étape 6 sur 7"],
+    7: ["Résultat", "Étape 7 sur 7"]
+  };
+  function renderWiz() {
+    var on = isWiz(), sec = $("p-corr");
+    sec.classList.toggle("wiz", on);
+    $("wizbar").hidden = !on; $("wiznav").hidden = !on; document.body.classList.toggle("haswiz", on); $("wiz-end").hidden = !on || wizStep !== 7;
+    sec.querySelectorAll("[data-step]").forEach(function (el) { el.classList.toggle("on", Number(el.dataset.step) === wizStep); });
+    if (!on) return;
+    var t = STEP_TXT[wizStep], title = wizStep === 6 ? (corrMode === "cnc" ? "Valeurs actuelles dans Usure outil" : "Programme actuel") : t[0];
+    $("wiz-lbl").innerHTML = escapeHtml(title) + "<small>" + t[1] + (wizStep > 1 ? " · " + (corrMode === "cnc" ? "Outil CNC" : "Cote FAO") : "") + "</small>";
+    var dots = $("wiz-dots"); dots.innerHTML = "";
+    for (var i = 1; i <= 7; i++) {
+      var d = document.createElement("button"); d.type = "button"; d.dataset.s = i;
+      d.className = i === wizStep ? "cur" : i < wizStep ? "done" : "";
+      d.setAttribute("aria-label", "Aller à l'étape " + i + " : " + (i === 6 ? "valeurs actuelles" : STEP_TXT[i][0]));
+      d.addEventListener("click", function () { goStep(Number(this.dataset.s)); });
+      dots.appendChild(d);
+    }
+    $("wiz-prev").disabled = wizStep === 1; $("wiz-prev").style.visibility = wizStep === 1 ? "hidden" : "";
+    $("wiz-fwd").hidden = wizStep === 7;
+    $("wiz-fwd").textContent = wizStep === 6 ? "Voir le résultat ►" : "Suivant ►";
+  }
+  function goStep(n) {
+    wizStep = Math.max(1, Math.min(7, n)); store("wizStep", String(wizStep));
+    renderWiz();
+    if (isWiz()) {
+      window.scrollTo(0, 0);
+      var first = { 2: "c-nom", 6: corrMode === "cnc" ? "c-wl" : "c-prog" }[wizStep];
+      if (first && !$(first).value) $(first).focus();
+    }
+  }
+  $("wiz-prev").addEventListener("click", function () { goStep(wizStep - 1); });
+  $("wiz-fwd").addEventListener("click", function () { goStep(wizStep + 1); });
+  $("p-corr").addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && e.target.tagName === "INPUT") { e.preventDefault(); nextField(e.target); }
+  });
+  $("wiz-next-part").addEventListener("click", function () {
+    $("c-mes").value = ""; calcCorr(); saveMode(); goStep(2); $("c-mes").focus();
+  });
+  $("wiz-new").addEventListener("click", function () {
+    ["c-nom", "c-mes", "c-up", "c-lo", "c-tool", "c-wl", "c-wr", "c-prog", "c-stock"].forEach(function (id) { $(id).value = ""; });
+    calcCorr(); saveMode(); goStep(2);
+  });
+  if (narrow) { var onNarrow = function () { renderWiz(); }; if (narrow.addEventListener) narrow.addEventListener("change", onNarrow); else if (narrow.addListener) narrow.addListener(onNarrow); }
+  function settingsHtml() {
+    return '<h2 style="margin-top:14px">Affichage des corrections</h2><div class="setopt" id="set-view">' + VIEWS.map(function (v) {
+      return '<button type="button" data-v="' + v[0] + '" aria-pressed="' + (v[0] === view) + '">' + v[1] + '<small>' + v[2] + '</small></button>';
+    }).join("") + '</div><h2 style="margin-top:18px">Saisie des chiffres (téléphone)</h2><div class="setopt" id="set-pad">' +
+      '<button type="button" data-p="on" aria-pressed="' + (padPref === "on") + '">Pavé numérique de l\'app<small>gros chiffres, touche +/−, le clavier du téléphone ne s\'ouvre pas</small></button>' +
+      '<button type="button" data-p="off" aria-pressed="' + (padPref === "off") + '">Clavier du téléphone<small>les barres du bas se cachent pendant la saisie</small></button></div>' +
+      '<p class="note">Les réponses du pas à pas restent en mémoire pour la cote en cours.</p>';
+  }
+  $("b-set").addEventListener("click", function () {
+    openTable("Paramètres", "", settingsHtml());
+    $("set-view").querySelectorAll("button").forEach(function (b) { b.addEventListener("click", function () {
+      view = b.dataset.v; store("view", view);
+      $("set-view").querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+      renderWiz();
+    }); });
+    $("set-pad").querySelectorAll("button").forEach(function (b) { b.addEventListener("click", function () {
+      padPref = b.dataset.p; store("pad", padPref);
+      $("set-pad").querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+      applyPad();
+    }); });
+  });
+
+  /* Saisie sur téléphone : pavé numérique de l'app, ou clavier du téléphone avec les barres cachées */
+  var padPref = load("pad") === "off" ? "off" : "on";
+  var touch = window.matchMedia ? window.matchMedia("(pointer: coarse)") : null;
+  function padOn() { return padPref === "on" && !!touch && touch.matches; }
+  var NUM_SEL = 'input[inputmode="decimal"], input[inputmode="numeric"]';
+  var kpTarget = null;
+  function applyPad() {
+    var on = padOn();
+    document.body.classList.toggle("pad", on);
+    document.querySelectorAll(NUM_SEL).forEach(function (el) {
+      if (!el.dataset.im) el.dataset.im = el.getAttribute("inputmode");
+      el.setAttribute("inputmode", on ? "none" : el.dataset.im);
+    });
+    if (!on) closePad();
+  }
+  function isNum(el) { return el && el.tagName === "INPUT" && !!el.dataset.im && (el.dataset.im === "decimal" || el.dataset.im === "numeric"); }
+  function labelOf(el) { var l = el.closest("label"); return l ? (l.childNodes[0].textContent || "").trim() : ""; }
+  function showVal() { if (kpTarget) $("kp-val").textContent = kpTarget.value || "–"; }
+  function openPad(el) {
+    if (kpTarget && kpTarget !== el) kpTarget.classList.remove("kpon");
+    kpTarget = el; el.classList.add("kpon");
+    $("kp-lbl").textContent = labelOf(el); showVal();
+    $("kpad").hidden = false; document.body.classList.add("typing");
+    setTimeout(function () { el.scrollIntoView({ block: "center", behavior: "smooth" }); }, 30);
+  }
+  function closePad() {
+    if (kpTarget) kpTarget.classList.remove("kpon");
+    kpTarget = null; $("kpad").hidden = true;
+    if (!document.activeElement || document.activeElement.tagName !== "INPUT") document.body.classList.remove("typing");
+  }
+  function setVal(v) { kpTarget.value = v; kpTarget.dispatchEvent(new Event("input", { bubbles: true })); showVal(); }
+  // Champ suivant visible dans la même étape ou la même carte ; sinon fin de saisie (et étape suivante en pas à pas)
+  function nextField(el) {
+    var box = el.closest("#p-corr.wiz [data-step]") || el.closest(".card") || el.closest("section");
+    var list = Array.prototype.filter.call(box.querySelectorAll("input"), function (x) { return x.offsetParent !== null && !x.disabled; });
+    var i = list.indexOf(el), nx = list[i + 1];
+    if (nx) { nx.focus(); if (isNum(nx) && padOn()) openPad(nx); return; }
+    closePad(); el.blur(); document.body.classList.remove("typing");
+    if (el.closest("#p-corr") && isWiz()) goStep(wizStep + 1);
+  }
+  document.addEventListener("focusin", function (e) {
+    var el = e.target;
+    if (isNum(el) && padOn()) { openPad(el); return; }
+    if (kpTarget) closePad();
+    if (narrow && narrow.matches && touch && touch.matches && el.tagName === "INPUT") document.body.classList.add("typing");
+  });
+  document.addEventListener("focusout", function () {
+    setTimeout(function () {
+      var a = document.activeElement;
+      if (!kpTarget && !(a && a.tagName === "INPUT")) document.body.classList.remove("typing");
+    }, 120);
+  });
+  // Le pavé ne prend pas le focus : le champ reste actif
+  $("kpad").addEventListener("mousedown", function (e) { e.preventDefault(); });
+  $("kpad").addEventListener("touchstart", function (e) { if (e.target.closest("button")) e.preventDefault(); var b = e.target.closest("button"); if (b) b.click(); }, { passive: false });
+  $("kpad").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b || !kpTarget) return;
+    var k = b.dataset.k, v = kpTarget.value.replace(/−/g, "-");
+    if (/^\d$/.test(k)) setVal(v + k);
+    else if (k === ",") { if (!/[.,]/.test(v)) setVal((v === "" || v === "-" ? v + "0" : v) + ","); }
+    else if (k === "del") setVal(v.slice(0, -1));
+    else if (k === "clr") setVal("");
+    else if (k === "neg") setVal(v.charAt(0) === "-" ? v.slice(1) : "-" + v.replace(/^\+/, ""));
+    else if (k === "hide") { var t = kpTarget; closePad(); t.blur(); document.body.classList.remove("typing"); }
+    else if (k === "ok") nextField(kpTarget);
+  });
+  // Toucher ailleurs ferme le pavé
+  document.addEventListener("pointerdown", function (e) {
+    if (kpTarget && !e.target.closest("#kpad") && e.target !== kpTarget && !isNum(e.target)) { var t = kpTarget; closePad(); t.blur(); }
+  });
+  if (touch && touch.addEventListener) touch.addEventListener("change", applyPad);
+  $("c-iso").addEventListener("input", function () { fixCase(); calcCorr(); });
+  function setTrt() {
+    var v = $("c-trt").value;
+    document.querySelectorAll("#p-corr [data-trt]").forEach(function (el) { el.hidden = v === "0"; });
+    calcCorr();
+  }
+  $("c-trt").addEventListener("input", setTrt);
+
+  /* Fenêtre des tableaux */
+  var lastFocus = null;
+  function openTable(title, norm, html) {
+    lastFocus = document.activeElement;
+    $("m-title").textContent = title; $("m-norm").innerHTML = norm ? "Norme : <b>" + norm + "</b>" : "";
+    $("m-body").innerHTML = html; $("modal").hidden = false; $("m-close").focus();
+  }
+  function closeTable() { $("modal").hidden = true; if (lastFocus) lastFocus.focus(); }
+  $("m-close").addEventListener("click", closeTable);
+  $("modal").addEventListener("click", function (e) { if (e.target === $("modal")) closeTable(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !$("modal").hidden) closeTable(); });
+  function table(head, rows, hlIndex) {
+    var h = '<table class="pts wide"><thead><tr>' + head.map(function (x) { return '<th>' + x + '</th>'; }).join("") + '</tr></thead><tbody>';
+    rows.forEach(function (r, i) { h += '<tr' + (i === hlIndex ? ' class="hl"' : '') + '>' + r.map(function (x) { return '<td>' + x + '</td>'; }).join("") + '</tr>'; });
+    return h + '</tbody></table>';
+  }
+  function norm(el, key) { $(el).innerHTML = "Norme : <b>" + NORMS.YEARS[key] + "</b>"; }
+
+  /* Tolérances ISO 286 */
+  var isoKind = "hole", isoLetter = "H", isoGrade = 7;
+  function um(x) { return x == null ? "–" : sgn(x, x % 1 ? 1 : 0); }
+  function buildLetters() {
+    var el = $("i-letters"); el.innerHTML = "";
+    ISO286.SHAFT_LETTERS.forEach(function (L) {
+      var t = isoKind === "hole" ? L.toUpperCase() : L;
+      var b = document.createElement("button"); b.type = "button"; b.textContent = t;
+      b.setAttribute("aria-pressed", t.toLowerCase() === isoLetter.toLowerCase() ? "true" : "false");
+      b.addEventListener("click", function () { isoLetter = t; syncCode(); });
+      el.appendChild(b);
+    });
+  }
+  function buildGrades() {
+    var el = $("i-grades"); el.innerHTML = "";
+    for (var g = 1; g <= 18; g++) (function (g) {
+      var b = document.createElement("button"); b.type = "button"; b.textContent = g;
+      b.setAttribute("aria-pressed", g === isoGrade ? "true" : "false");
+      b.addEventListener("click", function () { isoGrade = g; syncCode(); });
+      el.appendChild(b);
+    })(g);
+  }
+  function setKind(k) {
+    isoKind = k;
+    isoLetter = k === "hole" ? isoLetter.toUpperCase() : isoLetter.toLowerCase();
+    document.querySelectorAll("#i-kind button").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.k === k ? "true" : "false"); });
+    var pc = $("i-pair").value.trim();
+    if (pc) $("i-pair").value = normCode(pc, k === "hole" ? "ext" : "int");
+    syncCode();
+  }
+  function syncCode() { $("i-code").value = isoLetter + isoGrade; buildLetters(); buildGrades(); calcIso(); }
+  document.querySelectorAll("#i-kind button").forEach(function (b) { b.addEventListener("click", function () { setKind(b.dataset.k); }); });
+  $("i-code").addEventListener("input", function () {
+    var p = ISO286.parse($("i-code").value);
+    if (p) {
+      isoLetter = p.letter; isoGrade = p.grade; isoKind = p.hole ? "hole" : "shaft";
+      document.querySelectorAll("#i-kind button").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.k === isoKind ? "true" : "false"); });
+      buildLetters(); buildGrades();
+    }
+    calcIso();
+  });
+  $("i-pair").addEventListener("input", function () {
+    var el = $("i-pair"), v = normCode(el.value, isoKind === "hole" ? "ext" : "int");
+    if (v !== el.value) el.value = v;
+    calcIso();
+  });
+  function calcIso() {
+    var out = $("i-res"), d = num($("i-nom").value), code = $("i-code").value.trim();
+    if (isNaN(d)) { out.innerHTML = '<div class="verdict v-none">Saisis un diamètre.</div>'; return; }
+    var r = Calc.iso(d, code);
+    if (r.error) { out.innerHTML = '<div class="verdict v-none">Calcul impossible</div><p class="err">' + r.error + '</p>'; return; }
+    var mn = d + r.lo / 1000, mx = d + r.up / 1000, mid = d + (r.up + r.lo) / 2000;
+    var html = '<div class="codebig">Ø ' + fmt(d, d % 1 ? 3 : 0) + ' ' + r.letter + r.grade + '</div><p class="hint" style="margin-top:2px">' + (r.hole ? "Alésage, cote intérieure" : "Arbre, cote extérieure") + '</p>';
+    html += '<div class="big"><div class="bigbox"><div class="lbl">Mini</div><div class="val">' + mm4(mn) + '</div></div><div class="bigbox"><div class="lbl">Maxi</div><div class="val">' + mm4(mx) + '</div></div><div class="bigbox main"><div class="lbl">Milieu à viser</div><div class="val">' + mm4(mid) + '</div></div></div>';
+    html += '<dl class="rows"><dt>Écart supérieur</dt><dd>' + um(r.up) + ' µm</dd><dt>Écart inférieur</dt><dd>' + um(r.lo) + ' µm</dd><dt>Intervalle IT' + r.grade + '</dt><dd>' + r.it + ' µm</dd><dt>Tranche ISO</dt><dd>' + r.range + '</dd></dl>';
+    if (r.note) html += '<p class="note">' + r.note + '</p>';
+    var mes = num($("i-mes").value);
+    if (!isNaN(mes)) {
+      var ok = mes >= mn - 1e-9 && mes <= mx + 1e-9;
+      html += '<div class="verdict ' + (ok ? "v-ok" : "v-rebut") + '" style="margin-top:14px"><span class="pill">' + (ok ? "OK" : "Hors") + '</span><span>' + fmt(mes, 3) + ' ' + (ok ? "est dans la tolérance" : (mes < mn ? "est trop petit de " + fmt(mn - mes) + " mm" : "est trop grand de " + fmt(mes - mx) + " mm")) + '</span></div>';
+    }
+    var pc = $("i-pair").value.trim();
+    if (pc) {
+      var p = Calc.iso(d, pc);
+      if (p.error) html += '<p class="err">Ajustement : ' + p.error + '</p>';
+      else if (p.hole === r.hole) html += '<p class="err">Pour un ajustement, combine un alésage (majuscule) et un arbre (minuscule).</p>';
+      else {
+        var hole = r.hole ? r : p, shaft = r.hole ? p : r;
+        var jmax = hole.up - shaft.lo, jmin = hole.lo - shaft.up;
+        var kind = jmin >= 0 ? "Ajustement avec jeu" : jmax <= 0 ? "Ajustement serré" : "Ajustement incertain";
+        html += '<h2 style="margin-top:18px">' + hole.letter + hole.grade + "/" + shaft.letter + shaft.grade + ' : ' + kind + '</h2><dl class="rows"><dt>' + (jmax >= 0 ? "Jeu maxi" : "Serrage mini") + '</dt><dd>' + fmt(Math.abs(jmax), jmax % 1 ? 1 : 0) + ' µm</dd><dt>' + (jmin >= 0 ? "Jeu mini" : "Serrage maxi") + '</dt><dd>' + fmt(Math.abs(jmin), jmin % 1 ? 1 : 0) + ' µm</dd></dl>';
+      }
+    }
+    out.innerHTML = html;
+  }
+  $("i-nom").addEventListener("input", calcIso); $("i-mes").addEventListener("input", calcIso);
+  $("i-tab1").addEventListener("click", function () {
+    var code = $("i-code").value.trim(), p = ISO286.parse(code), d = num($("i-nom").value);
+    if (!p) return;
+    var rows = [], hl = -1;
+    ISO286.rangesFor(code).forEach(function (rg) {
+      var mid = rg.from === 0 ? rg.to / 2 : (rg.from + rg.to) / 2, r = ISO286.limits(mid, code);
+      if (r.error) return;
+      if (d > rg.from && d <= rg.to) hl = rows.length;
+      rows.push([rg.from + " à " + rg.to, um(r.up), um(r.lo), r.it]);
+    });
+    openTable(p.letter + p.grade + (p.hole ? " (alésage)" : " (arbre)"), NORMS.YEARS.iso286,
+      table(["Tranche (mm)", "Écart sup. (µm)", "Écart inf. (µm)", "IT (µm)"], rows, hl) + '<p class="note">Ligne surlignée : la tranche du Ø saisi.</p>');
+  });
+  $("i-tab2").addEventListener("click", function () {
+    var d = num($("i-nom").value), head = ["Tranche (mm)"], rows = [], hl = -1;
+    for (var g = 1; g <= 18; g++) head.push("IT" + g);
+    ISO286.MAIN.forEach(function (to, i) {
+      var from = i === 0 ? 0 : ISO286.MAIN[i - 1], row = [from + " à " + to];
+      if (d > from && d <= to) hl = i;
+      for (var g = 1; g <= 18; g++) row.push(fmt(ISO286.IT[g][i], ISO286.IT[g][i] % 1 ? 1 : 0));
+      rows.push(row);
+    });
+    openTable("Intervalles de tolérance IT (µm)", NORMS.YEARS.iso286, table(head, rows, hl) + '<p class="note">IT14 à IT18 ne sont pas prévus jusqu\'à 1 mm.</p>');
+  });
+  $("i-tab3").addEventListener("click", function () {
+    var d = num($("i-nom").value); if (isNaN(d)) return;
+    var rows = [];
+    ISO286.SHAFT_LETTERS.forEach(function (L) {
+      var code = (isoKind === "hole" ? L.toUpperCase() : L) + isoGrade, r = ISO286.limits(d, code);
+      if (r.error) return;
+      rows.push([code, um(r.up), um(r.lo), mm4(d + r.lo / 1000), mm4(d + r.up / 1000)]);
+    });
+    openTable("Ø " + fmt(d, d % 1 ? 3 : 0) + " : toutes les lettres en IT" + isoGrade, NORMS.YEARS.iso286,
+      table(["Classe", "Écart sup. (µm)", "Écart inf. (µm)", "Mini", "Maxi"], rows, -1) + '<p class="note">Les lettres absentes ne sont pas définies par la norme pour ce Ø ou cette qualité.</p>');
+  });
+
+  /* ISO 2768 */
+  var gCls = "m", gGeo = "K";
+  document.querySelectorAll("#n-cls button").forEach(function (b) { b.addEventListener("click", function () { gCls = b.dataset.c; document.querySelectorAll("#n-cls button").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); }); calc2768(); }); });
+  document.querySelectorAll("#n-geo button").forEach(function (b) { b.addEventListener("click", function () { gGeo = b.dataset.g; document.querySelectorAll("#n-geo button").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); }); calc2768(); }); });
+  function pm(x) { return x == null ? "–" : "±" + fmt(x, x < 0.1 ? 2 : x < 1 ? 2 : 1).replace(/,0$/, ""); }
+  function g2(x) { return x == null ? "–" : fmt(x, x < 0.1 ? 2 : 1).replace(/,0$/, ""); }
+  function calc2768() {
+    var len = num($("n-len").value), o = $("n-res");
+    if (isNaN(len)) { o.innerHTML = '<div class="verdict v-none">Saisis une cote.</div>'; return; }
+    var r = NORMS.iso2768(len, gCls), g = NORMS.iso2768_2(len, gGeo);
+    var h = '<div class="codebig">ISO 2768-' + gCls + gGeo + '</div><p class="hint" style="margin-top:2px">Cote ' + fmt(len, len % 1 ? 2 : 0) + ' mm</p>';
+    if (r.error) h += '<p class="err">' + r.error + '</p>';
+    else {
+      h += '<div class="big"><div class="bigbox main"><div class="lbl">Cote linéaire</div><div class="val">' + pm(r.lin) + '</div><div class="sub">mm</div></div><div class="bigbox"><div class="lbl">Arête cassée</div><div class="val">' + pm(r.edge) + '</div><div class="sub">rayon ou chanfrein</div></div></div>';
+      if (r.lin != null) h += '<dl class="rows"><dt>Mini</dt><dd>' + mm4(len - r.lin) + '</dd><dt>Maxi</dt><dd>' + mm4(len + r.lin) + '</dd><dt>Angle (côté le plus court = cette cote)</dt><dd>±' + r.angle + '</dd></dl>';
+    }
+    h += '<h2 style="margin-top:18px">Géométrie, classe ' + gGeo + '</h2><dl class="rows"><dt>Rectitude et planéité</dt><dd>' + g2(g.flat) + '</dd><dt>Perpendicularité</dt><dd>' + g2(g.perp) + '</dd><dt>Symétrie</dt><dd>' + g2(g.sym) + '</dd><dt>Battement circulaire</dt><dd>' + g2(g.run) + '</dd></dl><p class="note">Pour la perpendicularité et la symétrie, la longueur est celle du côté le plus court (ou de l\'élément de référence).</p>';
+    o.innerHTML = h;
+  }
+  $("n-len").addEventListener("input", calc2768);
+  $("n-tab1").addEventListener("click", function () {
+    var rows = [], R = NORMS.LIN_R;
+    R.forEach(function (to, i) { var from = i === 0 ? 0.5 : R[i - 1]; rows.push([from + " à " + to].concat(["f", "m", "c", "v"].map(function (c) { return pm(NORMS.LIN[c][i]); }))); });
+    var h = '<h2 style="margin-top:12px">Cotes linéaires (mm)</h2>' + table(["Cote (mm)", "f", "m", "c", "v"], rows, -1);
+    h += '<h2 style="margin-top:18px">Arêtes cassées (mm)</h2>' + table(["Cote (mm)", "f", "m", "c", "v"], [["0,5 à 3"].concat(["f", "m", "c", "v"].map(function (c) { return pm(NORMS.EDGE[c][0]); })), ["3 à 6"].concat(["f", "m", "c", "v"].map(function (c) { return pm(NORMS.EDGE[c][1]); })), ["plus de 6"].concat(["f", "m", "c", "v"].map(function (c) { return pm(NORMS.EDGE[c][2]); }))], -1);
+    var ar = [], AR = ["jusqu'à 10", "10 à 50", "50 à 120", "120 à 400", "plus de 400"];
+    AR.forEach(function (t, i) { ar.push([t].concat(["f", "m", "c", "v"].map(function (c) { return "±" + NORMS.ANG[c][i]; }))); });
+    h += '<h2 style="margin-top:18px">Angles (longueur du côté le plus court, mm)</h2>' + table(["Côté (mm)", "f", "m", "c", "v"], ar, -1);
+    openTable("ISO 2768-1", NORMS.YEARS.iso2768_1, h);
+  });
+  $("n-tab2").addEventListener("click", function () {
+    var R = NORMS.GEO_R, rows = [];
+    R.forEach(function (to, i) { var from = i === 0 ? 0 : R[i - 1]; rows.push([from + " à " + to].concat(["H", "K", "L"].map(function (c) { return g2(NORMS.FLAT[c][i]); }))); });
+    var h = '<h2 style="margin-top:12px">Rectitude et planéité (mm)</h2>' + table(["Longueur (mm)", "H", "K", "L"], rows, -1);
+    var P = NORMS.PERP_R, pr = [], sr = [];
+    P.forEach(function (to, i) { var from = i === 0 ? 0 : P[i - 1]; pr.push([from + " à " + to].concat(["H", "K", "L"].map(function (c) { return g2(NORMS.PERP[c][i]); }))); sr.push([from + " à " + to].concat(["H", "K", "L"].map(function (c) { return g2(NORMS.SYM[c][i]); }))); });
+    h += '<h2 style="margin-top:18px">Perpendicularité (mm)</h2>' + table(["Côté court (mm)", "H", "K", "L"], pr, -1);
+    h += '<h2 style="margin-top:18px">Symétrie (mm)</h2>' + table(["Longueur (mm)", "H", "K", "L"], sr, -1);
+    h += '<h2 style="margin-top:18px">Battement circulaire (mm)</h2>' + table(["", "H", "K", "L"], [["toutes"].concat(["H", "K", "L"].map(function (c) { return g2(NORMS.RUN[c]); }))], -1);
+    openTable("ISO 2768-2", NORMS.YEARS.iso2768_2, h);
+  });
+
+  /* Surépaisseur */
+  function calcSur() {
+    var f = num($("s-fin").value), s = num($("s-stock").value), k = $("s-kind").value;
+    var o1 = $("s-res1");
+    if (isNaN(f) || isNaN(s)) o1.innerHTML = '<p class="err">Saisis la cote finie et la surépaisseur.</p>';
+    else {
+      var rs = Calc.roughSize(f, s, k);
+      var how = k === "ext" ? "cote finie + 2 × surépaisseur" : k === "int" ? "cote finie − 2 × surépaisseur" : "cote finie + surépaisseur";
+      o1.innerHTML = '<div class="big"><div class="bigbox main"><div class="lbl">Cote d\'ébauche</div><div class="val">' + fmt(rs) + '</div><div class="sub">' + how + '</div></div><div class="bigbox"><div class="lbl">Total à enlever en finition</div><div class="val">' + fmt(k === "face" ? s : 2 * s) + '</div><div class="sub">' + (k === "face" ? "sur la face" : "sur la cote") + '</div></div></div>' +
+        '<p class="note">Dans AlphaCam ou dans le cycle, c\'est la surépaisseur par face (' + fmt(s) + ' mm) qu\'il faut saisir.</p>';
+    }
+    var cur = num($("r-cur").value), fin = num($("r-fin").value), kk = $("r-kind").value, mp = num($("r-max").value);
+    var o2 = $("s-res2");
+    if (isNaN(cur) || isNaN(fin)) { o2.innerHTML = '<p class="err">Saisis la cote actuelle et la cote finie.</p>'; return; }
+    var r = Calc.remaining(cur, fin, kk, mp);
+    if (r.perSide < 0) { o2.innerHTML = '<div class="verdict v-rebut" style="margin-top:14px"><span class="pill">Trop</span><span>Il manque ' + fmt(-r.perSide) + ' mm de matière par face : la cote finie est déjà dépassée.</span></div>'; return; }
+    var h = '<div class="big"><div class="bigbox main"><div class="lbl">Reste par face</div><div class="val">' + fmt(r.perSide) + '</div></div>';
+    if (r.passes) h += '<div class="bigbox"><div class="lbl">Passes</div><div class="val">' + r.passes + ' × ' + fmt(r.pass) + '</div><div class="sub">passes égales, maxi ' + fmt(mp) + '</div></div>';
+    h += '</div>';
+    if (r.perSide === 0) h += '<p class="note">Rien à enlever, la cote finie est atteinte.</p>';
+    o2.innerHTML = h;
+  }
+  ["s-fin", "s-stock", "s-kind", "r-cur", "r-fin", "r-kind", "r-max"].forEach(function (id) { $(id).addEventListener("input", calcSur); });
+
+  /* Trigo */
+  function box(lbl, val, main, sub) { return '<div class="bigbox' + (main ? ' main' : '') + '"><div class="lbl">' + lbl + '</div><div class="val">' + val + '</div>' + (sub ? '<div class="sub">' + sub + '</div>' : '') + '</div>'; }
+  function ang(x) { return fmt(x, 3) + "°"; }
+  function calcTri() {
+    var r = Calc.rightTriangle({ a: num($("g-a").value), b: num($("g-b").value), c: num($("g-c").value), alpha: num($("g-al").value), beta: num($("g-be").value) });
+    var o = $("g-res");
+    if (r.error) { o.innerHTML = '<p class="err">' + r.error + '</p>'; return; }
+    o.innerHTML = '<div class="big">' + box("Côté <i>a</i>", fmt(r.a)) + box("Côté <i>b</i>", fmt(r.b)) + box("Hypoténuse <i>c</i>", fmt(r.c)) + box("Angle <i>α</i>", ang(r.alpha)) + box("Angle <i>β</i>", ang(r.beta)) + '</div>' +
+      '<p class="note">Pente : ' + fmt(Math.tan(r.alpha * Math.PI / 180) * 100, 2) + ' % (b / a). Surface : ' + fmt(r.area, 2) + ' mm².</p>';
+  }
+  ["g-a", "g-b", "g-c", "g-al", "g-be"].forEach(function (id) { $(id).addEventListener("input", calcTri); });
+  $("g-clear").addEventListener("click", function () { ["g-a", "g-b", "g-c", "g-al", "g-be"].forEach(function (id) { $(id).value = ""; }); calcTri(); $("g-a").focus(); });
+
+  function calcCham() {
+    var r = Calc.chamfer(num($("k-w").value), num($("k-a").value)), o = $("k-res");
+    if (r.error) { o.innerHTML = '<p class="err">' + r.error + '</p>'; return; }
+    o.innerHTML = '<div class="big">' + box("Autre côté", fmt(r.other), true) + box("Longueur de la face", fmt(r.face)) + '</div>';
+  }
+  ["k-w", "k-a"].forEach(function (id) { $(id).addEventListener("input", calcCham); });
+
+  function calcMill() {
+    var r = Calc.chamferMill(num($("m-ang").value), num($("m-d0").value), num($("m-h").value), num($("m-p").value)), o = $("m-res");
+    if (r.error) { o.innerHTML = '<p class="err">' + r.error + '</p>'; return; }
+    var h = '<div class="big">' + box("Rayon à saisir", fmt(r.R), true, "correction sur le contour fini") + box("Hauteur sur la paroi", fmt(r.v), false, "chanfrein à " + fmt(r.chamferAngle, 1) + "° de la verticale") + '</div>';
+    h += '<p class="say">Programme le contour fini avec G41/G42, la pointe à Z −' + fmt(num($("m-p").value)) + ' et un rayon d\'outil de ' + fmt(r.R) + ' mm.</p>';
+    if (r.margin < 0.2) h += '<div class="alert"><b>Plongée trop faible.</b> Le chanfrein touche la pointe de la fraise. Descends au moins à ' + fmt(r.minDepth) + ' mm.</div>';
+    if (r.R < num($("m-d0").value) / 2) h += '<div class="alert"><b>Rayon plus petit que la pointe.</b> Plonge moins ou prends une fraise plus petite.</div>';
+    h += '<p class="note">Le bas du chanfrein est à ' + fmt(r.margin) + ' mm au-dessus de la pointe. Ø de la fraise au niveau du dessus : ' + fmt(2 * r.rTop) + ' mm.</p>';
+    o.innerHTML = h;
+  }
+  ["m-ang", "m-d0", "m-h", "m-p"].forEach(function (id) { $(id).addEventListener("input", calcMill); });
+
+  function calcBolt() {
+    var cx = num($("b-x").value), cy = num($("b-y").value);
+    var r = Calc.boltCircle(num($("b-d").value), num($("b-n").value), num($("b-s").value) || 0, isNaN(cx) ? 0 : cx, isNaN(cy) ? 0 : cy), o = $("b-res");
+    if (r.error) { o.innerHTML = '<p class="err">' + r.error + '</p>'; return; }
+    var d = num($("b-d").value), R = 90, sc = 80 / (d / 2);
+    var x0 = isNaN(cx) ? 0 : cx, y0 = isNaN(cy) ? 0 : cy;
+    var svg = '<svg class="bc" viewBox="0 0 220 220" aria-hidden="true"><circle cx="110" cy="110" r="80" fill="none" stroke="var(--line)" stroke-dasharray="4 4"/><path d="M110 20V200M20 110H200" stroke="var(--line)"/><path d="M110 110H210" stroke="var(--c1)" stroke-width="1.5"/><text x="196" y="104" style="fill:var(--c1)">+X</text>';
+    r.pts.forEach(function (p) {
+      var X = 110 + (p.x - x0) * sc, Y = 110 - (p.y - y0) * sc;
+      svg += '<circle cx="' + X.toFixed(1) + '" cy="' + Y.toFixed(1) + '" r="7" fill="var(--accent)"/><text x="' + X.toFixed(1) + '" y="' + (Y + 4).toFixed(1) + '" text-anchor="middle" style="fill:#1b1408">' + p.n + '</text>';
+    });
+    svg += '</svg>';
+    var t = '<div class="tblwrap"><table class="pts"><thead><tr><th>Trou</th><th>Angle</th><th>X</th><th>Y</th></tr></thead><tbody>';
+    r.pts.forEach(function (p) { t += '<tr><td>' + p.n + '</td><td>' + fmt(p.angle, 2) + '°</td><td>' + fmt(Calc.round3(p.x)) + '</td><td>' + fmt(Calc.round3(p.y)) + '</td></tr>'; });
+    t += '</tbody></table></div>';
+    o.innerHTML = '<div class="bcwrap"><div>' + svg + '</div><div style="min-width:0">' + t + '<p class="note">Pas entre trous : ' + fmt(r.step, 3) + '°, soit ' + fmt(r.pitch) + ' mm en ligne droite.</p></div></div>';
+  }
+  ["b-d", "b-n", "b-s", "b-x", "b-y"].forEach(function (id) { $(id).addEventListener("input", calcBolt); });
+
+  /* Émulsion */
+  function L(x) { return fmt(x, x < 10 ? 2 : 1) + " L"; }
+  function calcMix() {
+    var r = Calc.mix(num($("x-v").value), num($("x-p").value)), o = $("x-res");
+    if (r.error) { o.innerHTML = '<p class="err">' + r.error + '</p>'; return; }
+    o.innerHTML = '<div class="big">' + box("Huile", L(r.oil), true) + box("Eau", L(r.water)) + '</div>';
+  }
+  ["x-v", "x-p"].forEach(function (id) { $(id).addEventListener("input", calcMix); });
+  var vMode = "L";
+  document.querySelectorAll("#y-vmode button").forEach(function (b) { b.addEventListener("click", function () {
+    vMode = b.dataset.v;
+    document.querySelectorAll("#y-vmode button").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+    document.querySelectorAll("#p-emu [data-vm]").forEach(function (el) { el.hidden = el.dataset.vm !== vMode; });
+    calcTank();
+  }); });
+  function calcTank() {
+    var cap = num($("y-cap").value), vol = num($("y-v").value);
+    if (vMode === "P") {
+      var pct = num($("y-pct").value);
+      if (isNaN(cap)) { $("y-res").innerHTML = '<p class="err">Avec un remplissage en %, saisis la capacité du bac.</p>'; return; }
+      if (!(pct > 0 && pct <= 100)) { $("y-res").innerHTML = '<p class="err">Remplissage entre 0 et 100 %.</p>'; return; }
+      vol = cap * pct / 100;
+    }
+    var r = Calc.tank(vol, num($("y-b").value), num($("y-f").value), num($("y-t").value), num($("y-top").value), isNaN(cap) ? 0 : cap), o = $("y-res");
+    if (r.error) { o.innerHTML = '<p class="err">' + r.error + '</p>'; return; }
+    var top = num($("y-top").value), pure = top >= 100;
+    var h = '<div class="verdict ' + (r.action === "ok" ? "v-ok" : "v-reprendre") + '" style="margin-top:14px"><span class="pill">' + fmt(r.current, 1) + ' %</span><span>' +
+      (r.action === "ok" ? "Le bac est à la bonne concentration." : r.action === "huile" ? "Trop pauvre : il faut ajouter de l'huile." : "Trop riche : il faut ajouter de l'eau.") + '</span></div>';
+    if (r.action !== "ok") {
+      var what = r.action === "eau" ? "Eau à ajouter" : (pure ? "Huile pure à ajouter" : "Pré-mélange à " + fmt(top, 1) + " % à ajouter");
+      h += '<div class="big">' + box(what, L(r.add), true, r.action === "huile" && !pure ? "dont " + L(r.oilInside) + " d'huile" : "") + box("Volume final", L(r.final)) + '</div>';
+      if (r.overflow) h += '<div class="alert"><b>Ça déborde : le bac ne contient que ' + L(cap) + '.</b> Vide d\'abord ' + L(r.drain) + ', puis ajoute ' + L(r.addAfterDrain) + ' ' + (r.action === "eau" ? "d'eau" : pure ? "d'huile pure" : "de pré-mélange") + '.</div>';
+      if (r.action === "huile" && pure) h += '<p class="note">Si possible, ajoute plutôt un pré-mélange riche (par exemple 2 fois la cible) : l\'huile pure se mélange mal dans le bac. Mets sa concentration dans « Appoint à ».</p>';
+    }
+    if (vMode === "P") h += '<p class="note">Volume estimé dans le bac : ' + L(vol) + ' (' + fmt(num($("y-pct").value), 0) + ' % de ' + L(cap) + ').</p>';
+    o.innerHTML = h;
+  }
+  ["y-v", "y-pct", "y-cap", "y-b", "y-f", "y-t", "y-top"].forEach(function (id) { $(id).addEventListener("input", calcTank); });
+
+  /* Taraudage */
+  var N = NORMS;
+  function fnum(v) { return String(v).replace(".", ","); }
+  function seriesList(type) {
+    if (type === "M") return N.M_COARSE.map(function (x) { return { key: "M" + x[0], label: "M" + fnum(x[0]) + " × " + fnum(x[1]), D: x[0], P: x[1] }; });
+    if (type === "MF") return N.M_FINE.map(function (x) { return { key: "MF" + x[0] + "x" + x[1], label: "M" + fnum(x[0]) + " × " + fnum(x[1]), D: x[0], P: x[1] }; });
+    if (type === "STI") return N.M_COARSE.filter(function (x) { return x[0] >= 2 && x[0] <= 36 && x[0] !== 2.2 && x[0] !== 39; }).map(function (x) { return { key: "STI" + x[0], label: "EG M" + fnum(x[0]) + " × " + fnum(x[1]), D: x[0], P: x[1], k: String(x[0]) }; });
+    if (type === "STIF") return N.M_FINE.filter(function (x) { return x[0] >= 8 && x[0] <= 36; }).map(function (x) { return { key: "STIF" + x[0] + "x" + x[1], label: "EG M" + x[0] + " × " + fnum(x[1]), D: x[0], P: x[1] }; });
+    if (type === "STIU") return N.UNC.filter(function (x) { return N.frac(x[0]) >= 0.112; }).map(function (x) { return { key: "STIU" + x[0] + "c", label: "EG " + x[0] + "-" + x[1] + " UNC", D: N.frac(x[0]) * 25.4, P: 25.4 / x[1] }; })
+      .concat(N.UNF.filter(function (x) { return N.frac(x[0]) >= 0.112; }).map(function (x) { return { key: "STIU" + x[0] + "f", label: "EG " + x[0] + "-" + x[1] + " UNF", D: N.frac(x[0]) * 25.4, P: 25.4 / x[1] }; }));
+    if (type === "UNC" || type === "UNF" || type === "UNEF") return N[type].map(function (x) { return { key: type + x[0], label: x[0] + "-" + x[1] + " " + type, name: x[0], tpi: x[1] }; });
+    if (type === "G") return N.G.map(function (x) { return { key: "G" + x[0], label: "G " + x[0], row: x }; });
+    if (type === "RP") return N.RP.map(function (x) { return { key: "RP" + x[0], label: "R / Rp / Rc " + x[0], row: x }; });
+    if (type === "NPT") return N.NPT.map(function (x) { return { key: "NPT" + x[0], label: x[0] + " NPT", row: x }; });
+    return [];
+  }
+  var NORM_KEY = { M: "metric", MF: "metric", UNC: "unified", UNF: "unified", UNEF: "unified", G: "gas", RP: "rp", NPT: "npt", STI: "sti", STIF: "sti", STIU: "sti" };
+  // Données d'une taille : grandeurs communes pour le calcul et les tableaux
+  function threadData(type, it) {
+    if (type === "M" || type === "MF") { var m = N.metric(it.D, it.P, type === "M"); return { D: it.D, P: it.P, cut: m.cut, form: m.form, minMin: m.minMin, minMax: m.minMax, d3: m.d3, tol: "6H" }; }
+    if (type === "UNC" || type === "UNF" || type === "UNEF") { var u = N.unified(it.name, it.tpi, type); return { D: u.D, P: u.P, tpi: it.tpi, cut: u.cut, form: u.form, minMin: u.minMin, minMax: u.minMax, d3: u.d3, tol: "2B", small: N.frac(it.name) < 0.25 }; }
+    if (type === "G") { var g = it.row; return { D: g[2], P: 25.4 / g[1], tpi: g[1], cut: g[4], minMin: g[3], minMax: g[3] + N.G_TOL[g[1]], tol: "ISO 228-1" }; }
+    if (type === "RP") { var r = it.row; return { D: r[2], P: 25.4 / r[1], tpi: r[1], minGauge: r[3], gauge: r[4], rc: N.RC_DRILL[r[0]] }; }
+    if (type === "NPT") { var n = it.row; return { D: n[2], P: 25.4 / n[1], tpi: n[1], drillIn: n[3], cut: n[4] }; }
+    var s = N.sti(it.D, it.P, it.k);
+    return { D: it.D, P: it.P, sti: s, cut: s.drill, minMin: s.minMin, minMax: s.minMax };
+  }
+  var curThread = null;
+  function fillSizes() {
+    var type = $("f-type").value, sel = $("f-size"), list = seriesList(type), prev = load("thr." + type);
+    sel.innerHTML = "";
+    list.forEach(function (it) { var o = document.createElement("option"); o.value = it.key; o.textContent = it.label; sel.appendChild(o); });
+    var def = { M: "M8", MF: "MF10x1", UNC: "UNC1/4", UNF: "UNF1/4", UNEF: "UNEF1/4", G: "G1/4", RP: "RP1/2", NPT: "NPT1/4", STI: "STI8", STIF: "STIF10x1", STIU: "STIU1/4c" }[type];
+    sel.value = prev && list.some(function (x) { return x.key === prev; }) ? prev : def;
+    if (!sel.value && list.length) sel.value = list[0].key;
+    norm("f-norm", NORM_KEY[type]);
+    calcThread();
+  }
+  function curItem() { var type = $("f-type").value; return seriesList(type).filter(function (x) { return x.key === $("f-size").value; })[0]; }
+  function calcThread() {
+    var type = $("f-type").value, it = curItem(), o = $("f-res");
+    if (!it) { o.innerHTML = ""; return; }
+    store("thr." + type, it.key); store("thrType", type);
+    var t = threadData(type, it); curThread = { type: type, it: it, t: t };
+    var pas = t.tpi ? t.tpi + " filets/pouce (pas " + fmt(t.P, 3) + " mm)" : fnum(Calc.round3(t.P)) + " mm";
+    var h = '<div class="codebig">' + it.label + '</div>';
+    if (type === "RP") {
+      h += '<dl class="rows"><dt>Pas</dt><dd>' + pas + '</dd><dt>Ø ext. au plan de jauge</dt><dd>' + fmt(t.D) + '</dd><dt>Ø int. au plan de jauge</dt><dd>' + fmt(t.minGauge) + '</dd><dt>Longueur de jauge</dt><dd>' + fmt(t.gauge, 1) + '</dd><dt>Conicité</dt><dd>1:16</dd></dl>';
+      h += t.rc ? '<div class="big">' + box("Perçage Rc sans alésoir", fmt(t.rc[0], 2), true) + box("Avec alésoir conique", fmt(t.rc[1], 2)) + '</div><p class="note">Valeurs relevées chez un fabricant de tarauds (Hoffmann).</p>'
+               : '<p class="note">Rc (conique) : perçage selon la fiche du fabricant de ton taraud. Rp (cylindrique) : perçage proche du Ø intérieur au plan de jauge.</p>';
+    } else if (type === "NPT") {
+      h += '<div class="big">' + box("Foret conseillé", fmt(t.cut, 2), true, t.drillIn) + box("Pas", t.tpi + " filets/pouce") + '</div>';
+      h += '<dl class="rows"><dt>Ø ext. du tube</dt><dd>' + fmt(t.D) + '</dd><dt>Conicité</dt><dd>1:16</dd></dl><p class="note">Avec un alésoir conique, prends un foret un peu plus petit (voir le fabricant).</p>';
+    } else if (type.indexOf("STI") === 0) {
+      var s = t.sti;
+      h += '<div class="big">' + box("Perçage", fmt(s.drill, 2), true, "pour taraud EG (STI)") + box("Pas", pas) + '</div>';
+      h += '<dl class="rows"><dt>Ø intérieur du taraudage STI</dt><dd>' + fmt(s.minMin) + ' à ' + (s.minMax ? fmt(s.minMax) : "–") + '</dd><dt>Ø nominal du taraud EG</dt><dd>' + fmt(s.stiMajor) + '</dd></dl>';
+      h += '<h2 style="margin-top:16px">Longueurs de filet rapporté</h2><dl class="rows">' + s.lengths.map(function (x) { return '<dt>' + fmt(x.k, 1).replace(",0", "") + ' D</dt><dd>' + fmt(x.L, 2) + ' mm</dd>'; }).join("") + '</dl>';
+      h += '<p class="note">Profondeur mini du taraudage STI = longueur du filet rapporté + 1 à 2 pas (le filet est posé 0,25 à 0,5 pas sous la surface).</p>';
+      if (!N.STI_DRILL[it.k]) h += '<p class="note">Perçage calculé dans la tolérance du Ø intérieur STI : vérifie avec la notice du fabricant.</p>';
+    } else {
+      h += '<div class="big">' + box("Perçage taraud coupant", fmt(t.cut, 2), true) + (t.form != null ? box("Perçage taraud à refouler", "≈ " + fmt(t.form, 2), false, "indicatif, voir le fabricant") : "") + '</div>';
+      h += '<dl class="rows"><dt>Pas</dt><dd>' + pas + '</dd><dt>Ø intérieur ' + t.tol + ' mini</dt><dd>' + fmt(t.minMin) + '</dd><dt>Ø intérieur ' + t.tol + ' maxi</dt><dd>' + (t.minMax ? fmt(t.minMax) : "–") + '</dd>' + (t.d3 ? '<dt>Ø à fond de filet de la vis (d3)</dt><dd>' + fmt(t.d3) + '</dd>' : '') + '</dl>';
+      if (t.small) h += '<p class="note">Sous 1/4", le Ø intérieur maxi est calculé avec la formule ASME, à environ 0,01 mm près.</p>';
+      if (t.d3) h += '<p class="note">Filetage extérieur : chanfrein en bout jusqu\'au Ø ' + fmt(t.d3, 2) + ' (d3), soit environ ' + fmt((t.D - t.d3) / 2, 2) + ' × 45° (DIN 76-1).</p>';
+    }
+    o.innerHTML = h;
+    calcDepth(); calcEntry();
+  }
+  $("f-type").addEventListener("input", function () { fillSizes(); });
+  $("f-size").addEventListener("input", calcThread);
+  $("f-tab").addEventListener("click", function () {
+    var type = $("f-type").value, list = seriesList(type), rows = [], head, hl = -1;
+    list.forEach(function (it, i) {
+      var t = threadData(type, it);
+      if (it.key === $("f-size").value) hl = i;
+      if (type === "RP") rows.push([it.label, t.tpi, fmt(t.D), fmt(t.minGauge), fmt(t.gauge, 1), t.rc ? fmt(t.rc[0], 2) + " / " + fmt(t.rc[1], 2) : "–"]);
+      else if (type === "NPT") rows.push([it.label, t.tpi, fmt(t.D), t.drillIn, fmt(t.cut, 2)]);
+      else if (type.indexOf("STI") === 0) rows.push([it.label, fmt(t.P, 3), fmt(t.sti.drill, 2), fmt(t.sti.minMin) + " à " + (t.sti.minMax ? fmt(t.sti.minMax) : "–"), fmt(t.sti.stiMajor), fmt(it.D, 2) + " / " + fmt(it.D * 1.5, 2) + " / " + fmt(it.D * 2, 2)]);
+      else rows.push([it.label, t.tpi ? t.tpi : fnum(Calc.round3(t.P)), fmt(t.cut, 2), t.form != null ? fmt(t.form, 2) : "–", fmt(t.minMin), t.minMax ? fmt(t.minMax) : "–"]);
+    });
+    if (type === "RP") head = ["Taille", "Filets/pouce", "Ø ext. jauge", "Ø int. jauge", "Long. jauge", "Rc sans / avec alésoir"];
+    else if (type === "NPT") head = ["Taille", "Filets/pouce", "Ø tube", "Foret (pouce)", "Foret (mm)"];
+    else if (type.indexOf("STI") === 0) head = ["Taille", "Pas (mm)", "Perçage", "Ø int. STI", "Ø taraud EG", "Long. 1D / 1,5D / 2D"];
+    else head = ["Taille", type === "M" || type === "MF" ? "Pas (mm)" : "Filets/pouce", "Perçage coupant", "Perçage refouler ≈", "Ø int. mini", "Ø int. maxi"];
+    openTable($("f-type").options[$("f-type").selectedIndex].text, NORMS.YEARS[NORM_KEY[type]], table(head, rows, hl));
+  });
+
+  function calcDepth() {
+    var o = $("p-res"), L = num($("p-L").value), pa = num($("p-pa").value), form = $("p-form").value;
+    if (!curThread || isNaN(L) || isNaN(pa) || !(curThread.t.cut > 0)) { o.innerHTML = '<p class="err">Saisis la longueur filetée et l\'angle du foret.</p>'; return; }
+    var drill = curThread.t.cut;
+    if (form === "F" && curThread.t.form) drill = curThread.t.form;
+    var r = N.drillDepth(L, curThread.t.P, drill, form, pa);
+    o.innerHTML = '<div class="big">' + box("Profondeur perçage (cylindre)", fmt(r.depth, 2), true, "sans la pointe du foret") + box("Avec la pointe", fmt(r.total, 2), false, "pointe " + fmt(r.tip, 2) + " mm") + '</div>' +
+      '<p class="note">Longueur utile ' + fmt(L, 1) + ' + entrée du taraud ' + fmt(r.lead, 2) + ' mm (' + N.TAP_FORMS[form].txt.toLowerCase() + '). Foret Ø ' + fmt(drill, 2) + '.</p>';
+  }
+  ["p-L", "p-pa", "p-form"].forEach(function (id) { $(id).addEventListener("input", calcDepth); });
+
+  function calcEntry() {
+    var o = $("h-res"), a = num($("h-a").value), d0 = num($("h-d0").value) || 0;
+    if (!curThread) { o.innerHTML = ""; return; }
+    var D = curThread.t.D, auto = $("h-d").value.trim() === "", dc = auto ? N.r05(D * 1.05 + 0.049) : num($("h-d").value);
+    if (isNaN(dc) || isNaN(a) || !(a > 0 && a < 180)) { o.innerHTML = '<p class="err">Saisis le Ø du chanfrein et l\'angle de la fraise.</p>'; return; }
+    var hole = curThread.t.cut || D * 0.85, half = a / 2 * Math.PI / 180;
+    var depth = (dc - d0) / 2 / Math.tan(half), width = (dc - hole) / 2;
+    var h = '<div class="big">' + box("Ø du chanfrein", fmt(dc, 2), true, auto ? "≈ 1,05 × Ø nominal" : "saisi") + box("Plongée de la pointe", fmt(depth, 2), false, "fraise " + fmt(a, 0) + "° en plongée, au centre du trou") + '</div>';
+    h += '<p class="note">Largeur du chanfrein sur le bord du perçage : ' + fmt(width, 2) + ' mm.' + (d0 > 0 && d0 >= hole ? ' Attention : la pointe de la fraise est plus grosse que le perçage.' : '') + '</p>';
+    o.innerHTML = h;
+  }
+  ["h-d", "h-a", "h-d0"].forEach(function (id) { $(id).addEventListener("input", calcEntry); });
+  norm("h-norm", "din76");
+
+  /* Vis CHC et FHC */
+  function mlabel(m) { return "M" + fmt(m, m % 1 ? 1 : 0); }
+  N.CHC.forEach(function (r) { var o = document.createElement("option"); o.value = r[0]; o.textContent = mlabel(r[0]); $("v-m").appendChild(o); });
+  N.FHC.forEach(function (r) { var o = document.createElement("option"); o.value = r[0]; o.textContent = mlabel(r[0]); $("w-m").appendChild(o); });
+  $("v-m").value = "8"; $("w-m").value = "6";
+  var passCls = 1;
+  document.querySelectorAll("#v-pass button").forEach(function (b) { b.addEventListener("click", function () { passCls = Number(b.dataset.p); document.querySelectorAll("#v-pass button").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); }); calcChc(); }); });
+  function calcChc() {
+    var r = N.CHC.filter(function (x) { return x[0] === Number($("v-m").value); })[0], o = $("v-res");
+    var extra = num($("v-extra").value) || 0, wash = $("v-wash").checked;
+    var dia = r[6], depth = r[7] + extra;
+    if (wash) { dia = Math.max(dia, r[8] + 1); depth += r[9]; }
+    o.innerHTML = '<div class="big">' + box("Ø lamage", fmt(dia, 1), true) + box("Profondeur", fmt(depth, 2), false, wash ? "avec rondelle " + fmt(r[9], 1) + " mm" : "tête affleurante") + box("Trou de passage", fmt(r[3 + passCls], 1), false, ["fin", "moyen", "large"][passCls]) + '</div>' +
+      '<dl class="rows"><dt>Tête de vis Ø × hauteur</dt><dd>' + fmt(r[1], 1) + ' × ' + fmt(r[2], 1) + '</dd>' + (wash ? '<dt>Rondelle ISO 7092 Ø ext. × épaisseur</dt><dd>' + fmt(r[8], 1) + ' × ' + fmt(r[9], 1) + '</dd>' : '') + '</dl>' +
+      '<p class="note">La profondeur garde environ 0,4 à 1 mm sous la surface pour que la tête ne dépasse pas.</p>';
+  }
+  ["v-m", "v-extra", "v-wash"].forEach(function (id) { $(id).addEventListener("input", calcChc); });
+  $("v-wash").addEventListener("change", calcChc);
+  $("v-tab").addEventListener("click", function () {
+    var rows = N.CHC.map(function (r) { return [mlabel(r[0]), fmt(r[1], 1) + " × " + fmt(r[2], 1), fmt(r[3], 1) + " / " + fmt(r[4], 1) + " / " + fmt(r[5], 1), fmt(r[6], 1), fmt(r[7], 1), fmt(r[8], 1) + " × " + fmt(r[9], 1)]; });
+    openTable("Lamages pour vis CHC", NORMS.YEARS.chc, table(["Vis", "Tête Ø × h", "Passage fin / moyen / large", "Ø lamage", "Profondeur", "Rondelle Ø × ép."], rows, N.CHC.map(function (r) { return r[0]; }).indexOf(Number($("v-m").value))));
+  });
+  function calcFhc() {
+    var r = N.FHC.filter(function (x) { return x[0] === Number($("w-m").value); })[0], o = $("w-res");
+    var ret = num($("w-ret").value) || 0, a = num($("w-ang").value), d0 = num($("w-d0").value) || 0;
+    if (!(a > 0 && a < 180)) { o.innerHTML = '<p class="err">Angle de fraise entre 0 et 180°.</p>'; return; }
+    var t = Math.tan(a / 2 * Math.PI / 180);
+    var dia = r[1] + 2 * ret * t, depth = (dia - d0) / 2 / t;
+    var c = N.CHC.filter(function (x) { return x[0] === r[0]; })[0];
+    var h = '<div class="big">' + box("Ø fraisure en surface", fmt(dia, 2), true) + box("Plongée de la pointe", fmt(depth, 2), false, "fraise " + fmt(a, 0) + "°, au centre du trou") + '</div>';
+    h += '<dl class="rows"><dt>Tête Ø théorique maxi</dt><dd>' + fmt(r[1], 2) + '</dd><dt>Hauteur de tête maxi</dt><dd>' + fmt(r[2], 2) + '</dd>' + (c ? '<dt>Trou de passage moyen</dt><dd>' + fmt(c[4], 1) + '</dd>' : '') + '</dl>';
+    if (Math.abs(a - 90) > 0.5) h += '<div class="alert"><b>Vis ISO 10642 = tête à 90°.</b> Avec une autre fraise, la tête ne portera pas sur toute la fraisure.</div>';
+    o.innerHTML = h;
+  }
+  ["w-m", "w-ret", "w-ang", "w-d0"].forEach(function (id) { $(id).addEventListener("input", calcFhc); });
+  $("w-tab").addEventListener("click", function () {
+    var rows = N.FHC.map(function (r) { var c = N.CHC.filter(function (x) { return x[0] === r[0]; })[0]; return [mlabel(r[0]), fmt(r[1], 2), fmt(r[2], 2), c ? fmt(c[4], 1) : "–", fmt(r[1] / 2, 2)]; });
+    openTable("Fraisures pour vis FHC", NORMS.YEARS.fhc, table(["Vis", "Tête Ø maxi", "Hauteur tête", "Passage moyen", "Plongée pointe 90° (affleurant)"], rows, N.FHC.map(function (r) { return r[0]; }).indexOf(Number($("w-m").value))));
+  });
+  norm("v-norm", "chc"); norm("w-norm", "fhc"); norm("i-norm", "iso286"); $("n-norm").innerHTML = "Normes : <b>" + NORMS.YEARS.iso2768_1 + ", " + NORMS.YEARS.iso2768_2 + "</b>";
+
+  /* Démarrage avec un exemple */
+  applyMode(corrMode); renderWiz(); applyPad(); buildLetters(); buildGrades(); calcIso(); calc2768();
+  var tt = load("thrType"); if (tt && seriesList(tt).length) $("f-type").value = tt;
+  fillSizes(); calcChc(); calcFhc(); calcSur(); calcTri(); calcCham(); calcMill(); calcBolt(); calcMix(); calcTank();
+  var lastTab = load("tab"); if (lastTab && $("p-" + lastTab)) showTab(lastTab);
+})();
+</script>
+
+<script>
+if ("serviceWorker" in navigator) { window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js", { scope: "./" }).catch(function () {}); }); }
+</script>
+</body>
+</html>
