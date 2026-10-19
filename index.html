@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Outils d'atelier</title>
+<meta name="theme-color" content="#14171c">
+<link rel="icon" href="planning-horaire/icon-192.png">
+<style>
+:root{ --bg:#14171c; --card:#1d2128; --fg:#eef0f3; --muted:#9aa3ad; }
+*{box-sizing:border-box}
+body{margin:0; min-height:100vh; background:var(--bg); color:var(--fg);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; padding:28px 16px 40px;}
+main{max-width:640px; margin:0 auto;}
+h1{margin:0 0 4px; font-size:28px; letter-spacing:.01em;}
+h1 span{background:linear-gradient(90deg,#6fae52,#3b9be0,#f2a33a); -webkit-background-clip:text; background-clip:text; color:transparent;}
+.sub{color:var(--muted); margin:0 0 24px; font-size:15px;}
+a.app{display:flex; align-items:center; gap:14px; text-decoration:none; color:inherit;
+  background:var(--card); border-radius:16px; padding:14px; margin-bottom:12px;
+  border-left:6px solid var(--c); transition:transform .1s;}
+a.app:active{transform:scale(.98);}
+a.app img{width:56px; height:56px; border-radius:12px; flex:none;}
+a.app b{display:block; font-size:18px;}
+a.app small{color:var(--muted); font-size:14px;}
+footer{color:var(--muted); font-size:13px; margin-top:28px; text-align:center;}
+</style>
+</head>
+<body>
+<main>
+  <h1>🛠️ <span>Outils d'atelier</span></h1>
+  <p class="sub">Les apps d'Adi. Touchez une app pour l'ouvrir, puis « Ajouter à l'écran d'accueil ».</p>
+
+  <a class="app" href="planning-horaire/" style="--c:#6fae52">
+    <img src="planning-horaire/icon-192.png" alt="">
+    <div><b>Planning Horaire</b><small>Heures de la semaine, pot d'heures sup.</small></div>
+  </a>
+  <a class="app" href="porte-outils/" style="--c:#3b9be0">
+    <img src="porte-outils/icon-192.png" alt="">
+    <div><b>Porte-outils CNC</b><small>Scan QR, montages, catalogue d'outils.</small></div>
+  </a>
+  <a class="app" href="suivi-vehicules/" style="--c:#f2a33a">
+    <img src="suivi-vehicules/icon-192.png" alt="">
+    <div><b>Suivi Véhicules</b><small>Pleins, conso et coûts du Kangoo et de la GS.</small></div>
+  </a>
+
+  <footer>Données gardées sur le téléphone, rien n'est envoyé ailleurs.</footer>
+</main>
+</body>
+</html>

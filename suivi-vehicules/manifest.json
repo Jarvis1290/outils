@@ -1,0 +1,18 @@
+{
+  "name": "Suivi Véhicules",
+  "short_name": "Véhicules",
+  "description": "Pleins, conso et stats du Kangoo et de la BMW 1200 GS",
+  "lang": "fr",
+  "id": "./vehicules-app",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0D0E10",
+  "theme_color": "#0D0E10",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
