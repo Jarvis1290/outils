@@ -133,6 +133,169 @@ textarea{min-height:80px;resize:vertical}
 <script src="vendor/jsQR.js"></script>
 <script src="vendor/xlsx.mini.min.js"></script>
 <script>
+/* === SAUVEGARDE ATELIER v1 — début (copie identique dans chaque app, source : /mnt/project-files/sauvegarde-drive) === */
+/* Sauvegarde Drive commune aux apps d'atelier.
+   - 💾 Sauvegarder : fichier .txt daté (App_AAAA-MM-JJ_HHhMM.txt) → menu Partager d'Android (Drive), sinon téléchargement.
+   - 📂 Importer : lit le .txt, aperçu, confirmation ; les données actuelles partent d'abord dans « Copies avant import ».
+   - Copies avant import : jamais effacées, on peut revenir à n'importe laquelle (ce retour fait lui-même une copie).
+   - Rappel : bandeau si aucune sauvegarde depuis 7 jours et que les données ont changé depuis.
+   Usage :
+     Sauvegarde.init({ app:"PorteOutils", nom:"Porte-outils", cle:"porteoutils-cnc-v1", version:"1.1",
+       lire:() => donnees, ecrire:d => {...}, resume:d => "12 porte-outils…", valider:d => null|"erreur", vide:d => true|false });
+     Sauvegarde.panneau(element)   // carte avec boutons, aperçu d'import, copies
+     Sauvegarde.bandeau()          // HTML du rappel ("" si pas besoin)
+     Sauvegarde.copieAvant(raison) // à appeler avant tout autre remplacement des données (ex. import Excel) ; false = échec
+*/
+const Sauvegarde = (() => {
+  const MARQUE = "---- DONNÉES (ne pas modifier sous cette ligne) ----";
+  let C = null;
+  const p2 = n => String(n).padStart(2, "0");
+  const ech = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const dateFr = d => `${p2(d.getDate())}.${p2(d.getMonth()+1)}.${d.getFullYear()} ${p2(d.getHours())}:${p2(d.getMinutes())}`;
+  const empreinte = s => { let h = 2166136261; for(let i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
+  const kEtat = () => C.cle + "-sauvegarde", kCopies = () => C.cle + "-copies";
+  const lireLS = (k, def) => { try{ const v = JSON.parse(localStorage.getItem(k)); return v ?? def; }catch(e){ return def; } };
+  const ecrireLS = (k, v) => { try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } };
+  const etat = () => lireLS(kEtat(), {derniere:null, empreinte:null});
+  const copies = () => lireLS(kCopies(), []);
+  const actuel = () => JSON.stringify(C.lire());
+  let msgT;
+  function message(t, erreur){
+    let m = document.getElementById("sv-msg");
+    if(!m){ m = document.createElement("div"); m.id = "sv-msg"; m.className = "sv-msg"; m.setAttribute("role","status"); document.body.appendChild(m); }
+    m.textContent = t; m.classList.toggle("sv-err", !!erreur); m.classList.add("on"); clearTimeout(msgT); msgT = setTimeout(() => m.classList.remove("on"), 3200);
+  }
+
+  function init(cfg){ C = Object.assign({version:"", resume:() => "", valider:() => null, vide:() => false}, cfg); style(); }
+
+  function nomFichier(d){ return `${C.app}_${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}_${p2(d.getHours())}h${p2(d.getMinutes())}.txt`; }
+  function contenu(d, donnees){
+    const env = {format:"sauvegarde-atelier", formatVersion:1, app:C.app, nom:C.nom, appVersion:C.version, date:d.toISOString(), donnees};
+    return ["SAUVEGARDE ATELIER", `App : ${C.nom}${C.version ? " v" + C.version : ""}`, `Date : ${dateFr(d)}`,
+      `Contenu : ${C.resume(donnees)}`, "Pour remettre ces données : dans l'app, bouton 📂 Importer.", "", MARQUE, JSON.stringify(env)].join("\n");
+  }
+
+  async function sauvegarder(){
+    const d = new Date(), donnees = C.lire(), nom = nomFichier(d), txt = contenu(d, donnees);
+    const fichier = new File([txt], nom, {type:"text/plain"});
+    let fait = false;
+    if(navigator.canShare && navigator.share){
+      let ok = false; try{ ok = navigator.canShare({files:[fichier]}); }catch(e){}
+      if(ok){
+        try{ await navigator.share({files:[fichier], title:nom}); fait = true; message("Sauvegarde envoyée : " + nom); }
+        catch(e){ if(e && e.name === "AbortError"){ message("Sauvegarde annulée"); return false; } }
+      }
+    }
+    if(!fait){
+      const a = document.createElement("a"); a.href = URL.createObjectURL(fichier); a.download = nom;
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+      fait = true; message("Fichier enregistré dans Téléchargements : " + nom);
+    }
+    ecrireLS(kEtat(), {derniere:d.toISOString(), empreinte:empreinte(JSON.stringify(donnees))});
+    return true;
+  }
+
+  async function lireFichier(f){
+    const t = await f.text();
+    const i = t.indexOf(MARQUE);
+    let env;
+    try{ env = JSON.parse(i >= 0 ? t.slice(i + MARQUE.length) : t); }catch(e){ throw new Error("ce n'est pas une sauvegarde lisible"); }
+    if(!env || env.format !== "sauvegarde-atelier" || !env.donnees) throw new Error("ce n'est pas une sauvegarde d'atelier");
+    if(env.app !== C.app) throw new Error(`c'est une sauvegarde de « ${env.nom || env.app} », pas de « ${C.nom} »`);
+    const err = C.valider(env.donnees); if(err) throw new Error(err);
+    return env;
+  }
+
+  function copieAvant(raison){
+    const l = copies();
+    l.unshift({date:new Date().toISOString(), raison, resume:C.resume(C.lire()), donnees:C.lire()});
+    return ecrireLS(kCopies(), l);
+  }
+  function remplacer(donnees, raison){
+    if(!copieAvant(raison)){ message("Mémoire du téléphone pleine : copie impossible, rien n'a été remplacé. Sauvegarde d'abord sur Drive.", true); return false; }
+    C.ecrire(donnees); return true;
+  }
+
+  function bandeau(){
+    if(!C) return "";
+    const e = etat(), donnees = actuel();
+    if(C.vide(C.lire())) return "";
+    const jours = e.derniere ? Math.floor((Date.now() - new Date(e.derniere).getTime()) / 864e5) : null;
+    if(jours !== null && (jours < 7 || e.empreinte === empreinte(donnees))) return "";
+    return `<div class="sv-bandeau"><span>💾 ${jours === null ? "Jamais sauvegardé sur Drive." : `Pas de sauvegarde depuis ${jours} jours.`} Tes données ne sont que dans ce téléphone.</span><button type="button" class="sv-btn sv-save" onclick="Sauvegarde.sauvegarder().then(ok=>ok&&this.closest('.sv-bandeau').remove())">💾 Sauvegarder</button></div>`;
+  }
+
+  function panneau(el){
+    const e = etat(), l = copies(), d = e.derniere ? new Date(e.derniere) : null;
+    const change = d && e.empreinte !== empreinte(actuel());
+    el.innerHTML = `<div class="sv-carte">
+      <div class="sv-titre">💾 Sauvegarde Drive</div>
+      <div class="sv-info">Dernière sauvegarde : <b>${d ? dateFr(d) : "jamais"}</b>${change ? " · modifié depuis" : ""}</div>
+      <div class="sv-btns"><button type="button" class="sv-btn sv-save" data-sv="save">💾 Sauvegarder</button>
+        <label class="sv-btn sv-imp">📂 Importer<input type="file" accept=".txt,.json,text/plain,application/json" hidden></label></div>
+      <div class="sv-aide">Choisis Drive dans le menu Partager, dossier <b>Sauvegardes atelier</b>. Chaque sauvegarde est un nouveau fichier daté, rien n'est écrasé.</div>
+      <div class="sv-apercu" hidden></div>
+      <details class="sv-copies"><summary>Copies avant import (${l.length})</summary>
+        ${l.length ? l.map((c, i) => `<div class="sv-copie"><div><b>${dateFr(new Date(c.date))}</b> · ${ech(c.raison)}<br><small>${ech(c.resume)}</small></div><button type="button" class="sv-btn" data-sv="rev" data-i="${i}">Revenir</button></div>`).join("")
+          : `<div class="sv-aide">Aucune pour l'instant. Avant chaque import, tes données actuelles sont gardées ici, jamais effacées.</div>`}
+      </details></div>`;
+    const ap = el.querySelector(".sv-apercu"), inp = el.querySelector("input[type=file]");
+    el.querySelector('[data-sv="save"]').onclick = () => sauvegarder().then(() => panneau(el));
+    inp.onchange = async () => {
+      const f = inp.files[0]; if(!f) return;
+      let env;
+      try{ env = await lireFichier(f); }catch(err){ inp.value = ""; message("Import impossible : " + err.message, true); return; }
+      ap.hidden = false;
+      ap.innerHTML = `<div><b>${ech(f.name)}</b></div>
+        <div>Sauvegarde du <b>${dateFr(new Date(env.date))}</b>${env.appVersion ? ` (v${ech(env.appVersion)})` : ""}</div>
+        <div>Fichier : ${ech(C.resume(env.donnees))}</div><div>Actuellement : ${ech(C.resume(C.lire()))}</div>
+        <div class="sv-aide">Tes données actuelles seront d'abord gardées dans « Copies avant import ».</div>
+        <div class="sv-btns"><button type="button" class="sv-btn sv-ok" data-sv="ok">Remplacer mes données</button><button type="button" class="sv-btn" data-sv="no">Annuler</button></div>`;
+      ap.querySelector('[data-sv="no"]').onclick = () => { inp.value = ""; ap.hidden = true; };
+      ap.querySelector('[data-sv="ok"]').onclick = () => {
+        if(remplacer(env.donnees, "import " + f.name)){ message("Données importées"); panneau(el); }
+      };
+    };
+    el.querySelectorAll('[data-sv="rev"]').forEach(b => b.onclick = () => {
+      const c = copies()[+b.dataset.i];
+      if(!c || !confirm(`Revenir aux données du ${dateFr(new Date(c.date))} ?\n(${c.resume})\nTes données actuelles seront gardées comme nouvelle copie.`)) return;
+      if(remplacer(c.donnees, "retour à la copie du " + dateFr(new Date(c.date)))){ message("Données remises"); panneau(el); }
+    });
+  }
+
+  function style(){
+    if(document.getElementById("sv-style")) return;
+    const s = document.createElement("style"); s.id = "sv-style";
+    s.textContent = `
+.sv-carte{border:2px solid #1f8a5b;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px;background:var(--surface,transparent)}
+.sv-titre{font-weight:700;font-size:18px}
+.sv-info,.sv-aide{font-size:14px;opacity:.85}
+.sv-btns{display:flex;gap:12px;flex-wrap:wrap}
+.sv-btn{flex:1 1 140px;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:10px 16px;border-radius:10px;
+  border:1px solid #1f8a5b;background:transparent;color:inherit;font:inherit;font-weight:700;cursor:pointer}
+.sv-btn.sv-save{background:linear-gradient(135deg,#1f8a5b,#2a9d8f);border-color:transparent;color:#fff}
+.sv-btn.sv-imp{color:#1f8a5b}
+.sv-btn.sv-ok{background:#c0392b;border-color:#c0392b;color:#fff}
+.sv-apercu{border:2px solid #c0392b;border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:6px}
+.sv-copies summary{cursor:pointer;font-weight:600;padding:6px 0}
+.sv-copie{display:flex;gap:12px;align-items:center;justify-content:space-between;border-top:1px solid rgba(127,127,127,.3);padding:8px 0}
+.sv-copie .sv-btn{flex:0 0 auto;min-height:44px}
+.sv-bandeau{border:2px solid #1f8a5b;border-radius:10px;padding:10px 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.sv-bandeau span{flex:1 1 200px}
+.sv-bandeau .sv-btn{flex:0 0 auto}
+.sv-msg{position:fixed;left:16px;right:16px;bottom:calc(90px + env(safe-area-inset-bottom,0px));z-index:50;background:#1f8a5b;color:#fff;border-radius:10px;
+  padding:14px 16px;font-weight:600;text-align:center;opacity:0;transform:translateY(8px);transition:.2s;pointer-events:none}
+.sv-msg.on{opacity:1;transform:none}
+.sv-msg.sv-err{background:#c0392b}
+@media (prefers-color-scheme:dark){.sv-btn.sv-imp{color:#5cd69a}}`;
+    document.head.appendChild(s);
+  }
+
+  return {init, sauvegarder, panneau, bandeau, copieAvant, remplacer, lireFichier, nomFichier};
+})();
+/* === SAUVEGARDE ATELIER v1 — fin === */
+</script>
+<script>
 "use strict";
 /* ================= Données ================= */
 const KEY = "porteoutils-cnc-v1";
@@ -146,6 +309,13 @@ function save(changed=true){
   if(changed) db.changesSinceExport = (db.changesSinceExport||0) + 1;
   try{ localStorage.setItem(KEY, JSON.stringify(db)); }catch(e){ toast("Enregistrement impossible sur ce téléphone"); }
 }
+const APP_VERSION = "1.1";
+Sauvegarde.init({app:"PorteOutils", nom:"Porte-outils", cle:KEY, version:APP_VERSION,
+  lire:() => ({porteOutils:db.porteOutils, outils:db.outils, montages:db.montages, machines:db.machines}),
+  ecrire:d => { db = Object.assign(EMPTY(), d); save(false); route(); },
+  resume:d => `${(d.porteOutils||[]).length} porte-outils, ${(d.outils||[]).length} outils, ${(d.montages||[]).length} montages`,
+  vide:d => !d.porteOutils.length,
+  valider:d => Array.isArray(d.porteOutils) && Array.isArray(d.outils) && Array.isArray(d.montages) ? null : "données de porte-outils incomplètes"});
 try{ navigator.storage && navigator.storage.persist && navigator.storage.persist(); }catch(e){}
 
 const STATUTS = ["Monté","En stock","Réparation","Retiré"];
@@ -189,13 +359,7 @@ function setNav(n){ document.querySelectorAll(".nav a").forEach(a => a.classList
 function go(h){ location.hash = h; }
 const ICON_QR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3"/><rect x="7" y="7" width="4" height="4"/><rect x="13" y="13" width="4" height="4"/><path d="M13 7h4v2M7 13v4h2"/></svg>';
 
-function exportBanner(){
-  if(!db.porteOutils.length) return "";
-  const days = db.lastExport ? Math.floor((Date.now() - new Date(db.lastExport).getTime())/864e5) : null;
-  if(db.changesSinceExport > 0 && (days === null || days >= 7))
-    return `<div class="banner"><span>${days===null ? "Aucune sauvegarde Excel encore." : `Dernière sauvegarde il y a ${days} jours.`} Tes données ne sont que dans ce téléphone.</span><a class="btn" href="#/donnees">Sauvegarder</a></div>`;
-  return "";
-}
+function exportBanner(){ return Sauvegarde.bandeau(); }
 
 /* ================= Vues ================= */
 function vHome(){
@@ -389,22 +553,21 @@ function vOutilEdit(ref){
 
 function vData(){
   setTop("Données"); setNav("data");
-  const last = db.lastExport ? new Date(db.lastExport) : null;
   view.innerHTML = `
     <div class="card"><div class="label">Dans ce téléphone</div>
       <div class="grid2" style="margin-top:8px"><div><b>${db.porteOutils.length}</b> porte-outils</div><div><b>${db.outils.length}</b> outils</div><div><b>${db.montages.length}</b> montages</div></div>
-      <p class="muted" style="margin-bottom:0">Dernière sauvegarde Excel : ${last ? `${pad(last.getDate())}.${pad(last.getMonth()+1)}.${last.getFullYear()}` : "jamais"}${db.changesSinceExport ? ` · ${db.changesSinceExport} modification(s) depuis` : ""}</p></div>
-    <button class="btn primary block" id="bExp">Sauvegarder en Excel</button>
+      </div>
+    <div id="svPanel"></div>
     <div class="card" style="display:flex;flex-direction:column;gap:12px">
-      <div><b>Importer un fichier Excel</b><div class="muted">Remplace toutes les données de l'app par celles du fichier (onglets PorteOutils, Outils, Montages).</div></div>
+      <div><b>Importer un fichier Excel</b><div class="muted">Pour le premier chargement de ton fichier Outils_CNC_import.xlsx (onglets PorteOutils, Outils, Montages). Les données actuelles sont d'abord gardées dans « Copies avant import ».</div></div>
       <input type="file" id="fileIn" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
       <div id="impBox" hidden class="confirm"><div id="impTxt"></div><div class="btns"><button class="btn primary" id="bImpOk">Remplacer mes données</button><button class="btn" id="bImpNo">Annuler</button></div></div>
     </div>
     <div class="card" style="display:flex;flex-direction:column;gap:12px"><b>Machines</b>
       <div class="chips">${db.machines.map((m,i)=>`<span class="chip">${esc(m)} <button type="button" data-i="${i}" class="rmM" aria-label="Retirer ${esc(m)}" style="border:0;background:none;color:var(--danger);cursor:pointer">×</button></span>`).join("")}</div>
       <form class="inline" id="fM"><input id="newM" placeholder="Nouvelle machine"><button class="btn" type="submit">Ajouter</button></form></div>
-    <p class="muted" style="font-size:14px">Les données restent uniquement dans ce téléphone (navigateur). Sauvegarde en Excel régulièrement : c'est ta copie de sécurité, et le fichier s'ouvre sur PC.</p>`;
-  $("#bExp").onclick = exportXlsx;
+    <p class="muted" style="font-size:14px">Les données restent uniquement dans ce téléphone (navigateur). Sauvegarde régulièrement sur Drive : c'est ta copie de sécurité. App v${APP_VERSION}</p>`;
+  Sauvegarde.panneau($("#svPanel"));
   let pending = null;
   $("#fileIn").onchange = async e => {
     const file = e.target.files[0]; if(!file) return;
@@ -413,7 +576,7 @@ function vData(){
     $("#impBox").hidden = false;
   };
   $("#bImpNo").onclick = () => { pending = null; $("#impBox").hidden = true; $("#fileIn").value = ""; };
-  $("#bImpOk").onclick = () => { if(!pending) return; const keep = db.lastExport; db = Object.assign(EMPTY(), pending, {lastExport:keep, changesSinceExport:0}); save(false); toast("Données importées"); vData(); };
+  $("#bImpOk").onclick = () => { if(!pending) return; if(Sauvegarde.remplacer(pending, "import Excel")) toast("Données importées"); };
   document.querySelectorAll(".rmM").forEach(b => b.onclick = () => { db.machines.splice(+b.dataset.i,1); save(); vData(); });
   $("#fM").onsubmit = e => { e.preventDefault(); const v = $("#newM").value.trim(); if(v && !db.machines.includes(v)){ db.machines.push(v); save(); } vData(); };
 }
@@ -438,21 +601,6 @@ function readXlsx(file){
     return {porteOutils, outils, montages, machines};
   });
 }
-function exportXlsx(){
-  try{
-    const wb = XLSX.utils.book_new();
-    const add = (name, rows) => { const ws = XLSX.utils.json_to_sheet(rows.map(r => { const o = {}; COLS[name].forEach(c => o[c] = r[c] ?? ""); return o; }), {header:COLS[name]});
-      ws["!cols"] = COLS[name].map(c => ({wch: c === "Notes" ? 50 : 16})); XLSX.utils.book_append_sheet(wb, ws, name); };
-    add("PorteOutils", db.porteOutils); add("Outils", sortedOutils());
-    add("Montages", [...db.montages].sort((a,b)=>(a.DateMontage||"").localeCompare(b.DateMontage||"")));
-    const d = new Date();
-    XLSX.writeFile(wb, `Outils_CNC_${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}.xlsx`);
-    db.lastExport = d.toISOString(); db.changesSinceExport = 0; save(false);
-    toast("Fichier Excel enregistré dans Téléchargements");
-    if(location.hash.startsWith("#/donnees")) vData();
-  }catch(e){ toast("Export impossible : " + e.message); }
-}
-
 /* ================= Scanner ================= */
 let stream = null, scanning = false, detector = null, torchOn = false;
 async function openScanner(){
