@@ -62,6 +62,7 @@
   color-scheme:dark;
 }
 *{box-sizing:border-box;}
+[hidden]{display:none!important;}
 body{
   background-color:var(--bg);
   background-image:
@@ -352,6 +353,193 @@ button.tap-confirm.armed{
 <div class="app" id="app"></div>
 
 <script>
+/* === SAUVEGARDE ATELIER v2 — début (copie identique dans chaque app, source : /mnt/project-files/sauvegarde-drive) === */
+/* Sauvegarde Drive commune aux apps d'atelier.
+   - 💾 Sauvegarder : fichier .txt daté (App_AAAA-MM-JJ_HHhMM.txt) → menu Partager d'Android (Drive), sinon téléchargement.
+     v2 (choix d'Adi 6b) : chaque fichier contient TOUT l'historique des sauvegardes de l'app (le dernier fichier suffit).
+     Historique gardé dans le téléphone (<cle>-historique), une entrée par sauvegarde dont les données ont changé.
+   - 📂 Importer : lit le .txt (v1 ou v2), aperçu, choix de la version à remettre (la plus récente par défaut), confirmation ;
+     les données actuelles partent d'abord dans « Copies avant import » ; l'historique du fichier rejoint celui du téléphone.
+   - Copies avant import : jamais effacées, on peut revenir à n'importe laquelle (ce retour fait lui-même une copie).
+   - Rappel : bandeau si aucune sauvegarde depuis 7 jours et que les données ont changé depuis.
+   Usage :
+     Sauvegarde.init({ app:"PorteOutils", nom:"Porte-outils", cle:"porteoutils-cnc-v1", version:"1.1",
+       lire:() => donnees, ecrire:d => {...}, resume:d => "12 porte-outils…", valider:d => null|"erreur", vide:d => true|false });
+     Sauvegarde.panneau(element)   // carte avec boutons, aperçu d'import, copies
+     Sauvegarde.bandeau()          // HTML du rappel ("" si pas besoin)
+     Sauvegarde.copieAvant(raison) // à appeler avant tout autre remplacement des données (ex. import Excel) ; false = échec
+*/
+const Sauvegarde = (() => {
+  const MARQUE = "---- DONNÉES (ne pas modifier sous cette ligne) ----";
+  let C = null;
+  const p2 = n => String(n).padStart(2, "0");
+  const ech = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const dateFr = d => `${p2(d.getDate())}.${p2(d.getMonth()+1)}.${d.getFullYear()} ${p2(d.getHours())}:${p2(d.getMinutes())}`;
+  const empreinte = s => { let h = 2166136261; for(let i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
+  const kEtat = () => C.cle + "-sauvegarde", kCopies = () => C.cle + "-copies", kHist = () => C.cle + "-historique";
+  const lireLS = (k, def) => { try{ const v = JSON.parse(localStorage.getItem(k)); return v ?? def; }catch(e){ return def; } };
+  const ecrireLS = (k, v) => { try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } };
+  const etat = () => lireLS(kEtat(), {derniere:null, empreinte:null});
+  const copies = () => lireLS(kCopies(), []);
+  const historique = () => lireLS(kHist(), []);
+  // réunit deux historiques (clé = date), trié du plus ancien au plus récent
+  function fusion(a, b){ const m = new Map(); [...a, ...b].forEach(h => h && h.date && h.donnees && m.set(h.date, h)); return [...m.values()].sort((x, y) => x.date.localeCompare(y.date)); }
+  const actuel = () => JSON.stringify(C.lire());
+  let msgT;
+  function message(t, erreur){
+    let m = document.getElementById("sv-msg");
+    if(!m){ m = document.createElement("div"); m.id = "sv-msg"; m.className = "sv-msg"; m.setAttribute("role","status"); document.body.appendChild(m); }
+    m.textContent = t; m.classList.toggle("sv-err", !!erreur); m.classList.add("on"); clearTimeout(msgT); msgT = setTimeout(() => m.classList.remove("on"), 3200);
+  }
+
+  function init(cfg){ C = Object.assign({version:"", resume:() => "", valider:() => null, vide:() => false}, cfg); style(); }
+
+  function nomFichier(d){ return `${C.app}_${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}_${p2(d.getHours())}h${p2(d.getMinutes())}.txt`; }
+  function contenu(d, donnees, hist){
+    const env = {format:"sauvegarde-atelier", formatVersion:2, app:C.app, nom:C.nom, appVersion:C.version, date:d.toISOString(), donnees, historique:hist};
+    return ["SAUVEGARDE ATELIER", `App : ${C.nom}${C.version ? " v" + C.version : ""}`, `Date : ${dateFr(d)}`,
+      `Contenu : ${C.resume(donnees)}`, `Historique : ${hist.length} sauvegarde(s), toutes dans ce fichier (le plus récent fichier suffit) :`,
+      ...hist.slice().reverse().map(h => `  ${dateFr(new Date(h.date))}  ${h.resume}`),
+      "Pour remettre ces données : dans l'app, bouton 📂 Importer.", "", MARQUE, JSON.stringify(env)].join("\n");
+  }
+
+  async function sauvegarder(){
+    const d = new Date(), donnees = C.lire(), nom = nomFichier(d);
+    let hist = historique();
+    const der = hist[hist.length - 1];
+    if(!der || empreinte(JSON.stringify(der.donnees)) !== empreinte(JSON.stringify(donnees))) hist = fusion(hist, [{date:d.toISOString(), resume:C.resume(donnees), donnees}]);
+    const txt = contenu(d, donnees, hist);
+    const fichier = new File([txt], nom, {type:"text/plain"});
+    let fait = false;
+    if(navigator.canShare && navigator.share){
+      let ok = false; try{ ok = navigator.canShare({files:[fichier]}); }catch(e){}
+      if(ok){
+        try{ await navigator.share({files:[fichier], title:nom}); fait = true; message("Sauvegarde envoyée : " + nom); }
+        catch(e){ if(e && e.name === "AbortError"){ message("Sauvegarde annulée"); return false; } }
+      }
+    }
+    if(!fait){
+      const a = document.createElement("a"); a.href = URL.createObjectURL(fichier); a.download = nom;
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+      fait = true; message("Fichier enregistré dans Téléchargements : " + nom);
+    }
+    ecrireLS(kEtat(), {derniere:d.toISOString(), empreinte:empreinte(JSON.stringify(donnees))});
+    if(!ecrireLS(kHist(), hist)) message("Fichier envoyé, mais mémoire du téléphone pleine : l'historique n'a pas pu y être gardé.", true);
+    return true;
+  }
+
+  async function lireFichier(f){
+    const t = await f.text();
+    const i = t.indexOf(MARQUE);
+    let env;
+    try{ env = JSON.parse(i >= 0 ? t.slice(i + MARQUE.length) : t); }catch(e){ throw new Error("ce n'est pas une sauvegarde lisible"); }
+    if(!env || env.format !== "sauvegarde-atelier" || !env.donnees) throw new Error("ce n'est pas une sauvegarde d'atelier");
+    if(env.app !== C.app) throw new Error(`c'est une sauvegarde de « ${env.nom || env.app} », pas de « ${C.nom} »`);
+    const err = C.valider(env.donnees); if(err) throw new Error(err);
+    const r = C.resume;
+    env.versions = fusion(Array.isArray(env.historique) ? env.historique : [], [{date:env.date, resume:r(env.donnees), donnees:env.donnees}])
+      .filter(h => !C.valider(h.donnees)).reverse(); // plus récente d'abord
+    return env;
+  }
+
+  function copieAvant(raison){
+    const l = copies();
+    l.unshift({date:new Date().toISOString(), raison, resume:C.resume(C.lire()), donnees:C.lire()});
+    return ecrireLS(kCopies(), l);
+  }
+  function remplacer(donnees, raison){
+    if(!copieAvant(raison)){ message("Mémoire du téléphone pleine : copie impossible, rien n'a été remplacé. Sauvegarde d'abord sur Drive.", true); return false; }
+    C.ecrire(donnees); return true;
+  }
+
+  function bandeau(){
+    if(!C) return "";
+    const e = etat(), donnees = actuel();
+    if(C.vide(C.lire())) return "";
+    const jours = e.derniere ? Math.floor((Date.now() - new Date(e.derniere).getTime()) / 864e5) : null;
+    if(jours !== null && (jours < 7 || e.empreinte === empreinte(donnees))) return "";
+    return `<div class="sv-bandeau"><span>💾 ${jours === null ? "Jamais sauvegardé sur Drive." : `Pas de sauvegarde depuis ${jours} jours.`} Tes données ne sont que dans ce téléphone.</span><button type="button" class="sv-btn sv-save" onclick="Sauvegarde.sauvegarder().then(ok=>ok&&this.closest('.sv-bandeau').remove())">💾 Sauvegarder</button></div>`;
+  }
+
+  function panneau(el){
+    const e = etat(), l = copies(), d = e.derniere ? new Date(e.derniere) : null;
+    const change = d && e.empreinte !== empreinte(actuel());
+    el.innerHTML = `<div class="sv-carte">
+      <div class="sv-titre">💾 Sauvegarde Drive</div>
+      <div class="sv-info">Dernière sauvegarde : <b>${d ? dateFr(d) : "jamais"}</b>${change ? " · modifié depuis" : ""}</div>
+      <div class="sv-btns"><button type="button" class="sv-btn sv-save" data-sv="save">💾 Sauvegarder</button>
+        <label class="sv-btn sv-imp">📂 Importer<input type="file" accept=".txt,.json,text/plain,application/json" hidden></label></div>
+      <div class="sv-aide">Choisis Drive dans le menu Partager, dossier <b>Sauvegardes atelier</b>. Chaque fichier contient tout l'historique (${historique().length} sauvegarde(s)) : le plus récent suffit.</div>
+      <div class="sv-apercu" hidden></div>
+      <details class="sv-copies"><summary>Copies avant import (${l.length})</summary>
+        ${l.length ? l.map((c, i) => `<div class="sv-copie"><div><b>${dateFr(new Date(c.date))}</b> · ${ech(c.raison)}<br><small>${ech(c.resume)}</small></div><button type="button" class="sv-btn" data-sv="rev" data-i="${i}">Revenir</button></div>`).join("")
+          : `<div class="sv-aide">Aucune pour l'instant. Avant chaque import, tes données actuelles sont gardées ici, jamais effacées.</div>`}
+      </details></div>`;
+    const ap = el.querySelector(".sv-apercu"), inp = el.querySelector("input[type=file]");
+    el.querySelector('[data-sv="save"]').onclick = () => sauvegarder().then(() => panneau(el));
+    inp.onchange = async () => {
+      const f = inp.files[0]; if(!f) return;
+      let env;
+      try{ env = await lireFichier(f); }catch(err){ inp.value = ""; message("Import impossible : " + err.message, true); return; }
+      ap.hidden = false;
+      const v = env.versions;
+      ap.innerHTML = `<div><b>${ech(f.name)}</b></div>
+        <div>Sauvegarde du <b>${dateFr(new Date(env.date))}</b>${env.appVersion ? ` (v${ech(env.appVersion)})` : ""} · ${v.length} version(s) dans le fichier</div>
+        <label class="sv-aide">Version à remettre
+          <select class="sv-choix">${v.map((h, i) => `<option value="${i}">${dateFr(new Date(h.date))} · ${ech(h.resume)}${i ? "" : " (la plus récente)"}</option>`).join("")}</select></label>
+        <div>Actuellement : ${ech(C.resume(C.lire()))}</div>
+        <div class="sv-aide">Tes données actuelles seront d'abord gardées dans « Copies avant import ».</div>
+        <div class="sv-btns"><button type="button" class="sv-btn sv-ok" data-sv="ok">Remplacer mes données</button><button type="button" class="sv-btn" data-sv="no">Annuler</button></div>`;
+      ap.querySelector('[data-sv="no"]').onclick = () => { inp.value = ""; ap.hidden = true; };
+      ap.querySelector('[data-sv="ok"]').onclick = () => {
+        const h = v[+ap.querySelector(".sv-choix").value] || v[0];
+        if(remplacer(h.donnees, `import ${f.name} (version du ${dateFr(new Date(h.date))})`)){
+          ecrireLS(kHist(), fusion(historique(), v));
+          message("Données importées"); panneau(el);
+        }
+      };
+    };
+    el.querySelectorAll('[data-sv="rev"]').forEach(b => b.onclick = () => {
+      const c = copies()[+b.dataset.i];
+      if(!c || !confirm(`Revenir aux données du ${dateFr(new Date(c.date))} ?\n(${c.resume})\nTes données actuelles seront gardées comme nouvelle copie.`)) return;
+      if(remplacer(c.donnees, "retour à la copie du " + dateFr(new Date(c.date)))){ message("Données remises"); panneau(el); }
+    });
+  }
+
+  function style(){
+    if(document.getElementById("sv-style")) return;
+    const s = document.createElement("style"); s.id = "sv-style";
+    s.textContent = `
+.sv-carte{border:2px solid #1f8a5b;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px;background:var(--surface,transparent)}
+.sv-titre{font-weight:700;font-size:18px}
+.sv-info,.sv-aide{font-size:14px;opacity:.85}
+.sv-btns{display:flex;gap:12px;flex-wrap:wrap}
+.sv-btn{flex:1 1 140px;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:10px 16px;border-radius:10px;
+  border:1px solid #1f8a5b;background:transparent;color:inherit;font:inherit;font-weight:700;cursor:pointer}
+.sv-btn.sv-save{background:linear-gradient(135deg,#1f8a5b,#2a9d8f);border-color:transparent;color:#fff}
+.sv-btn.sv-imp{color:#1f8a5b}
+.sv-btn.sv-ok{background:#c0392b;border-color:#c0392b;color:#fff}
+.sv-apercu{border:2px solid #c0392b;border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:6px}
+.sv-choix{display:block;width:100%;margin-top:4px;min-height:48px;font:inherit}
+.sv-copies summary{cursor:pointer;font-weight:600;padding:6px 0}
+.sv-copie{display:flex;gap:12px;align-items:center;justify-content:space-between;border-top:1px solid rgba(127,127,127,.3);padding:8px 0}
+.sv-copie .sv-btn{flex:0 0 auto;min-height:44px}
+.sv-bandeau{border:2px solid #1f8a5b;border-radius:10px;padding:10px 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.sv-bandeau span{flex:1 1 200px}
+.sv-bandeau .sv-btn{flex:0 0 auto}
+.sv-msg{position:fixed;left:16px;right:16px;bottom:calc(90px + env(safe-area-inset-bottom,0px));z-index:50;background:#1f8a5b;color:#fff;border-radius:10px;
+  padding:14px 16px;font-weight:600;text-align:center;opacity:0;transform:translateY(8px);transition:.2s;pointer-events:none}
+.sv-msg.on{opacity:1;transform:none}
+.sv-msg.sv-err{background:#c0392b}
+@media (prefers-color-scheme:dark){.sv-btn.sv-imp{color:#5cd69a}}`;
+    document.head.appendChild(s);
+  }
+
+  return {init, historique, sauvegarder, panneau, bandeau, copieAvant, remplacer, lireFichier, nomFichier};
+})();
+/* === SAUVEGARDE ATELIER v2 — fin === */
+</script>
+<script>
 (function(){
 "use strict";
 
@@ -378,7 +566,8 @@ function loadStore(){
     settings: DEFAULT_SETTINGS,
     currentWeek: {}, // { lundi: {arrival,lunchStart,lunchEnd,departure}, ... }
     pot: { totalMin: 60, spreadWeeks: 0 }, // pot d'heures sup/insup ; spreadWeeks=0 = pas étalé, reste en réserve
-    reportMode: "vendredi" // "vendredi" | "repartir"
+    reportMode: "vendredi", // "vendredi" | "repartir"
+    history: [] // semaines clôturées, de la plus ancienne à la plus récente
   };
 }
 function saveStore(){
@@ -386,11 +575,14 @@ function saveStore(){
 }
 
 var state = loadStore();
+if(!Array.isArray(state.history)) state.history = [];
 var currentTab = "semaine";
 var modalDay = null;
-var APP_VERSION = "1.2";
-var APP_DATE = "16.10.2026";
+var APP_VERSION = "1.3";
+var APP_DATE = "19.10.2026";
 var aboutOpen = false;
+var closeWeekOpen = false; // fenêtre de récap avant clôture
+var showAllHistory = false;
 var modalEdited = false; // true dès que l'utilisateur modifie un champ pendant que la fiche jour est ouverte
 
 // ---------- Time helpers ----------
@@ -532,14 +724,39 @@ function carriedBalance(){
   if(state.pot.spreadWeeks > 0) return state.pot.totalMin / state.pot.spreadWeeks;
   return 0;
 }
-function closeWeekAndStart(){
-  var appliedThisWeek = carriedBalance(); // part du pot consommée cette semaine
+// Ce que la clôture va faire, calculé sans rien modifier (sert au récap ET à la clôture)
+function closeWeekSummary(){
+  var applied = carriedBalance(); // part du pot consommée cette semaine
   var weekEcart = touchedEcartSum(); // ce que tu as réellement fait, en plus ou en moins
-  state.pot.totalMin = Math.round((state.pot.totalMin||0) - appliedThisWeek + weekEcart);
+  var potBefore = state.pot.totalMin || 0;
+  return {
+    applied: applied,
+    weekEcart: weekEcart,
+    potBefore: potBefore,
+    potAfter: Math.round(potBefore - applied + weekEcart),
+    validated: DAYS.filter(isDayTouched),
+    pending: remainingUntouchedDays()
+  };
+}
+function closeWeekAndStart(){
+  var s = closeWeekSummary();
+  var days = {};
+  s.validated.forEach(function(day){
+    var d = state.currentWeek[day];
+    days[day] = { arrival:d.arrival, lunchStart:d.lunchStart, lunchEnd:d.lunchEnd, departure:d.departure,
+      skipMorningBreak:!!d.skipMorningBreak, skipAfternoonBreak:!!d.skipAfternoonBreak, ecartMin:dayEcartMin(day) };
+  });
+  state.history.push({
+    closedAt: new Date().toISOString(), week: isoWeekNumber(), days: days,
+    weekEcartMin: Math.round(s.weekEcart), potAppliedMin: Math.round(s.applied),
+    potBeforeMin: s.potBefore, potAfterMin: s.potAfter, spreadWeeks: state.pot.spreadWeeks
+  });
+  state.pot.totalMin = s.potAfter;
   if(state.pot.spreadWeeks > 0) state.pot.spreadWeeks = Math.max(0, state.pot.spreadWeeks - 1);
   state.currentWeek = {};
   DAYS.forEach(ensureDayDefaults);
   saveStore();
+  closeWeekOpen = false;
   render();
 }
 function touchedEcartSum(){
@@ -646,6 +863,8 @@ function render(){
   renderCloseWeekCard(page0);
 
   var page1 = el("div","pager-page");
+  var rappel = Sauvegarde.bandeau();
+  if(rappel) page1.appendChild(el("div", null, rappel));
   renderSemaine(page1);
 
   var page2 = el("div","pager-page");
@@ -653,7 +872,12 @@ function render(){
   renderWeekStatRow(page2);
   page2.appendChild(el("div","section-title","Report des heures"));
   renderReport(page2);
-  var foot = el("footer","note","Toutes les données restent sur ton téléphone · v"+APP_VERSION);
+  page2.appendChild(el("div","section-title","Historique des semaines"));
+  renderHistory(page2);
+  var svPanel = el("div");
+  Sauvegarde.panneau(svPanel);
+  page2.appendChild(svPanel);
+  var foot = el("footer","note","Données sur ton téléphone, copie de sécurité sur Drive · v"+APP_VERSION);
   page2.appendChild(foot);
 
   track.appendChild(page0);
@@ -663,7 +887,7 @@ function render(){
   app.appendChild(viewport);
   attachSwipe(viewport);
 
-  if(!modalDay && !pointageOpen && !pointageChooserOpen && !aboutOpen){
+  if(!modalDay && !pointageOpen && !pointageChooserOpen && !aboutOpen && !closeWeekOpen){
     var dots = el("div","page-dots");
     for(var i=0;i<PAGE_COUNT;i++){
       (function(i){
@@ -679,6 +903,7 @@ function render(){
   if(pointageChooserOpen) renderPointageChooser();
   if(pointageOpen) renderPointageConfirm();
   if(aboutOpen) renderAbout();
+  if(closeWeekOpen) renderCloseWeekConfirm();
 }
 
 function renderPointagePage(app){
@@ -746,6 +971,33 @@ function renderPointageChooser(){
   document.getElementById("app").appendChild(backdrop);
 }
 
+// Bouton à confirmer par un second tap (il passe en orange, puis revient au bout de 2,2 s)
+function doubleTapButton(label, onConfirm){
+  var btn = el("button", "primary tap-confirm", label);
+  var armed = false, armedAt = 0, armTimer = null;
+  btn.onclick = function(ev){
+    if(ev){ ev.preventDefault(); ev.stopPropagation(); }
+    var now = Date.now();
+    if(armed){
+      if(now - armedAt < 150) return; // filtre un double-évènement du même tap (touch+click)
+      clearTimeout(armTimer);
+      armed = false;
+      onConfirm();
+    } else {
+      armed = true;
+      armedAt = now;
+      btn.classList.add("armed");
+      btn.textContent = "👉 Encore un tap pour confirmer";
+      armTimer = setTimeout(function(){
+        armed = false;
+        btn.classList.remove("armed");
+        btn.textContent = label;
+      }, 2200);
+    }
+  };
+  return btn;
+}
+
 function renderPointageConfirm(){
   var p = pointagePending;
   var backdrop = el("div","modal-backdrop");
@@ -766,28 +1018,7 @@ function renderPointageConfirm(){
   );
   sheet.appendChild(big);
 
-  var confirmBtn = el("button", "primary tap-confirm", "✅ Valider cette heure");
-  var armed = false, armedAt = 0, armTimer = null;
-  confirmBtn.onclick = function(ev){
-    if(ev){ ev.preventDefault(); ev.stopPropagation(); }
-    var now = Date.now();
-    if(armed){
-      if(now - armedAt < 150) return; // filtre un double-évènement du même tap (touch+click)
-      clearTimeout(armTimer);
-      armed = false;
-      confirmPointage();
-    } else {
-      armed = true;
-      armedAt = now;
-      confirmBtn.classList.add("armed");
-      confirmBtn.textContent = "👉 Encore un tap pour confirmer";
-      armTimer = setTimeout(function(){
-        armed = false;
-        confirmBtn.classList.remove("armed");
-        confirmBtn.textContent = "✅ Valider cette heure";
-      }, 2200);
-    }
-  };
+  var confirmBtn = doubleTapButton("✅ Valider cette heure", confirmPointage);
   sheet.appendChild(confirmBtn);
 
   var cancelBtn = el("button","ghost","Annuler");
@@ -1131,7 +1362,9 @@ function renderAbout(){
     ["Pot","Réserve d’heures en plus ou en moins reportée de semaine en semaine. Il grossit à chaque clôture de semaine."],
     ["Étaler","Nombre de semaines sur lesquelles le pot est repris. « En réserve » = le pot dort, rien n’est appliqué."],
     ["Pauses offertes","Les pauses de 9h30 et 15h30 (matin seulement le vendredi) ne sont pas déduites. Si tu en sautes une, elle compte +15 min."],
-    ["Clôturer la semaine","L’écart réel de la semaine part dans le pot, puis une nouvelle semaine vierge démarre."]
+    ["Clôturer la semaine","Affiche d’abord un récap (écart de la semaine, pot avant → après), à confirmer par double tap. L’écart réel part alors dans le pot, la semaine va dans l’historique et une nouvelle semaine vierge démarre."],
+    ["Historique","Les semaines clôturées, gardées dans l’app avec leurs heures, leur écart et le pot après clôture (page Report)."],
+    ["Sauvegarde Drive","Le bouton 💾 Sauvegarder crée un fichier .txt daté avec toutes tes données et l’envoie par le menu Partager : choisis Drive, dossier « Sauvegardes atelier ». 📂 Importer remet un fichier ; tes données actuelles sont d’abord gardées dans « Copies avant import »."]
   ];
   var dl = el("dl","gloss");
   items.forEach(function(it){
@@ -1181,20 +1414,135 @@ function renderReport(app){
 function renderCloseWeekCard(app){
   var closeCard = el("div","card");
   closeCard.appendChild(el("div","section-title","Fin de semaine"));
-  var closeDesc = el("div", null, "Clôture la semaine en cours : son écart réel part dans le pot, et une nouvelle semaine vierge démarre.");
+  var closeDesc = el("div", null, "Clôture la semaine en cours : un récap s’affiche, puis son écart réel part dans le pot, la semaine va dans l’historique et une nouvelle semaine vierge démarre.");
   closeDesc.style.cssText = "font-size:13px; color:var(--fg-muted); margin:8px 0 12px;";
   closeCard.appendChild(closeDesc);
   var closeBtn = el("button","primary","✅ Clôturer la semaine");
-  closeBtn.onclick = closeWeekAndStart;
+  closeBtn.onclick = function(){ closeWeekOpen = true; render(); };
   closeCard.appendChild(closeBtn);
   app.appendChild(closeCard);
 }
+
+function signed(min){ return (min>=0?"+":"")+toHHMM(min); }
+function signColor(min){ return min>0?"var(--good)":min<0?"var(--bad)":"var(--fg)"; }
+function dateCH(iso){
+  var d = new Date(iso);
+  return (d.getDate()<10?"0":"")+d.getDate()+"."+(d.getMonth()<9?"0":"")+(d.getMonth()+1)+"."+d.getFullYear();
+}
+
+function renderCloseWeekConfirm(){
+  var s = closeWeekSummary();
+  var backdrop = el("div","modal-backdrop");
+  var cancel = function(){ closeWeekOpen = false; render(); };
+  backdrop.onclick = function(e){ if(e.target===backdrop) cancel(); };
+
+  var sheet = el("div","modal-sheet");
+  var head = el("div","modal-header");
+  head.appendChild(el("h3", null, "Clôturer la semaine S."+isoWeekNumber()));
+  var closeBtn = el("button","modal-close","✕");
+  closeBtn.onclick = cancel;
+  head.appendChild(closeBtn);
+  sheet.appendChild(head);
+
+  if(s.pending.length){
+    var warn = el("div","tip");
+    warn.style.borderColor = "var(--warn)";
+    warn.innerHTML = '<span class="ic">⚠️</span><span><strong>'+s.pending.length+' jour(s) pas validé(s)</strong> ('+s.pending.map(function(d){ return DAY_SHORT[d]; }).join(", ")+') : ils ne comptent pas dans l’écart et ne seront pas gardés dans l’historique.</span>';
+    sheet.appendChild(warn);
+  }
+
+  var rows = el("div","card");
+  rows.style.padding = "4px 14px";
+  [["Jours validés", s.validated.length+" / 5", "var(--fg)"],
+   ["Écart de la semaine", signed(s.weekEcart), signColor(s.weekEcart)],
+   ["Part du pot appliquée", signed(s.applied), signColor(s.applied)]].forEach(function(r){
+    var f = el("div","field");
+    f.innerHTML = '<span style="font-size:13px;font-weight:600;">'+r[0]+'</span><span style="font-family:var(--font-mono);font-weight:700;font-size:16px;color:'+r[2]+';">'+r[1]+'</span>';
+    rows.appendChild(f);
+  });
+  sheet.appendChild(rows);
+
+  var pot = el("div","daysummary");
+  pot.innerHTML =
+    '<div><div class="ds-label">🫙 Pot avant</div><div class="ds-value" style="color:'+signColor(s.potBefore)+'">'+signed(s.potBefore)+'</div></div>'+
+    '<div style="font-size:20px;color:var(--fg-muted);">→</div>'+
+    '<div style="text-align:right;"><div class="ds-label">Pot après</div><div class="ds-value" style="color:'+signColor(s.potAfter)+'">'+signed(s.potAfter)+'</div></div>';
+  sheet.appendChild(pot);
+
+  var info = el("div","tip");
+  info.innerHTML = '<span class="ic">ℹ️</span><span>La semaine part dans l’historique (page Report) et une nouvelle semaine vierge démarre.'+(state.pot.spreadWeeks>0?' Étalement du pot : '+state.pot.spreadWeeks+' → '+Math.max(0,state.pot.spreadWeeks-1)+' semaine(s).':'')+'</span>';
+  sheet.appendChild(info);
+
+  sheet.appendChild(doubleTapButton("✅ Clôturer la semaine", closeWeekAndStart));
+  var cancelBtn = el("button","ghost","Annuler");
+  cancelBtn.style.marginTop = "4px";
+  cancelBtn.onclick = cancel;
+  sheet.appendChild(cancelBtn);
+
+  backdrop.appendChild(sheet);
+  document.getElementById("app").appendChild(backdrop);
+}
+
+function renderHistory(app){
+  var card = el("div","card");
+  var list = state.history.slice().reverse(); // plus récente d'abord
+  if(!list.length){
+    card.appendChild(el("div","about-text","Aucune semaine clôturée pour l’instant. Chaque clôture viendra se ranger ici."));
+    app.appendChild(card);
+    return;
+  }
+  var shown = showAllHistory ? list : list.slice(0, 8);
+  shown.forEach(function(h){
+    var row = el("div","week-item");
+    var nDays = Object.keys(h.days||{}).length;
+    row.innerHTML =
+      '<div class="wi-label">S.'+h.week+' <span style="font-weight:400;color:var(--fg-muted);font-size:12px;">· clôturée le '+dateCH(h.closedAt)+' · '+nDays+' j</span>'+
+        '<div style="font-weight:400;color:var(--fg-muted);font-size:12px;font-family:var(--font-mono);">pot '+signed(h.potBeforeMin)+' → '+signed(h.potAfterMin)+'</div></div>'+
+      '<div class="wi-value '+(h.weekEcartMin>0?"pos":h.weekEcartMin<0?"neg":"")+'">'+signed(h.weekEcartMin)+'</div>';
+    card.appendChild(row);
+  });
+  if(list.length > 8){
+    var more = el("button","ghost", showAllHistory ? "Voir moins" : "Voir tout ("+list.length+" semaines)");
+    more.style.marginTop = "8px";
+    more.onclick = function(){ showAllHistory = !showAllHistory; render(); };
+    card.appendChild(more);
+  }
+  app.appendChild(card);
+}
+
+// ---------- Sauvegarde Drive (bloc commun SAUVEGARDE ATELIER) ----------
+Sauvegarde.init({
+  app: "PlanningHoraire",
+  nom: "Planning Horaire",
+  cle: STORE_KEY,
+  version: APP_VERSION,
+  lire: function(){ return JSON.parse(JSON.stringify(state)); },
+  ecrire: function(d){
+    state = d;
+    if(!Array.isArray(state.history)) state.history = [];
+    DAYS.forEach(ensureDayDefaults);
+    saveStore();
+    modalDay = null; closeWeekOpen = false;
+    render();
+  },
+  resume: function(d){
+    var n = (d.history||[]).length;
+    var jours = DAYS.filter(function(day){ return d.currentWeek && d.currentWeek[day] && d.currentWeek[day].touched; }).length;
+    var pot = (d.pot && d.pot.totalMin) || 0;
+    return n+" semaine(s) clôturée(s), pot "+(pot>=0?"+":"")+toHHMM(pot)+", "+jours+" jour(s) validé(s) cette semaine";
+  },
+  valider: function(d){ return d && d.settings && d.currentWeek && d.pot ? null : "données de Planning Horaire incomplètes"; },
+  vide: function(d){
+    return !(d.history && d.history.length) && !DAYS.some(function(day){ return d.currentWeek[day] && d.currentWeek[day].touched; });
+  }
+});
+try{ navigator.storage && navigator.storage.persist && navigator.storage.persist(); }catch(e){}
 
 render();
 
 // Rafraîchit le marqueur "maintenant" de la timeline toutes les 30s (sans gêner une fiche ouverte)
 setInterval(function(){
-  if(!modalDay && !pointageOpen && !pointageChooserOpen && !aboutOpen) render();
+  if(!modalDay && !pointageOpen && !pointageChooserOpen && !aboutOpen && !closeWeekOpen && currentPage !== 2) render();
 }, 30000);
 })();
 </script>
