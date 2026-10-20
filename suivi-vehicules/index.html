@@ -305,13 +305,32 @@ details.panel[open] summary{margin-bottom:10px}
 .efrm input{width:100%;box-sizing:border-box;background:var(--ink);border:1px solid var(--line);color:var(--fg);border-radius:10px;padding:10px;font-size:15px;font-family:var(--f-body)}
 .efrm .full{grid-column:1/-1}
 .del{margin-top:10px}
-.modal{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:var(--scrim);padding:16px}
-.modal .box{background:var(--navy);border:1px solid var(--line);border-radius:18px;max-width:440px;width:100%;box-sizing:border-box;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:12px}
-.modal h4{margin:0;font-family:var(--f-disp);font-size:18px;letter-spacing:.05em;text-transform:uppercase}
-.modal .path{background:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13.5px;line-height:1.5;word-break:break-word}
-.modal .path b{font-family:var(--f-num);font-weight:600}
-.modal .muted{font-size:12.5px}
-.modal .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kmc .top{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.kmc .top b{font-family:var(--f-num);font-size:30px;font-weight:700;color:var(--volt-hi)}
+.kmc .top b small{font-size:13px;color:var(--fg-2);font-weight:500}
+.kmc .top span{font-size:12.5px;color:var(--fg-2)}
+.stack{display:flex;height:14px;border-radius:99px;overflow:hidden;background:var(--ink);border:1px solid var(--line);margin:10px 0 4px}
+.stack i{display:block;height:100%}
+.prow{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.prow:last-child{border-bottom:0}
+.prow .dot{width:10px;height:10px;border-radius:50%;background:var(--pc)}
+.prow .v{font-family:var(--f-num);text-align:right;white-space:nowrap}
+.prow .v small{display:block;color:var(--fg-3);font-size:11px}
+.prow small.why{display:block;color:var(--fg-3);font-size:11.5px}
+.tripbtn{font-size:15px}
+.ttot{background:var(--ink);border:1px solid var(--volt);border-radius:14px;padding:12px;text-align:center;margin:12px 0 6px;box-shadow:0 0 18px -6px var(--volt-glow)}
+.ttot b{display:block;font-family:var(--f-num);font-size:34px;font-weight:700;color:var(--volt-hi);line-height:1.1}
+.ttot small{color:var(--fg-2);font-size:12.5px}
+.tline{display:grid;grid-template-columns:auto auto 1fr auto;gap:10px;align-items:center;padding:9px 2px;border-bottom:1px solid var(--line);cursor:pointer;font-size:14px}
+.tline input[type=checkbox]{width:22px;height:22px;accent-color:var(--volt);margin:0}
+.tline .e{font-size:18px}
+.tline .t small{display:block;color:var(--fg-3);font-size:11.5px}
+.tline .v{font-family:var(--f-num);text-align:right;white-space:nowrap}
+.tline.off{opacity:.45}
+.tline.off .v{text-decoration:line-through}
+.tpe{display:grid;grid-template-columns:auto auto 1fr;gap:10px;align-items:center;padding:9px 2px}
+.tpe input[type=checkbox]{width:22px;height:22px;accent-color:var(--volt);margin:0}
+.tpe .field input{padding:9px 10px;font-size:16px}
 /* pavé numérique de l'app (comme l'app de calcul d'atelier) */
 body.typing nav.tabs{display:none}
 body.typing .app{padding-bottom:62vh}
@@ -328,6 +347,7 @@ body.typing .sheet .in{padding-bottom:calc(330px + env(safe-area-inset-bottom,0p
 .kp-grid .k0{grid-column:span 2}
 .kp-grid .kok{background:linear-gradient(160deg,var(--grad1),var(--grad2));color:var(--on-acc);border-color:var(--volt);font:700 17px var(--f-disp);letter-spacing:.04em}
 input.kpon{border-color:var(--volt)!important;box-shadow:0 0 0 3px var(--volt-glow)!important}
+.sv-btn.sv-imp{color:var(--ok)} /* bouton Importer de la sauvegarde commune, lisible sur fond sombre */
 </style>
 </head>
 <body>
@@ -354,6 +374,8 @@ input.kpon{border-color:var(--volt)!important;box-shadow:0 0 0 3px var(--volt-gl
     <div id="priceCards" style="display:flex;flex-direction:column;gap:10px"></div>
     <div class="h2">Chiffres</div>
     <div id="vehCards" style="display:flex;flex-direction:column;gap:12px"></div>
+    <div class="card kmc" id="kmCard"></div>
+    <button class="btn primary tripbtn" type="button" id="btnTrip">🧮 Combien coûte un trajet ?</button>
     <div class="h2">Km par mois</div>
     <div class="card">
       <div class="chartbox"><canvas id="cMonth"></canvas></div>
@@ -407,16 +429,10 @@ input.kpon{border-color:var(--volt)!important;box-shadow:0 0 0 3px var(--volt-gl
   <!-- PLUS -->
   <section class="view" id="v-more" hidden>
     <div class="h2">Sauvegarde</div>
-    <button class="btn primary" type="button" id="btnSave">⬇ Sauvegarder</button>
-    <button class="btn" type="button" id="btnImport">⬆ Importer une sauvegarde</button>
+    <div id="svBox"></div>
+    <button class="btn" type="button" id="btnImport">📄 Importer un ancien fichier</button>
     <input type="file" id="fileImport" accept=".txt,.json,.xlsx,.xls,text/plain,application/json" hidden>
-    <div class="card" style="display:flex;flex-direction:column;gap:10px">
-      <label class="switch"><span>Sauvegarde auto 1×/jour<br><small style="color:var(--fg-3)">au premier enregistrement de la journée</small></span><input type="checkbox" id="autoBk"></label>
-      <div class="cap" id="bkInfo" style="margin:0"></div>
-      <div class="cap" id="bkDir" style="margin:0"></div>
-      <button class="btn" type="button" id="btnDir">📁 Choisir le dossier de sauvegarde</button>
-    </div>
-    <div class="cap">Fichier texte : <span style="font-family:var(--f-num)">Vehicules_sauvegarde_AAAA-MM-JJ.txt</span>. Pour tout récupérer (nouveau téléphone…), importe la dernière sauvegarde. Tu peux toujours importer aussi ton fichier <span style="font-family:var(--f-num)">Vehicules.xlsx</span> d'origine.</div>
+    <div class="cap">Ancien fichier = une sauvegarde d'avant la v1.5 (<span style="font-family:var(--f-num)">Vehicules_sauvegarde_AAAA-MM-JJ.txt</span>) ou ton fichier <span style="font-family:var(--f-num)">Vehicules.xlsx</span> d'origine. Tes données actuelles sont d'abord gardées dans « Copies avant import ».</div>
     <div class="h2" id="setTitle">Réglages</div>
     <div class="card">
       <div class="efrm">
@@ -445,10 +461,23 @@ input.kpon{border-color:var(--volt)!important;box-shadow:0 0 0 3px var(--volt-gl
       <div class="efrm">
         <input id="eDate" type="date" aria-label="Date">
         <input id="eAmt" type="text" inputmode="decimal" autocomplete="off" placeholder="Montant CHF" aria-label="Montant CHF">
-        <input id="eDesc" class="full" type="text" placeholder="Ex. vidange, plaquettes, assurance…" aria-label="Description">
+        <input id="eDesc" class="full" type="text" placeholder="Ex. vidange, plaquettes, pneus…" aria-label="Description">
+        <div class="seg full" id="eKind"><button type="button" data-k="E">🔧 Entretien</button><button type="button" data-k="P">🛞 Pneus</button></div>
       </div>
       <button class="btn primary" type="button" id="eAdd" style="margin-top:10px">Ajouter</button>
       <div class="list" id="entList" style="margin-top:6px"></div>
+    </div>
+    <div class="h2" id="fixTitle">Frais fixes et achat</div>
+    <div class="card">
+      <div class="fields" id="fixForm">
+        <div class="field full"><label for="xBuy">📉 Prix d'achat CHF</label><input id="xBuy" data-x="buy" type="text" inputmode="decimal" autocomplete="off" placeholder="0"></div>
+        <div class="field"><label for="xAss">🛡️ Assurance CHF/an</label><input id="xAss" data-x="ass" type="text" inputmode="decimal" autocomplete="off" placeholder="0"></div>
+        <div class="field"><label for="xImp">🧾 Impôt, plaques /an</label><input id="xImp" data-x="imp" type="text" inputmode="decimal" autocomplete="off" placeholder="0"></div>
+        <div class="field"><label for="xVig">🛣️ Vignette CHF/an</label><input id="xVig" data-x="vig" type="text" inputmode="decimal" autocomplete="off" placeholder="40"></div>
+        <div class="field"><label for="xGar">🅿️ Garage, parking /an</label><input id="xGar" data-x="gar" type="text" inputmode="decimal" autocomplete="off" placeholder="0"></div>
+        <div class="field full"><label for="xAut">➕ Autre CHF/an</label><input id="xAut" data-x="aut" type="text" inputmode="decimal" autocomplete="off" placeholder="0"></div>
+      </div>
+      <div class="cap" id="fixCap"></div>
     </div>
     <div class="h2">BMW 1200 GS</div>
     <details class="panel"><summary>🔩 Couples de serrage</summary><div class="tblwrap" id="tblCouples"></div></details>
@@ -457,7 +486,7 @@ input.kpon{border-color:var(--volt)!important;box-shadow:0 0 0 3px var(--volt-gl
     <button class="btn danger" type="button" id="btnWipe">Effacer toutes les données</button>
     <div class="h2">À propos</div>
     <div class="card">
-      <div class="kv"><span>Version</span><span>1.4</span><span>Données</span><span>Dans ce téléphone</span><span>Pleins notés</span><span id="abN">–</span></div>
+      <div class="kv"><span>Version</span><span id="abV">–</span><span>Données</span><span>Dans ce téléphone</span><span>Pleins notés</span><span id="abN">–</span></div>
       <dl class="glo">
         <dt>Plein complet / partiel</dt><dd>Complet = réservoir rempli à ras. La conso se calcule de plein complet à plein complet, en additionnant les partiels entre deux.</dd>
         <dt>Conso L/100 km</dt><dd>Litres versés depuis le dernier plein complet ÷ km parcourus × 100. Impossible si des litres manquent entre deux.</dd>
@@ -466,6 +495,10 @@ input.kpon{border-color:var(--volt)!important;box-shadow:0 0 0 3px var(--volt-gl
         <dt>Valeurs ignorées</dt><dd>Un plein est écarté des moyennes s'il est impossible : prix sous 1,20 ou au-dessus de 3,00 CHF/L, plus de litres que le réservoir, conso sous 3,5 ou au-dessus de 9 L/100. Plus de 1,3 × l'autonomie entre deux pleins = plein(s) oublié(s) : les km comptent, mais pas pour la conso ni les records. « Compter quand même » force la prise en compte.</dd>
         <dt>Km par mois</dt><dd>Les km entre deux pleins sont répartis jour par jour sur les mois concernés.</dd>
         <dt>Taux € → CHF</dt><dd>Taux de référence de la Banque centrale européenne du jour du plein, chargé automatiquement. Tu peux le corriger.</dd>
+        <dt>💸 Coût réel au km</dt><dd>Tout ce que coûte le véhicule, ramené au km : carburant (conso moyenne × prix moyen des 12 derniers mois), entretien et pneus des 12 derniers mois ÷ km faits sur ces 12 mois, frais fixes de l'année ÷ km par an, et amortissement.</dd>
+        <dt>📉 Amortissement</dt><dd>Prix d'achat ÷ km faits depuis le premier plein noté. Plus tu roules, moins chaque km coûte.</dd>
+        <dt>🧮 Coût d'un trajet</dt><dd>Km du trajet × coût au km de chaque poste coché, plus le péage ou parking du jour si tu le coches. Tes cases restent comme tu les as laissées.</dd>
+        <dt>💾 Sauvegarde Drive</dt><dd>Chaque sauvegarde est un nouveau fichier qui contient tout l'historique. Le plus récent suffit pour revenir à n'importe quelle version.</dd>
         <dt>Stations et pays</dt><dd>Classement du prix moyen au litre (en CHF) par station et par pays, pour le véhicule du mode choisi.</dd>
       </dl>
     </div>
@@ -525,7 +558,206 @@ input.kpon{border-color:var(--volt)!important;box-shadow:0 0 0 3px var(--volt-gl
   </div>
 </div>
 <div class="toast" id="toast"></div>
-<div class="modal" id="modal" hidden><div class="box" id="modalBox" role="dialog" aria-modal="true"></div></div>
+<div class="sheet" id="trip" role="dialog" aria-label="Coût d'un trajet">
+  <div class="in">
+    <div class="grab"></div>
+    <h3><span>🧮 Coût d'un trajet</span> <button type="button" id="tripClose" aria-label="Fermer">×</button></h3>
+    <div class="vpick" id="tripV"></div>
+    <div class="fields"><div class="field full"><label for="tripKm">Km du trajet</label><input id="tripKm" type="text" inputmode="numeric" autocomplete="off" placeholder="100"></div></div>
+    <div class="ttot"><b id="tripTot">–</b><small id="tripSub"></small></div>
+    <div id="tripList"></div>
+    <div class="tpe"><input type="checkbox" id="tripPeOn" aria-label="Compter le péage ou parking"><span class="e">🎫</span><div class="field"><label for="tripPe">Péage, parking du jour CHF</label><input id="tripPe" type="text" inputmode="decimal" autocomplete="off" placeholder="0"></div></div>
+    <div class="cap" id="tripCap"></div>
+  </div>
+</div>
+<script>
+/* === SAUVEGARDE ATELIER v2 — début (copie identique dans chaque app, source : /mnt/project-files/sauvegarde-drive) === */
+/* Sauvegarde Drive commune aux apps d'atelier.
+   - 💾 Sauvegarder : fichier .txt daté (App_AAAA-MM-JJ_HHhMM.txt) → menu Partager d'Android (Drive), sinon téléchargement.
+     v2 (choix d'Adi 6b) : chaque fichier contient TOUT l'historique des sauvegardes de l'app (le dernier fichier suffit).
+     Historique gardé dans le téléphone (<cle>-historique), une entrée par sauvegarde dont les données ont changé.
+   - 📂 Importer : lit le .txt (v1 ou v2), aperçu, choix de la version à remettre (la plus récente par défaut), confirmation ;
+     les données actuelles partent d'abord dans « Copies avant import » ; l'historique du fichier rejoint celui du téléphone.
+   - Copies avant import : jamais effacées, on peut revenir à n'importe laquelle (ce retour fait lui-même une copie).
+   - Rappel : bandeau si aucune sauvegarde depuis 7 jours et que les données ont changé depuis.
+   Usage :
+     Sauvegarde.init({ app:"PorteOutils", nom:"Porte-outils", cle:"porteoutils-cnc-v1", version:"1.1",
+       lire:() => donnees, ecrire:d => {...}, resume:d => "12 porte-outils…", valider:d => null|"erreur", vide:d => true|false });
+     Sauvegarde.panneau(element)   // carte avec boutons, aperçu d'import, copies
+     Sauvegarde.bandeau()          // HTML du rappel ("" si pas besoin)
+     Sauvegarde.copieAvant(raison) // à appeler avant tout autre remplacement des données (ex. import Excel) ; false = échec
+*/
+const Sauvegarde = (() => {
+  const MARQUE = "---- DONNÉES (ne pas modifier sous cette ligne) ----";
+  let C = null;
+  const p2 = n => String(n).padStart(2, "0");
+  const ech = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const dateFr = d => `${p2(d.getDate())}.${p2(d.getMonth()+1)}.${d.getFullYear()} ${p2(d.getHours())}:${p2(d.getMinutes())}`;
+  const empreinte = s => { let h = 2166136261; for(let i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
+  const kEtat = () => C.cle + "-sauvegarde", kCopies = () => C.cle + "-copies", kHist = () => C.cle + "-historique";
+  const lireLS = (k, def) => { try{ const v = JSON.parse(localStorage.getItem(k)); return v ?? def; }catch(e){ return def; } };
+  const ecrireLS = (k, v) => { try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } };
+  const etat = () => lireLS(kEtat(), {derniere:null, empreinte:null});
+  const copies = () => lireLS(kCopies(), []);
+  const historique = () => lireLS(kHist(), []);
+  // réunit deux historiques (clé = date), trié du plus ancien au plus récent
+  function fusion(a, b){ const m = new Map(); [...a, ...b].forEach(h => h && h.date && h.donnees && m.set(h.date, h)); return [...m.values()].sort((x, y) => x.date.localeCompare(y.date)); }
+  const actuel = () => JSON.stringify(C.lire());
+  let msgT;
+  function message(t, erreur){
+    let m = document.getElementById("sv-msg");
+    if(!m){ m = document.createElement("div"); m.id = "sv-msg"; m.className = "sv-msg"; m.setAttribute("role","status"); document.body.appendChild(m); }
+    m.textContent = t; m.classList.toggle("sv-err", !!erreur); m.classList.add("on"); clearTimeout(msgT); msgT = setTimeout(() => m.classList.remove("on"), 3200);
+  }
+
+  function init(cfg){ C = Object.assign({version:"", resume:() => "", valider:() => null, vide:() => false}, cfg); style(); }
+
+  function nomFichier(d){ return `${C.app}_${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}_${p2(d.getHours())}h${p2(d.getMinutes())}.txt`; }
+  function contenu(d, donnees, hist){
+    const env = {format:"sauvegarde-atelier", formatVersion:2, app:C.app, nom:C.nom, appVersion:C.version, date:d.toISOString(), donnees, historique:hist};
+    return ["SAUVEGARDE ATELIER", `App : ${C.nom}${C.version ? " v" + C.version : ""}`, `Date : ${dateFr(d)}`,
+      `Contenu : ${C.resume(donnees)}`, `Historique : ${hist.length} sauvegarde(s), toutes dans ce fichier (le plus récent fichier suffit) :`,
+      ...hist.slice().reverse().map(h => `  ${dateFr(new Date(h.date))}  ${h.resume}`),
+      "Pour remettre ces données : dans l'app, bouton 📂 Importer.", "", MARQUE, JSON.stringify(env)].join("\n");
+  }
+
+  async function sauvegarder(){
+    const d = new Date(), donnees = C.lire(), nom = nomFichier(d);
+    let hist = historique();
+    const der = hist[hist.length - 1];
+    if(!der || empreinte(JSON.stringify(der.donnees)) !== empreinte(JSON.stringify(donnees))) hist = fusion(hist, [{date:d.toISOString(), resume:C.resume(donnees), donnees}]);
+    const txt = contenu(d, donnees, hist);
+    const fichier = new File([txt], nom, {type:"text/plain"});
+    let fait = false;
+    if(navigator.canShare && navigator.share){
+      let ok = false; try{ ok = navigator.canShare({files:[fichier]}); }catch(e){}
+      if(ok){
+        try{ await navigator.share({files:[fichier], title:nom}); fait = true; message("Sauvegarde envoyée : " + nom); }
+        catch(e){ if(e && e.name === "AbortError"){ message("Sauvegarde annulée"); return false; } }
+      }
+    }
+    if(!fait){
+      const a = document.createElement("a"); a.href = URL.createObjectURL(fichier); a.download = nom;
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+      fait = true; message("Fichier enregistré dans Téléchargements : " + nom);
+    }
+    ecrireLS(kEtat(), {derniere:d.toISOString(), empreinte:empreinte(JSON.stringify(donnees))});
+    if(!ecrireLS(kHist(), hist)) message("Fichier envoyé, mais mémoire du téléphone pleine : l'historique n'a pas pu y être gardé.", true);
+    return true;
+  }
+
+  async function lireFichier(f){
+    const t = await f.text();
+    const i = t.indexOf(MARQUE);
+    let env;
+    try{ env = JSON.parse(i >= 0 ? t.slice(i + MARQUE.length) : t); }catch(e){ throw new Error("ce n'est pas une sauvegarde lisible"); }
+    if(!env || env.format !== "sauvegarde-atelier" || !env.donnees) throw new Error("ce n'est pas une sauvegarde d'atelier");
+    if(env.app !== C.app) throw new Error(`c'est une sauvegarde de « ${env.nom || env.app} », pas de « ${C.nom} »`);
+    const err = C.valider(env.donnees); if(err) throw new Error(err);
+    const r = C.resume;
+    env.versions = fusion(Array.isArray(env.historique) ? env.historique : [], [{date:env.date, resume:r(env.donnees), donnees:env.donnees}])
+      .filter(h => !C.valider(h.donnees)).reverse(); // plus récente d'abord
+    return env;
+  }
+
+  function copieAvant(raison){
+    const l = copies();
+    l.unshift({date:new Date().toISOString(), raison, resume:C.resume(C.lire()), donnees:C.lire()});
+    return ecrireLS(kCopies(), l);
+  }
+  function remplacer(donnees, raison){
+    if(!copieAvant(raison)){ message("Mémoire du téléphone pleine : copie impossible, rien n'a été remplacé. Sauvegarde d'abord sur Drive.", true); return false; }
+    C.ecrire(donnees); return true;
+  }
+
+  function bandeau(){
+    if(!C) return "";
+    const e = etat(), donnees = actuel();
+    if(C.vide(C.lire())) return "";
+    const jours = e.derniere ? Math.floor((Date.now() - new Date(e.derniere).getTime()) / 864e5) : null;
+    if(jours !== null && (jours < 7 || e.empreinte === empreinte(donnees))) return "";
+    return `<div class="sv-bandeau"><span>💾 ${jours === null ? "Jamais sauvegardé sur Drive." : `Pas de sauvegarde depuis ${jours} jours.`} Tes données ne sont que dans ce téléphone.</span><button type="button" class="sv-btn sv-save" onclick="Sauvegarde.sauvegarder().then(ok=>ok&&this.closest('.sv-bandeau').remove())">💾 Sauvegarder</button></div>`;
+  }
+
+  function panneau(el){
+    const e = etat(), l = copies(), d = e.derniere ? new Date(e.derniere) : null;
+    const change = d && e.empreinte !== empreinte(actuel());
+    el.innerHTML = `<div class="sv-carte">
+      <div class="sv-titre">💾 Sauvegarde Drive</div>
+      <div class="sv-info">Dernière sauvegarde : <b>${d ? dateFr(d) : "jamais"}</b>${change ? " · modifié depuis" : ""}</div>
+      <div class="sv-btns"><button type="button" class="sv-btn sv-save" data-sv="save">💾 Sauvegarder</button>
+        <label class="sv-btn sv-imp">📂 Importer<input type="file" accept=".txt,.json,text/plain,application/json" hidden></label></div>
+      <div class="sv-aide">Choisis Drive dans le menu Partager, dossier <b>Sauvegardes atelier</b>. Chaque fichier contient tout l'historique (${historique().length} sauvegarde(s)) : le plus récent suffit.</div>
+      <div class="sv-apercu" hidden></div>
+      <details class="sv-copies"><summary>Copies avant import (${l.length})</summary>
+        ${l.length ? l.map((c, i) => `<div class="sv-copie"><div><b>${dateFr(new Date(c.date))}</b> · ${ech(c.raison)}<br><small>${ech(c.resume)}</small></div><button type="button" class="sv-btn" data-sv="rev" data-i="${i}">Revenir</button></div>`).join("")
+          : `<div class="sv-aide">Aucune pour l'instant. Avant chaque import, tes données actuelles sont gardées ici, jamais effacées.</div>`}
+      </details></div>`;
+    const ap = el.querySelector(".sv-apercu"), inp = el.querySelector("input[type=file]");
+    el.querySelector('[data-sv="save"]').onclick = () => sauvegarder().then(() => panneau(el));
+    inp.onchange = async () => {
+      const f = inp.files[0]; if(!f) return;
+      let env;
+      try{ env = await lireFichier(f); }catch(err){ inp.value = ""; message("Import impossible : " + err.message, true); return; }
+      ap.hidden = false;
+      const v = env.versions;
+      ap.innerHTML = `<div><b>${ech(f.name)}</b></div>
+        <div>Sauvegarde du <b>${dateFr(new Date(env.date))}</b>${env.appVersion ? ` (v${ech(env.appVersion)})` : ""} · ${v.length} version(s) dans le fichier</div>
+        <label class="sv-aide">Version à remettre
+          <select class="sv-choix">${v.map((h, i) => `<option value="${i}">${dateFr(new Date(h.date))} · ${ech(h.resume)}${i ? "" : " (la plus récente)"}</option>`).join("")}</select></label>
+        <div>Actuellement : ${ech(C.resume(C.lire()))}</div>
+        <div class="sv-aide">Tes données actuelles seront d'abord gardées dans « Copies avant import ».</div>
+        <div class="sv-btns"><button type="button" class="sv-btn sv-ok" data-sv="ok">Remplacer mes données</button><button type="button" class="sv-btn" data-sv="no">Annuler</button></div>`;
+      ap.querySelector('[data-sv="no"]').onclick = () => { inp.value = ""; ap.hidden = true; };
+      ap.querySelector('[data-sv="ok"]').onclick = () => {
+        const h = v[+ap.querySelector(".sv-choix").value] || v[0];
+        if(remplacer(h.donnees, `import ${f.name} (version du ${dateFr(new Date(h.date))})`)){
+          ecrireLS(kHist(), fusion(historique(), v));
+          message("Données importées"); panneau(el);
+        }
+      };
+    };
+    el.querySelectorAll('[data-sv="rev"]').forEach(b => b.onclick = () => {
+      const c = copies()[+b.dataset.i];
+      if(!c || !confirm(`Revenir aux données du ${dateFr(new Date(c.date))} ?\n(${c.resume})\nTes données actuelles seront gardées comme nouvelle copie.`)) return;
+      if(remplacer(c.donnees, "retour à la copie du " + dateFr(new Date(c.date)))){ message("Données remises"); panneau(el); }
+    });
+  }
+
+  function style(){
+    if(document.getElementById("sv-style")) return;
+    const s = document.createElement("style"); s.id = "sv-style";
+    s.textContent = `
+.sv-carte [hidden]{display:none!important}
+.sv-carte{border:2px solid #1f8a5b;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px;background:var(--surface,transparent)}
+.sv-titre{font-weight:700;font-size:18px}
+.sv-info,.sv-aide{font-size:14px;opacity:.85}
+.sv-btns{display:flex;gap:12px;flex-wrap:wrap}
+.sv-btn{flex:1 1 140px;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:10px 16px;border-radius:10px;
+  border:1px solid #1f8a5b;background:transparent;color:inherit;font:inherit;font-weight:700;cursor:pointer}
+.sv-btn.sv-save{background:linear-gradient(135deg,#1f8a5b,#2a9d8f);border-color:transparent;color:#fff}
+.sv-btn.sv-imp{color:#1f8a5b}
+.sv-btn.sv-ok{background:#c0392b;border-color:#c0392b;color:#fff}
+.sv-apercu{border:2px solid #c0392b;border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:6px}
+.sv-choix{display:block;width:100%;margin-top:4px;min-height:48px;font:inherit}
+.sv-copies summary{cursor:pointer;font-weight:600;padding:6px 0}
+.sv-copie{display:flex;gap:12px;align-items:center;justify-content:space-between;border-top:1px solid rgba(127,127,127,.3);padding:8px 0}
+.sv-copie .sv-btn{flex:0 0 auto;min-height:44px}
+.sv-bandeau{border:2px solid #1f8a5b;border-radius:10px;padding:10px 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.sv-bandeau span{flex:1 1 200px}
+.sv-bandeau .sv-btn{flex:0 0 auto}
+.sv-msg{position:fixed;left:16px;right:16px;bottom:calc(90px + env(safe-area-inset-bottom,0px));z-index:50;background:#1f8a5b;color:#fff;border-radius:10px;
+  padding:14px 16px;font-weight:600;text-align:center;opacity:0;transform:translateY(8px);transition:.2s;pointer-events:none}
+.sv-msg.on{opacity:1;transform:none}
+.sv-msg.sv-err{background:#c0392b}
+@media (prefers-color-scheme:dark){.sv-btn.sv-imp{color:#5cd69a}}`;
+    document.head.appendChild(s);
+  }
+
+  return {init, historique, sauvegarder, panneau, bandeau, copieAvant, remplacer, lireFichier, nomFichier};
+})();
+/* === SAUVEGARDE ATELIER v2 — fin === */
+</script>
 
 
 <script>
@@ -536,12 +768,13 @@ const THEME = {
   b:{K:"#E7EDF3",B:"#8FB3D9",txt:"#A8B6C5",grid:"rgba(143,179,217,.12)",tipBg:"#25323F",tipFg:"#E7EDF3",tipBd:"#8FB3D9",track:"#34455A",needle:"#E7EDF3",muted:"#738599",bad:"#F07884",warn:"#E8C062",acc:"#8FB3D9"}};
 let MODE=0; try{ const m=localStorage.getItem("sv-mode"); if(m==="1") MODE=1; }catch(e){}
 let T=THEME.k;
-const APP_VERSION="1.4";
+const APP_VERSION="1.5";
 const KEY="suivi-vehicules-v1";
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}}, lsSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
-let STATE={fills:[],tyres:[],ent:[],autoBackup:true,lastBackup:null,rates:{},range:[925,350],tank:[60,20]};
+let STATE={fills:[],tyres:[],ent:[],rates:{},range:[925,350],tank:[60,20],buy:[3500,10000],fixed:[{},{}],trip:null};
 try{ const raw=lsGet(KEY); if(raw) STATE=Object.assign(STATE,JSON.parse(raw)); }catch(e){}
 let fills=STATE.fills; if(!STATE.range) STATE.range=[925,350]; if(!STATE.tank) STATE.tank=[60,20];
+if(!STATE.buy) STATE.buy=[3500,10000]; if(!STATE.fixed) STATE.fixed=[{},{}]; delete STATE.autoBackup; delete STATE.lastBackup;
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 fills.forEach(f=>{ if(!f.id) f.id=uid(); f.opts=f.opts||{}; f.ctry=f.ctry||"CH"; });
 function persist(){
@@ -880,12 +1113,7 @@ function renderInsight(){
   $("#insight2").innerHTML = `<div class="big">${head}</div>
     <p>Moto au garage : le Kangoo fait <b>${fmt(g.k)} km/mois</b>. Les mois où la moto roule beaucoup : <b>${fmt(b.k)} km/mois</b> (${b.k>=g.k?"+":"−"}${fmt(Math.abs(b.k/g.k-1)*100)} %), mais <b>${fmt((b.k+b.b)/(g.k+g.b)*100-100)} % de km en plus</b> au total.</p>`;
 }
-function renderBanner(){
-  const box=$("#bannerBox"); if(!fills.length){ box.innerHTML=""; return; }
-  const lb=STATE.lastBackup, days=lb?TODAY-day(lb):999;
-  if(days>=7){ box.innerHTML=`<div class="banner"><span>${lb?`Dernière sauvegarde il y a ${days} jours.`:"Tu n'as encore jamais fait de sauvegarde."}</span><button type="button" id="bnSave">Sauvegarder</button></div>`; $("#bnSave").onclick=()=>exportXlsx(false); }
-  else box.innerHTML="";
-}
+function renderBanner(){ $("#bannerBox").innerHTML=Sauvegarde.bandeau(); }
 function renderHome(){
   $("#modesw").innerHTML=[0,1].map(i=>`<button type="button" aria-pressed="${i===MODE}" data-i="${i}">${[car,bike][i]("currentColor")}${V[i].n}</button>`).join("");
   $("#modesw").querySelectorAll("button").forEach(bt=>bt.onclick=()=>{ if(+bt.dataset.i!==MODE) setMode(+bt.dataset.i); });
@@ -904,6 +1132,7 @@ function renderHome(){
       <div class="kpis"><div class="kpi"><b>${fmt(s.conso,2)}</b><small>L / 100 km</small></div><div class="kpi"><b>${fmt(s.c100,1)}</b><small>CHF / 100 km</small></div><div class="kpi"><b>${fmt(s.kmY)}</b><small>km ${new Date().getFullYear()}</small></div></div>
       <div class="kpis" style="border-top:1px solid var(--line)"><div class="kpi"><b>${fmt(s.pL,3)}</b><small>CHF / L moyen</small></div><div class="kpi"><b>${fmt(s.chf)}</b><small>CHF carburant</small></div><div class="kpi"><b>${fmt(s.suivi)}</b><small>km suivis</small></div></div>
       <div class="foot"><span>Dernier plein : ${dfr(s.last.d)}</span>${s.alerts?`<span class="alert">⚠ ${s.alerts} à compléter</span>`:`<span>✓ complet</span>`}</div></div>`;
+  renderKmCard();
   renderInsight();
   const n=24, M=A.months.slice(-n);  mk("cMonth",{type:"bar",data:{labels:M.map(m=>MOIS[m.getMonth()]+" "+String(m.getFullYear()).slice(2)),
     datasets:[{label:V[i].n,data:A.mKm[i].slice(-n).map(Math.round),backgroundColor:V[i].c,borderRadius:4}]},
@@ -915,6 +1144,81 @@ function renderHome(){
     options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tip,callbacks:{label:c=>` ${c.dataset.label} : ${fmt(c.parsed.y,2)} L/100`}}},
       scales:{x:{grid:{display:false},ticks:{maxTicksLimit:4,maxRotation:0,callback:function(v){return this.getLabelForValue(v).split(" ").slice(1).join(" ")}}},y:{ticks:{callback:v=>fmt(v,1)}}}}});
   $("#capHomeConso").textContent=`${pts.length} derniers pleins complets · moyenne ${fmt(s.conso,2)} L/100 km (pointillé).`;
+}
+
+// ---------- 💸 coût réel au km et coût d'un trajet
+const POSTES=[["carb","💧","Carburant","#4FA8FF"],["ent","🔧","Entretien","#F5A623"],["pneu","🛞","Pneus","#A58CFF"],["ass","🛡️","Assurance","#3DD39B"],["imp","🧾","Impôt / plaques","#E8C062"],
+  ["vig","🛣️","Vignette","#FF7AA8"],["gar","🅿️","Garage / parking","#6FD3DC"],["aut","➕","Autre","#9AA0A8"],["amo","📉","Amortissement","#FF6B5A"]];
+const FIXES=["ass","imp","vig","gar","aut"];
+const isTyre=e=>e.k?e.k==="P":/pneu/i.test(e.t||"");
+function costs(v){ // coût au km de chaque poste (CHF/km) ; null = pas encore calculable
+  const s=A.stat[v], l=A.per[v]; if(!s||l.length<2) return null;
+  const first=l.reduce((m,f)=>f.d<m.d||(f.d===m.d&&f.km<m.km)?f:m,l[0]);
+  const span=Math.max(30,Math.min(365,TODAY-day(first.d))); // 12 derniers mois, ou moins si l'historique est plus court
+  let kmW=null; try{ kmW=odoAt(v,dOf(TODAY))-odoAt(v,dOf(TODAY-span)); }catch(e){}
+  if(!(kmW>0)) kmW=null;
+  const kmY=kmW?kmW*365/span:null;
+  const pr=l.filter(f=>f.Pok&&TODAY-day(f.d)<=365), pL=pr.length?pr.reduce((t,f)=>t+f.P,0)/pr.reduce((t,f)=>t+f.L,0):s.pL;
+  const ents=STATE.ent.filter(e=>e.v===v&&e.d&&TODAY-day(e.d)<=span&&+e.m>0);
+  const sum=a=>a.reduce((t,e)=>t+(+e.m),0), F=STATE.fixed[v]||{}, buy=+STATE.buy[v]||0, kmBuy=Math.max(0,s.odo-first.km);
+  const r={carb:s.conso&&pL?s.conso*pL/100:null,
+    ent:kmW&&sum(ents.filter(e=>!isTyre(e)))>0?sum(ents.filter(e=>!isTyre(e)))/kmW:null, pneu:kmW&&sum(ents.filter(isTyre))>0?sum(ents.filter(isTyre))/kmW:null,
+    amo:buy>0&&kmBuy>0?buy/kmBuy:null};
+  FIXES.forEach(k=>r[k]=kmY&&+F[k]>0?+F[k]/kmY:null);
+  const tot=POSTES.reduce((t,p)=>t+(r[p[0]]||0),0);
+  return {r,tot,pL,kmW,kmY,span,first,buy,kmBuy,fixY:FIXES.reduce((t,k)=>t+(+F[k]||0),0)};
+}
+function renderKmCard(){
+  const v=MODE, c=costs(v), box=$("#kmCard");
+  if(!c){ box.innerHTML=`<div class="funh"><span class="em">💸</span>Coût réel au km</div><div class="muted">Il faut au moins deux pleins de ce véhicule.</div>`; return; }
+  const tot=c.tot||1;
+  box.innerHTML=`<div class="funh"><span class="em">💸</span>Coût réel au km</div>
+    <div class="top"><b>${fmt(c.tot,2)} <small>CHF / km</small></b><span>carburant seul ${fmt(c.r.carb,2)} CHF/km</span></div>
+    <div class="stack">${POSTES.filter(p=>c.r[p[0]]>0).map(p=>`<i style="width:${(c.r[p[0]]/tot*100).toFixed(1)}%;background:${p[3]}" title="${p[2]}"></i>`).join("")}</div>
+    ${POSTES.map(p=>{ const x=c.r[p[0]]; return `<div class="prow" style="--pc:${p[3]}"><span class="dot"></span><span>${p[1]} ${p[2]}${x==null?`<small class="why">${whyNot(p[0],c)}</small>`:""}</span><span class="v">${x==null?"–":fmt(x,3)+" CHF/km"}${x!=null?`<small>${fmt(x*100,2)} CHF / 100 km</small>`:""}</span></div>`; }).join("")}
+    <div class="cap">Entretien et pneus : ${c.span<365?`depuis le premier plein (${c.span} j)`:"12 derniers mois"} ÷ ${fmt(c.kmW)} km. Frais fixes ÷ ≈ ${fmt(c.kmY)} km par an. Amortissement : ${fmt(c.buy)} CHF ÷ ${fmt(c.kmBuy)} km depuis le ${dfr(c.first.d)}, ça baisse à chaque km.</div>`;
+}
+function whyNot(k,c){
+  if(k==="carb") return "pas encore de conso calculée";
+  if(k==="ent"||k==="pneu") return `rien de noté sur ${c.span<365?"la période":"12 mois"} (Plus → Entretien)`;
+  if(k==="amo") return c.buy>0?"pas encore assez de km":"prix d'achat pas noté (Plus → Frais fixes)";
+  return "pas noté (Plus → Frais fixes)";
+}
+const TRIP0={v:0,km:100,pe:0,peOn:false,chk:{carb:true,ent:true,pneu:true,ass:true,imp:true,vig:true,gar:true,aut:true,amo:true}};
+function trip(){ if(!STATE.trip) STATE.trip=JSON.parse(JSON.stringify(TRIP0)); STATE.trip.chk=Object.assign({},TRIP0.chk,STATE.trip.chk); return STATE.trip; }
+function openTrip(){ const t=trip(); t.v=MODE;
+  $("#tripKm").value=t.km?String(t.km):""; $("#tripPe").value=t.pe?String(t.pe).replace(".",","):""; $("#tripPeOn").checked=!!t.peOn;
+  renderTrip(); applyPad(); $("#scrim").classList.add("on"); $("#trip").classList.add("on"); }
+function closeTrip(){ if(kpTarget) closePad(); $("#trip").classList.remove("on"); if(!$("#sheet").classList.contains("on")) $("#scrim").classList.remove("on"); }
+function renderTrip(){
+  const t=trip(), v=t.v, c=costs(v), km=nv($("#tripKm"));
+  $("#tripV").innerHTML=[0,1].map(i=>`<button type="button" style="--c:${V[i].c}" aria-pressed="${i===v}" data-i="${i}" ${A.stat[i]?"":"disabled"}>${icon(i)}${V[i].n}</button>`).join("");
+  $("#tripV").querySelectorAll("button").forEach(b=>b.onclick=()=>{ t.v=+b.dataset.i; persist(); renderTrip(); });
+  const k=isNaN(km)?0:km; let sum=0;
+  $("#tripList").innerHTML=POSTES.map(p=>{ const x=c?c.r[p[0]]:null, on=!!t.chk[p[0]], amt=x!=null?x*k:null; if(on&&amt!=null) sum+=amt;
+    return `<label class="tline ${on?"":"off"}"><input type="checkbox" data-k="${p[0]}" ${on?"checked":""}><span class="e">${p[1]}</span><span class="t">${p[2]}<small>${x!=null?fmt(x,3)+" CHF/km":c?whyNot(p[0],c):"–"}</small></span><span class="v">${amt!=null?fmt(amt,2)+" CHF":"–"}</span></label>`; }).join("");
+  $("#tripList").querySelectorAll("input[type=checkbox]").forEach(b=>b.onchange=()=>{ t.chk[b.dataset.k]=b.checked; persist(); renderTrip(); });
+  const pe=nv($("#tripPe")); if(t.peOn&&!isNaN(pe)) sum+=pe;
+  $("#tripTot").textContent=k>0?fmt(sum,2)+" CHF":"–";
+  const carb=c&&c.r.carb!=null?c.r.carb*k:null, L=A.stat[v]&&A.stat[v].conso?A.stat[v].conso*k/100:null;
+  $("#tripSub").innerHTML=k>0?`${fmt(k)} km en ${V[v].n} · ${fmt(sum/k,2)} CHF/km${carb!=null?`<br>carburant seul ${fmt(carb,2)} CHF · ≈ ${fmt(L,1)} L`:""}`:"Tape les km du trajet";
+  $("#tripCap").textContent="Décoche ce que tu ne veux pas compter : tes choix restent pour la prochaine fois.";
+}
+$("#btnTrip").onclick=openTrip; $("#tripClose").onclick=closeTrip;
+$("#tripKm").addEventListener("input",()=>{ const k=nv($("#tripKm")); trip().km=isNaN(k)?0:k; persist(); renderTrip(); });
+$("#tripPe").addEventListener("input",()=>{ const p=nv($("#tripPe")); const t=trip(); t.pe=isNaN(p)?0:p; if(t.pe>0) t.peOn=true; $("#tripPeOn").checked=t.peOn; persist(); renderTrip(); });
+$("#tripPeOn").onchange=e=>{ trip().peOn=e.target.checked; persist(); renderTrip(); };
+function renderFixed(){
+  const v=MODE, F=STATE.fixed[v]||(STATE.fixed[v]={});
+  $("#fixTitle").textContent=`Frais fixes et achat · ${V[v].n}`;
+  $("#fixForm").querySelectorAll("input[data-x]").forEach(el=>{ const k=el.dataset.x, x=k==="buy"?STATE.buy[v]:F[k];
+    el.value=x?String(x).replace(".",","):"";
+    el.onchange=()=>{ const n=nv(el), val=isNaN(n)||n<0?0:Math.round(n*100)/100; if(k==="buy") STATE.buy[v]=val; else F[k]=val; persist(); renderFixCap(); }; });
+  renderFixCap();
+}
+function renderFixCap(){ const c=costs(MODE);
+  $("#fixCap").innerHTML=c?`Frais fixes : <b>${fmt(c.fixY)} CHF/an</b> ÷ ≈ ${fmt(c.kmY)} km/an = <b>${fmt(c.kmY?c.fixY/c.kmY:null,3)} CHF/km</b>.<br>Amortissement : ${fmt(c.buy)} CHF ÷ ${fmt(c.kmBuy)} km depuis le premier plein (${dfr(c.first.d)}) = <b>${fmt(c.r.amo,3)} CHF/km</b>.`
+    :"Les calculs apparaissent après deux pleins de ce véhicule.";
 }
 
 let statV=0, statK="conso";
@@ -1062,7 +1366,7 @@ function renderTyres(){
     const x={id:uid(),v,d,t:sel.t};
     if(moto){ const mod=sel.mod==="__autre"?($("#tModOther").value.trim()||null):sel.mod; const km=nv($("#tKm"));
       x.pos=sel.pos; if(mod) x.mod=mod; if(!isNaN(km)&&km>0) x.km=Math.round(km); }
-    STATE.tyres.push(x); persist(); autoBackup(); $("#tKm").value=""; $("#tModOther").value=""; if(x.mod&&sel.mod==="__autre") sel.mod=x.mod;
+    STATE.tyres.push(x); persist(); $("#tKm").value=""; $("#tModOther").value=""; if(x.mod&&sel.mod==="__autre") sel.mod=x.mod;
     renderTyres(); toast(`${TTYPE[x.t].e} ${TTYPE[x.t].n}${x.mod?" · "+x.mod:""}${moto?" · "+TPOS[x.pos].toLowerCase():""} noté le ${dfr(d)}`); };
   const all=STATE.tyres.filter(x=>x.v===v);
   if(!all.length){ $("#tyreList").innerHTML=`<div class="muted" style="padding:10px 0">Aucun changement noté. Note le prochain et l'app comptera les km faits avec chaque ${moto?"pneu":"train de pneus"}.</div>`; return; }
@@ -1091,29 +1395,31 @@ function renderSettings(){
   $("#sRange").onchange=()=>{ const v=nv($("#sRange")); if(v>50&&v<3000){ STATE.range[MODE]=Math.round(v); persist(); ORACLE_CACHE={}; A=analyse(); toast(`Autonomie ${V[MODE].n} : ${fmt(v)} km`); } };
   $("#sTank").onchange=()=>{ const v=nv($("#sTank")); if(v>3&&v<200){ STATE.tank[MODE]=v; persist(); A=analyse(); toast(`Réservoir ${V[MODE].n} : ${fmt(v)} L`); } };
 }
+let eKind="E";
 function renderMore(){
   renderSettings();
   renderTyres();
-  $("#autoBk").checked=!!STATE.autoBackup; $("#autoBk").onchange=e=>{ STATE.autoBackup=e.target.checked; persist(); };
-  $("#bkInfo").textContent = STATE.lastBackup?`Dernière sauvegarde : ${dfr(STATE.lastBackup)}`:"Pas encore de sauvegarde.";
-  $("#bkDir").innerHTML = DIR?`Dossier choisi : <b>${DIR.name}</b>`:`Dossier : <b>Téléchargements</b>`;
-  $("#btnDir").onclick=()=>chooseDir();
-  $("#abN").textContent=fills.length;
+  renderFixed();
+  Sauvegarde.panneau($("#svBox"));
+  $("#abN").textContent=fills.length; $("#abV").textContent=APP_VERSION;
   $("#entTitle").textContent=`Entretien · ${V[MODE].n}`;
+  $("#eKind").querySelectorAll("button").forEach(b=>{ b.setAttribute("aria-pressed",b.dataset.k===eKind); b.onclick=()=>{ eKind=b.dataset.k; renderMore(); }; });
   if(!$("#eDate").value) $("#eDate").value=dOf(TODAY);
   const el=STATE.ent.filter(x=>x.v===MODE).sort((a,b)=>(b.d||"").localeCompare(a.d||""));
   const tot=el.reduce((t,x)=>t+(+x.m||0),0);
   $("#entList").innerHTML=(el.length?`<div class="mini" style="margin:6px 0"><div><small>Total noté</small><b>${fmt(tot)} CHF</b></div><div><small>Interventions</small><b>${el.length}</b></div></div>`:`<div class="muted" style="padding:8px 0">Rien de noté pour ce véhicule.</div>`)+
-    el.map(x=>`<div class="row" role="button" tabindex="0" data-id="${x.id}" style="--c:${V[x.v].c}"><div class="ic">${V[x.v].n.slice(0,3)}</div><div class="t"><b>${x.t}</b><div>${x.d?dfr(x.d):"date non notée"}${x.km?` · ${fmt(x.km)} km`:""}</div></div><div class="v">${x.m!=null&&x.m!==""?fmt(+x.m,2)+" CHF":"–"}</div></div>`).join("");
+    el.map(x=>`<div class="row" role="button" tabindex="0" data-id="${x.id}" style="--c:${V[x.v].c}"><div class="ic">${V[x.v].n.slice(0,3)}</div><div class="t"><b>${isTyre(x)?"🛞 ":""}${x.t}</b><div>${x.d?dfr(x.d):"date non notée"}${x.km?` · ${fmt(x.km)} km`:""}</div></div><div class="v">${x.m!=null&&x.m!==""?fmt(+x.m,2)+" CHF":"–"}</div></div>`).join("");
   $("#entList").querySelectorAll(".row").forEach(r=>r.onclick=()=>confirmTap(r,"Toucher encore pour supprimer",()=>{ STATE.ent=STATE.ent.filter(x=>x.id!==r.dataset.id); persist(); renderMore(); toast("Ligne d'entretien supprimée"); }));
   $("#eAdd").onclick=()=>{ const t=$("#eDesc").value.trim(); if(!t){ toast("Écris ce qui a été fait."); return; }
-    const m=nv($("#eAmt")); STATE.ent.push({id:uid(),d:$("#eDate").value||null,v:MODE,t,m:isNaN(m)?null:m}); persist(); autoBackup();
+    const m=nv($("#eAmt")); STATE.ent.push({id:uid(),d:$("#eDate").value||null,v:MODE,t,m:isNaN(m)?null:m,k:eKind}); persist();
     $("#eDesc").value=""; $("#eAmt").value=""; renderMore(); toast("✓ Entretien noté"); };
   $("#tblCouples").innerHTML=`<table class="tbl"><tr><th>Pièce</th><th>Nm</th><th>Outils</th><th>Divers</th></tr>${COUPLES.map(c=>`<tr><td>${c[0]}<br><small style="color:var(--fg-3)">${c[5]||""}</small></td><td class="n"><b>${c[1]??"–"}</b></td><td>${[c[2],c[3]].filter(Boolean).join(", ")}</td><td>${c[4]||""}</td></tr>`).join("")}</table>
     <div class="cap">Trousse : ${OUTILS.join(" · ")}</div>`;
   $("#tblPneus").innerHTML=`<table class="tbl"><tr><th>Pneu</th><th>Off</th><th>Meilleur prix</th></tr>${PNEUS.slice().sort((a,b)=>(a[3]||1e9)-(b[3]||1e9)).map(p=>`<tr><td><b>${p[0]}</b> ${p[1]}</td><td class="n">${p[2]!=null?Math.round(p[2]*100)+" %":"–"}</td><td class="n">${p[3]!=null?fmt(p[3],2)+" CHF":"–"}<br><small style="color:var(--fg-3)">${p[4]}</small></td></tr>`).join("")}</table>
     <div class="cap">Prix de la paire AV + AR relevés dans ton ancien fichier.</div>`;
-  $("#btnWipe").onclick=()=>confirmTap($("#btnWipe"),"Toucher encore pour TOUT effacer (pense à sauvegarder avant)",()=>{ fills.length=0; STATE.tyres=[]; STATE.ent=[]; persist(); A=analyse(); go("home"); toast("Toutes les données ont été effacées"); });
+  $("#btnWipe").onclick=()=>confirmTap($("#btnWipe"),"Toucher encore pour TOUT effacer (une copie est gardée dans « Copies avant import »)",()=>{
+    if(!Sauvegarde.copieAvant("avant d'effacer toutes les données")){ toast("⚠ Mémoire pleine : copie impossible, rien n'a été effacé. Sauvegarde d'abord sur Drive."); return; }
+    fills.length=0; STATE.tyres=[]; STATE.ent=[]; persist(); A=analyse(); go("home"); toast("Toutes les données ont été effacées"); });
 }
 
 function renderFun(){ try{ renderFunInner(); }catch(e){ $("#v-fun").innerHTML=`<div class="h2">Fun & records</div><div class="card muted">Pas encore assez de données pour les stats fun. Reviens après quelques pleins sur les deux véhicules.</div>`; } }
@@ -1204,7 +1510,7 @@ $(".badge").textContent="⚙ v"+APP_VERSION;
 
 // swipe entre onglets
 (function(){ let x0=null,y0=null,t0=0;
-  document.addEventListener("touchstart",e=>{ if($("#sheet").classList.contains("on")||e.touches.length!==1) return; const t=e.touches[0]; x0=t.clientX; y0=t.clientY; t0=Date.now();
+  document.addEventListener("touchstart",e=>{ if($("#sheet").classList.contains("on")||$("#trip").classList.contains("on")||e.touches.length!==1) return; const t=e.touches[0]; x0=t.clientX; y0=t.clientY; t0=Date.now();
     if(e.target.closest(".chips")||e.target.closest("#kpad")) x0=null; },{passive:true});
   document.addEventListener("touchend",e=>{ if(x0==null) return; const t=e.changedTouches[0], dx=t.clientX-x0, dy=t.clientY-y0; x0=null;
     if(Math.abs(dx)>70 && Math.abs(dx)>Math.abs(dy)*1.6 && Date.now()-t0<700){ const i=ORDER.indexOf(curView), j=i+(dx<0?1:-1); if(j>=0&&j<ORDER.length) go(ORDER[j],dx<0?1:-1); } },{passive:true});
@@ -1279,7 +1585,7 @@ async function loadRate(){
 $("#fR").addEventListener("input",()=>{ rateManual=true; });
 $("#fDate").addEventListener("change",()=>{ if(sCur==="EUR"){ rateManual=false; loadRate(); } });
 $("#btnDel").onclick=()=>{ if(!EDIT) return; confirmTap($("#btnDel"),"Toucher encore pour supprimer ce plein",()=>{ const id=EDIT.id; fills.splice(fills.findIndex(f=>f.id===id),1); persist(); A=analyse(); closeSheet(); views[curView](); toast("Plein supprimé"); }); };
-$("#fab").onclick=()=>openSheet(true); $("#fab2").onclick=()=>openSheet(true); $("#close").onclick=closeSheet; $("#scrim").onclick=closeSheet;
+$("#fab").onclick=()=>openSheet(true); $("#fab2").onclick=()=>openSheet(true); $("#close").onclick=closeSheet; $("#scrim").onclick=()=>{ closeTrip(); closeSheet(); };
 $("#fCur").querySelectorAll("button").forEach(b=>b.onclick=()=>setCur(b.dataset.c));
 $("#fType").querySelectorAll("button").forEach(b=>b.onclick=()=>{sFull=b.dataset.t==="1";$("#fType").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b));live();});
 function preview(){
@@ -1323,7 +1629,7 @@ function save(){
   if(EDIT){
     Object.assign(EDIT,{d:$("#fDate").value,v:sv,km:r.km,L:r.L,P:r.P,eur:r.eur,rate:r.rate,full:sFull,ctry:sCtry,st:curStation(),opts:{...sOpts},force:!$("#forceBox").hidden&&$("#fForce").checked});
     if(r.rate) STATE.lastRate=r.rate;
-    persist(); A=analyse(); closeSheet(); views[curView](); toast("✓ Plein modifié"); autoBackup(); return;
+    persist(); A=analyse(); closeSheet(); views[curView](); toast("✓ Plein modifié"); return;
   }
   const prevBest=Math.min(...A.per[sv].filter(f=>f.conso!=null).map(f=>f.conso)), lastKm=lastOf(sv)?lastOf(sv).km:0;
   let verdict=""; try{ const pr=predict(sv); if(pr&&pr.due!=null&&sFull){ const e=day($("#fDate").value)-pr.due; verdict=Math.abs(e)<=2?` · 🧠 L'IA avait prévu le ${dshort(pr.due)} : 🎯 dans le mille !`:Math.abs(e)<=pr.win?` · 🧠 Prévu le ${dshort(pr.due)} : à ${Math.abs(e)} j près 👍`:` · 🧠 Prévu le ${dshort(pr.due)} : raté de ${Math.abs(e)} j 😅`; } }catch(_){}
@@ -1334,78 +1640,19 @@ function save(){
   if(r.conso!=null&&r.conso<prevBest){ toast(`🏆 Record perso battu : ${fmt(r.conso,2)} L/100 km !${bornes}`); }
   else if(bornes){ toast(`✓ ${V[sv].n} enregistré${bornes}`); }
   else toast(`✓ ${V[sv].n} enregistré${r.conso!=null?` · ${fmt(r.conso,2)} L/100 km`:r.dist?` · +${fmt(r.dist)} km`:""}${verdict}`);
-  autoBackup();
 }
 
-// ---------- Excel : sauvegarde et import
-const XD = s=>{ if(!s) return null; const [y,m,d]=s.split("-").map(Number); return new Date(Date.UTC(y,m-1,d,12)); };
-// --- dossier de sauvegarde (si le téléphone le permet)
-const FS_OK = typeof window.showDirectoryPicker==="function";
-let DIR=null;
-function idb(){ return new Promise((res,rej)=>{ const r=indexedDB.open("suivi-vehicules-fs",1); r.onupgradeneeded=()=>r.result.createObjectStore("kv"); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
-async function idbGet(k){ try{ const db=await idb(); return await new Promise(res=>{ const t=db.transaction("kv").objectStore("kv").get(k); t.onsuccess=()=>res(t.result||null); t.onerror=()=>res(null); }); }catch(e){ return null; } }
-async function idbSet(k,v){ try{ const db=await idb(); await new Promise(res=>{ const t=db.transaction("kv","readwrite"); t.objectStore("kv").put(v,k); t.oncomplete=res; t.onerror=res; }); }catch(e){} }
-if(FS_OK) idbGet("dir").then(h=>{ DIR=h; if(curView==="more") renderMore(); });
-async function chooseDir(){
-  if(!FS_OK){ showModal({title:"📁 Dossier de sauvegarde",html:dirHelp(),buttons:[["OK",closeModal]]}); return; }
-  try{ const h=await window.showDirectoryPicker({id:"vehicules-backup",mode:"readwrite",startIn:"downloads"}); DIR=h; await idbSet("dir",h); toast(`📁 Sauvegardes dans « ${h.name} »`); if(curView==="more") renderMore(); return true; }
-  catch(e){ if(e&&e.name!=="AbortError") toast("Impossible de choisir ce dossier : "+e.message); return false; }
-}
-function dirHelp(){ return `<div class="muted">Ce téléphone ne laisse pas une page choisir elle-même un dossier. Deux façons d'utiliser un dossier à toi :</div>
-  <div class="path"><b>1.</b> Chrome → <b>⋮ → Paramètres → Téléchargements</b> → active <b>« Demander où enregistrer les fichiers »</b>. À chaque sauvegarde, Android te demandera le dossier.<br><br><b>2.</b> Touche <b>Partager</b> dans la fenêtre de sauvegarde et choisis où l'envoyer (Mes fichiers, Drive, Synology Drive…).</div>`; }
-async function dirWritable(ask){ if(!DIR) return false; try{ let p=await DIR.queryPermission({mode:"readwrite"}); if(p!=="granted"&&ask) p=await DIR.requestPermission({mode:"readwrite"}); return p==="granted"; }catch(e){ return false; } }
-function showModal({title,html,buttons}){
-  $("#modalBox").innerHTML=`<h4>${title}</h4>${html}<div class="${buttons.length>2?"":"row2"}" style="display:grid;gap:8px;${buttons.length>2?"":"grid-template-columns:1fr 1fr"}">${buttons.map((b,i)=>`<button class="btn ${i===buttons.length-1?"primary":""}" type="button" data-i="${i}">${b[0]}</button>`).join("")}</div>`;
-  $("#modalBox").querySelectorAll("button[data-i]").forEach(b=>b.onclick=()=>buttons[+b.dataset.i][1]());
-  $("#modal").hidden=false; }
-function closeModal(){ $("#modal").hidden=true; }
-$("#modal").addEventListener("click",e=>{ if(e.target.id==="modal") closeModal(); });
-let LAST_FILE=null;
-function buildXlsx(){
-  const H=["Date","Véhicule","Km compteur","Litres","Prix total CHF","Type","Pays","Station","Montant €","Taux €→CHF","Clim","Remorque","Autoroute","Chargé/duo"];
-  const rows=fills.slice().sort((a,b)=>a.d.localeCompare(b.d)||a.km-b.km).map(f=>[XD(f.d),V[f.v].n,f.km,f.L,f.P,f.full?"Plein":"Partiel",f.ctry||"CH",f.st||"",f.eur??"",f.rate??"",
-    f.opts&&f.opts.clim?"x":"",f.opts&&f.opts.rem?"x":"",f.opts&&f.opts.auto?"x":"",f.opts&&f.opts.charge?"x":""]);
-  const wb=XLSX.utils.book_new();
-  const w1=XLSX.utils.aoa_to_sheet([H,...rows],{cellDates:true,dateNF:"dd.mm.yyyy"}); w1["!cols"]=[{wch:11},{wch:9},{wch:11},{wch:8},{wch:12},{wch:8},{wch:6},{wch:14},{wch:10},{wch:10},{wch:5},{wch:8},{wch:9},{wch:10}];
-  XLSX.utils.book_append_sheet(wb,w1,"Pleins");
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["Date","Véhicule","Pneus montés","Roue","Modèle","Km compteur"],...STATE.tyres.map(t=>[XD(t.d),V[t.v].n,TTYPE[tyreType(t)].n,t.pos?TPOS[t.pos]:"",t.mod||"",t.km??""])],{cellDates:true,dateNF:"dd.mm.yyyy"}),"Pneus");
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["Date","Véhicule","Description","Montant CHF","Km"],...STATE.ent.map(e=>[XD(e.d),V[e.v].n,e.t,e.m??"",e.km??""])],{cellDates:true,dateNF:"dd.mm.yyyy"}),"Entretien");
-  const data=XLSX.write(wb,{bookType:"xlsx",type:"array"});
-  return new Blob([data],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
-}
-function downloadBlob(blob,name){ const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=name; a.style.display="none"; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); },60000); }
-async function shareFile(){ if(!LAST_FILE) return; const f=new File([LAST_FILE.blob],LAST_FILE.name,{type:"text/plain"});
-  try{ if(navigator.canShare&&navigator.canShare({files:[f]})){ await navigator.share({files:[f],title:LAST_FILE.name}); STATE.lastBackup=dOf(TODAY); persist(); renderBanner(); return; } }catch(e){ if(e&&e.name==="AbortError") return; }
-  try{ await navigator.clipboard.writeText(await LAST_FILE.blob.text()); toast("Partage impossible : la sauvegarde est copiée, colle-la dans une note."); }catch(e){ toast("Partage impossible sur ce téléphone : "+String(e)); } }
-function buildBackup(){
-  const data={app:"Suivi Véhicules",version:APP_VERSION,date:dOf(TODAY),
-    reglages:{autonomie:{Kangoo:STATE.range[0],BMW:STATE.range[1]},reservoir:{Kangoo:STATE.tank[0],BMW:STATE.tank[1]}},
+// ---------- 💾 sauvegarde Drive commune (bloc SAUVEGARDE ATELIER v2) + import des anciens fichiers
+function backupData(){ // ce que contient chaque sauvegarde (noms lisibles)
+  const per=a=>({Kangoo:a[0],BMW:a[1]});
+  return {app:"Suivi Véhicules",version:APP_VERSION,
+    reglages:{autonomie:per(STATE.range),reservoir:per(STATE.tank),achat:per(STATE.buy),frais:per(STATE.fixed),trajet:STATE.trip||null},
     pleins:fills.map(f=>({id:f.id,d:f.d,v:V[f.v].n,km:f.km,L:f.L,P:f.P,full:f.full,ctry:f.ctry||"CH",st:f.st||null,eur:f.eur??null,rate:f.rate??null,opts:f.opts||{},force:!!f.force})),
-    pneus:STATE.tyres.map(t=>({id:t.id,d:t.d,v:V[t.v].n,t:t.t,pos:t.pos??null,mod:t.mod??null,km:t.km??null})), entretien:STATE.ent.map(e=>({id:e.id,d:e.d,v:V[e.v].n,t:e.t,m:e.m??null,km:e.km??null}))};
-  return new Blob([JSON.stringify(data,null,1)],{type:"text/plain"});
+    pneus:STATE.tyres.map(t=>({id:t.id,d:t.d,v:V[t.v].n,t:t.t,pos:t.pos??null,mod:t.mod??null,km:t.km??null})),
+    entretien:STATE.ent.map(e=>({id:e.id,d:e.d,v:V[e.v].n,t:e.t,m:e.m??null,km:e.km??null,k:e.k??null}))};
 }
-async function exportXlsx(auto){
-  let blob; try{ blob=buildBackup(); }catch(e){ toast("La sauvegarde a échoué : "+String(e)); return false; }
-  const name=`Vehicules_sauvegarde_${dOf(TODAY)}.txt`; LAST_FILE={blob,name};
-  let where="";
-  if(DIR && await dirWritable(!auto)){
-    try{ const fh=await DIR.getFileHandle(name,{create:true}); const w=await fh.createWritable(); await w.write(blob); await w.close(); where=`Dossier <b>${DIR.name}</b> (celui que tu as choisi)`; }catch(e){ where=""; }
-  }
-  if(!where){ try{ downloadBlob(blob,name); where=`<b>Mes fichiers → Téléchargements</b><br><span class="muted">(Stockage interne/Download)</span>`; }catch(e){ where=""; } }
-  if(where){ STATE.lastBackup=dOf(TODAY); persist(); renderBanner(); if(curView==="more") renderMore(); }
-  if(auto){ if(where) toast(`💾 Sauvegarde du jour → ${DIR&&where.includes(DIR.name)?DIR.name:"Téléchargements"}`); return !!where; }
-  exportXlsxModal(name,where,true);
-  return !!where;
-}
-function exportXlsxModal(name,where){
-  const btns=[["📁 Changer de dossier",async()=>{ if(FS_OK){ const ok=await chooseDir(); if(ok){ closeModal(); exportXlsx(false); } } else showModal({title:"📁 Changer de dossier",html:dirHelp(),buttons:[["Retour",()=>exportXlsxModal(name,where)],["OK",closeModal]]}); }],
-    ["↗ Partager / enregistrer ailleurs",async()=>{ await shareFile(); }],
-    ["OK",closeModal]];
-  showModal({title:where?"💾 Sauvegarde enregistrée":"⚠ Sauvegarde à finir",html:where?`<div class="path">Fichier : <b>${name}</b><br>Endroit : ${where}</div>
-    <div class="muted">Pas trouvé ? Regarde la notification de téléchargement en haut de l'écran, ou utilise <b>Partager</b>. Pour tout récupérer : <b>Plus → Importer</b> et choisis ce fichier.</div>`
-    :`<div class="path">Le téléphone a bloqué l'enregistrement direct.</div><div class="muted">Touche <b>Partager / enregistrer ailleurs</b> et choisis <b>Mes fichiers</b>, Drive ou Synology Drive.</div>`,buttons:btns});
-}
-function autoBackup(){ if(STATE.autoBackup && STATE.lastBackup!==dOf(TODAY) && fills.length) setTimeout(()=>exportXlsx(true),900); }
+function backupResume(d){ const p=d.pleins||[], n=x=>p.filter(f=>vehOf(f.v)===x).length;
+  return `${p.length} pleins (Kangoo ${n(0)}, BMW ${n(1)}), ${(d.entretien||[]).length} entretiens, ${(d.pneus||[]).length} changements de pneus`; }
 const toISO=v=>{ if(v==null||v==="") return null; if(v instanceof Date){ const d=new Date(v.getTime()+12*3600e3); return d.toISOString().slice(0,10); }
   if(typeof v==="number"){ const d=new Date(Math.round((v-25569)*864e5)+12*3600e3); return d.toISOString().slice(0,10); }
   const m=String(v).match(/(\d{1,2})[./](\d{1,2})[./](\d{4})/); if(m) return `${m[3]}-${m[2].padStart(2,"0")}-${m[1].padStart(2,"0")}`;
@@ -1441,30 +1688,42 @@ function parseWorkbook(wb){
       out.ent.push({id:uid(),d:toISO(row[eh.idx("date")]),v,t:String(t),m:im>=0?num(row[im]):null,km:ik>=0?num(row[ik]):null}); } } }
   return out;
 }
-function parseBackup(text){ let j; try{ j=JSON.parse(text); }catch(e){ throw new Error("ce fichier texte n'est pas une sauvegarde de l'app"); }
+function parseBackup(text){ let j; try{ j=JSON.parse(text); }catch(e){ throw new Error("ce fichier texte n'est pas une sauvegarde de l'app"); } return backupFrom(j); }
+function backupFrom(j){ // relit les données d'une sauvegarde (ancien .txt ou sauvegarde Drive)
   const vi=n=>vehOf(n); const out={fills:[],tyres:[],ent:[]};
   (j.pleins||[]).forEach(f=>{ const v=vi(f.v); if(v<0||!f.d||f.km==null) return; out.fills.push({id:f.id||uid(),d:f.d,v,km:+f.km,L:f.L??null,P:f.P??null,full:!!f.full,ctry:f.ctry||"CH",st:f.st||null,eur:f.eur??null,rate:f.rate??null,opts:f.opts||{},force:!!f.force}); });
-  if(j.reglages){ const a=j.reglages.autonomie||{}, t=j.reglages.reservoir||{}; out.range=[+a.Kangoo||925,+a.BMW||350]; out.tank=[+t.Kangoo||60,+t.BMW||20]; }
+  if(j.reglages){ const g=j.reglages, a=g.autonomie||{}, t=g.reservoir||{}; out.range=[+a.Kangoo||925,+a.BMW||350]; out.tank=[+t.Kangoo||60,+t.BMW||20];
+    if(g.achat) out.buy=[+g.achat.Kangoo||0,+g.achat.BMW||0];
+    if(g.frais) out.fixed=[Object.assign({},g.frais.Kangoo),Object.assign({},g.frais.BMW)];
+    if(g.trajet) out.trip=g.trajet; }
   (j.pneus||[]).forEach(t=>{ const v=vi(t.v); if(v>=0&&t.d) out.tyres.push(tyreFrom(t.id||uid(),t.d,v,t.t,t.pos,t.mod,t.km)); });
-  (j.entretien||[]).forEach(e=>{ const v=vi(e.v); if(v>=0&&e.t) out.ent.push({id:e.id||uid(),d:e.d||null,v,t:e.t,m:e.m??null,km:e.km??null}); });
+  (j.entretien||[]).forEach(e=>{ const v=vi(e.v); if(v>=0&&e.t){ const x={id:e.id||uid(),d:e.d||null,v,t:e.t,m:e.m??null,km:e.km??null}; if(e.k==="E"||e.k==="P") x.k=e.k; out.ent.push(x); } });
   return out; }
 let pendingImport=null;
 $("#btnImport").onclick=()=>$("#fileImport").click();
 $("#fileImport").onchange=async e=>{ const file=e.target.files[0]; e.target.value=""; if(!file) return;
   try{ let d;
     const txt=/\.(txt|json)$/i.test(file.name)||file.type.startsWith("text")||file.type.includes("json");
-    if(txt){ d=parseBackup(await file.text()); }
+    if(txt){ const t=await file.text(); if(t.startsWith("SAUVEGARDE ATELIER")){ toast("C'est une sauvegarde Drive : utilise 📂 Importer dans la carte verte juste au-dessus."); return; } d=parseBackup(t); }
     else { if(typeof XLSX==="undefined"){ toast("Module Excel pas encore chargé : réessaie avec internet."); return; } d=parseWorkbook(XLSX.read(await file.arrayBuffer(),{cellDates:true})); }
     if(!d.fills.length){ toast("Aucun plein trouvé dans ce fichier."); return; }
     if(fills.length){ pendingImport=d; showImportConfirm(file.name,d); } else applyImport(d);
   }catch(err){ toast("Import impossible : "+err.message); } };
 function showImportConfirm(name,d){
   $("#bannerBox").innerHTML=`<div class="banner"><span>Remplacer tes ${fills.length} pleins par les ${d.fills.length} du fichier « ${name} » ?</span><button type="button" id="impOk">Remplacer</button><button type="button" id="impNo">Annuler</button></div>`;
-  $("#impOk").onclick=()=>{ applyImport(pendingImport); pendingImport=null; }; $("#impNo").onclick=()=>{ pendingImport=null; renderBanner(); };
+  $("#impOk").onclick=()=>{ if(!Sauvegarde.copieAvant(`import ${name}`)){ toast("⚠ Mémoire pleine : copie impossible, rien n'a été remplacé. Sauvegarde d'abord sur Drive."); return; } applyImport(pendingImport); pendingImport=null; }; $("#impNo").onclick=()=>{ pendingImport=null; renderBanner(); };
   window.scrollTo({top:0,behavior:"smooth"}); }
-function applyImport(d){ fills.length=0; d.fills.forEach(f=>fills.push(f)); STATE.tyres=d.tyres; STATE.ent=d.ent; if(d.range) STATE.range=d.range; if(d.tank) STATE.tank=d.tank; persist(); A=analyse(); go("home");
+function setData(d){ fills.length=0; d.fills.forEach(f=>fills.push(f)); STATE.tyres=d.tyres; STATE.ent=d.ent;
+  ["range","tank","buy","fixed","trip"].forEach(k=>{ if(d[k]) STATE[k]=d[k]; });
+  persist(); ORACLE_CACHE={}; IA_CACHE={}; A=analyse(); }
+function applyImport(d){ setData(d); go("home");
   toast(`✓ ${d.fills.length} pleins importés${d.ent.length?`, ${d.ent.length} entretiens`:""}${d.tyres.length?`, ${d.tyres.length} changements de pneus`:""}`); }
-$("#btnSave").onclick=()=>exportXlsx(false);
+Sauvegarde.init({app:"Vehicules", nom:"Suivi Véhicules", cle:KEY, version:APP_VERSION,
+  lire:backupData,
+  ecrire:d=>{ setData(backupFrom(d)); renderBanner(); views[curView](); },
+  resume:backupResume,
+  valider:d=>d&&Array.isArray(d.pleins)?null:"il n'y a pas de pleins dans ce fichier",
+  vide:d=>!(d.pleins||[]).length});
 
 // ---------- pavé numérique de l'app (repris de l'app de calcul d'atelier)
 let padPref = lsGet("sv-pad")==="off" ? "off" : "on";
