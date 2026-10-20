@@ -153,6 +153,15 @@ body.haswiz main { padding-bottom: calc(var(--bnav-h) + 96px); }
 .mach td.v.nochg { color: #6f808b; }
 .mach td.v .arrow { color: #10181e; margin-left: 3px; font-size: .7em; vertical-align: middle; }
 .mach-foot { display: flex; gap: 6px; margin: 4px -10px 0; padding: 6px 10px; background: #e9eef1; border-top: 1px solid #8fa2ae; }
+.mach td.v.on { background: #e2661f; color: #10181e; }
+.mach.acam td.rl { width: auto; white-space: normal; font-size: 13px; }
+.mach.acam td.v { width: 46%; }
+.passh { font: 600 14px var(--f-body); color: var(--muted); margin: 14px 0 6px; text-transform: none; letter-spacing: 0; }
+table.passes { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+table.passes th { text-align: right; font: 600 12px var(--f-body); color: var(--muted); padding: 4px 8px; border-bottom: 1px solid var(--line); }
+table.passes td { text-align: right; font: 600 16px var(--f-num); padding: 6px 8px; border-bottom: 1px solid var(--line); }
+table.passes th:first-child, table.passes td:first-child { text-align: left; font-family: var(--f-body); }
+table.passes tr.last td { color: var(--accent); }
 .mach-foot span { font: 600 13px var(--f-num); padding: 4px 10px; border-radius: 3px; background: #7fb6cf; color: #f4f7f9; }
 .mach-note { font-size: 13px; color: var(--muted); margin: 8px 0 0; }
 label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); min-width: 0; }
@@ -256,7 +265,7 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 30px; }
     <div data-step="1">
       <div class="subtabs" role="tablist" aria-label="Type de correction">
         <button type="button" role="tab" id="m-cnc" data-mode="cnc" aria-selected="true"><b>Outil CNC</b><small>ce qu'on tape dans « Usure outil »</small></button>
-        <button type="button" role="tab" id="m-fao" data-mode="fao" aria-selected="false"><b>Cote FAO / programme</b><small>la cote à programmer, l'outil ne change pas</small></button>
+        <button type="button" role="tab" id="m-fao" data-mode="fao" aria-selected="false"><b>Cote FAO / programme</b><small>les valeurs à taper dans AlphaCam</small></button>
       </div>
     </div>
     <div class="grid2" id="corr-grid">
@@ -265,7 +274,7 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 30px; }
           <h2>1. Cotes <span class="example" id="exTag">exemple</span></h2>
           <div class="fields">
             <label>Cote nominale (mm)<input id="c-nom" inputmode="decimal" placeholder="20"></label>
-            <label>Cote mesurée (mm)<input id="c-mes" inputmode="decimal" placeholder="19,96"></label>
+            <label data-only="cnc">Cote mesurée (mm)<input id="c-mes" inputmode="decimal" placeholder="19,96"></label>
           </div>
         </div>
         <div data-step="3">
@@ -312,15 +321,23 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 30px; }
         </div>
         <div class="card" data-step="6">
           <h2 data-mode="cnc">5. Valeurs actuelles dans Usure outil</h2>
-          <h2 data-mode="fao">5. Programme actuel</h2>
+          <h2 data-mode="fao">5. Réglages AlphaCam</h2>
           <div class="fields">
             <label data-mode="cnc" class="full">Outil (facultatif)<input id="c-tool" placeholder="FRAISE D10" autocomplete="off"></label>
             <label data-mode="cnc">Δlongu. actuel (mm)<span class="signrow"><input id="c-wl" inputmode="decimal" placeholder="0.000"><button type="button" class="neg" data-neg="c-wl" aria-label="Changer le signe">+/−</button></span></label>
             <label data-mode="cnc">Δrayon actuel (mm)<span class="signrow"><input id="c-wr" inputmode="decimal" placeholder="0.000"><button type="button" class="neg" data-neg="c-wr" aria-label="Changer le signe">+/−</button></span></label>
             <p class="hint full" data-mode="cnc" style="margin:0">Recopie les deux valeurs actuelles de la ligne de l'outil dans « Usure outil ».</p>
-            <label data-mode="fao">Cote programmée actuelle (mm, facultatif)<input id="c-prog" inputmode="decimal" placeholder="= nominale"></label>
-            <label data-mode="fao">Surépaisseur actuelle FAO (mm, facultatif)<span class="signrow"><input id="c-stock" inputmode="decimal" placeholder="0"><button type="button" class="neg" data-neg="c-stock" aria-label="Changer le signe">+/−</button></span></label>
-            <p class="hint full" data-mode="fao" style="margin:0">Cote programmée : celle de la géométrie dans AlphaCam ou du programme, si elle a déjà été corrigée. Vide = cote nominale.</p>
+            <div class="full" data-mode="fao" data-xy2><span class="flbl">Le Ø ou la largeur se fait…</span>
+              <div class="seg" id="sidemode"><button type="button" data-s="2" aria-pressed="true">Les 2 côtés (même cycle)</button><button type="button" data-s="1" aria-pressed="false">Un seul côté (cycles différents)</button></div>
+              <input type="hidden" id="c-side" value="2"></div>
+            <label data-mode="fao" data-xy>Surép. XY initiale (mm, laissée par l'ébauche)<span class="signrow"><input id="c-rough" inputmode="decimal" placeholder="0,2"><button type="button" class="neg" data-neg="c-rough" aria-label="Changer le signe">+/−</button></span></label>
+            <label data-mode="fao" data-xy>Nombre de passes<input id="c-npass" inputmode="numeric" placeholder="1"></label>
+            <div class="full" data-mode="fao" data-xy><div class="seg" id="pmode"><button type="button" data-p="c" aria-pressed="true">Constantes</button><button type="button" data-p="s" aria-pressed="false">Spécifiées</button></div>
+              <input type="hidden" id="c-pmode" value="c"></div>
+            <label data-mode="fao" data-spec>Largeur PREMIÈRE passe (mm)<input id="c-pfirst" inputmode="decimal" placeholder="0,1"></label>
+            <label data-mode="fao" data-spec>Largeur DERNIÈRE passe (mm)<input id="c-plast" inputmode="decimal" placeholder="0,005"></label>
+            <label data-mode="fao" data-zh>Hauteur totale, du dessous à la surface de référence (mm)<input id="c-ztot" inputmode="decimal" placeholder="20"></label>
+            <p class="hint full" data-mode="fao" id="c-fao-hint" style="margin:0"></p>
           </div>
         </div>
       </div>
@@ -629,7 +646,7 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 30px; }
   </div>
 </div>
 <nav class="bnav" aria-label="Onglets"><button class="tab" type="button" data-tab="corr" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 1v5M12 18v5M1 12h5M18 12h5"/></svg>Corriger</button><button class="tab" type="button" data-tab="iso" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v10M7 9h10M7 19h10"/></svg>Tolér.</button><button class="tab" type="button" data-tab="thr" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M8 3h8M9 3v18h6V3M9 7l6 2M9 11l6 2M9 15l6 2"/></svg>Taraud</button><button class="tab" type="button" data-tab="vis" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10l-2 4H9z"/><path d="M10 8v12h4V8"/></svg>Vis</button><button class="tab" type="button" data-tab="sur" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="13" width="16" height="7"/><path d="M4 9h16M4 5h16" stroke-dasharray="2 2"/></svg>Surép.</button><button class="tab" type="button" data-tab="trig" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16V6z"/><path d="M16 20v-4h4"/></svg>Trigo</button><button class="tab" type="button" data-tab="emu" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c4 5 6 8 6 11a6 6 0 0 1-12 0c0-3 2-6 6-11z"/></svg>Émulsion</button></nav>
-<footer class="wrap">Les valeurs ne sont jamais envoyées à la machine : vérifie le signe et recopie-les toi-même dans la table d'outils. Une correction négative fait enlever plus de matière. · v1.0</footer>
+<footer class="wrap">Les valeurs ne sont jamais envoyées à la machine : vérifie le signe et recopie-les toi-même dans la table d'outils. Une correction négative fait enlever plus de matière. · v1.1</footer>
 
 <script>
 // ISO 286-1:2010 / ISO 286-2:2010 : intervalles de tolérance IT1 à IT18 et écarts fondamentaux
@@ -1041,19 +1058,54 @@ var Calc = (function () {
   }
 
 
-  // Correction de cote pour la FAO ou le programme (l'usure outil ne change pas).
-  // prog = cote programmée actuelle (défaut : nominale), stock = surépaisseur actuelle dans la FAO (ou null).
-  // offset = décalage du contour par côté (ou en Z) ; négatif = enlève plus de matière.
-  function cam(caseKey, nominal, measured, up, lo, prog, stock) {
+  // Valeurs à saisir dans AlphaCam, sans mesure : la géométrie est dessinée à la cote nominale, on vise le milieu.
+  // XY : surépaisseur par côté (sur le rayon), négative = enlève plus de matière ; sides = 1 si tout l'écart
+  // va sur l'usinage d'un seul côté ; initial = « Surép. XY initiale » (matière laissée par l'usinage précédent)
+  // et passes = « Nombre de passes » : AlphaCam partage en parts égales ce qu'il reste entre initiale et finale.
+  // Passes « Spécifiées » : first / last = largeurs de la première et de la dernière passe, le milieu en parts égales.
+  // Z : profondeur de coupe relative à la surface de référence (négative vers le bas) ;
+  // total = hauteur du dessous de la pièce jusqu'à la surface de référence (cas hauteur restante).
+  function fao(caseKey, nominal, up, lo, opts) {
+    opts = opts || {};
     var c = CASES[caseKey];
-    var r = correction(caseKey, nominal, measured, up, lo, null);
-    if (prog == null) prog = nominal;
-    var dev = measured - r.target;
-    r.prog = prog;
-    r.newProg = round4(prog - dev);
-    r.change = round4(-dev);
-    r.offset = round4(c.sign * dev / c.div);
-    r.newStock = stock == null ? null : round4(stock + r.offset);
+    var target = nominal + (up + lo) / 2;
+    var r = { axis: c.axis, min: round4(nominal + lo), max: round4(nominal + up), target: round4(target), change: round4(target - nominal) };
+    if (c.axis === "R") {
+      r.sides = c.div === 2 && opts.sides === 1 ? 1 : c.div;
+      r.stock = round4(-c.sign * (target - nominal) / r.sides);
+      if (opts.initial != null) {
+        var n = Math.max(1, Math.round(opts.passes || 1)), total = opts.initial - r.stock;
+        if (total <= 0) r.error = "La Surép. XY initiale doit être plus grande que la Surépaisseur XY finale (" + r.stock + ").";
+        else {
+          var spec = opts.first != null && opts.last != null && n >= 2, cuts = [];
+          if (!spec) for (var k = 1; k <= n; k++) cuts.push(total / n);
+          else if (n === 2) { cuts = [opts.first, total - opts.first]; if (Math.abs(cuts[1] - opts.last) > 5e-5) r.warn = "two"; }
+          else { var mid = (total - opts.first - opts.last) / (n - 2); cuts.push(opts.first); for (var m = 0; m < n - 2; m++) cuts.push(mid); cuts.push(opts.last); }
+          if (spec && !(opts.first > 0 && opts.last > 0)) r.error = "Les largeurs de la première et de la dernière passe doivent être plus grandes que 0.";
+          else if (cuts.some(function (x) { return x < -1e-9; }) || (spec && n === 2 && opts.first > total + 1e-9)) r.error = "La première + la dernière passe (" + round4(opts.first + (n === 2 ? 0 : opts.last)) + ") dépassent la matière à enlever (" + round4(total) + ").";
+          else {
+            r.passes = [];
+            var prev = opts.initial, done = 0;
+            for (var i = 1; i <= n; i++) {
+              done += cuts[i - 1];
+              var left = i === n ? r.stock : round4(opts.initial - done);
+              r.passes.push({ n: i, cut: round4(prev - left), left: left });
+              prev = left;
+            }
+          }
+          r.spec = spec;
+          r.total = round4(total);
+        }
+      }
+    } else if (caseKey === "profondeur") {
+      r.depth = round4(-target);
+    } else if (opts.total == null) {
+      r.depth = null;
+    } else if (opts.total <= target) {
+      r.error = "La hauteur totale doit être plus grande que la hauteur restante.";
+    } else {
+      r.depth = round4(-(opts.total - target));
+    }
     return r;
   }
 
@@ -1176,8 +1228,8 @@ var Calc = (function () {
   }
 
   return { rightTriangle: rightTriangle, chamfer: chamfer, chamferMill: chamferMill, boltCircle: boltCircle, mix: mix, tank: tank,
-           iso: iso, parseIso: parseIso, general: general, correction: correction, cam: cam,
-           roughSize: roughSize, remaining: remaining, CASES: CASES, round3: round3 };
+           iso: iso, parseIso: parseIso, general: general, correction: correction, fao: fao,
+           roughSize: roughSize, remaining: remaining, CASES: CASES, round3: round3, round4: round4 };
 })();
 if (typeof module !== "undefined") module.exports = Calc;
 
@@ -1304,9 +1356,11 @@ if (typeof module !== "undefined") module.exports = Calc;
   function calcCorr() {
     var out = $("c-res");
     genHint();
+    var fao = corrMode === "fao";
+    faoVis();
     var nom = num($("c-nom").value), mes = num($("c-mes").value);
     var up, lo, tolTxt = "", err = "";
-    if (isNaN(nom) || isNaN(mes)) { out.innerHTML = '<div class="verdict v-none">Saisis la cote nominale et la cote mesurée.</div>'; return; }
+    if (isNaN(nom) || (!fao && isNaN(mes))) { out.innerHTML = '<div class="verdict v-none">' + (fao ? "Saisis la cote nominale du plan." : "Saisis la cote nominale et la cote mesurée.") + '</div>'; $("exTag").hidden = !isExample(); return; }
     if (tolMode === "iso") {
       var r = Calc.iso(nom, $("c-iso").value);
       if (r.error) err = r.error; else { up = r.up / 1000; lo = r.lo / 1000; tolTxt = $("c-iso").value.trim() + " (" + sgn(r.up, 0) + " / " + sgn(r.lo, 0) + " µm)"; }
@@ -1341,12 +1395,13 @@ if (typeof module !== "undefined") module.exports = Calc;
     if (shift) { up = up + shift; lo = lo + shift; }
     // Valeurs propres au mode
     function opt(id) { var v = $(id).value.trim(); return v === "" ? null : num(v); }
-    var wl = opt("c-wl"), wr = opt("c-wr"), prog = opt("c-prog"), stock = opt("c-stock");
+    var wl = opt("c-wl"), wr = opt("c-wr"), rough = opt("c-rough"), ztot = opt("c-ztot");
     if (!err && corrMode === "cnc" && ((wl != null && isNaN(wl)) || (wr != null && isNaN(wr)))) err = "Une valeur actuelle de Usure outil n'est pas un nombre.";
-    if (!err && corrMode === "fao" && ((prog != null && isNaN(prog)) || (stock != null && isNaN(stock)))) err = "La cote programmée ou la surépaisseur n'est pas un nombre.";
+    if (!err && fao && ((rough != null && isNaN(rough)) || (ztot != null && isNaN(ztot)))) err = "L'ajout ébauche ou la hauteur totale n'est pas un nombre.";
     if (err) { out.innerHTML = '<div class="verdict v-none">Calcul impossible</div><p class="err">' + err + '</p>'; return; }
+    if (fao) { out.innerHTML = faoHtml(nom, up, lo, upF, loF, shift, tolTxt, trt, trtTxt, trtName, rough, ztot); $("exTag").hidden = !isExample(); return; }
 
-    var c = corrMode === "fao" ? Calc.cam(curCase, nom, mes, up, lo, prog, stock) : Calc.correction(curCase, nom, mes, up, lo, null);
+    var c = Calc.correction(curCase, nom, mes, up, lo, null);
     var t = CASE_TXT[curCase];
     var isR = c.axis === "R";
     var vTxt = { ok: "Dans la tolérance", reprendre: "Hors tolérance, encore de la matière : à reprendre", rebut: "Hors tolérance, trop de matière enlevée" }[c.verdict];
@@ -1354,34 +1409,17 @@ if (typeof module !== "undefined") module.exports = Calc;
     var pill = tolMode === "none" ? (c.delta === 0 ? "ok" : "info") : { ok: "OK", reprendre: "Reprendre", rebut: "Rebut" }[c.verdict];
     var vClass = tolMode === "none" ? (c.delta === 0 ? "v-ok" : "v-none") : "v-" + c.verdict;
 
-    var fao = corrMode === "fao";
-    var dev = fao ? -c.change : c.devTarget;
-    var amount = fao ? c.offset : c.delta;
+    var dev = c.devTarget, amount = c.delta;
     var say;
     if (Math.abs(dev) < 0.0005) say = t[0] + " est sur la cote visée, aucune correction à faire.";
     else {
-      say = t[0] + " est trop " + (dev < 0 ? t[1] : t[2]) + " de " + (fao ? mm4(Math.abs(dev)) : fmt(Math.abs(dev))) + " mm par rapport à la cote visée. ";
-      if (fao) say += "Programme " + mm4(c.newProg) + " au lieu de " + mm4(c.prog) + " et ne touche pas à Usure outil.";
-      else if (isR) say += "L'outil doit enlever " + fmt(Math.abs(c.delta)) + " mm " + (c.delta < 0 ? "de plus" : "de moins") + (Calc.CASES[curCase].div === 2 ? " par côté." : " sur la face.");
+      say = t[0] + " est trop " + (dev < 0 ? t[1] : t[2]) + " de " + fmt(Math.abs(dev)) + " mm par rapport à la cote visée. ";
+      if (isR) say += "L'outil doit enlever " + fmt(Math.abs(c.delta)) + " mm " + (c.delta < 0 ? "de plus" : "de moins") + (Calc.CASES[curCase].div === 2 ? " par côté." : " sur la face.");
       else say += "L'outil doit descendre " + (c.delta < 0 ? "plus bas" : "moins bas") + " de " + fmt(Math.abs(c.delta)) + " mm.";
     }
     if (c.verdict === "rebut" && tolMode !== "none") say += " Cette pièce ne se rattrape pas ; la correction sert pour les suivantes.";
 
     var html = '<div class="verdict ' + vClass + '"><span class="pill">' + pill + '</span><span>' + vTxt + '</span></div>';
-    if (fao) {
-      var progLbl = { profondeur: "Profondeur à programmer", hauteur: "Hauteur à programmer", epaulement: "Cote à programmer" }[curCase] || (KIND[curCase] === "int" || curCase === "tourillon" ? "Cote (Ø ou largeur) à programmer" : "Cote à programmer");
-      var offLbl = isR ? (Calc.CASES[curCase].div === 2 ? "Décalage par côté" : "Décalage de la face") : "Décalage en Z";
-      var offSub = isR ? (c.offset < 0 ? "enlève plus de matière" : c.offset > 0 ? "enlève moins de matière" : "rien à changer") : (c.offset < 0 ? "descendre" : c.offset > 0 ? "remonter" : "rien à changer");
-      html += '<div class="big"><div class="bigbox main"><div class="lbl">' + progLbl + '</div><div class="val">' + mm4(c.newProg) + '</div><div class="sub">avant ' + mm4(c.prog) + ' (' + sgn(c.change, Math.abs(Math.round(c.change * 1000) - c.change * 1000) > 1e-6 ? 4 : 3) + ')</div></div>';
-      html += '<div class="bigbox"><div class="lbl">' + offLbl + '</div><div class="val ' + (c.offset < 0 ? "minus" : c.offset > 0 ? "plus" : "") + '">' + sgn(c.offset, Math.abs(Math.round(c.offset * 1000) - c.offset * 1000) > 1e-6 ? 4 : 3) + '</div><div class="sub">' + offSub + '</div></div></div>';
-      html += '<p class="say">' + say + '</p>';
-      html += '<dl class="rows">';
-      html += '<dt>Surépaisseur FAO' + (isR ? " (par côté)" : " (fond / Z)") + '</dt><dd>' + (c.newStock != null ? (stock === 0 ? "0,000" : sgn(stock, 3)) + ' → <b>' + sgn(c.newStock, 4) + '</b>' : 'actuelle + (' + sgn(c.offset, 4) + ')') + '</dd>';
-      if (curCase === "profondeur") html += '<dt>Z du fond (dessus à Z0)</dt><dd>' + (c.newProg === 0 ? "0" : "-" + mm4(c.newProg)) + '</dd>';
-      if (isR && Calc.CASES[curCase].div === 2) html += '<dt>Au Ø / à la largeur</dt><dd>' + sgn(c.change, 4) + '</dd>';
-      html += '</dl>';
-      html += '<div class="alert" style="border-left-color:var(--c1);background:color-mix(in srgb, var(--c1) 12%, transparent)"><b>Une seule méthode à la fois.</b> Dans AlphaCam, soit tu changes la géométrie à ' + mm4(c.newProg) + ', soit tu gardes la géométrie et tu mets le décalage en surépaisseur sur la finition. Les deux ensemble doublent la correction.</div>';
-    } else {
       var isRk = isR, name = isR ? "Δrayon" : "Δlongu.";
       function mv(x) { x = Calc.round3(x); return (x < 0 ? "-" : "") + Math.abs(x).toFixed(3); }
       function mc(x) { x = Calc.round3(x); return x === 0 ? "0.000" : (x > 0 ? "+" : "-") + Math.abs(x).toFixed(3); }
@@ -1400,20 +1438,89 @@ if (typeof module !== "undefined") module.exports = Calc;
       var miss = (wl == null ? 1 : 0) + (wr == null ? 1 : 0);
       html += '<p class="mach-note">' + (hot ? 'Change seulement la case <b style="color:#e2661f">orange</b> (' + name + '). L\'autre valeur reste comme elle est. <b>Quand c\'est tapé dans la machine, touche la case orange</b> : elle devient la valeur actuelle.' : 'Rien à changer dans Usure outil.') + (miss ? ' Valeur actuelle non saisie : 0.000 supposé, recopie celle de la machine.' : '') + '</p>';
       html += '<p class="say">' + say + '</p>';
-    }
     if (Math.abs(amount) > 0.1) html += '<div class="alert"><b>Grosse correction (plus de 0,1 mm).</b> Vérifie la mesure, le bon outil et le signe avant de la saisir. Une erreur de cette taille vient souvent d\'une mauvaise cote ou d\'un outil cassé.</div>';
     if (trt !== "0" && !shift) html += '<div class="alert" style="border-left-color:var(--c4);background:color-mix(in srgb, var(--c4) 12%, transparent)"><b>' + trtTxt + ' :</b> cette cote ne bouge pas avec le traitement, rien à enlever ni à ajouter.</div>';
     if (shift) html += '<div class="alert" style="border-left-color:var(--c4);background:color-mix(in srgb, var(--c4) 12%, transparent)"><b>Avant ' + trtName.toLowerCase() + ', usine à ' + mm4(nom + (upF + loF) / 2 + shift) + ' (' + mm4(nom + loF + shift) + ' à ' + mm4(nom + upF + shift) + ').</b> C\'est ' + fmt(Math.abs(shift), 4).replace(/0$/, "") + ' mm ' + (shift < 0 ? "plus petit" : "plus grand") + ' que la cote finie visée (' + mm4(nom + (upF + loF) / 2) + '), parce que la couche ' + (shift < 0 ? "va l\'agrandir" : "va la réduire") + ' de cette valeur. ' + trtTxt + '. La cote mesurée doit être prise avant traitement.</div>';
-    html += '<dl class="rows"><dt>Tolérance</dt><dd>' + tolTxt + '</dd>' + (shift ? '<dt>Cote finie (après traitement)</dt><dd>' + mm4(nom + loF) + ' à ' + mm4(nom + upF) + '</dd>' : '') + '<dt>' + (shift ? 'Mini à usiner' : 'Mini') + '</dt><dd>' + mm4(c.min) + '</dd><dt>' + (shift ? 'Maxi à usiner' : 'Maxi') + '</dt><dd>' + mm4(c.max) + '</dd><dt>Cote visée (milieu)</dt><dd>' + mm4(c.target) + '</dd><dt>Mesurée</dt><dd>' + mm4(mes) + '</dd><dt>Écart / nominale</dt><dd>' + sgn(c.deviation) + '</dd><dt>Écart / cote visée</dt><dd>' + (fao ? sgn(dev, Math.abs(Math.round(dev * 1000) - dev * 1000) > 1e-6 ? 4 : 3) : sgn(Calc.round3(c.devTarget))) + '</dd></dl>';
-    if (curCase === "rainure") html += fao ? '<p class="note">Si la fraise fait la largeur en une passe, changer la cote ne sert à rien : il faut une fraise d\'un autre Ø ou un contournage.</p>' : '<p class="note">Valable si la rainure est contournée avec correction de rayon (G41/G42). Si la fraise fait la largeur en une passe, c\'est le Ø de la fraise qu\'il faut changer.</p>';
+    html += '<dl class="rows"><dt>Tolérance</dt><dd>' + tolTxt + '</dd>' + (shift ? '<dt>Cote finie (après traitement)</dt><dd>' + mm4(nom + loF) + ' à ' + mm4(nom + upF) + '</dd>' : '') + '<dt>' + (shift ? 'Mini à usiner' : 'Mini') + '</dt><dd>' + mm4(c.min) + '</dd><dt>' + (shift ? 'Maxi à usiner' : 'Maxi') + '</dt><dd>' + mm4(c.max) + '</dd><dt>Cote visée (milieu)</dt><dd>' + mm4(c.target) + '</dd><dt>Mesurée</dt><dd>' + mm4(mes) + '</dd><dt>Écart / nominale</dt><dd>' + sgn(c.deviation) + '</dd><dt>Écart / cote visée</dt><dd>' + sgn(Calc.round3(c.devTarget)) + '</dd></dl>';
+    if (curCase === "rainure") html += '<p class="note">Valable si la rainure est contournée avec correction de rayon (G41/G42). Si la fraise fait la largeur en une passe, c\'est le Ø de la fraise qu\'il faut changer.</p>';
     if (curCase === "profondeur" || curCase === "hauteur") html += '<p class="note">Valable si le zéro pièce en Z n\'a pas bougé. Si plusieurs outils sont faux de la même valeur, contrôle plutôt le zéro pièce.</p>';
     out.innerHTML = html;
     $("exTag").hidden = !isExample();
   }
+  /* Mode FAO : valeurs à taper dans AlphaCam, sans mesure */
+  function faoVis() {
+    var on = corrMode === "fao", c = Calc.CASES[curCase];
+    var sel = function (q, show) { document.querySelectorAll("#p-corr " + q).forEach(function (el) { el.hidden = !show; }); };
+    document.querySelectorAll("#p-corr [data-only]").forEach(function (el) { el.hidden = el.dataset.only !== corrMode; });
+    sel("[data-xy]", on && c.axis === "R");
+    sel("[data-xy2]", on && c.axis === "R" && c.div === 2);
+    sel("[data-zh]", on && curCase === "hauteur");
+    var pm = $("c-pmode").value === "s" ? "s" : "c";
+    sel("[data-spec]", on && c.axis === "R" && pm === "s");
+    document.querySelectorAll("#pmode button").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.p === pm ? "true" : "false"); });
+    var side = $("c-side").value === "1" ? "1" : "2";
+    document.querySelectorAll("#sidemode button").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.s === side ? "true" : "false"); });
+    $("c-fao-hint").textContent = curCase === "profondeur" ? "Rien à saisir ici : la profondeur de coupe se compte depuis la surface de référence (le dessus de la pièce)."
+      : curCase === "hauteur" ? "La profondeur de coupe se compte depuis la surface de référence, donc il faut la hauteur totale de la pièce à cet endroit."
+      : (curCase === "epaulement" ? "Une seule face : tout l'écart va sur cette face. " : "Les 2 côtés : le même usinage fait les deux parois, l'écart est partagé. Un seul côté : chaque paroi a son usinage, tout l'écart va sur un seul. ")
+        + "Surép. XY initiale : la matière laissée par l'usinage précédent (vide = pas de tableau des passes).";
+  }
+  function v4(x) { x = Calc.round4(x); return x === 0 ? "0.0000" : (x < 0 ? "-" : "") + Math.abs(x).toFixed(4); }
+  function faoHtml(nom, up, lo, upF, loF, shift, tolTxt, trt, trtTxt, trtName, rough, ztot) {
+    var c = Calc.CASES[curCase], isR = c.axis === "R";
+    var np = Number($("c-npass").value.trim() || "1");
+    if (!(np >= 1 && np <= 50 && Math.round(np) === np)) return '<div class="verdict v-none">Calcul impossible</div><p class="err">Nombre de passes : un nombre entier de 1 à 50.</p>';
+    var spec = $("c-pmode").value === "s", pf = null, pl = null;
+    if (spec && rough != null) {
+      pf = num($("c-pfirst").value); pl = num($("c-plast").value);
+      if (isNaN(pf) || isNaN(pl)) return '<div class="verdict v-none">Calcul impossible</div><p class="err">Passes spécifiées : saisis la largeur de la première et de la dernière passe.</p>';
+    }
+    var f = Calc.fao(curCase, nom, up, lo, { sides: $("c-side").value === "1" ? 1 : 2, initial: rough, passes: np, first: pf, last: pl, total: ztot });
+    if (f.error) return '<div class="verdict v-none">Calcul impossible</div><p class="err">' + f.error + '</p>';
+    var dim = { poche: "Ø", alesage: "Ø", tourillon: "Ø", rainure: "largeur", tenon: "largeur", epaulement: "cote", profondeur: "profondeur", hauteur: "hauteur" }[curCase];
+    var dimTxt = dim === "Ø" ? "Ø " : dim + " ";
+    var html = '';
+    var rows, foot, say;
+    if (isR) {
+      rows = '<tr><td class="rl">Surépaisseur XY</td><td class="v on">' + v4(f.stock) + '</td></tr>' + (f.passes ? '<tr><td class="rl">Surép. XY initiale</td><td class="v">' + v4(rough) + '</td></tr><tr><td class="rl">Nombre de passes</td><td class="v">' + f.passes.length + '</td></tr><tr><td class="rl">Passes</td><td class="v">' + (spec ? "Spécifiées" : "Constantes") + '</td></tr>' + (spec ? '<tr><td class="rl">Largeur PREMIÈRE passe</td><td class="v">' + v4(pf) + '</td></tr><tr><td class="rl">Largeur DERNIÈRE passe</td><td class="v">' + v4(pl) + '</td></tr>' : '') : '');
+      foot = "Données usinage";
+      say = "Géométrie dessinée à la cote nominale (" + dimTxt + mm4(nom) + "). On vise " + mm4(f.target) + " (" + sgn(f.change, 4).replace(/0$/, "") + (dim === "cote" ? "" : " " + (dim === "Ø" ? "au Ø" : "à la largeur")) + "). ";
+      if (f.stock === 0) say += "Rien à décaler : surépaisseur 0.";
+      else if (f.sides === 2) say += "Ça fait <b>" + v4(f.stock) + " par côté (sur le rayon)</b>, la même valeur sur les deux parois.";
+      else if (c.div === 2) say += "Tout l'écart va sur <b>un seul côté : " + v4(f.stock) + "</b>. Mets-la seulement sur l'usinage de ce côté ; l'autre usinage garde 0.";
+      else say += "Une seule face : <b>" + v4(f.stock) + "</b> sur cette face.";
+      say += " " + (f.stock < 0 ? "Négatif = la fraise enlève plus de matière." : f.stock > 0 ? "Positif = la fraise laisse plus de matière." : "");
+    } else {
+      foot = "Niveaux et coupes";
+      if (f.depth == null) {
+        rows = '<tr><td class="rl">Profondeur de coupe</td><td class="v">?</td></tr>';
+        say = "Saisis la hauteur totale (du dessous à la surface de référence) à l'étape Réglages AlphaCam.";
+      } else {
+        rows = '<tr><td class="rl">Profondeur de coupe</td><td class="v on">' + v4(f.depth) + '</td></tr>';
+        say = curCase === "profondeur" ? "Relative à la surface de référence (le dessus de la pièce). Profondeur visée " + mm4(f.target) + " (milieu de la tolérance)."
+          : "Relative à la surface de référence. Hauteur totale " + mm4(ztot) + " − hauteur restante visée " + mm4(f.target) + " = " + mm4(-f.depth) + " sous la surface de référence.";
+      }
+    }
+    html += '<div class="mach acam" style="margin-top:0" role="table" aria-label="À remplir dans AlphaCam"><div class="mach-top"><span>À REMPLIR DANS ALPHACAM</span><span>' + foot + '</span></div><table><tbody>' + rows + '</tbody></table><div class="mach-foot"><span>' + (isR ? (f.sides === 2 && c.div === 2 ? "par côté, sur le rayon" : "sur un seul usinage") : "relatif à la surface de référence") + '</span></div></div>';
+    html += '<p class="say">' + say + '</p>';
+    if (isR) html += f.passes ? '<h3 class="passh">Passes : ' + fmt(f.total, 4).replace(/0$/, "") + ' mm à enlever par côté, ' + (f.spec ? (f.passes.length > 2 ? 'première et dernière imposées, le milieu en ' + (f.passes.length - 2) + ' part' + (f.passes.length > 3 ? 's égales' : '') : 'première imposée, la dernière fait le reste') : 'en ' + f.passes.length + ' part' + (f.passes.length > 1 ? 's égales' : '')) + '</h3><table class="passes"><thead><tr><th>Passe</th><th>Enlève</th><th>Reste</th></tr></thead><tbody>'
+        + f.passes.map(function (p, i) { var last = i === f.passes.length - 1; return '<tr' + (last ? ' class="last"' : '') + '><td>' + p.n + (last ? ' (finale)' : '') + '</td><td>' + v4(p.cut) + '</td><td>' + v4(p.left) + (last ? ' ✓' : '') + '</td></tr>'; }).join("") + '</tbody></table>' + (f.warn === "two" ? '<p class="note">Avec 2 passes, il n\'y a pas de milieu : la dernière passe fait ce qui reste (' + v4(f.passes[1].cut) + '), pas ' + v4(pl) + '. Vérifie dans AlphaCam ou ajoute une passe.</p>' : '') + (spec && np === 1 ? '<p class="note">Avec 1 passe, les largeurs première et dernière ne servent pas.</p>' : '')
+      : '<p class="note">Saisis la Surép. XY initiale (laissée par l\'ébauche) à l\'étape Réglages pour voir le tableau des passes.</p>';
+    if (isR && Math.abs(f.stock) > 0.1) html += '<div class="alert"><b>Grosse surépaisseur (plus de 0,1 mm).</b> Vérifie la tolérance et le cas de figure avant de la saisir.</div>';
+    if (isR && f.stock !== 0) html += '<div class="alert" style="border-left-color:var(--c1);background:color-mix(in srgb, var(--c1) 12%, transparent)"><b>Une seule méthode à la fois.</b> Soit la géométrie reste au nominal avec cette surépaisseur, soit tu ' + (f.sides === 2 && c.div === 2 ? "dessines la géométrie à " + mm4(f.target) : "déplaces la paroi de " + fmt(Math.abs(f.stock), 4).replace(/0$/, "") + " mm dans la géométrie") + ' avec surépaisseur 0. Les deux ensemble doublent la correction.</div>';
+    if (trt !== "0" && !shift) html += '<div class="alert" style="border-left-color:var(--c4);background:color-mix(in srgb, var(--c4) 12%, transparent)"><b>' + trtTxt + ' :</b> cette cote ne bouge pas avec le traitement, rien à enlever ni à ajouter.</div>';
+    if (shift) html += '<div class="alert" style="border-left-color:var(--c4);background:color-mix(in srgb, var(--c4) 12%, transparent)"><b>Avant ' + trtName.toLowerCase() + ', usine à ' + mm4(f.target) + ' (' + mm4(f.min) + ' à ' + mm4(f.max) + ').</b> Les valeurs AlphaCam ci-dessus en tiennent déjà compte. C\'est ' + fmt(Math.abs(shift), 4).replace(/0$/, "") + ' mm ' + (shift < 0 ? "plus petit" : "plus grand") + ' que la cote finie visée (' + mm4(nom + (upF + loF) / 2) + '). ' + trtTxt + '.</div>';
+    html += '<dl class="rows"><dt>Tolérance</dt><dd>' + tolTxt + '</dd>' + (shift ? '<dt>Cote finie (après traitement)</dt><dd>' + mm4(nom + loF) + ' à ' + mm4(nom + upF) + '</dd>' : '') + '<dt>' + (shift ? 'Mini à usiner' : 'Mini') + '</dt><dd>' + mm4(f.min) + '</dd><dt>' + (shift ? 'Maxi à usiner' : 'Maxi') + '</dt><dd>' + mm4(f.max) + '</dd><dt>Cote visée (milieu)</dt><dd>' + mm4(f.target) + '</dd><dt>Écart / nominale</dt><dd>' + sgn(f.change, 4) + '</dd></dl>';
+    if (curCase === "rainure") html += '<p class="note">Si la fraise fait la largeur en une passe, la surépaisseur ne sert à rien : il faut une fraise d\'un autre Ø ou un contournage.</p>';
+    if (!isR) html += '<p class="note">Valable si la surface de référence est bien le dessus de la pièce et si la case de la profondeur est en relatif.</p>';
+    return html;
+  }
+  document.querySelectorAll("#pmode button").forEach(function (b) { b.addEventListener("click", function () { $("c-pmode").value = b.dataset.p; calcCorr(); saveMode(); }); });
+  document.querySelectorAll("#sidemode button").forEach(function (b) { b.addEventListener("click", function () { $("c-side").value = b.dataset.s; calcCorr(); saveMode(); }); });
   var EX = { nom: "20", mes: "19,96", iso: "H7" };
-  function isExample() { return $("c-nom").value === EX.nom && $("c-mes").value === EX.mes && $("c-iso").value === EX.iso && curCase === "poche"; }
+  function isExample() { return $("c-nom").value === EX.nom && (corrMode === "fao" || $("c-mes").value === EX.mes) && $("c-iso").value === EX.iso && curCase === "poche"; }
 
-  ["c-nom", "c-mes", "c-up", "c-lo", "c-gen", "c-thk", "c-tool", "c-thk2", "c-wl", "c-wr", "c-prog", "c-stock"].forEach(function (id) { $(id).addEventListener("input", function () { calcCorr(); saveMode(); }); });
+  ["c-nom", "c-mes", "c-up", "c-lo", "c-gen", "c-thk", "c-tool", "c-thk2", "c-wl", "c-wr", "c-rough", "c-npass", "c-pfirst", "c-plast", "c-ztot"].forEach(function (id) { $(id).addEventListener("input", function () { calcCorr(); saveMode(); }); });
   $("c-gen").addEventListener("input", genHint);
   function genHint() {
     var g = Calc.general(num($("c-nom").value), $("c-gen").value), name = $("c-gen").options[$("c-gen").selectedIndex].text.replace(/ \(.*\)$/, "");
@@ -1422,7 +1529,7 @@ if (typeof module !== "undefined") module.exports = Calc;
   ["c-iso", "c-trt"].forEach(function (id) { $(id).addEventListener("input", saveMode); });
 
   /* Sous-onglets : chaque mode garde sa propre saisie */
-  var MODE_IDS = ["c-nom", "c-mes", "c-iso", "c-up", "c-lo", "c-gen", "c-trt", "c-thk", "c-thk2", "c-tool", "c-wl", "c-wr", "c-prog", "c-stock"];
+  var MODE_IDS = ["c-nom", "c-mes", "c-iso", "c-up", "c-lo", "c-gen", "c-trt", "c-thk", "c-thk2", "c-tool", "c-wl", "c-wr", "c-side", "c-rough", "c-npass", "c-pmode", "c-pfirst", "c-plast", "c-ztot"];
   var corrMode = load("corrMode") === "fao" ? "fao" : "cnc";
   var modeState = {};
   ["cnc", "fao"].forEach(function (m) { try { modeState[m] = JSON.parse(load("corr." + m) || "null"); } catch (e) { modeState[m] = null; } });
@@ -1443,11 +1550,13 @@ if (typeof module !== "undefined") module.exports = Calc;
     if (st) {
       MODE_IDS.forEach(function (id) { if (st.v && st.v[id] != null) $(id).value = st.v[id]; });
       if ($("c-trt").selectedIndex < 0) $("c-trt").value = "0";
+      if ($("c-side").value !== "1") $("c-side").value = "2";
+      if ($("c-pmode").value !== "s") $("c-pmode").value = "c";
       if (st.caseKey && Calc.CASES[st.caseKey]) selectCase(st.caseKey);
     } else {
       MODE_IDS.forEach(function (id) { $(id).value = ""; });
       $("c-nom").value = EX.nom; $("c-mes").value = EX.mes; $("c-iso").value = EX.iso;
-      $("c-gen").value = "m"; $("c-trt").value = "0"; $("c-thk").value = "25"; $("c-thk2").value = "";
+      $("c-gen").value = "m"; $("c-trt").value = "0"; $("c-thk").value = "25"; $("c-thk2").value = ""; $("c-side").value = "2"; $("c-pmode").value = "c";
       selectCase("poche");
     }
     setChips(); fixCase(); setTrt(); setMode(st && st.tol ? st.tol : "iso");
@@ -1497,19 +1606,21 @@ if (typeof module !== "undefined") module.exports = Calc;
     6: ["", "Étape 6 sur 7"],
     7: ["Résultat", "Étape 7 sur 7"]
   };
+  var FAO_SUB = { 2: "Étape 2 sur 7 : cote nominale du plan", 3: "Étape 3 sur 7 : la cote à usiner" };
   function renderWiz() {
     var on = isWiz(), sec = $("p-corr");
     sec.classList.toggle("wiz", on);
     $("wizbar").hidden = !on; $("wiznav").hidden = !on; document.body.classList.toggle("haswiz", on); $("wiz-end").hidden = !on || wizStep !== 7;
     sec.querySelectorAll("[data-step]").forEach(function (el) { el.classList.toggle("on", Number(el.dataset.step) === wizStep); });
     if (!on) return;
-    var t = STEP_TXT[wizStep], title = wizStep === 6 ? (corrMode === "cnc" ? "Valeurs actuelles dans Usure outil" : "Programme actuel") : t[0];
-    $("wiz-lbl").innerHTML = escapeHtml(title) + "<small>" + t[1] + (wizStep > 1 ? " · " + (corrMode === "cnc" ? "Outil CNC" : "Cote FAO") : "") + "</small>";
+    var t = STEP_TXT[wizStep], title = wizStep === 6 ? (corrMode === "cnc" ? "Valeurs actuelles dans Usure outil" : "Réglages AlphaCam") : t[0];
+    var sub = corrMode === "fao" && FAO_SUB[wizStep] ? FAO_SUB[wizStep] : t[1];
+    $("wiz-lbl").innerHTML = escapeHtml(title) + "<small>" + sub + (wizStep > 1 ? " · " + (corrMode === "cnc" ? "Outil CNC" : "Cote FAO") : "") + "</small>";
     var dots = $("wiz-dots"); dots.innerHTML = "";
     for (var i = 1; i <= 7; i++) {
       var d = document.createElement("button"); d.type = "button"; d.dataset.s = i;
       d.className = i === wizStep ? "cur" : i < wizStep ? "done" : "";
-      d.setAttribute("aria-label", "Aller à l'étape " + i + " : " + (i === 6 ? "valeurs actuelles" : STEP_TXT[i][0]));
+      d.setAttribute("aria-label", "Aller à l'étape " + i + " : " + (i === 6 ? (corrMode === "cnc" ? "valeurs actuelles" : "réglages AlphaCam") : STEP_TXT[i][0]));
       d.addEventListener("click", function () { goStep(Number(this.dataset.s)); });
       dots.appendChild(d);
     }
@@ -1522,7 +1633,7 @@ if (typeof module !== "undefined") module.exports = Calc;
     renderWiz();
     if (isWiz()) {
       window.scrollTo(0, 0);
-      var first = { 2: "c-nom", 6: corrMode === "cnc" ? "c-wl" : "c-prog" }[wizStep];
+      var first = { 2: "c-nom", 6: corrMode === "cnc" ? "c-wl" : curCase === "hauteur" ? "c-ztot" : null }[wizStep];
       if (first && !$(first).value) $(first).focus();
     }
   }
@@ -1532,10 +1643,11 @@ if (typeof module !== "undefined") module.exports = Calc;
     if (e.key === "Enter" && e.target.tagName === "INPUT") { e.preventDefault(); nextField(e.target); }
   });
   $("wiz-next-part").addEventListener("click", function () {
-    $("c-mes").value = ""; calcCorr(); saveMode(); goStep(2); $("c-mes").focus();
+    var f = corrMode === "fao" ? "c-nom" : "c-mes";
+    $(f).value = ""; calcCorr(); saveMode(); goStep(2); $(f).focus();
   });
   $("wiz-new").addEventListener("click", function () {
-    ["c-nom", "c-mes", "c-up", "c-lo", "c-tool", "c-wl", "c-wr", "c-prog", "c-stock"].forEach(function (id) { $(id).value = ""; });
+    ["c-nom", "c-mes", "c-up", "c-lo", "c-tool", "c-wl", "c-wr", "c-rough", "c-npass", "c-pfirst", "c-plast", "c-ztot"].forEach(function (id) { $(id).value = ""; });
     calcCorr(); saveMode(); goStep(2);
   });
   if (narrow) { var onNarrow = function () { renderWiz(); }; if (narrow.addEventListener) narrow.addEventListener("change", onNarrow); else if (narrow.addListener) narrow.addListener(onNarrow); }
