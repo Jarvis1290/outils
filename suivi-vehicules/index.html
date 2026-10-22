@@ -10,8 +10,8 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="vendor/chart.umd.min.js"></script>
+<script src="vendor/xlsx.full.min.js"></script>
 <style>
 /* Layout : app téléphone une colonne, barre du haut + contenu défilant + barre d'onglets en bas, bouton « + Plein » flottant.
    Deux ambiances fixes choisies par véhicule : Kangoo = carbone et rouge, BMW = gris-bleu. */
@@ -768,7 +768,7 @@ const THEME = {
   b:{K:"#E7EDF3",B:"#8FB3D9",txt:"#A8B6C5",grid:"rgba(143,179,217,.12)",tipBg:"#25323F",tipFg:"#E7EDF3",tipBd:"#8FB3D9",track:"#34455A",needle:"#E7EDF3",muted:"#738599",bad:"#F07884",warn:"#E8C062",acc:"#8FB3D9"}};
 let MODE=0; try{ const m=localStorage.getItem("sv-mode"); if(m==="1") MODE=1; }catch(e){}
 let T=THEME.k;
-const APP_VERSION="1.5";
+const APP_VERSION="1.6";
 const KEY="suivi-vehicules-v1";
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}}, lsSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 let STATE={fills:[],tyres:[],ent:[],rates:{},range:[925,350],tank:[60,20],buy:[3500,10000],fixed:[{},{}],trip:null};
@@ -794,6 +794,7 @@ const COUPLES=[["Mass lot guidon",38,"","","","Guidon"],["Pontet guidon",19,"","
 const OUTILS=["Clé 08/10","Clé 13/17","Douille 08","Douille 10","Douille 13","Douille 17","Imbus 04","Imbus 06","Imbus 08","Imbus 17","Imbus 19","T25","T27","T30","T40","T45","T50"];
 const PNEUS=[["Bridgestone","Battlax AdventureCross AX41",.6,255,"123 pneus (custom)"],["Continental","TKC 80 Twinduro",.5,270.85,"Pneu online"],["Heidenau","K60 Scout M+S",.5,227.51,"Autre relevé"],["Michelin","Anakee Wild",.5,266,"123 pneus (custom)"],["Mitas","E10 Dakar",null,245,"123 pneus (custom)"],["Mitas","E10",.7,213.55,"Autre relevé"],["Mitas","E09",.8,221,"123 pneus (custom)"],["Pirelli","Scorpion Rally",.8,254,"Autre relevé"],["Pirelli","Scorpion Rally STR",.4,233,"Autre relevé"],["Shinko","E804 / E805",.6,283.12,"Pneu online"],["Heidenau","K60 Ranger",.7,269.43,"Pneu online"],["Metzeler","Karoo 4",.5,null,""]];
 const $ = s=>document.querySelector(s);
+const esc = s=>String(s ?? "").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); // texte saisi ou importé → HTML sûr
 const fmt = (x,d=0)=>x==null||isNaN(x)?"–":x.toLocaleString("fr-CH",{minimumFractionDigits:d,maximumFractionDigits:d});
 const day = s=>Math.round(new Date(s+"T12:00:00").getTime()/864e5);
 const MOIS=["janv","févr","mars","avr","mai","juin","juil","août","sept","oct","nov","déc"];
@@ -1295,8 +1296,8 @@ function renderPriceGroups(kind,list,col){
   const ch=rows.find(r=>r.k==="CH");
   if(kind==="stations"){
     const best=rows[0], Ltot=rows.reduce((t,r)=>t+r.L,0), paid=rows.reduce((t,r)=>t+r.P,0);
-    $("#statCap").innerHTML=`🏆 <b>${best.k}</b> est la moins chère pour toi : ${fmt(best.pl,3)} CHF/L en moyenne. Si tu avais tout fait là-bas : ≈ <b>${fmt(paid-best.pl*Ltot)} CHF</b> économisés.`;
-    $("#statKv").innerHTML=`<div style="grid-column:1/-1">${rows.map((r,i)=>`<div class="rank"><span class="n">${i+1}</span><span>${r.k}${r.ex?' <span class="pill w">exemple</span>':""}<small>${r.n} plein(s) · ${[...r.ctry].map(c=>CTRY[c].f).join(" ")}</small></span>
+    $("#statCap").innerHTML=`🏆 <b>${esc(best.k)}</b> est la moins chère pour toi : ${fmt(best.pl,3)} CHF/L en moyenne. Si tu avais tout fait là-bas : ≈ <b>${fmt(paid-best.pl*Ltot)} CHF</b> économisés.`;
+    $("#statKv").innerHTML=`<div style="grid-column:1/-1">${rows.map((r,i)=>`<div class="rank"><span class="n">${i+1}</span><span>${esc(r.k)}${r.ex?' <span class="pill w">exemple</span>':""}<small>${r.n} plein(s) · ${[...r.ctry].map(c=>CTRY[c].f).join(" ")}</small></span>
       <span class="${i===0?"best":""}" style="font-family:var(--f-num);font-size:12px">${r.pl<avg?"−":"+"}${fmt(Math.abs(r.pl/avg-1)*100)} %</span><span class="p ${i===0?"best":""}">${fmt(r.pl,3)}</span></div>`).join("")}</div>`;
   } else {
     $("#statCap").innerHTML = ch ? rows.filter(r=>r.k!=="CH").map(r=>`${CTRY[r.k].f} ${r.pl<ch.pl?"<b class='best' style='color:var(--ok)'>":"<b style='color:var(--bad)'>"}${r.pl<ch.pl?"−":"+"}${fmt(Math.abs(r.pl/ch.pl-1)*100)} %</b> par rapport à la Suisse`).join("<br>")||"Que des pleins en Suisse pour l'instant." : "";
@@ -1314,7 +1315,7 @@ function renderHist(){
   all.forEach(f=>{ const k=f.d.slice(0,7); if(k!==cur){cur=k;const[y,m]=k.split("-");html+=`<div class="monthsep">${MOIS[m-1]} ${y}</div>`;}
     html+=`<div class="row" role="button" tabindex="0" data-id="${f.id}" style="--c:${V[f.v].c}"><div class="ic">${V[f.v].n.slice(0,3)}</div>
       <div class="t"><b>${fmt(f.km)} km</b>${f.conso!=null?`<span class="pill ok">${fmt(f.conso,2)} L/100</span>`:""}${f.eur!=null?`<span class="pill" style="color:var(--volt-hi);border-color:color-mix(in srgb,var(--volt) 50%,transparent)">€</span>`:""}${f.ign&&f.ign.length?f.ign.map(x=>`<span class="pill w">⚠ ignoré : ${x}</span>`).join(""):""}${f.weird?`<span class="pill w">conso inhabituelle</span>`:""}${f.force?`<span class="pill ok">compté quand même</span>`:""}${f.alert?`<span class="pill" style="color:var(--fg-3);border-color:var(--line)">${f.alert}</span>`:""}
-      <div>${CTRY[f.ctry||"CH"].f} ${dfr(f.d)} · ${f.full?"plein":"partiel"}${f.dist?` · +${fmt(f.dist)} km`:""}${f.st?` · ${f.st}`:""}${Object.keys(f.opts||{}).filter(k=>f.opts[k]).map(k=>" "+OPTS.find(o=>o[0]===k)[1].split(" ")[0]).join("")}</div></div>
+      <div>${CTRY[f.ctry||"CH"].f} ${dfr(f.d)} · ${f.full?"plein":"partiel"}${f.dist?` · +${fmt(f.dist)} km`:""}${f.st?` · ${esc(f.st)}`:""}${Object.keys(f.opts||{}).filter(k=>f.opts[k]).map(k=>" "+OPTS.find(o=>o[0]===k)[1].split(" ")[0]).join("")}</div></div>
       <div class="v">${f.P!=null?fmt(f.P,2)+" CHF":"–"}<small>${f.eur!=null?fmt(f.eur,2)+" € · ":""}${f.L!=null?fmt(f.L,2)+" L":"– L"}</small></div></div>`; });
   $("#histList").innerHTML=(html||`<div class="muted" style="padding:12px 2px">Aucun plein noté.</div>`)+(allF.length>all.length?`<button class="btn" type="button" id="histMore" style="margin:8px 0">Afficher plus (${allF.length-all.length} de plus)</button>`:"")+`<div class="cap" style="padding:8px 2px">Touche un plein pour le modifier ou le supprimer.</div>`;
   $("#histList").querySelectorAll(".row").forEach(r=>r.onclick=()=>{ const f=fills.find(x=>x.id===r.dataset.id); if(f) openSheet(false,f); });
@@ -1355,7 +1356,7 @@ function renderTyres(){
     $("#tPos").innerHTML=["AV","AR","2"].map(p=>`<button type="button" aria-pressed="${p===sel.pos}" data-p="${p}">${TPOS[p]}</button>`).join("");
     $("#tPos").querySelectorAll("button").forEach(b=>b.onclick=()=>{ sel.pos=b.dataset.p; sel.mod=lastModAt(v,sel.pos); renderTyres(); });
     const M=tyreModels(v);
-    $("#tMod").innerHTML=M.list.map(n=>`<button type="button" class="${M.used.includes(n)?"recent":""}" aria-pressed="${n===sel.mod}" data-m="${n.replace(/"/g,"&quot;")}">${n}</button>`).join("")+`<button type="button" aria-pressed="${sel.mod==="__autre"}" data-m="__autre">Autre…</button>`;
+    $("#tMod").innerHTML=M.list.map(n=>`<button type="button" class="${M.used.includes(n)?"recent":""}" aria-pressed="${n===sel.mod}" data-m="${esc(n)}">${esc(n)}</button>`).join("")+`<button type="button" aria-pressed="${sel.mod==="__autre"}" data-m="__autre">Autre…</button>`;
     $("#tModOther").hidden=sel.mod!=="__autre";
     $("#tMod").querySelectorAll("button").forEach(b=>b.onclick=()=>{ sel.mod=sel.mod===b.dataset.m?null:b.dataset.m; renderTyres(); });
     const est=(()=>{ try{ return odoAt(v,$("#tDate").value||dOf(TODAY)); }catch(e){ return null; } })();
@@ -1371,7 +1372,7 @@ function renderTyres(){
   const all=STATE.tyres.filter(x=>x.v===v);
   if(!all.length){ $("#tyreList").innerHTML=`<div class="muted" style="padding:10px 0">Aucun changement noté. Note le prochain et l'app comptera les km faits avec chaque ${moto?"pneu":"train de pneus"}.</div>`; return; }
   const row=p=>{ const T=TTYPE[tyreType(p)];
-    return `<div class="tyre" role="button" tabindex="0" data-id="${p.id}"><span class="ic">${T.e}</span><span>${p.mod?`${T.n} · <b>${p.mod}</b>`:`${T.n} ${p.d.slice(0,4)}`}<small>${dfr(p.d)} → ${p.open?"aujourd'hui":dfr(p.end)}${p.pos==="2"?" · AV + AR":""}${p.km!=null?` · monté à ${fmt(p.km)} km`:""}</small></span><span class="v">${fmt(p.run)} km${p.open?"<small>en cours</small>":""}</span></div>`; };
+    return `<div class="tyre" role="button" tabindex="0" data-id="${p.id}"><span class="ic">${T.e}</span><span>${p.mod?`${T.n} · <b>${esc(p.mod)}</b>`:`${T.n} ${p.d.slice(0,4)}`}<small>${dfr(p.d)} → ${p.open?"aujourd'hui":dfr(p.end)}${p.pos==="2"?" · AV + AR":""}${p.km!=null?` · monté à ${fmt(p.km)} km`:""}</small></span><span class="v">${fmt(p.run)} km${p.open?"<small>en cours</small>":""}</span></div>`; };
   let html="";
   if(!moto){
     const per=tyreSegments(v,"AV"); const tot={H:0,E:0,R:0,O:0}; per.forEach(p=>tot[tyreType(p)]+=p.run);
@@ -1379,7 +1380,7 @@ function renderTyres(){
   } else {
     const segs={AV:tyreSegments(v,"AV"),AR:tyreSegments(v,"AR")};
     html=`<div class="mini" style="margin:8px 0">${["AV","AR"].map(p=>{ const c=segs[p].find(x=>x.open);
-      return `<div><small>${TPOS[p]} actuel</small>${c?`<b>${fmt(c.run)} km</b><small>${TTYPE[tyreType(c)].e} ${c.mod||TTYPE[tyreType(c)].n}</small>`:`<b>–</b><small>pas noté</small>`}</div>`; }).join("")}</div>`;
+      return `<div><small>${TPOS[p]} actuel</small>${c?`<b>${fmt(c.run)} km</b><small>${TTYPE[tyreType(c)].e} ${esc(c.mod||TTYPE[tyreType(c)].n)}</small>`:`<b>–</b><small>pas noté</small>`}</div>`; }).join("")}</div>`;
     const tot={R:0,O:0}; segs.AR.forEach(p=>{ if(tot[tyreType(p)]!=null) tot[tyreType(p)]+=p.run; });
     if(tot.R||tot.O) html+=`<div class="cap" style="margin:0 0 4px">Arrière : 🛣️ ${fmt(tot.R)} km en route · ⛰️ ${fmt(tot.O)} km en off-road</div>`;
     ["AV","AR"].forEach(p=>{ if(segs[p].length) html+=`<div class="tpos">${TPOS[p]}</div>`+segs[p].slice().reverse().map(row).join(""); });
@@ -1408,7 +1409,7 @@ function renderMore(){
   const el=STATE.ent.filter(x=>x.v===MODE).sort((a,b)=>(b.d||"").localeCompare(a.d||""));
   const tot=el.reduce((t,x)=>t+(+x.m||0),0);
   $("#entList").innerHTML=(el.length?`<div class="mini" style="margin:6px 0"><div><small>Total noté</small><b>${fmt(tot)} CHF</b></div><div><small>Interventions</small><b>${el.length}</b></div></div>`:`<div class="muted" style="padding:8px 0">Rien de noté pour ce véhicule.</div>`)+
-    el.map(x=>`<div class="row" role="button" tabindex="0" data-id="${x.id}" style="--c:${V[x.v].c}"><div class="ic">${V[x.v].n.slice(0,3)}</div><div class="t"><b>${isTyre(x)?"🛞 ":""}${x.t}</b><div>${x.d?dfr(x.d):"date non notée"}${x.km?` · ${fmt(x.km)} km`:""}</div></div><div class="v">${x.m!=null&&x.m!==""?fmt(+x.m,2)+" CHF":"–"}</div></div>`).join("");
+    el.map(x=>`<div class="row" role="button" tabindex="0" data-id="${x.id}" style="--c:${V[x.v].c}"><div class="ic">${V[x.v].n.slice(0,3)}</div><div class="t"><b>${isTyre(x)?"🛞 ":""}${esc(x.t)}</b><div>${x.d?dfr(x.d):"date non notée"}${x.km?` · ${fmt(x.km)} km`:""}</div></div><div class="v">${x.m!=null&&x.m!==""?fmt(+x.m,2)+" CHF":"–"}</div></div>`).join("");
   $("#entList").querySelectorAll(".row").forEach(r=>r.onclick=()=>confirmTap(r,"Toucher encore pour supprimer",()=>{ STATE.ent=STATE.ent.filter(x=>x.id!==r.dataset.id); persist(); renderMore(); toast("Ligne d'entretien supprimée"); }));
   $("#eAdd").onclick=()=>{ const t=$("#eDesc").value.trim(); if(!t){ toast("Écris ce qui a été fait."); return; }
     const m=nv($("#eAmt")); STATE.ent.push({id:uid(),d:$("#eDate").value||null,v:MODE,t,m:isNaN(m)?null:m,k:eKind}); persist();
@@ -1523,7 +1524,7 @@ function renderCtry(){ $("#fCtry").innerHTML=["CH","FR","IT","DE","AT"].map(c=>`
 function renderSt(){
   const recent=[...new Set(A.per[sv].filter(f=>f.st&&(f.ctry||"CH")===sCtry).sort((a,b)=>b.d.localeCompare(a.d)).map(f=>f.st))].slice(0,3);
   const list=recent.concat((STATIONS[sCtry]||[]).filter(x=>!recent.includes(x)));
-  $("#fSt").innerHTML=list.map(x=>`<button type="button" class="${recent.includes(x)?"recent":""}" aria-pressed="${x===sSt}" data-s="${x}">${x}</button>`).join("")+`<button type="button" aria-pressed="${sSt==="__autre"}" data-s="__autre">Autre…</button>`;
+  $("#fSt").innerHTML=list.map(x=>`<button type="button" class="${recent.includes(x)?"recent":""}" aria-pressed="${x===sSt}" data-s="${esc(x)}">${esc(x)}</button>`).join("")+`<button type="button" aria-pressed="${sSt==="__autre"}" data-s="__autre">Autre…</button>`;
   $("#fStOther").hidden = sSt!=="__autre";
   $("#fSt").querySelectorAll("button").forEach(b=>b.onclick=()=>{ sSt = sSt===b.dataset.s?null:b.dataset.s; renderSt(); live(); });
 }
@@ -1663,7 +1664,7 @@ function findHeader(rows,need){ for(let i=0;i<Math.min(rows.length,40);i++){ con
 function tyreFrom(id,d,v,t,pos,mod,km){ // relit un changement de pneus (sauvegarde ou Excel)
   const s=String(t||"").trim().toLowerCase(); const tt=TTYPE[String(t||"").toUpperCase()]&&s.length===1?s.toUpperCase():s.startsWith("h")?"H":s.startsWith("o")?"O":s.startsWith("r")?"R":"E";
   const ps=String(pos||"").trim().toLowerCase(); const P=ps==="av"||ps.startsWith("avant")?"AV":ps==="ar"||ps.startsWith("arri")?"AR":ps==="2"||ps.startsWith("les")?"2":null;
-  const x={id,d,v,t:tt}; if(P) x.pos=P; if(mod) x.mod=String(mod); if(km!=null&&km!==""&&!isNaN(+km)) x.km=+km; return x; }
+  const x={id,d,v,t:tt}; if(P) x.pos=P; if(mod) x.mod=okS(mod,60); if(okN(km)!=null) x.km=okN(km); return x; }
 function parseWorkbook(wb){
   const out={fills:[],tyres:[],ent:[]};
   const sh=n=>wb.Sheets[n]?XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:null}):null;
@@ -1676,8 +1677,8 @@ function parseWorkbook(wb){
   for(let r=h.i+1;r<P.length;r++){ const row=P[r]||[]; const d=toISO(row[iD]), v=vehOf(row[iV]), km=num(row[iK]);
     if(!d||v<0||km==null) continue;
     const f={id:uid(),d,v,km,L:num(row[iL]),P:iP>=0?num(row[iP]):null,full:String(row[iT]||"Plein").toLowerCase().startsWith("plein")||String(row[iT]||"").toLowerCase()==="f",ctry:"CH",st:null,eur:null,rate:null,opts:{}};
-    if(iC>=0&&row[iC]&&CTRY[row[iC]]) f.ctry=row[iC];
-    if(iS>=0&&row[iS]) f.st=String(row[iS]);
+    if(iC>=0&&row[iC]&&Object.hasOwn(CTRY,row[iC])) f.ctry=row[iC];
+    if(iS>=0&&row[iS]) f.st=okS(row[iS],60);
     if(iE>=0) f.eur=num(row[iE]); if(iX>=0) f.rate=num(row[iX]);
     iO.forEach((k,j)=>{ if(k>=0&&row[k]) f.opts[["clim","rem","auto","charge"][j]]=true; });
     if(iR>=0&&row[iR]){ const m=String(row[iR]).match(/EUR\s*:\s*([\d.,]+)\s*€\/L\s*×\s*change\s*([\d.,]+)/); if(m){ const el=num(m[1]),rt=num(m[2]); f.ctry=f.ctry==="CH"?"EU":f.ctry; f.rate=rt; f.eur=f.L?Math.round(f.L*el*100)/100:null; } }
@@ -1685,19 +1686,27 @@ function parseWorkbook(wb){
   const Tz=sh("Pneus"); if(Tz){ const th=findHeader(Tz,["date","véhicule"]); if(th){ for(let r=th.i+1;r<Tz.length;r++){ const row=Tz[r]||[]; const d=toISO(row[th.idx("date")]), v=vehOf(row[th.idx("véhicule")]); const t=String(row[th.idx("pneus montés")]||"").toLowerCase(); if(d&&v>=0&&t) out.tyres.push(tyreFrom(uid(),d,v,t,row[th.idx("roue")],row[th.idx("modèle")],num(row[th.idx("km compteur")]))); } } }
   const E=sh("Entretien"); if(E){ const eh=findHeader(E,["date","véhicule","description"]); if(eh){ const im=eh.idx("montant chf"), ik=eh.idx("km");
     for(let r=eh.i+1;r<E.length;r++){ const row=E[r]||[]; const v=vehOf(row[eh.idx("véhicule")]), t=row[eh.idx("description")]; if(v<0||!t) continue;
-      out.ent.push({id:uid(),d:toISO(row[eh.idx("date")]),v,t:String(t),m:im>=0?num(row[im]):null,km:ik>=0?num(row[ik]):null}); } } }
+      out.ent.push({id:uid(),d:toISO(row[eh.idx("date")]),v,t:okS(t,120),m:im>=0?num(row[im]):null,km:ik>=0?num(row[ik]):null}); } } }
   return out;
 }
 function parseBackup(text){ let j; try{ j=JSON.parse(text); }catch(e){ throw new Error("ce fichier texte n'est pas une sauvegarde de l'app"); } return backupFrom(j); }
+const okId=x=>/^[\w-]{1,40}$/.test(String(x??""))?String(x):uid(); // contrôle de ce qui arrive d'un fichier
+const okD=x=>/^\d{4}-\d{2}-\d{2}$/.test(String(x??""))?String(x):null;
+const okN=x=>x==null||x===""||!isFinite(+x)?null:+x;
+const okS=(x,n)=>x==null||x===""?null:String(x).slice(0,n);
+const okOpts=o=>{ const r={}; OPTS.forEach(([k])=>{ if(o&&o[k]) r[k]=true; }); return r; };
+const okFix=o=>{ const r={}; FIXES.forEach(k=>{ const n=okN(o&&o[k]); if(n!=null&&n>=0) r[k]=n; }); return r; };
+const okTrip=t=>{ if(!t||typeof t!=="object") return null; const r=JSON.parse(JSON.stringify(TRIP0));
+  r.v=t.v===1?1:0; r.km=okN(t.km)??r.km; r.pe=okN(t.pe)??0; r.peOn=!!t.peOn; Object.keys(r.chk).forEach(k=>{ if(t.chk&&k in t.chk) r.chk[k]=!!t.chk[k]; }); return r; };
 function backupFrom(j){ // relit les données d'une sauvegarde (ancien .txt ou sauvegarde Drive)
   const vi=n=>vehOf(n); const out={fills:[],tyres:[],ent:[]};
-  (j.pleins||[]).forEach(f=>{ const v=vi(f.v); if(v<0||!f.d||f.km==null) return; out.fills.push({id:f.id||uid(),d:f.d,v,km:+f.km,L:f.L??null,P:f.P??null,full:!!f.full,ctry:f.ctry||"CH",st:f.st||null,eur:f.eur??null,rate:f.rate??null,opts:f.opts||{},force:!!f.force}); });
-  if(j.reglages){ const g=j.reglages, a=g.autonomie||{}, t=g.reservoir||{}; out.range=[+a.Kangoo||925,+a.BMW||350]; out.tank=[+t.Kangoo||60,+t.BMW||20];
-    if(g.achat) out.buy=[+g.achat.Kangoo||0,+g.achat.BMW||0];
-    if(g.frais) out.fixed=[Object.assign({},g.frais.Kangoo),Object.assign({},g.frais.BMW)];
-    if(g.trajet) out.trip=g.trajet; }
-  (j.pneus||[]).forEach(t=>{ const v=vi(t.v); if(v>=0&&t.d) out.tyres.push(tyreFrom(t.id||uid(),t.d,v,t.t,t.pos,t.mod,t.km)); });
-  (j.entretien||[]).forEach(e=>{ const v=vi(e.v); if(v>=0&&e.t){ const x={id:e.id||uid(),d:e.d||null,v,t:e.t,m:e.m??null,km:e.km??null}; if(e.k==="E"||e.k==="P") x.k=e.k; out.ent.push(x); } });
+  (j.pleins||[]).forEach(f=>{ const v=vi(f.v), d=okD(f.d), km=okN(f.km); if(v<0||!d||km==null) return; out.fills.push({id:okId(f.id),d,v,km,L:okN(f.L),P:okN(f.P),full:!!f.full,ctry:Object.hasOwn(CTRY,f.ctry)?f.ctry:"CH",st:okS(f.st,60),eur:okN(f.eur),rate:okN(f.rate),opts:okOpts(f.opts),force:!!f.force}); });
+  if(j.reglages){ const g=j.reglages, a=g.autonomie||{}, t=g.reservoir||{}; out.range=[okN(a.Kangoo)||925,okN(a.BMW)||350]; out.tank=[okN(t.Kangoo)||60,okN(t.BMW)||20];
+    if(g.achat) out.buy=[okN(g.achat.Kangoo)||0,okN(g.achat.BMW)||0];
+    if(g.frais) out.fixed=[okFix(g.frais.Kangoo),okFix(g.frais.BMW)];
+    if(g.trajet) out.trip=okTrip(g.trajet); }
+  (j.pneus||[]).forEach(t=>{ const v=vi(t.v), d=okD(t.d); if(v>=0&&d) out.tyres.push(tyreFrom(okId(t.id),d,v,t.t,t.pos,t.mod,t.km)); });
+  (j.entretien||[]).forEach(e=>{ const v=vi(e.v); if(v>=0&&e.t){ const x={id:okId(e.id),d:okD(e.d),v,t:okS(e.t,120),m:okN(e.m),km:okN(e.km)}; if(e.k==="E"||e.k==="P") x.k=e.k; out.ent.push(x); } });
   return out; }
 let pendingImport=null;
 $("#btnImport").onclick=()=>$("#fileImport").click();
@@ -1710,7 +1719,7 @@ $("#fileImport").onchange=async e=>{ const file=e.target.files[0]; e.target.valu
     if(fills.length){ pendingImport=d; showImportConfirm(file.name,d); } else applyImport(d);
   }catch(err){ toast("Import impossible : "+err.message); } };
 function showImportConfirm(name,d){
-  $("#bannerBox").innerHTML=`<div class="banner"><span>Remplacer tes ${fills.length} pleins par les ${d.fills.length} du fichier « ${name} » ?</span><button type="button" id="impOk">Remplacer</button><button type="button" id="impNo">Annuler</button></div>`;
+  $("#bannerBox").innerHTML=`<div class="banner"><span>Remplacer tes ${fills.length} pleins par les ${d.fills.length} du fichier « ${esc(name)} » ?</span><button type="button" id="impOk">Remplacer</button><button type="button" id="impNo">Annuler</button></div>`;
   $("#impOk").onclick=()=>{ if(!Sauvegarde.copieAvant(`import ${name}`)){ toast("⚠ Mémoire pleine : copie impossible, rien n'a été remplacé. Sauvegarde d'abord sur Drive."); return; } applyImport(pendingImport); pendingImport=null; }; $("#impNo").onclick=()=>{ pendingImport=null; renderBanner(); };
   window.scrollTo({top:0,behavior:"smooth"}); }
 function setData(d){ fills.length=0; d.fills.forEach(f=>fills.push(f)); STATE.tyres=d.tyres; STATE.ent=d.ent;
