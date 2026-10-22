@@ -1,14 +1,14 @@
 # Outils d'atelier
 
 Petites apps (PWA) d'Adi, publiées avec GitHub Pages :
-**https://adi1290-vsx.github.io/outils/**
+**https://jarvis1290.github.io/outils/**
 
 | App | Dossier | Adresse |
 |---|---|---|
-| Planning Horaire | `planning-horaire/` | https://adi1290-vsx.github.io/outils/planning-horaire/ |
-| Porte-outils CNC | `porte-outils/` | https://adi1290-vsx.github.io/outils/porte-outils/ |
-| Suivi Véhicules | `suivi-vehicules/` | https://adi1290-vsx.github.io/outils/suivi-vehicules/ |
-| Calcul Atelier | `calcul-atelier/` | https://adi1290-vsx.github.io/outils/calcul-atelier/ |
+| Planning Horaire | `planning-horaire/` | https://jarvis1290.github.io/outils/planning-horaire/ |
+| Porte-outils CNC | `porte-outils/` | https://jarvis1290.github.io/outils/porte-outils/ |
+| Suivi Véhicules | `suivi-vehicules/` | https://jarvis1290.github.io/outils/suivi-vehicules/ |
+| Calcul Atelier | `calcul-atelier/` | https://jarvis1290.github.io/outils/calcul-atelier/ |
 
 ## Rangement
 
