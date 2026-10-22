@@ -1,5 +1,5 @@
 // Calcul Atelier — fonctionnement hors ligne
-const CACHE = "calcul-atelier-v1.1";
+const CACHE = "calcul-atelier-v1.2";
 const CORE = ["./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)));

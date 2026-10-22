@@ -168,6 +168,9 @@ nav.tabs button.active{background:var(--surface); color:var(--accent-strong); bo
   display:flex; gap:8px; align-items:flex-start;
 }
 .tip .ic{flex-shrink:0;}
+.ico{display:inline-flex;flex:none;width:1.25em;height:1.25em;vertical-align:-.28em;color:var(--ic)}.ico svg{width:100%;height:100%}
+button.primary .ico,.sv-save .ico{color:inherit}
+.modal-close .ico,.d-reset .ico{width:1.1em;height:1.1em;vertical-align:-.2em}
 
 /* Day entry screen */
 .day-tabs{display:flex; gap:6px; overflow-x:auto; padding-bottom:2px;}
@@ -280,7 +283,7 @@ footer.note{
   flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer;
   background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius); padding:10px 4px;
 }
-.pointage-icon-btn .pi-emoji{font-size:20px;}
+.pointage-icon-btn .pi-emoji{font-size:22px;line-height:1;}
 .pointage-icon-btn .pi-label{font-size:9px; font-weight:700; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.02em; color:var(--fg-muted); text-align:center; line-height:1.2;}
 .pointage-icon-btn .pi-time{font-size:10px; font-family:var(--font-mono); font-weight:700; color:var(--accent-strong);}
 .pointage-icon-btn.done{background:var(--accent-soft); border-color:var(--accent);}
@@ -352,6 +355,11 @@ button.tap-confirm.armed{
 <body>
 <div class="app" id="app"></div>
 
+<script>
+/* Icônes Phosphor duotone (MIT, phosphoricons.com), via icones.js.org */
+var ICO={"cloud-arrow-up":["<path d=\"M240 128a80 80 0 0 1-80 80H72A56 56 0 1 1 85.92 97.74v.1A80 80 0 0 1 240 128\" opacity=\".2\"/><path d=\"M178.34 165.66L160 147.31V208a8 8 0 0 1-16 0v-60.69l-18.34 18.35a8 8 0 0 1-11.32-11.32l32-32a8 8 0 0 1 11.32 0l32 32a8 8 0 0 1-11.32 11.32M160 40a88.08 88.08 0 0 0-78.71 48.68A64 64 0 1 0 72 216h40a8 8 0 0 0 0-16H72a48 48 0 0 1 0-96c1.1 0 2.2 0 3.29.12A88 88 0 0 0 72 128a8 8 0 0 0 16 0a72 72 0 1 1 100.8 66a8 8 0 0 0 3.2 15.34a7.9 7.9 0 0 0 3.2-.68A88 88 0 0 0 160 40\"/>","#3b6fb0"],"folder-open":["<path d=\"M208 88v24H69.77a8 8 0 0 0-7.59 5.47L32 208V64a8 8 0 0 1 8-8h53.33a8 8 0 0 1 4.8 1.6L128 80h72a8 8 0 0 1 8 8\" opacity=\".2\"/><path d=\"M245 110.64a16 16 0 0 0-13-6.64h-16V88a16 16 0 0 0-16-16h-69.33l-27.73-20.8a16.14 16.14 0 0 0-9.6-3.2H40a16 16 0 0 0-16 16v144a8 8 0 0 0 8 8h179.1a8 8 0 0 0 7.59-5.47l28.49-85.47a16.05 16.05 0 0 0-2.18-14.42M93.34 64l29.86 22.4A8 8 0 0 0 128 88h72v16H69.77a16 16 0 0 0-15.18 10.94L40 158.7V64Zm112 136H43.1l26.67-80H232Z\"/>","#c9822a"],"sign-in":["<path d=\"M200 40v176H40a16 16 0 0 1-16-16V56a16 16 0 0 1 16-16Z\" opacity=\".2\"/><path d=\"m141.66 133.66l-40 40a8 8 0 0 1-11.32-11.32L116.69 136H24a8 8 0 0 1 0-16h92.69L90.34 93.66a8 8 0 0 1 11.32-11.32l40 40a8 8 0 0 1 0 11.32M200 32h-64a8 8 0 0 0 0 16h56v160h-56a8 8 0 0 0 0 16h64a8 8 0 0 0 8-8V40a8 8 0 0 0-8-8\"/>","#3f8f4f"],"fork-knife":["<path d=\"M208 40v128h-56s0-104 56-128\" opacity=\".2\"/><path d=\"M72 88V40a8 8 0 0 1 16 0v48a8 8 0 0 1-16 0m144-48v184a8 8 0 0 1-16 0v-48h-48a8 8 0 0 1-8-8a268.8 268.8 0 0 1 7.22-56.88c9.78-40.49 28.32-67.63 53.63-78.47A8 8 0 0 1 216 40m-16 13.9c-32.17 24.57-38.47 84.42-39.7 106.1H200Zm-80.11-15.21a8 8 0 1 0-15.78 2.63L112 88.63a32 32 0 0 1-64 0l7.88-47.31a8 8 0 1 0-15.78-2.63l-8 48A8 8 0 0 0 32 88a48.07 48.07 0 0 0 40 47.32V224a8 8 0 0 0 16 0v-88.68A48.07 48.07 0 0 0 128 88a8 8 0 0 0-.11-1.31Z\"/>","#c15b4a"],"coffee":["<path d=\"M208 88v48a88 88 0 0 1-51.3 80H83.3A88 88 0 0 1 32 136V88Z\" opacity=\".2\"/><path d=\"M80 56V24a8 8 0 0 1 16 0v32a8 8 0 0 1-16 0m40 8a8 8 0 0 0 8-8V24a8 8 0 0 0-16 0v32a8 8 0 0 0 8 8m32 0a8 8 0 0 0 8-8V24a8 8 0 0 0-16 0v32a8 8 0 0 0 8 8m96 56v8a40 40 0 0 1-37.51 39.91a96.6 96.6 0 0 1-27 40.09H208a8 8 0 0 1 0 16H32a8 8 0 0 1 0-16h24.54A96.3 96.3 0 0 1 24 136V88a8 8 0 0 1 8-8h176a40 40 0 0 1 40 40m-48-24H40v40a80.27 80.27 0 0 0 45.12 72h69.76A80.27 80.27 0 0 0 200 136Zm32 24a24 24 0 0 0-16-22.62V136a96 96 0 0 1-1.2 15a24 24 0 0 0 17.2-23Z\"/>","#9a6a2f"],"sign-out":["<path d=\"M224 56v144a16 16 0 0 1-16 16H48V40h160a16 16 0 0 1 16 16\" opacity=\".2\"/><path d=\"M120 216a8 8 0 0 1-8 8H48a8 8 0 0 1-8-8V40a8 8 0 0 1 8-8h64a8 8 0 0 1 0 16H56v160h56a8 8 0 0 1 8 8m109.66-93.66l-40-40a8 8 0 0 0-11.32 11.32L204.69 120H112a8 8 0 0 0 0 16h92.69l-26.35 26.34a8 8 0 0 0 11.32 11.32l40-40a8 8 0 0 0 0-11.32\"/>","#5b5fc7"],"clock":["<path d=\"M224 128a96 96 0 1 1-96-96a96 96 0 0 1 96 96\" opacity=\".2\"/><path d=\"M128 24a104 104 0 1 0 104 104A104.11 104.11 0 0 0 128 24m0 192a88 88 0 1 1 88-88a88.1 88.1 0 0 1-88 88m64-88a8 8 0 0 1-8 8h-56a8 8 0 0 1-8-8V72a8 8 0 0 1 16 0v48h48a8 8 0 0 1 8 8\"/>","#3f8f4f"],"check-circle":["<path d=\"M224 128a96 96 0 1 1-96-96a96 96 0 0 1 96 96\" opacity=\".2\"/><path d=\"M173.66 98.34a8 8 0 0 1 0 11.32l-56 56a8 8 0 0 1-11.32 0l-24-24a8 8 0 0 1 11.32-11.32L112 148.69l50.34-50.35a8 8 0 0 1 11.32 0M232 128A104 104 0 1 1 128 24a104.11 104.11 0 0 1 104 104m-16 0a88 88 0 1 0-88 88a88.1 88.1 0 0 0 88-88\"/>","#3f8f4f"],"calendar-check":["<path d=\"M216 48v40H40V48a8 8 0 0 1 8-8h160a8 8 0 0 1 8 8\" opacity=\".2\"/><path d=\"M208 32h-24v-8a8 8 0 0 0-16 0v8H88v-8a8 8 0 0 0-16 0v8H48a16 16 0 0 0-16 16v160a16 16 0 0 0 16 16h160a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16M72 48v8a8 8 0 0 0 16 0v-8h80v8a8 8 0 0 0 16 0v-8h24v32H48V48Zm136 160H48V96h160zm-38.34-85.66a8 8 0 0 1 0 11.32l-48 48a8 8 0 0 1-11.32 0l-24-24a8 8 0 0 1 11.32-11.32L116 164.69l42.34-42.35a8 8 0 0 1 11.32 0\"/>","#3f8f4f"],"hand-tap":["<path d=\"M216 148v36c0 24-8 40-8 40H72l-29.32-50a20 20 0 0 1 34.64-20L96 184V76a20 20 0 0 1 40 0v56a20 20 0 0 1 40 0v16a20 20 0 0 1 40 0\" opacity=\".2\"/><path d=\"M56 76a60 60 0 0 1 120 0a8 8 0 0 1-16 0a44 44 0 0 0-88 0a8 8 0 1 1-16 0m140 44a27.9 27.9 0 0 0-13.36 3.39A28 28 0 0 0 144 106.7V76a28 28 0 0 0-56 0v80l-3.82-6.13a28 28 0 0 0-48.41 28.17l29.32 50a8 8 0 1 0 13.8-8.04L49.6 170a12 12 0 1 1 20.78-12l.14.23l18.68 30A8 8 0 0 0 104 184V76a12 12 0 0 1 24 0v68a8 8 0 1 0 16 0v-12a12 12 0 0 1 24 0v20a8 8 0 0 0 16 0v-4a12 12 0 0 1 24 0v36c0 21.61-7.1 36.3-7.16 36.42a8 8 0 0 0 3.58 10.73a7.9 7.9 0 0 0 3.58.85a8 8 0 0 0 7.16-4.42c.37-.73 8.85-18 8.85-43.58v-36A28 28 0 0 0 196 120\"/>","#c9822a"],"piggy-bank":["<path d=\"M240 112v32a16 16 0 0 1-16 16h-8l-18.1 50.69a8 8 0 0 1-7.54 5.31h-12.72a8 8 0 0 1-7.54-5.31L166.29 200H97.71l-3.81 10.69a8 8 0 0 1-7.54 5.31H73.64a8 8 0 0 1-7.54-5.31L53 174a79.7 79.7 0 0 1-21-54a80 80 0 0 1 80-80h32a80 80 0 0 1 73.44 48.22a82 82 0 0 1 2.9 7.78H224a16 16 0 0 1 16 16\" opacity=\".2\"/><path d=\"M192 116a12 12 0 1 1-12-12a12 12 0 0 1 12 12m-40-52h-40a8 8 0 0 0 0 16h40a8 8 0 0 0 0-16m96 48v32a24 24 0 0 1-24 24h-2.36l-16.21 45.38A16 16 0 0 1 190.36 224h-12.72a16 16 0 0 1-15.07-10.62l-1.92-5.38h-57.3l-1.92 5.38A16 16 0 0 1 86.36 224H73.64a16 16 0 0 1-15.07-10.62L46 178.22a87.7 87.7 0 0 1-21.44-48.38A16 16 0 0 0 16 144a8 8 0 0 1-16 0a32 32 0 0 1 24.28-31A88.12 88.12 0 0 1 112 32h104a8 8 0 0 1 0 16h-21.39a87.93 87.93 0 0 1 30.17 37c.43 1 .85 2 1.25 3A24 24 0 0 1 248 112m-16 0a8 8 0 0 0-8-8h-3.66a8 8 0 0 1-7.64-5.6A71.9 71.9 0 0 0 144 48h-32a72 72 0 0 0-53.09 120.64a8 8 0 0 1 1.64 2.71L73.64 208h12.72l3.82-10.69a8 8 0 0 1 7.53-5.31h68.58a8 8 0 0 1 7.53 5.31l3.82 10.69h12.72l18.11-50.69A8 8 0 0 1 216 152h8a8 8 0 0 0 8-8Z\"/>","#c9822a"],"sparkle":["<path d=\"m194.82 151.43l-55.09 20.3l-20.3 55.09a7.92 7.92 0 0 1-14.86 0l-20.3-55.09l-55.09-20.3a7.92 7.92 0 0 1 0-14.86l55.09-20.3l20.3-55.09a7.92 7.92 0 0 1 14.86 0l20.3 55.09l55.09 20.3a7.92 7.92 0 0 1 0 14.86\" opacity=\".2\"/><path d=\"M197.58 129.06L146 110l-19-51.62a15.92 15.92 0 0 0-29.88 0L78 110l-51.62 19a15.92 15.92 0 0 0 0 29.88L78 178l19 51.62a15.92 15.92 0 0 0 29.88 0L146 178l51.62-19a15.92 15.92 0 0 0 0-29.88ZM137 164.22a8 8 0 0 0-4.74 4.74L112 223.85L91.78 169a8 8 0 0 0-4.78-4.78L32.15 144L87 123.78a8 8 0 0 0 4.78-4.78L112 64.15L132.22 119a8 8 0 0 0 4.74 4.74L191.85 144ZM144 40a8 8 0 0 1 8-8h16V16a8 8 0 0 1 16 0v16h16a8 8 0 0 1 0 16h-16v16a8 8 0 0 1-16 0V48h-16a8 8 0 0 1-8-8m104 48a8 8 0 0 1-8 8h-8v8a8 8 0 0 1-16 0v-8h-8a8 8 0 0 1 0-16h8v-8a8 8 0 0 1 16 0v8h8a8 8 0 0 1 8 8\"/>","#7a5bb5"],"lightbulb":["<path d=\"M208 104a79.86 79.86 0 0 1-30.59 62.92A24.29 24.29 0 0 0 168 186v6a8 8 0 0 1-8 8H96a8 8 0 0 1-8-8v-6a24.11 24.11 0 0 0-9.3-19A79.87 79.87 0 0 1 48 104.45C47.76 61.09 82.72 25 126.07 24A80 80 0 0 1 208 104\" opacity=\".2\"/><path d=\"M176 232a8 8 0 0 1-8 8H88a8 8 0 0 1 0-16h80a8 8 0 0 1 8 8m40-128a87.55 87.55 0 0 1-33.64 69.21A16.24 16.24 0 0 0 176 186v6a16 16 0 0 1-16 16H96a16 16 0 0 1-16-16v-6a16 16 0 0 0-6.23-12.66A87.59 87.59 0 0 1 40 104.49C39.74 56.83 78.26 17.14 125.88 16A88 88 0 0 1 216 104m-16 0a72 72 0 0 0-73.74-72c-39 .92-70.47 33.39-70.26 72.39a71.65 71.65 0 0 0 27.64 56.3A32 32 0 0 1 96 186v6h64v-6a32.15 32.15 0 0 1 12.47-25.35A71.65 71.65 0 0 0 200 104m-16.11-9.34a57.6 57.6 0 0 0-46.56-46.55a8 8 0 0 0-2.66 15.78c16.57 2.79 30.63 16.85 33.44 33.45A8 8 0 0 0 176 104a9 9 0 0 0 1.35-.11a8 8 0 0 0 6.54-9.23\"/>","#b8940f"],"moon-stars":["<path d=\"M210.69 158.18A88 88 0 1 1 97.82 45.31A96.08 96.08 0 0 0 192 160a97 97 0 0 0 18.69-1.82\" opacity=\".2\"/><path d=\"M240 96a8 8 0 0 1-8 8h-16v16a8 8 0 0 1-16 0v-16h-16a8 8 0 0 1 0-16h16V72a8 8 0 0 1 16 0v16h16a8 8 0 0 1 8 8m-96-40h8v8a8 8 0 0 0 16 0v-8h8a8 8 0 0 0 0-16h-8v-8a8 8 0 0 0-16 0v8h-8a8 8 0 0 0 0 16m72.77 97a8 8 0 0 1 1.43 8A96 96 0 1 1 95.07 37.8a8 8 0 0 1 10.6 9.06a88.07 88.07 0 0 0 103.47 103.47a8 8 0 0 1 7.63 2.67m-19.39 14.88c-1.79.09-3.59.14-5.38.14A104.11 104.11 0 0 1 88 64c0-1.79 0-3.59.14-5.38a80 80 0 1 0 109.24 109.24Z\"/>","#7a5bb5"],"warning":["<path d=\"M215.46 216H40.54c-12.62 0-20.54-13.21-14.41-23.91l87.46-151.87c6.3-11 22.52-11 28.82 0l87.46 151.87c6.13 10.7-1.79 23.91-14.41 23.91\" opacity=\".2\"/><path d=\"M236.8 188.09L149.35 36.22a24.76 24.76 0 0 0-42.7 0L19.2 188.09a23.51 23.51 0 0 0 0 23.72A24.35 24.35 0 0 0 40.55 224h174.9a24.35 24.35 0 0 0 21.33-12.19a23.51 23.51 0 0 0 .02-23.72m-13.87 15.71a8.5 8.5 0 0 1-7.48 4.2H40.55a8.5 8.5 0 0 1-7.48-4.2a7.59 7.59 0 0 1 0-7.72l87.45-151.87a8.75 8.75 0 0 1 15 0l87.45 151.87a7.59 7.59 0 0 1-.04 7.72M120 144v-40a8 8 0 0 1 16 0v40a8 8 0 0 1-16 0m20 36a12 12 0 1 1-12-12a12 12 0 0 1 12 12\"/>","#c9822a"],"prohibit":["<path d=\"M224 128a96 96 0 1 1-96-96a96 96 0 0 1 96 96\" opacity=\".2\"/><path d=\"M128 24a104 104 0 1 0 104 104A104.11 104.11 0 0 0 128 24m88 104a87.56 87.56 0 0 1-20.41 56.28L71.72 60.4A88 88 0 0 1 216 128m-176 0a87.56 87.56 0 0 1 20.41-56.28L184.28 195.6A88 88 0 0 1 40 128\"/>","#c15b4a"],"x":["<path d=\"M216 56v144a16 16 0 0 1-16 16H56a16 16 0 0 1-16-16V56a16 16 0 0 1 16-16h144a16 16 0 0 1 16 16\" opacity=\".2\"/><path d=\"M205.66 194.34a8 8 0 0 1-11.32 11.32L128 139.31l-66.34 66.35a8 8 0 0 1-11.32-11.32L116.69 128L50.34 61.66a8 8 0 0 1 11.32-11.32L128 116.69l66.34-66.35a8 8 0 0 1 11.32 11.32L139.31 128Z\"/>","currentColor"],"arrow-counter-clockwise":["<path d=\"M216 128a88 88 0 1 1-88-88a88 88 0 0 1 88 88\" opacity=\".2\"/><path d=\"M224 128a96 96 0 0 1-94.71 96H128a95.38 95.38 0 0 1-65.9-26.2a8 8 0 0 1 11-11.63a80 80 0 1 0-1.67-114.78a3 3 0 0 1-.26.25L44.59 96H72a8 8 0 0 1 0 16H24a8 8 0 0 1-8-8V56a8 8 0 0 1 16 0v29.8L60.25 60A96 96 0 0 1 224 128\"/>","currentColor"]};
+function ic(n,c){var x=ICO[n];return '<span class="ico" style="--ic:'+(c||x[1])+'"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">'+x[0]+'</svg></span>';}
+</script>
 <script>
 /* === SAUVEGARDE ATELIER v2 — début (copie identique dans chaque app, source : /mnt/project-files/sauvegarde-drive) === */
 /* Sauvegarde Drive commune aux apps d'atelier.
@@ -458,17 +466,17 @@ const Sauvegarde = (() => {
     if(C.vide(C.lire())) return "";
     const jours = e.derniere ? Math.floor((Date.now() - new Date(e.derniere).getTime()) / 864e5) : null;
     if(jours !== null && (jours < 7 || e.empreinte === empreinte(donnees))) return "";
-    return `<div class="sv-bandeau"><span>💾 ${jours === null ? "Jamais sauvegardé sur Drive." : `Pas de sauvegarde depuis ${jours} jours.`} Tes données ne sont que dans ce téléphone.</span><button type="button" class="sv-btn sv-save" onclick="Sauvegarde.sauvegarder().then(ok=>ok&&this.closest('.sv-bandeau').remove())">💾 Sauvegarder</button></div>`;
+    return `<div class="sv-bandeau"><span>${ic("cloud-arrow-up")} ${jours === null ? "Jamais sauvegardé sur Drive." : `Pas de sauvegarde depuis ${jours} jours.`} Tes données ne sont que dans ce téléphone.</span><button type="button" class="sv-btn sv-save" onclick="Sauvegarde.sauvegarder().then(ok=>ok&&this.closest('.sv-bandeau').remove())">${ic("cloud-arrow-up")} Sauvegarder</button></div>`;
   }
 
   function panneau(el){
     const e = etat(), l = copies(), d = e.derniere ? new Date(e.derniere) : null;
     const change = d && e.empreinte !== empreinte(actuel());
     el.innerHTML = `<div class="sv-carte">
-      <div class="sv-titre">💾 Sauvegarde Drive</div>
+      <div class="sv-titre">${ic("cloud-arrow-up")} Sauvegarde Drive</div>
       <div class="sv-info">Dernière sauvegarde : <b>${d ? dateFr(d) : "jamais"}</b>${change ? " · modifié depuis" : ""}</div>
-      <div class="sv-btns"><button type="button" class="sv-btn sv-save" data-sv="save">💾 Sauvegarder</button>
-        <label class="sv-btn sv-imp">📂 Importer<input type="file" accept=".txt,.json,text/plain,application/json" hidden></label></div>
+      <div class="sv-btns"><button type="button" class="sv-btn sv-save" data-sv="save">${ic("cloud-arrow-up")} Sauvegarder</button>
+        <label class="sv-btn sv-imp">${ic("folder-open")} Importer<input type="file" accept=".txt,.json,text/plain,application/json" hidden></label></div>
       <div class="sv-aide">Choisis Drive dans le menu Partager, dossier <b>Sauvegardes atelier</b>. Chaque fichier contient tout l'historique (${historique().length} sauvegarde(s)) : le plus récent suffit.</div>
       <div class="sv-apercu" hidden></div>
       <details class="sv-copies"><summary>Copies avant import (${l.length})</summary>
@@ -578,8 +586,8 @@ var state = loadStore();
 if(!Array.isArray(state.history)) state.history = [];
 var currentTab = "semaine";
 var modalDay = null;
-var APP_VERSION = "1.3";
-var APP_DATE = "19.10.2026";
+var APP_VERSION = "1.4";
+var APP_DATE = "22.10.2026";
 var aboutOpen = false;
 var closeWeekOpen = false; // fenêtre de récap avant clôture
 var showAllHistory = false;
@@ -632,7 +640,7 @@ DAYS.forEach(ensureDayDefaults);
 // ---------- Pointage (horodatage en un clic) ----------
 var FIELD_ORDER = ["arrival","lunchStart","lunchEnd","departure"];
 var FIELD_LABELS = {arrival:"Arrivée", lunchStart:"Pause midi", lunchEnd:"Reprise", departure:"Départ"};
-var FIELD_EMOJI = {arrival:"🕒", lunchStart:"🍽️", lunchEnd:"☕", departure:"🚪"};
+var FIELD_EMOJI = {arrival:ic("sign-in"), lunchStart:ic("fork-knife"), lunchEnd:ic("coffee"), departure:ic("sign-out")};
 var pointageOpen = false;
 var pointagePending = null; // { day, field, time }
 var pointageChooserOpen = false;
@@ -923,12 +931,12 @@ function renderPointagePage(app){
   card.appendChild(el("div","pointage-day-label",DAY_LABELS[day]));
 
   if(allDone){
-    var doneMsg = el("div", null, "✅ "+DAY_LABELS[day]+" complet");
+    var doneMsg = el("div", null, ic("check-circle")+" "+DAY_LABELS[day]+" complet");
     doneMsg.style.cssText = "font-size:15px;color:var(--good);font-weight:700;text-align:center;margin:10px 0;";
     card.appendChild(doneMsg);
   } else {
     var doneCount = FIELD_ORDER.filter(function(k){ return !!punched[k]; }).length;
-    var btn = el("button","primary pointage-big-btn","🕐 Pointer ("+doneCount+"/4)");
+    var btn = el("button","primary pointage-big-btn",ic("clock")+" Pointer ("+doneCount+"/4)");
     btn.style.marginTop = "10px";
     btn.onclick = function(){ pointageChooserOpen = true; render(); };
     card.appendChild(btn);
@@ -946,7 +954,7 @@ function renderPointageChooser(){
   var sheet = el("div","modal-sheet");
   var head = el("div","modal-header");
   head.appendChild(el("h3", null, "Pointage · "+DAY_LABELS[day]));
-  var closeBtn = el("button","modal-close","✕");
+  var closeBtn = el("button","modal-close",ic("x"));
   closeBtn.onclick = function(){ pointageChooserOpen = false; render(); };
   head.appendChild(closeBtn);
   sheet.appendChild(head);
@@ -987,11 +995,11 @@ function doubleTapButton(label, onConfirm){
       armed = true;
       armedAt = now;
       btn.classList.add("armed");
-      btn.textContent = "👉 Encore un tap pour confirmer";
+      btn.innerHTML = ic("hand-tap")+" Encore un tap pour confirmer";
       armTimer = setTimeout(function(){
         armed = false;
         btn.classList.remove("armed");
-        btn.textContent = label;
+        btn.innerHTML = label;
       }, 2200);
     }
   };
@@ -1006,7 +1014,7 @@ function renderPointageConfirm(){
   var sheet = el("div","modal-sheet");
   var head = el("div","modal-header");
   head.appendChild(el("h3", null, "Pointage"));
-  var closeBtn = el("button","modal-close","✕");
+  var closeBtn = el("button","modal-close",ic("x"));
   closeBtn.onclick = closePointage;
   head.appendChild(closeBtn);
   sheet.appendChild(head);
@@ -1018,7 +1026,7 @@ function renderPointageConfirm(){
   );
   sheet.appendChild(big);
 
-  var confirmBtn = doubleTapButton("✅ Valider cette heure", confirmPointage);
+  var confirmBtn = doubleTapButton(ic("check-circle")+" Valider cette heure", confirmPointage);
   sheet.appendChild(confirmBtn);
 
   var cancelBtn = el("button","ghost","Annuler");
@@ -1048,7 +1056,7 @@ function renderTopRow(app){
   var potLive = pot.totalMin - appliedFromPot;
   var potCard = el("div","balance-card");
   potCard.style.flex = "1";
-  potCard.innerHTML = '<div class="label">🫙 Pot</div>'+
+  potCard.innerHTML = '<div class="label">'+ic("piggy-bank")+' Pot</div>'+
     '<div class="value" style="color:'+(potLive>0?"var(--good)":potLive<0?"var(--bad)":"var(--fg)")+'">'+(potLive>=0?"+":"")+toHHMM(potLive)+'</div>'+
     '<div class="sub">Réserve totale: '+(pot.totalMin>=0?"+":"")+toHHMM(pot.totalMin)+'<br>déjà '+(appliedFromPot>=0?"-":"+")+toHHMM(Math.abs(appliedFromPot))+' en cours</div>';
   row.appendChild(potCard);
@@ -1092,7 +1100,7 @@ function renderSemaine(app){
       info.innerHTML = '<span class="times">'+d.arrival+'–'+d.lunchStart+' / '+d.lunchEnd+'–'+d.departure+'</span>';
     } else if(state.reportMode==="repartir" || day==="vendredi"){
       var proj = dayProjection(day);
-      info.innerHTML = '<span class="times">Estimé '+proj.departure+'</span> ✨';
+      info.innerHTML = '<span class="times">Estimé '+proj.departure+'</span> '+ic("sparkle");
     } else {
       info.textContent = "Pas encore confirmé";
     }
@@ -1104,7 +1112,7 @@ function renderSemaine(app){
     } else {
       row.appendChild(el("div","d-ecart zero","—"));
     }
-    var resetDayBtn = el("button","d-reset","↺");
+    var resetDayBtn = el("button","d-reset",ic("arrow-counter-clockwise"));
     resetDayBtn.onclick = function(ev){ ev.stopPropagation(); resetDay(day); };
     row.appendChild(resetDayBtn);
     daysCard.appendChild(row);
@@ -1114,9 +1122,9 @@ function renderSemaine(app){
   var tip = el("div","tip");
   if(state.reportMode==="vendredi"){
     var fp = dayProjection("vendredi");
-    tip.innerHTML = '<span class="ic">💡</span><span>Vendredi, pars à <strong>'+fp.departure+'</strong> pour être à l’équilibre (le solde est absorbé uniquement le vendredi)'+(fp.skipsLunch?" — pas besoin de prendre la pause déjeuner, tu pars avant midi":"")+'.</span>';
+    tip.innerHTML = '<span class="ic">'+ic("lightbulb")+'</span><span>Vendredi, pars à <strong>'+fp.departure+'</strong> pour être à l’équilibre (le solde est absorbé uniquement le vendredi)'+(fp.skipsLunch?" — pas besoin de prendre la pause déjeuner, tu pars avant midi":"")+'.</span>';
   } else {
-    tip.innerHTML = '<span class="ic">💡</span><span>Le solde est réparti sur les '+remainingUntouchedDays().length+' jour(s) pas encore confirmé(s) — les heures estimées se mettent à jour à chaque jour que tu valides.</span>';
+    tip.innerHTML = '<span class="ic">'+ic("lightbulb")+'</span><span>Le solde est réparti sur les '+remainingUntouchedDays().length+' jour(s) pas encore confirmé(s) — les heures estimées se mettent à jour à chaque jour que tu valides.</span>';
   }
   app.appendChild(tip);
 }
@@ -1217,7 +1225,7 @@ function renderDayModal(){
   var sheet = el("div","modal-sheet");
   var head = el("div","modal-header");
   head.appendChild(el("h3", null, DAY_LABELS[day]));
-  var closeBtn = el("button","modal-close","✕");
+  var closeBtn = el("button","modal-close",ic("x"));
   closeBtn.onclick = closeModal;
   head.appendChild(closeBtn);
   sheet.appendChild(head);
@@ -1251,16 +1259,16 @@ function renderDayModal(){
     group.appendChild(f);
   }
 
-  makeField("Arrivée","🕒","arrival", ref.arrival);
-  makeField("Début pause midi","🍽️","lunchStart", ref.lunchStart);
-  makeField("Reprise","☕","lunchEnd", ref.lunchEnd);
-  makeField("Départ","🚪","departure", ref.departure);
+  makeField("Arrivée",ic("sign-in"),"arrival", ref.arrival);
+  makeField("Début pause midi",ic("fork-knife"),"lunchStart", ref.lunchStart);
+  makeField("Reprise",ic("coffee"),"lunchEnd", ref.lunchEnd);
+  makeField("Départ",ic("sign-out"),"departure", ref.departure);
 
   sheet.appendChild(group);
 
   function makeSkipCheckbox(labelText, key){
     var f = el("div","field");
-    var lab = el("label", null, '<span>☕❌</span><span>'+labelText+' sautée (+15min)</span>');
+    var lab = el("label", null, '<span>'+ic("prohibit")+'</span><span>'+labelText+' sautée (+15min)</span>');
     f.appendChild(lab);
     var cb = document.createElement("input");
     cb.type = "checkbox";
@@ -1288,9 +1296,9 @@ function renderDayModal(){
     if(!depPunched){
       var fp = dayProjection("vendredi");
       var fpTip = el("div","tip");
-      fpTip.innerHTML = '<span class="ic">✨</span><span>Le départ reste <strong>calculé en direct</strong> ('+fp.departure+' pour l’instant) tant que tu ne l’as pas validé ci-dessous — pointer l’arrivée ou une pause ne le fige pas.</span>';
+      fpTip.innerHTML = '<span class="ic">'+ic("sparkle")+'</span><span>Le départ reste <strong>calculé en direct</strong> ('+fp.departure+' pour l’instant) tant que tu ne l’as pas validé ci-dessous — pointer l’arrivée ou une pause ne le fige pas.</span>';
       sheet.appendChild(fpTip);
-      var applyBtn = el("button","primary","✅ Valider la fin de journée ("+fp.departure+")");
+      var applyBtn = el("button","primary",ic("check-circle")+" Valider la fin de journée ("+fp.departure+")");
       applyBtn.onclick = function(){
         if(!state.currentWeek[day]) state.currentWeek[day] = {};
         state.currentWeek[day].departure = fp.departure;
@@ -1303,7 +1311,7 @@ function renderDayModal(){
       sheet.appendChild(applyBtn);
     } else {
       var doneTip = el("div","tip");
-      doneTip.innerHTML = '<span class="ic">✅</span><span>Fin de journée validée à <strong>'+d.departure+'</strong>.</span>';
+      doneTip.innerHTML = '<span class="ic">'+ic("check-circle")+'</span><span>Fin de journée validée à <strong>'+d.departure+'</strong>.</span>';
       sheet.appendChild(doneTip);
     }
   }
@@ -1338,7 +1346,7 @@ function renderAbout(){
   var sheet = el("div","modal-sheet");
   var head = el("div","modal-header");
   head.appendChild(el("h3", null, "À propos"));
-  var closeBtn = el("button","modal-close","✕");
+  var closeBtn = el("button","modal-close",ic("x"));
   closeBtn.onclick = function(){ aboutOpen = false; render(); };
   head.appendChild(closeBtn);
   sheet.appendChild(head);
@@ -1364,7 +1372,7 @@ function renderAbout(){
     ["Pauses offertes","Les pauses de 9h30 et 15h30 (matin seulement le vendredi) ne sont pas déduites. Si tu en sautes une, elle compte +15 min."],
     ["Clôturer la semaine","Affiche d’abord un récap (écart de la semaine, pot avant → après), à confirmer par double tap. L’écart réel part alors dans le pot, la semaine va dans l’historique et une nouvelle semaine vierge démarre."],
     ["Historique","Les semaines clôturées, gardées dans l’app avec leurs heures, leur écart et le pot après clôture (page Report)."],
-    ["Sauvegarde Drive","Le bouton 💾 Sauvegarder crée un fichier .txt daté avec toutes tes données et l’envoie par le menu Partager : choisis Drive, dossier « Sauvegardes atelier ». 📂 Importer remet un fichier ; tes données actuelles sont d’abord gardées dans « Copies avant import »."]
+    ["Sauvegarde Drive","Le bouton "+ic("cloud-arrow-up")+" Sauvegarder crée un fichier .txt daté avec toutes tes données et l’envoie par le menu Partager : choisis Drive, dossier « Sauvegardes atelier ». "+ic("folder-open")+" Importer remet un fichier ; tes données actuelles sont d’abord gardées dans « Copies avant import »."]
   ];
   var dl = el("dl","gloss");
   items.forEach(function(it){
@@ -1403,9 +1411,9 @@ function renderReport(app){
   var hint = el("div","tip");
   hint.style.marginTop = "10px";
   if(pot.spreadWeeks>0){
-    hint.innerHTML = '<span class="ic">💡</span><span>Cette semaine, <strong>'+(appliedThisWeek>=0?"+":"")+toHHMM(appliedThisWeek)+'</strong> du pot est appliqué automatiquement (réparti sur '+pot.spreadWeeks+' semaine'+(pot.spreadWeeks>1?"s":"")+').</span>';
+    hint.innerHTML = '<span class="ic">'+ic("lightbulb")+'</span><span>Cette semaine, <strong>'+(appliedThisWeek>=0?"+":"")+toHHMM(appliedThisWeek)+'</strong> du pot est appliqué automatiquement (réparti sur '+pot.spreadWeeks+' semaine'+(pot.spreadWeeks>1?"s":"")+').</span>';
   } else {
-    hint.innerHTML = '<span class="ic">💤</span><span>Le pot dort, rien n’est appliqué cette semaine. Augmente le nombre de semaines pour commencer à le reprendre, ou laisse-le grossir pour une demi-journée ou une journée de récup plus tard.</span>';
+    hint.innerHTML = '<span class="ic">'+ic("moon-stars")+'</span><span>Le pot dort, rien n’est appliqué cette semaine. Augmente le nombre de semaines pour commencer à le reprendre, ou laisse-le grossir pour une demi-journée ou une journée de récup plus tard.</span>';
   }
   spreadCard.appendChild(hint);
   app.appendChild(spreadCard);
@@ -1417,7 +1425,7 @@ function renderCloseWeekCard(app){
   var closeDesc = el("div", null, "Clôture la semaine en cours : un récap s’affiche, puis son écart réel part dans le pot, la semaine va dans l’historique et une nouvelle semaine vierge démarre.");
   closeDesc.style.cssText = "font-size:13px; color:var(--fg-muted); margin:8px 0 12px;";
   closeCard.appendChild(closeDesc);
-  var closeBtn = el("button","primary","✅ Clôturer la semaine");
+  var closeBtn = el("button","primary",ic("calendar-check")+" Clôturer la semaine");
   closeBtn.onclick = function(){ closeWeekOpen = true; render(); };
   closeCard.appendChild(closeBtn);
   app.appendChild(closeCard);
@@ -1439,7 +1447,7 @@ function renderCloseWeekConfirm(){
   var sheet = el("div","modal-sheet");
   var head = el("div","modal-header");
   head.appendChild(el("h3", null, "Clôturer la semaine S."+isoWeekNumber()));
-  var closeBtn = el("button","modal-close","✕");
+  var closeBtn = el("button","modal-close",ic("x"));
   closeBtn.onclick = cancel;
   head.appendChild(closeBtn);
   sheet.appendChild(head);
@@ -1447,7 +1455,7 @@ function renderCloseWeekConfirm(){
   if(s.pending.length){
     var warn = el("div","tip");
     warn.style.borderColor = "var(--warn)";
-    warn.innerHTML = '<span class="ic">⚠️</span><span><strong>'+s.pending.length+' jour(s) pas validé(s)</strong> ('+s.pending.map(function(d){ return DAY_SHORT[d]; }).join(", ")+') : ils ne comptent pas dans l’écart et ne seront pas gardés dans l’historique.</span>';
+    warn.innerHTML = '<span class="ic">'+ic("warning")+'</span><span><strong>'+s.pending.length+' jour(s) pas validé(s)</strong> ('+s.pending.map(function(d){ return DAY_SHORT[d]; }).join(", ")+') : ils ne comptent pas dans l’écart et ne seront pas gardés dans l’historique.</span>';
     sheet.appendChild(warn);
   }
 
@@ -1464,7 +1472,7 @@ function renderCloseWeekConfirm(){
 
   var pot = el("div","daysummary");
   pot.innerHTML =
-    '<div><div class="ds-label">🫙 Pot avant</div><div class="ds-value" style="color:'+signColor(s.potBefore)+'">'+signed(s.potBefore)+'</div></div>'+
+    '<div><div class="ds-label">'+ic("piggy-bank")+' Pot avant</div><div class="ds-value" style="color:'+signColor(s.potBefore)+'">'+signed(s.potBefore)+'</div></div>'+
     '<div style="font-size:20px;color:var(--fg-muted);">→</div>'+
     '<div style="text-align:right;"><div class="ds-label">Pot après</div><div class="ds-value" style="color:'+signColor(s.potAfter)+'">'+signed(s.potAfter)+'</div></div>';
   sheet.appendChild(pot);
@@ -1473,7 +1481,7 @@ function renderCloseWeekConfirm(){
   info.innerHTML = '<span class="ic">ℹ️</span><span>La semaine part dans l’historique (page Report) et une nouvelle semaine vierge démarre.'+(state.pot.spreadWeeks>0?' Étalement du pot : '+state.pot.spreadWeeks+' → '+Math.max(0,state.pot.spreadWeeks-1)+' semaine(s).':'')+'</span>';
   sheet.appendChild(info);
 
-  sheet.appendChild(doubleTapButton("✅ Clôturer la semaine", closeWeekAndStart));
+  sheet.appendChild(doubleTapButton(ic("calendar-check")+" Clôturer la semaine", closeWeekAndStart));
   var cancelBtn = el("button","ghost","Annuler");
   cancelBtn.style.marginTop = "4px";
   cancelBtn.onclick = cancel;
