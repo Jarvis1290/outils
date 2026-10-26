@@ -1253,21 +1253,30 @@ function renderRemind(){
   sh.addEventListener("touchend",function(e){ if(sy==null) return; var dy=e.changedTouches[0].clientY-sy; sy=null; if(dy>90) closeSheet(); },{passive:true});
   $("#sheetBack").addEventListener("click",function(e){ if(e.target.id==="sheetBack") closeSheet(); });
 })();
-// touche Retour d'Android : ferme le panneau, revient à l'onglet d'avant, puis double appui pour quitter
+// touche Retour d'Android : ferme le panneau, revient à l'onglet d'avant, puis double appui pour quitter.
+// Chrome saute une entrée d'historique posée sans vrai geste (pour un doigt, le geste ne compte qu'au relevé) :
+// la garde se pose donc seulement au relevé du doigt / au clic / à une touche, jamais au chargement ni après un Retour.
+// En plus, quand Chrome le permet (CloseWatcher), Retour ferme le panneau ouvert sans toucher à l'historique.
 (function(){
   var armed=function(){ return history.state&&history.state.ph===1; };
-  var arm=function(){ if(!armed()) try{ history.pushState({ph:1},""); }catch(e){} };
   try{ if(!history.state||history.state.ph==null) history.replaceState({ph:0},""); }catch(e){}
-  arm(); ["pointerdown","keydown"].forEach(function(t){ addEventListener(t,arm,true); });
-  var quitT=null;
-  addEventListener("popstate",function(){
+  var cw=null, quitT=null;
+  var backNav=function(){ if(sheets.length){ closeSheet(); return true; } if(navStack.length){ go(navStack.pop(),true); return true; } var home=defaultTab(); if(tab!==home){ go(home,true); return true; } return false; };
+  var need=function(){ return sheets.length>0 || navStack.length>0 || tab!==defaultTab(); };
+  var cwSync=function(){ if(typeof CloseWatcher!=="function") return;
+    if(need()&&!cw){ try{ cw=new CloseWatcher(); cw.onclose=function(){ cw=null; backNav(); cwSync(); }; }catch(e){ cw=null; } }
+    else if(!need()&&cw){ var w=cw; cw=null; try{ w.destroy(); }catch(e){} } };
+  var gest=function(e){ if(e.type==="keydown"&&e.key==="Escape") return;
+    if(e.type!=="pointerup"||e.pointerType!=="mouse"){ if(!armed()) try{ history.pushState({ph:1},""); }catch(x){} }
+    setTimeout(cwSync,60); };
+  ["pointerup","touchend","click","keydown"].forEach(function(t){ addEventListener(t,gest,true); });
+  addEventListener("popstate",function(){ // la garde est consommée : elle sera reposée au prochain toucher
     if(quitT){ clearTimeout(quitT); quitT=null; }
-    if(sheets.length){ closeSheet(); arm(); return; }
-    if(navStack.length){ go(navStack.pop(),true); arm(); return; }
-    var home=defaultTab(); if(tab!==home){ go(home,true); arm(); return; }
+    if(backNav()){ cwSync(); return; }
     toast("Appuie encore sur Retour pour quitter");
-    quitT=setTimeout(function(){ quitT=null; arm(); },2500);
+    quitT=setTimeout(function(){ quitT=null; },2500);
   });
+  setInterval(cwSync,700); // un panneau fermé autrement (bouton, toucher) libère son CloseWatcher
 })();
 
 // ---------- sauvegarde Drive (bloc commun SAUVEGARDE ATELIER) ----------
