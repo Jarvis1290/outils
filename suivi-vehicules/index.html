@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
-<script>try{document.documentElement.dataset.theme=localStorage.getItem("sv-theme")||"fonce";document.documentElement.dataset.rail=localStorage.getItem("sv-rail")||"g";}catch(e){}</script>
+<script>try{document.documentElement.dataset.theme=localStorage.getItem("sv-theme")||"fonce";document.documentElement.dataset.rail=localStorage.getItem("sv-rail")||"g";document.documentElement.dataset.snap=localStorage.getItem("sv-snap")||"f";}catch(e){}</script>
 <script src="vendor/chart.umd.min.js"></script>
 <script src="vendor/xlsx.full.min.js"></script>
 <style>
@@ -499,6 +499,41 @@ div.addt{display:block;cursor:default;color:var(--fg)}
 .bedit .btn{padding:10px}
 .tbl small{color:var(--fg-3)}
 .chiprow button:disabled{opacity:1;cursor:default}
+/* barre d'icônes en bas, sous le pouce */
+html[data-rail="b"] .app{padding-left:max(14px,env(safe-area-inset-left,0px));padding-right:max(14px,env(safe-area-inset-right,0px));padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+html[data-rail="b"] nav.tabs{top:auto;left:max(10px,env(safe-area-inset-left,0px));right:max(10px,env(safe-area-inset-right,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));width:auto;height:62px;max-width:640px;margin:0 auto;border-radius:31px}
+html[data-rail="b"] nav.tabs .in{flex-direction:row;justify-content:space-evenly;gap:2px;padding:0 4px;overflow-x:auto;scrollbar-width:none}
+html[data-rail="b"] nav.tabs .sp{display:none}
+html[data-rail="b"] nav.tabs button,html[data-rail="b"] nav.tabs .fab{flex:none;margin:0;width:38px;height:38px}
+html[data-rail="b"] .toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+@media (max-width:360px){ html[data-rail="b"] nav.tabs button,html[data-rail="b"] nav.tabs .fab{width:36px;height:36px} }
+/* défilement vertical par fenêtre : chaque bloc s'aimante en haut, comme un swipe */
+html[data-snap="f"]{scroll-snap-type:y mandatory;scroll-padding-top:calc(72px + env(safe-area-inset-top,0px))}
+html[data-snap="f"][data-rail="b"]{scroll-padding-bottom:calc(80px + env(safe-area-inset-bottom,0px))}
+html[data-snap="f"]:has(body.typing){scroll-snap-type:none}
+html[data-snap="f"] #bannerBox>*,html[data-snap="f"] section.view,html[data-snap="f"] section.view>.card,html[data-snap="f"] section.view>details.panel,html[data-snap="f"] section.view>.h2,html[data-snap="f"] #dash>.tw,
+html[data-snap="f"] #statOne>.card,html[data-snap="f"] #statCom>.card,html[data-snap="f"] #histList>.row,html[data-snap="f"] #histList>.monthsep,
+html[data-snap="f"] .tlist>.tle,html[data-snap="f"] .tlist>.tly,html[data-snap="f"] #bmwBody>.card{scroll-snap-align:start}
+/* ordre de la barre (Paramètres) */
+.rord{display:flex;flex-direction:column;gap:4px}
+.rord .it{display:flex;align-items:center;gap:10px;padding:4px 2px}
+.rord .it svg{width:22px;height:22px;flex:none}
+.rord .it span{flex:1}
+.rord .it button{width:34px;height:30px;border:0;border-radius:10px;background:var(--navy);color:var(--fg);cursor:pointer}
+.rord .it button:disabled{opacity:.3}
+/* odomètre des stats communes */
+.odoV{padding:12px 0 4px;border-top:1px solid var(--line)}
+.odoV:first-of-type{border-top:0;padding-top:4px}
+.odoN{display:flex;align-items:center;gap:6px;font-weight:600;color:var(--c)}
+.odoN svg{width:20px;height:20px}
+.odoD{display:flex;align-items:flex-end;gap:4px;margin:10px 0}
+.odoD i{font-style:normal;font:700 28px/1 var(--f-num);width:30px;height:44px;display:grid;place-items:center;border-radius:8px;
+  background:linear-gradient(#0B0C0F,#262a31 50%,#0B0C0F);color:#F2F3F5;box-shadow:inset 0 0 0 1px #30343c}
+.odoD i:last-of-type{color:var(--c)}
+.odoD span{margin-left:6px;color:var(--fg-3);font-size:13px;padding-bottom:4px}
+.odoS{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.odoS div{background:var(--navy);border-radius:12px;padding:8px 10px;font-size:11px;color:var(--fg-3)}
+.odoS b{display:block;font:700 17px/1.2 var(--f-num);color:var(--fg)}
 </style>
 </head>
 <body>
@@ -589,7 +624,7 @@ div.addt{display:block;cursor:default;color:var(--fg)}
 
   <!-- HISTORIQUE -->
   <section class="view" id="v-hist" hidden>
-    <div class="chips" id="histVeh"></div>
+    <div class="chips" id="histVeh" hidden></div>
     <div class="seg2" id="histType" style="align-self:flex-start"><button type="button" data-k="all">Tout</button><button type="button" data-k="fill">Pleins</button><button type="button" data-k="ent">Entretien</button></div>
     <div class="card list" id="histList" style="padding-block:4px"></div>
   </section>
@@ -647,7 +682,10 @@ div.addt{display:block;cursor:default;color:var(--fg)}
     <div class="h2">Affichage</div>
     <div class="card" style="display:flex;flex-direction:column;gap:12px">
       <div class="switch"><span>Thème</span><span class="seg2" id="setTheme"><button type="button" data-x="fonce">Foncé</button><button type="button" data-x="clair">Clair</button></span></div>
-      <div class="switch"><span>Barre d'icônes</span><span class="seg2" id="setRail"><button type="button" data-x="g">À gauche</button><button type="button" data-x="d">À droite</button></span></div>
+      <div class="switch"><span>Barre d'icônes</span><span class="seg2" id="setRail"><button type="button" data-x="g">À gauche</button><button type="button" data-x="d">À droite</button><button type="button" data-x="b">En bas</button></span></div>
+      <div class="switch"><span>Défilement</span><span class="seg2" id="setSnap"><button type="button" data-x="f">Par fenêtre</button><button type="button" data-x="l">Libre</button></span></div>
+      <div class="field"><label>Ordre de la barre d'icônes</label><div class="rord" id="railOrd"></div></div>
+      <div class="switch"><span>Tableau de bord</span><button type="button" class="btn" id="goOrg" style="width:auto">Organiser le tableau</button></div>
     </div>
     <div class="h2">Sauvegarde</div>
     <div id="svBox"></div>
@@ -963,7 +1001,7 @@ const THEME = { // v1.8 : même fond foncé pour les deux, accent rouge (Kangoo)
   b:{K:"#E5484D",B:"#3D86F8",txt:"#B3B8C2",grid:"rgba(255,255,255,.06)",tipBg:"#20242B",tipFg:"#EEF0F4",tipBd:"#2F7CF6",track:"#262A32",needle:"#EEF0F4",muted:"#8B92A0",bad:"#FF9F43",warn:"#F5D04C",acc:"#2F7CF6"}};
 let MODE=0; try{ const m=localStorage.getItem("sv-mode"); if(m==="1") MODE=1; }catch(e){}
 let T=THEME.k;
-const APP_VERSION="2.0";
+const APP_VERSION="2.1";
 const KEY="suivi-vehicules-v1";
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}}, lsSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 let STATE={fills:[],tyres:[],ent:[],rates:{},range:[925,350],tank:[60,20],buy:[3500,10000],fixed:[{},{}],trip:null};
@@ -1415,18 +1453,17 @@ function renderDash(){
     + (dEdit?`<div class="tu w addt"><div class="hd"><span class="ti">Ajouter une tuile</span></div>
       <div class="chiprow" style="flex-wrap:wrap;margin-top:10px">${Object.keys(TUILES).filter(t=>!L.order.includes(t)).map(t=>`<button type="button" data-add="${t}">＋ ${TUILES[t]}</button>`).join("")||`<span class="muted">Toutes les tuiles sont déjà sur le tableau.</span>`}</div>
       <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><button type="button" class="btn primary" id="dDone" style="flex:2">Terminé</button><button type="button" class="btn" id="dClear" style="flex:1">Tout retirer</button><button type="button" class="btn" id="dReset" style="flex:1">Par défaut</button></div></div>`
-      :`<button type="button" class="tu w addt" id="dEdit">${ic("sliders-horizontal")} Organiser le tableau</button>`);
+      :"");
   box.querySelectorAll(".tw").forEach(w=>{ const n=pool.querySelector(`.tsrc[data-t="${w.dataset.t}"]`); if(n) w.appendChild(n); });
-  if(!L.order.length&&!dEdit) box.insertAdjacentHTML("afterbegin",`<div class="tu w muted" style="text-align:center">Ton tableau est vide. Touche « Organiser le tableau » pour choisir tes tuiles.</div>`);
+  if(!L.order.length&&!dEdit) box.insertAdjacentHTML("afterbegin",`<div class="tu w muted" style="text-align:center">Ton tableau est vide. Va dans Paramètres → « Organiser le tableau » pour choisir tes tuiles.</div>`);
   const save=()=>{ STATE.tiles=L; persist(); renderDash(); };
   box.querySelectorAll("[data-mv]").forEach(b=>b.onclick=()=>{ const t=b.closest(".tw").dataset.t, k=L.order.indexOf(t), j=k+(+b.dataset.mv); [L.order[k],L.order[j]]=[L.order[j],L.order[k]]; save(); });
   box.querySelectorAll("[data-sz]").forEach(b=>b.onclick=()=>{ const t=b.closest(".tw").dataset.t; if(L.half[t]) delete L.half[t]; else L.half[t]=true; save(); });
   box.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{ const t=b.closest(".tw").dataset.t; L.order=L.order.filter(x=>x!==t); save(); });
   box.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>{ L.order.push(b.dataset.add); save(); });
-  if(dEdit){ $("#dDone").onclick=()=>{ dEdit=false; renderHome(); };
+  if(dEdit){ $("#dDone").onclick=()=>{ dEdit=false; renderHome(); toast("✓ Tableau enregistré"); };
     $("#dClear").onclick=()=>{ L.order=[]; save(); };
     $("#dReset").onclick=()=>{ STATE.tiles=JSON.parse(JSON.stringify(TILES0)); persist(); renderDash(); }; }
-  else $("#dEdit").onclick=()=>{ dEdit=true; renderDash(); };
   if(dEdit) return; // en mode « organiser », les tuiles ne réagissent pas au toucher
   if($("#dPlein")) $("#dPlein").onclick=()=>openSheet(true);
   box.querySelectorAll("[data-w]").forEach(b=>b.onclick=()=>{ wOff+=+b.dataset.w; renderDash(); });
@@ -1604,7 +1641,7 @@ let histT="all";
 const EKIND={E:["wrench","Entretien","#F5A623"],P:["tire","Pneus","#A58CFF"],F:["receipt","Frais","#E8C062"]};
 const ekOf=e=>e.k&&EKIND[e.k]?e.k:(isTyre(e)?"P":"E");
 function renderHist(){
-  chipRow($("#histVeh"),histV,i=>{histV=i;renderHist()},true);
+  histV=MODE; // le journal suit le véhicule choisi en haut
   $("#histType").querySelectorAll("button").forEach(b=>{ b.setAttribute("aria-pressed",b.dataset.k===histT); b.onclick=()=>{ histT=b.dataset.k; renderHist(); }; });
   const F=histT==="ent"?[]:A.per.flat().filter(f=>histV<0||f.v===histV).map(f=>({d:f.d,km:f.km,f}));
   const E=histT==="fill"?[]:STATE.ent.filter(e=>histV<0||e.v===histV).map(e=>({d:e.d||"0000-00-00",km:+e.km||0,e}));
@@ -1677,6 +1714,21 @@ function renderTl(){
 
 // ---------- stats communes : Kangoo, BMW ou les deux
 let statM="one", comV=[true,true];
+// odomètre : compteur actuel, km de l'année, du mois et depuis le premier plein (= l'achat)
+function odo(i){ const P=A.per[i]; if(!P||!P.length) return null;
+  const kms=P.map(f=>f.km), mx=Math.max(...kms), mn=Math.min(...kms);
+  const since=d=>{ const av=P.filter(f=>f.d<d), ap=P.filter(f=>f.d>=d); if(!ap.length) return 0;
+    return Math.max(0,mx-(av.length?Math.max(...av.map(f=>f.km)):Math.min(...ap.map(f=>f.km)))); };
+  const n=new Date(), y=n.getFullYear();
+  return {mx,an:since(y+"-01-01"),mois:since(y+"-"+String(n.getMonth()+1).padStart(2,"0")+"-01"),achat:mx-mn}; }
+function odoHtml(sel){ const O=sel.map(i=>[i,odo(i)]).filter(x=>x[1]);
+  if(!O.length) return "";
+  const sum=k=>O.reduce((t,x)=>t+x[1][k],0);
+  return `<div class="card"><div class="hd2">Odomètre</div>${O.map(([i,o])=>`<div class="odoV" style="--c:${V[i].c}"><div class="odoN">${icon(i)} ${V[i].n}</div>
+    <div class="odoD" aria-label="${fmt(o.mx)} km">${String(Math.round(o.mx)).padStart(6,"0").split("").map(c=>`<i>${c}</i>`).join("")}<span>km</span></div>
+    <div class="odoS"><div><b>${fmt(o.an)}</b>km cette année</div><div><b>${fmt(o.mois)}</b>km ce mois</div><div><b>${fmt(o.achat)}</b>km depuis l'achat</div></div></div>`).join("")}
+    ${O.length>1?`<div class="cap">Ensemble : ${fmt(sum("an"))} km cette année · ${fmt(sum("mois"))} km ce mois · ${fmt(sum("achat"))} km depuis l'achat.</div>`:""}
+    <div class="cap">D'après le compteur noté à chaque plein. L'achat compte depuis le premier plein.</div></div>`; }
 function renderCom(){
   const box=$("#statCom"), sel=[0,1].filter(i=>comV[i]&&A.stat[i]);
   const start=[0,1].map(i=>STATE.buyD[i]||(A.per[i].length?A.per[i].reduce((m,f)=>f.d<m?f.d:m,"9999"):null));
@@ -1689,7 +1741,7 @@ function renderCom(){
     const sumEnt=(i,k)=>STATE.ent.filter(e=>e.v===i&&(k?ekOf(e)===k:ekOf(e)!=="F")).reduce((t,e)=>t+(+e.m||0),0);
     const km=i=>A.stat[i].suivi, carb=i=>A.stat[i].chf;
     const kmT=sel.reduce((t,i)=>t+km(i),0), chfT=sel.reduce((t,i)=>t+carb(i)+sumEnt(i)+sumEnt(i,"F"),0);
-    h+=`<div class="card"><div class="hd2">Conso L/100 sur 12 mois</div><div class="chartbox"><canvas id="cCom"></canvas></div>
+    h+=odoHtml(sel)+`<div class="card"><div class="hd2">Conso L/100 sur 12 mois</div><div class="chartbox"><canvas id="cCom"></canvas></div>
       <div class="legend" style="margin-top:8px">${sel.map(i=>`<span style="--c:${V[i].c}">${V[i].n}</span>`).join("")}</div></div>
       <div class="card tblwrap"><table class="tbl"><tr><th></th>${sel.map(i=>`<th style="text-align:right">${V[i].n}</th>`).join("")}${sel.length>1?`<th style="text-align:right">Total</th>`:""}</tr>
       ${row("Km suivis",km)}${row("Carburant CHF",carb)}${row("Entretien et pneus CHF",i=>sumEnt(i))}${row("Frais notés CHF",i=>sumEnt(i,"F"))}
@@ -1833,10 +1885,24 @@ function renderSettings(){
 }
 function renderAff(){
   const H=document.documentElement;
-  [["#setTheme","theme","sv-theme"],["#setRail","rail","sv-rail"]].forEach(([id,k,key])=>{
+  [["#setTheme","theme","sv-theme"],["#setRail","rail","sv-rail"],["#setSnap","snap","sv-snap"]].forEach(([id,k,key])=>{
     $(id).querySelectorAll("button").forEach(b=>{ b.setAttribute("aria-pressed",H.dataset[k]===b.dataset.x);
       b.onclick=()=>{ H.dataset[k]=b.dataset.x; try{localStorage.setItem(key,b.dataset.x);}catch(e){} applyTheme(); renderAff(); }; }); });
+  const O=railOrder(), lab=x=>x==="fab"?"Bouton +":TITRES[x];
+  $("#railOrd").innerHTML=O.map((x,k)=>`<div class="it">${$(railSel(x)).querySelector("svg").outerHTML}<span>${lab(x)}${x==="bmw"?" <small class=\"muted\">(BMW seulement)</small>":""}</span>
+    <button type="button" data-ro="-1" data-x="${x}" aria-label="Monter" ${k?"":"disabled"}>▲</button><button type="button" data-ro="1" data-x="${x}" aria-label="Descendre" ${k<O.length-1?"":"disabled"}>▼</button></div>`).join("")
+    +`<button type="button" class="btn" id="roReset" style="margin-top:6px">Ordre par défaut</button>`;
+  $("#railOrd").querySelectorAll("[data-ro]").forEach(b=>b.onclick=()=>{ const k=O.indexOf(b.dataset.x), j=k+(+b.dataset.ro); [O[k],O[j]]=[O[j],O[k]]; setRailOrder(O); renderAff(); });
+  $("#roReset").onclick=()=>{ setRailOrder(null); renderAff(); };
+  $("#goOrg").onclick=()=>{ dEdit=true; go("home"); };
 }
+// ordre des icônes de la barre (Paramètres reste toujours au bout)
+const RAIL0=["home","hist","tl","stats","fab","cmp","fun","bmw"];
+const railSel=x=>x==="fab"?"#fab":`nav.tabs [data-v="${x}"]`;
+function railOrder(){ let o=null; try{ o=JSON.parse(localStorage.getItem("sv-order")||"null"); }catch(e){}
+  if(!Array.isArray(o)||o.length!==RAIL0.length||!RAIL0.every(x=>o.includes(x))) o=RAIL0.slice(); return o; }
+function setRailOrder(o){ try{ if(o) localStorage.setItem("sv-order",JSON.stringify(o)); else localStorage.removeItem("sv-order"); }catch(e){} applyRailOrder(); }
+function applyRailOrder(){ const box=$("nav.tabs .in"), sp=box.querySelector(".sp"); railOrder().forEach(x=>box.insertBefore($(railSel(x)),sp)); }
 function renderMore(){
   renderAff();
   renderSettings();
@@ -1927,7 +1993,8 @@ const views={home:renderHome,hist:renderHist,tl:renderTl,stats:renderStats,cmp:r
 const ORDER=["home","hist","tl","stats","cmp","fun","bmw","more"];
 let curView="home";
 const TITRES={home:"Tableau de bord",hist:"Journal",tl:"Timeline",stats:"Stats",cmp:"Moto ou voiture",fun:"Fun & records",bmw:"BMW 1200 GS",more:"Paramètres"};
-function go(v,dir){ curView=v; Object.keys(views).forEach(k=>$("#v-"+k).hidden=k!==v); $("#vTitle").textContent=TITRES[v];
+let navStack=[];
+function go(v,dir,back){ if(!back&&v!==curView){ navStack.push(curView); if(navStack.length>30) navStack.shift(); } curView=v; Object.keys(views).forEach(k=>$("#v-"+k).hidden=k!==v); $("#vTitle").textContent=TITRES[v];
   const el=$("#v-"+v); el.classList.remove("in-l","in-r"); if(dir){ void el.offsetWidth; el.classList.add(dir>0?"in-r":"in-l"); }
   document.querySelectorAll("nav.tabs [data-v]").forEach(b=>{ if(b.dataset.v===v) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current"); });
   views[v](); window.scrollTo({top:0}); }
@@ -1936,9 +2003,26 @@ document.querySelectorAll("nav.tabs [data-v]").forEach(b=>b.onclick=()=>go(b.dat
 // swipe entre onglets
 (function(){ let x0=null,y0=null,t0=0;
   document.addEventListener("touchstart",e=>{ if($("#sheet").classList.contains("on")||$("#trip").classList.contains("on")||e.touches.length!==1) return; const t=e.touches[0]; x0=t.clientX; y0=t.clientY; t0=Date.now();
-    if(e.target.closest(".chips")||e.target.closest("#kpad")||e.target.closest(".tblwrap")||e.target.closest(".chiprow")) x0=null; },{passive:true});
+    if(e.target.closest(".chips")||e.target.closest("#kpad")||e.target.closest(".tblwrap")||e.target.closest(".chiprow")||document.body.classList.contains("typing")||(document.activeElement&&document.activeElement.matches("input,textarea,select"))) x0=null; },{passive:true});
   document.addEventListener("touchend",e=>{ if(x0==null) return; const t=e.changedTouches[0], dx=t.clientX-x0, dy=t.clientY-y0; x0=null;
-    if(Math.abs(dx)>70 && Math.abs(dx)>Math.abs(dy)*1.6 && Date.now()-t0<700){ const O=ORDER.filter(v=>v!=="bmw"||MODE===1), i=O.indexOf(curView), j=i+(dx<0?1:-1); if(i>=0&&j>=0&&j<O.length) go(O[j],dx<0?1:-1); } },{passive:true});
+    if(Math.abs(dx)>70 && Math.abs(dx)>Math.abs(dy)*1.6 && Date.now()-t0<700){ const O=railOrder().filter(v=>v!=="fab"&&(v!=="bmw"||MODE===1)), i=O.indexOf(curView), j=i+(dx<0?1:-1); if(i>=0&&j>=0&&j<O.length) go(O[j],dx<0?1:-1); } },{passive:true});
+})();
+
+// touche Retour d'Android : ferme la fenêtre ouverte, revient à l'écran d'avant, puis double appui pour quitter
+(function(){ const arm=()=>{ try{ history.pushState({sv:1},""); }catch(e){} };
+  try{ history.replaceState({sv:0},""); }catch(e){} arm();
+  let quitT=null;
+  addEventListener("popstate",()=>{
+    if(quitT){ clearTimeout(quitT); quitT=null; }
+    if(kpTarget){ closePad(); arm(); return; }
+    if($("#sheet").classList.contains("on")){ closeSheet(); arm(); return; }
+    if($("#trip").classList.contains("on")){ closeTrip(); arm(); return; }
+    if(dEdit){ dEdit=false; if(!navStack.length){ renderHome(); arm(); return; } }
+    if(navStack.length){ go(navStack.pop(),-1,true); arm(); return; }
+    if(curView!=="home"){ go("home",-1,true); arm(); return; }
+    toast("Appuie encore sur Retour pour quitter");
+    quitT=setTimeout(()=>{ quitT=null; arm(); },2500); // pas de second appui : on réarme
+  });
 })();
 
 // saisie
@@ -2150,7 +2234,7 @@ $("#fileImport").onchange=async e=>{ const file=e.target.files[0]; e.target.valu
     if(fills.length){ pendingImport=d; showImportConfirm(file.name,d); } else applyImport(d);
   }catch(err){ toast("Import impossible : "+err.message); } };
 function showImportConfirm(name,d){
-  $("#bannerBox").innerHTML=`<div class="banner"><span>Remplacer tes ${fills.length} pleins par les ${d.fills.length} du fichier « ${esc(name)} » ?</span><button type="button" id="impOk">Remplacer</button><button type="button" id="impNo">Annuler</button></div>`;
+  $("#bannerBox").innerHTML=`<div class="banner"><span>Remplacer tes ${fills.length} pleins par les ${d.fills.length} du fichier « ${esc(name)} » ?</span><button type="button" id="impOk">Remplacer</button><button type="button" id="impNo">Annuler</button></div>`; window.scrollTo({top:0});
   $("#impOk").onclick=()=>{ if(!Sauvegarde.copieAvant(`import ${name}`)){ toast("⚠ Mémoire pleine : copie impossible, rien n'a été remplacé. Sauvegarde d'abord sur Drive."); return; } applyImport(pendingImport); pendingImport=null; }; $("#impNo").onclick=()=>{ pendingImport=null; renderBanner(); };
   window.scrollTo({top:0,behavior:"smooth"}); }
 function setData(d){ fills.length=0; d.fills.forEach(f=>fills.push(f)); STATE.tyres=d.tyres; STATE.ent=d.ent;
@@ -2208,7 +2292,7 @@ if(touchMQ&&touchMQ.addEventListener) touchMQ.addEventListener("change",applyPad
 
 // ---------- hors ligne
 if("serviceWorker" in navigator){ window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js",{scope:"./"}).catch(()=>{})); }
-applyTheme();
+applyTheme(); applyRailOrder();
 applyPad();
 go("home");
 })();
