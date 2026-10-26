@@ -1,5 +1,5 @@
 // Suivi Véhicules — fonctionnement hors ligne
-const CACHE = "suivi-vehicules-v1.8";
+const CACHE = "suivi-vehicules-v2.0";
 const CORE = ["./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png",
   "./vendor/chart.umd.min.js", "./vendor/xlsx.full.min.js"];   // bibliothèques en local (plus de CDN)
 self.addEventListener("install", e => {
