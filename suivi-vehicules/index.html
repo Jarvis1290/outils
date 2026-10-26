@@ -1159,7 +1159,7 @@ const THEME = { // v1.8 : même fond foncé pour tous, un accent par véhicule
   k:{txt:"#B3B8C2",grid:"rgba(255,255,255,.06)",tipBg:"#20242B",tipFg:"#EEF0F4",tipBd:"#E5484D",track:"#262A32",needle:"#EEF0F4",muted:"#8B92A0",bad:"#FF9F43",warn:"#F5D04C",acc:"#E5484D",fg:"#EEF0F4"}};
 let MODE=0; try{ const m=+localStorage.getItem("sv-mode"); if(m>0) MODE=m; }catch(e){}
 let T=THEME.k;
-const APP_VERSION="3.0";
+const APP_VERSION="3.0.1";
 const KEY="suivi-vehicules-v1";
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}}, lsSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 let STATE={fills:[],tyres:[],ent:[],rates:{},range:[925,350],tank:[60,20],buy:[3500,10000],fixed:[{},{}],trip:null};
@@ -2357,6 +2357,7 @@ function renderMore(){
 
 // ---------- Quoi de neuf : la version en grand, une carte par version ; s'ouvre une fois après chaque mise à jour
 const CHANGELOG=[
+  ["3.0.1","26.10.2026","Touche Retour",["La touche Retour d'Android ferme d'abord ce qui est ouvert (tuile, fenêtre, menu), puis revient à l'écran d'avant, au lieu de sortir de l'app","Double appui sur Retour depuis le tableau de bord pour quitter"]],
   ["3.0","26.10.2026","Nouveaux véhicules",["Paramètres → Véhicules : ajoute un vélo, une trottinette, un scooter… avec son nom, son type, sa couleur, son carburant et son icône","Plus de 3 véhicules : un menu en haut pour choisir","Sans carburant : tu notes juste le compteur, l'entretien et les frais","Modifier ou supprimer un véhicule (une copie est gardée avant)","Journal, stats, stats communes, coût, Fun et sauvegarde Drive prennent tous les véhicules"]],
   ["2.5","26.10.2026","Fun & duel",["Fun & records et « Moto ou voiture » réunis : le duel Kangoo vs BMW 1200 est une carte","Nouvelles cartes : Succès (badges), Station préférée, Pleins par pays, Malin ou pas","Baignoires et CO₂ réunis dans « Ça représente quoi »","Les bornes kilométriques passent dans l'odomètre, l'effet clim dans Stats","Cartes en mini qui s'ouvrent en grand ; retire celles que tu n'aimes pas (Organiser les cartes)"]],
   ["2.4","26.10.2026","Stats",["Conso et prix façon bourse : valeur en grand, flèche, tendances 1 mois, 3 mois, 1 an","La ligne de moyenne a son étiquette « moy. »","Km par année : valeur sur chaque barre, l'année en cours en couleur avec sa projection en pointillé, comparaison avec l'an dernier","Stats communes : véhicules et période au choix, odomètre comparé, course des km, conso superposée, CHF par mois, face-à-face avec trophées"]],
@@ -2528,28 +2529,40 @@ document.querySelectorAll("nav.tabs [data-v]").forEach(b=>b.onclick=()=>go(b.dat
 })();
 
 // touche Retour d'Android : ferme ce qui est ouvert, revient à l'écran d'avant, puis double appui pour quitter.
-// Chrome saute les entrées d'historique ajoutées sans geste de l'utilisateur : on (re)pose donc la garde à chaque toucher.
+// Chrome saute une entrée d'historique posée sans vrai geste (pour un doigt, le geste ne compte qu'au relevé) :
+// la garde se pose donc seulement au relevé du doigt / au clic / à une touche, jamais au chargement ni après un Retour.
+// En plus, quand Chrome le permet (CloseWatcher), les fenêtres, tuiles et menus ouverts se ferment avec Retour sans toucher à l'historique.
+function closeTop(){ // ferme ce qui est ouvert par-dessus l'écran ; true si quelque chose a été fermé
+  if(kpTarget){ closePad(); return true; }
+  if($("#vmenu")){ $("#vmenu").remove(); return true; }
+  if($("nav.tabs").classList.contains("open")){ railClose(); return true; }
+  if($("#sheet").classList.contains("on")){ closeSheet(); return true; }
+  if(closeTV()) return true;
+  if(tOpenIn){ tOpenIn=null; renderDash(); return true; }
+  if(VF&&curView==="more"){ VF=null; renderVehForm(); return true; }
+  if(funEdit){ funEdit=false; renderFun(); return true; }
+  if(dEdit&&!navStack.length){ dEdit=false; renderHome(); return true; }
+  return false; }
+const hasTop=()=>!!(kpTarget||$("#vmenu")||$("nav.tabs").classList.contains("open")||$("#sheet").classList.contains("on")||TV||tOpenIn||(VF&&curView==="more")||funEdit||(dEdit&&!navStack.length));
 (function(){ const armed=()=>history.state&&history.state.sv===1;
-  const arm=()=>{ if(!armed()) try{ history.pushState({sv:1},""); }catch(e){} };
   try{ if(!history.state||history.state.sv==null) history.replaceState({sv:0},""); }catch(e){}
-  arm(); ["pointerdown","keydown"].forEach(t=>addEventListener(t,arm,true));
-  let quitT=null;
-  addEventListener("popstate",()=>{
+  let cw=null, quitT=null;
+  const backNav=()=>{ if(dEdit) dEdit=false; if(navStack.length){ go(navStack.pop(),-1,true); return true; } if(curView!=="home"){ go("home",-1,true); return true; } return false; };
+  const need=()=>hasTop()||curView!=="home"||navStack.length>0;
+  const cwSync=()=>{ if(typeof CloseWatcher!=="function") return; // Retour pris par Chrome sans consommer l'historique
+    if(need()&&!cw){ try{ cw=new CloseWatcher(); cw.onclose=()=>{ cw=null; if(!closeTop()) backNav(); cwSync(); }; }catch(e){ cw=null; } }
+    else if(!need()&&cw){ const w=cw; cw=null; try{ w.destroy(); }catch(e){} } };
+  const gest=e=>{ if(e.type==="keydown"&&e.key==="Escape") return;
+    if(e.type!=="pointerup"||e.pointerType!=="mouse"){ if(!armed()) try{ history.pushState({sv:1},""); }catch(x){} }
+    setTimeout(cwSync,60); };
+  ["pointerup","touchend","click","keydown"].forEach(t=>addEventListener(t,gest,true));
+  addEventListener("popstate",()=>{ // la garde est consommée : elle sera reposée au prochain toucher
     if(quitT){ clearTimeout(quitT); quitT=null; }
-    if(kpTarget){ closePad(); arm(); return; }
-    if($("#vmenu")){ $("#vmenu").remove(); arm(); return; }
-    if($("nav.tabs").classList.contains("open")){ railClose(); arm(); return; }
-    if($("#sheet").classList.contains("on")){ closeSheet(); arm(); return; }
-    if(closeTV()){ arm(); return; }
-    if(tOpenIn){ tOpenIn=null; renderDash(); arm(); return; }
-    if(VF&&curView==="more"){ VF=null; renderVehForm(); arm(); return; }
-    if(funEdit){ funEdit=false; renderFun(); arm(); return; }
-    if(dEdit){ dEdit=false; if(!navStack.length){ renderHome(); arm(); return; } }
-    if(navStack.length){ go(navStack.pop(),-1,true); arm(); return; }
-    if(curView!=="home"){ go("home",-1,true); arm(); return; }
+    if(closeTop()||backNav()){ cwSync(); return; }
     toast("Appuie encore sur Retour pour quitter");
-    quitT=setTimeout(()=>{ quitT=null; arm(); },2500); // pas de second appui : on réarme
+    quitT=setTimeout(()=>{ quitT=null; },2500);
   });
+  setInterval(cwSync,700); // une fenêtre fermée autrement (bouton, toucher) libère son CloseWatcher
 })();
 
 // ---------- défilement par page : un glissé = une page entière (la hauteur de l'écran), et jamais une tuile coupée entre deux pages
