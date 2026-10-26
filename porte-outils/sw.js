@@ -1,5 +1,5 @@
-const CACHE = "porteoutils-v1.1";
-const FILES = ["./", "index.html", "manifest.json", "icon-192.png", "icon-512.png", "vendor/jsQR.js", "vendor/xlsx.mini.min.js"];
+const CACHE = "porteoutils-v1.2";
+const FILES = ["./", "index.html", "manifest.json", "icon-192.png", "icon-512.png", "vendor/jsQR.js"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith("porteoutils-") && k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener("fetch", e => {
