@@ -589,6 +589,13 @@ html[data-theme="clair"] .tm.hero{background:linear-gradient(135deg,color-mix(in
 @keyframes tvin{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 .tview .tvh{display:flex;align-items:center;gap:10px;padding:14px 0 10px;max-width:640px;width:100%;margin:0 auto}
 .tview .tvh b{flex:1;font:700 20px var(--f-disp);letter-spacing:-.3px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tview.tapc #tvX{display:none}
+.tview.tapc .tvh::after{content:"touche pour refermer";font:500 11.5px var(--f-body);color:var(--fg-3);white-space:nowrap}
+.tw.open{cursor:pointer}
+.tlink{cursor:pointer;color:var(--volt-hi)}
+nav.tabs [data-v="more"]{width:32px!important;height:32px!important;align-self:center;opacity:.8}
+nav.tabs [data-v="more"] svg{width:17px!important;height:17px!important}
+nav.tabs [data-v="more"][aria-current="page"]{opacity:1;box-shadow:0 0 0 3px color-mix(in srgb,var(--volt) 22%,transparent)}
 .tview .tvh button{width:38px;height:38px;border-radius:50%;border:0;background:var(--navy);color:var(--fg);display:grid;place-items:center;cursor:pointer;box-shadow:var(--sh);padding:0}
 .tview .tvb{flex:1;overflow-y:auto;touch-action:pan-y pinch-zoom;display:flex;flex-direction:column;gap:12px;padding-bottom:calc(30px + env(safe-area-inset-bottom,0px));max-width:640px;width:100%;margin:0 auto;overscroll-behavior:contain}
 .tview .tvb > .tsrc{gap:12px}
@@ -1609,7 +1616,7 @@ function dashParts(i){
   // coût au km + dépenses des 6 derniers mois
   const c=costs(i), now=new Date(), mk6=Array.from({length:6},(_,k)=>{ const d=new Date(now.getFullYear(),now.getMonth()-5+k,1); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"); });
   const sp=mk6.map(k=>list.filter(f=>f.d.startsWith(k)).reduce((t,f)=>t+(f.P||0),0)), smx=Math.max(...sp,1);
-  G.cout=`<div class="tu" data-cost><div class="hd"><span>${ic("coins","#E8C062")} Coût / km</span><span>détail ›</span></div>
+  G.cout=`<div class="tu"><div class="hd"><span>${ic("coins","#E8C062")} Coût / km</span><span data-cost class="tlink">détail ›</span></div>
     <div class="num">${fmt(c?c.tot:s.c100/100,2)}<small>CHF</small></div>
     <div class="tr eq">${c?"tout compris":"carburant seul"}</div>
     <div class="sbar" title="Carburant des 6 derniers mois">${sp.map((v,k)=>`<i class="${k===5?"me":""}" style="height:${Math.max(6,v/smx*100).toFixed(0)}%"></i>`).join("")}</div></div>`;
@@ -1660,7 +1667,7 @@ function dashParts(i){
 }
 function miniHtml(t,m,title){ m=m||{n:"–"}; title=title||TUILES[t];
   return `<div class="tu tm${t==="hero"?" hero":""}" role="button" tabindex="0" aria-label="${title} : ouvrir"><div class="mh">${m.ic||""}<span>${m.lab||title}</span></div>`
-    +(t==="hero"?`<button type="button" class="mplus" data-plein aria-label="Nouveau plein">${ic("plus")}</button>`:`<span class="mo">${ic(["cout","kmc","trip"].includes(t)?"caret-right":"arrows-out","var(--fg-3)")}</span>`)
+    +(t==="hero"?`<button type="button" class="mplus" data-plein aria-label="Nouveau plein">${ic("plus")}</button>`:`<span class="mo">${ic(t==="trip"?"caret-right":"arrows-out","var(--fg-3)")}</span>`)
     +`<div class="mn${String(m.n).replace(/<[^>]*>/g,"").length>8?" lg":""}">${m.n}${m.u?`<small>${m.u}</small>`:""}</div><div class="ms ${m.cls||""}">${m.s||""}</div></div>`; }
 function bindTiles(root,refresh){
   root.querySelectorAll("[data-plein]").forEach(b=>b.onclick=e=>{ e.stopPropagation(); closeTV(); openSheet(true); });
@@ -1680,16 +1687,16 @@ function renderDash(){
   const P=dashParts(i), list=L.order.filter(t=>tileOk(t,i));
   box.innerHTML=list.map(t=>{ const z=tOpenIn===t?"w":(L.size[t]||"m");
     if(z==="m") return `<div class="tw" data-t="${t}">${miniHtml(t,P.M[t])}</div>`;
-    return `<div class="tw ${z}${tOpenIn===t?" open":""}" data-t="${t}">${tOpenIn===t?`<div class="tvbar"><span>${TUILES[t]}</span><button type="button" data-close>${ic("x")} Réduire</button></div>`:""}${P.G[t]||""}</div>`; }).join("");
+    return `<div class="tw ${z}${tOpenIn===t?" open":""}" data-t="${t}">${P.G[t]||""}</div>`; }).join("");
   box.querySelectorAll(".tw").forEach(w=>{ if(w.querySelector(".tm")) return; const n=pool.querySelector(`.tsrc[data-t="${w.dataset.t}"]`); if(n) w.appendChild(n); });
   if(!list.length) box.innerHTML=`<div class="tu w muted" style="text-align:center">Ton tableau est vide. Va dans Paramètres → « Organiser le tableau » pour choisir tes tuiles.</div>`;
   bindTiles(box,renderDash);
   box.querySelectorAll(".tm").forEach(m=>m.onclick=e=>{ if(e.target.closest("[data-plein]")) return; tapTile(m.closest(".tw").dataset.t); });
-  box.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>{ tOpenIn=null; renderDash(); });
+  box.querySelectorAll(".tw.open").forEach(w=>w.onclick=e=>{ if(e.target.closest(TAPX)) return; tOpenIn=null; renderDash(); }); // on retouche la tuile : elle se referme
   const bt=$("#btnTrip"); if(bt) bt.onclick=()=>{ closeTV(); go("cost"); };
 }
 function tapTile(t){
-  if(["cout","kmc","trip"].includes(t)){ go("cost"); return; }
+  if(t==="trip"){ go("cost"); return; }
   if(lsGet("sv-topen")==="s"){ tOpenIn=t; renderDash(); pgSched(()=>{ const w=document.querySelector(`#dash .tw[data-t="${t}"]`); if(w) pgShow(w); }); return; }
   openTile(t); }
 function openTile(t){
@@ -1714,11 +1721,14 @@ function orgList(box,c){ const L=c.L, ks=Object.keys(c.keys), SZ={m:"Mini",h:"½
 
 // ---------- fenêtre plein écran (tuile ouverte, carte Fun, Quoi de neuf) : Retour ou ✕ la ferme
 let TV=null;
+const TAPX="button,a,input,select,textarea,label,canvas,summary,[data-w],[data-p],[data-k],[data-cost],[role=button]"; // ce qui ne referme pas une tuile ouverte
 function openTV(title,render,onClose,key){ if(TV) closeTV(); TV={render,onClose,key}; $("#tvT").textContent=title; $("#tvX").innerHTML=ic("x");
+  const tap=!!key&&/^(tile|fun):/.test(key); $("#tview").classList.toggle("tapc",tap);
   $("#tview").hidden=false; document.body.classList.add("tvon"); render($("#tvB")); $("#tvB").scrollTop=0; }
 function refreshTV(){ if(TV){ const st=$("#tvB").scrollTop; TV.render($("#tvB")); $("#tvB").scrollTop=st; } }
 function closeTV(){ if(!TV) return false; const t=TV; TV=null; if(t.onClose) t.onClose($("#tvB")); $("#tvB").innerHTML=""; $("#tview").hidden=true; document.body.classList.remove("tvon"); return true; }
 $("#tvX").onclick=closeTV;
+$("#tview").addEventListener("click",e=>{ if(!TV||!$("#tview").classList.contains("tapc")||e.target.closest(TAPX)) return; closeTV(); }); // tuile ouverte : on la retouche, elle se referme
 
 // ---------- 💸 coût réel au km et coût d'un trajet (onglet « Coût & trajet »)
 const POSTES=[["carb","drop","Carburant","#4FA8FF"],["ent","wrench","Entretien","#F5A623"],["pneu","tire","Pneus","#A58CFF"],["ass","shield-check","Assurance","#3DD39B"],["imp","receipt","Impôt / plaques","#E8C062"],
@@ -2351,7 +2361,7 @@ const CHANGELOG=[
   ["2.5","26.10.2026","Fun & duel",["Fun & records et « Moto ou voiture » réunis : le duel Kangoo vs BMW 1200 est une carte","Nouvelles cartes : Succès (badges), Station préférée, Pleins par pays, Malin ou pas","Baignoires et CO₂ réunis dans « Ça représente quoi »","Les bornes kilométriques passent dans l'odomètre, l'effet clim dans Stats","Cartes en mini qui s'ouvrent en grand ; retire celles que tu n'aimes pas (Organiser les cartes)"]],
   ["2.4","26.10.2026","Stats",["Conso et prix façon bourse : valeur en grand, flèche, tendances 1 mois, 3 mois, 1 an","La ligne de moyenne a son étiquette « moy. »","Km par année : valeur sur chaque barre, l'année en cours en couleur avec sa projection en pointillé, comparaison avec l'an dernier","Stats communes : véhicules et période au choix, odomètre comparé, course des km, conso superposée, CHF par mois, face-à-face avec trophées"]],
   ["2.3","26.10.2026","Onglets",["Nouvel onglet Coût & trajet : coût réel au km détaillé et calculateur de trajet","Nouvel onglet Fiche technique par véhicule : achat, autonomie, réservoir","Pneus hiver / été du Kangoo dans son onglet ; couples, comparatif et pneus dans l'onglet BMW","Frais fixes dans le Journal, notés chaque année (tes anciens montants y sont repris)","Nouveau calcul : (prix d'achat + frais fixes payés) ÷ km depuis le 1er plein","Paramètres : seulement les réglages de l'app"]],
-  ["2.2","26.10.2026","Navigation",["Bouton + en haut, à côté du choix du véhicule (et dans la tuile du véhicule)","Retour : ferme ce qui est ouvert, revient à l'écran d'avant, double appui pour quitter","Barre : icônes en haut ou en bas, épinglée ou cachée avec sa languette","Défilement par page : un saut net d'un écran, jamais une tuile ou une ligne coupée, points de page sur le bord","Plus d'ascenseur visible","Tuiles mini avec le chiffre utile : plein écran ou sur place, au choix ; taille Mini, ½ ou Large dans Organiser"]],
+  ["2.2","26.10.2026","Navigation",["Bouton + en haut, à côté du choix du véhicule (et dans la tuile du véhicule)","Retour : ferme ce qui est ouvert, revient à l'écran d'avant, double appui pour quitter","Tuile ouverte : on la retouche et elle se referme (plus de bouton Réduire)","Bouton Paramètres plus petit, pour ne pas le confondre avec les onglets","Barre : icônes en haut ou en bas, épinglée ou cachée avec sa languette","Défilement par page : un saut net d'un écran, jamais une tuile ou une ligne coupée, points de page sur le bord","Plus d'ascenseur visible","Tuiles mini avec le chiffre utile : plein écran ou sur place, au choix ; taille Mini, ½ ou Large dans Organiser"]],
   ["2.1","26.10.2026","Barre réglable",["Touche Retour d'Android","Ordre des icônes de la barre, barre à gauche, à droite ou en bas","Le journal suit le véhicule choisi","Odomètre dans les stats communes"]],
   ["2.0","26.10.2026","Plein + entretien",["Une seule fenêtre pour le plein et l'entretien","Timeline à cases par type","Stats communes, onglet BMW (couples, comparatif)"]],
   ["1.9","26.10.2026","Tableau à ta façon",["Tu choisis et ranges les tuiles du tableau de bord"]],
