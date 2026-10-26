@@ -457,6 +457,25 @@ nav.tabs{box-shadow:var(--rail-sh)}
 html[data-rail="d"] .app{padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:calc(78px + env(safe-area-inset-right,0px))}
 html[data-rail="d"] nav.tabs{left:auto;right:max(10px,env(safe-area-inset-right,0px))}
 @media (max-width:360px){ html[data-rail="d"] .app{padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:calc(70px + env(safe-area-inset-right,0px))} }
+
+/* tuiles à organiser */
+.tw{min-width:0;position:relative}
+.tw.w{grid-column:1/-1}
+.tw > .tu{height:100%;box-sizing:border-box}
+.tsrc{display:flex;flex-direction:column;gap:10px}
+.tsrc > .h2{margin:2px 0 0}
+.addt{display:flex;align-items:center;justify-content:center;gap:8px;border:1.5px dashed color-mix(in srgb,var(--volt) 55%,transparent);background:transparent;box-shadow:none;color:var(--volt-hi);font:600 14px var(--f-body);cursor:pointer;padding:14px}
+div.addt{display:block;cursor:default;color:var(--fg)}
+.dash.edit .tw{outline:1.5px dashed color-mix(in srgb,var(--volt) 60%,transparent);outline-offset:3px;border-radius:var(--r)}
+.dash.edit .tw > :not(.tbar){pointer-events:none;opacity:.55}
+.dash.edit .tw > :not(.tbar){max-height:84px;overflow:hidden;-webkit-mask-image:linear-gradient(#000 40%,transparent);mask-image:linear-gradient(#000 40%,transparent)}
+.tbar{display:flex;align-items:center;gap:4px;margin-bottom:6px;font-size:12px;font-weight:600;color:var(--fg)}
+.tw:not(.w) .tbar span{display:none}
+.tw:not(.w) .tbar{justify-content:space-between}
+.tbar span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tbar button{border:0;background:var(--navy-2);color:var(--fg);border-radius:10px;min-width:30px;height:30px;padding:0 6px;font:600 12px var(--f-body);cursor:pointer;box-shadow:0 0 0 1px var(--line)}
+.tbar button:disabled{opacity:.3}
+.tbar button[data-rm]{color:var(--bad)}
 </style>
 </head>
 <body>
@@ -473,23 +492,39 @@ html[data-rail="d"] nav.tabs{left:auto;right:max(10px,env(safe-area-inset-right,
     <div class="card empty" id="homeEmpty" hidden></div>
     <div id="homeBody" style="display:flex;flex-direction:column;gap:12px">
     <div id="dash" class="dash"></div>
+    <div id="tilePool" hidden>
+    <div class="tsrc" data-t="pred">
     <div class="h2">Prochain plein</div>
     <div id="predCards"></div>
+    </div>
+    <div class="tsrc" data-t="price">
     <div class="h2">Prix au litre · dernier plein</div>
     <div id="priceCards" style="display:flex;flex-direction:column;gap:10px"></div>
+    </div>
+    <div class="tsrc" data-t="veh">
     <div class="h2">Chiffres</div>
     <div id="vehCards" style="display:flex;flex-direction:column;gap:12px"></div>
+    </div>
+    <div class="tsrc" data-t="kmc">
     <div class="card kmc" id="kmCard"></div>
+    </div>
+    <div class="tsrc" data-t="trip">
     <button class="btn primary tripbtn" type="button" id="btnTrip"><span class="ico" style="--ic:#3DD39B"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M176 64v48H80V64Z" opacity=".2"/><path d="M80 120h96a8 8 0 0 0 8-8V64a8 8 0 0 0-8-8H80a8 8 0 0 0-8 8v48a8 8 0 0 0 8 8m8-48h80v32H88Zm112-48H56a16 16 0 0 0-16 16v176a16 16 0 0 0 16 16h144a16 16 0 0 0 16-16V40a16 16 0 0 0-16-16m0 192H56V40h144Zm-100-68a12 12 0 1 1-12-12a12 12 0 0 1 12 12m40 0a12 12 0 1 1-12-12a12 12 0 0 1 12 12m40 0a12 12 0 1 1-12-12a12 12 0 0 1 12 12m-80 40a12 12 0 1 1-12-12a12 12 0 0 1 12 12m40 0a12 12 0 1 1-12-12a12 12 0 0 1 12 12m40 0a12 12 0 1 1-12-12a12 12 0 0 1 12 12"/></svg></span> Combien coûte un trajet ?</button>
+    </div>
+    <div class="tsrc" data-t="month">
     <div class="h2">Km par mois</div>
     <div class="card">
       <div class="chartbox"><canvas id="cMonth"></canvas></div>
       <div class="cap">24 derniers mois. Les km entre deux pleins sont répartis jour par jour.</div>
     </div>
+    </div>
+    <div class="tsrc" data-t="conso15">
     <div class="h2">Conso des derniers pleins</div>
     <div class="card">
       <div class="chartbox"><canvas id="cHomeConso"></canvas></div>
       <div class="cap" id="capHomeConso"></div>
+    </div>
+    </div>
     </div>
     </div>
   </section>
@@ -885,7 +920,7 @@ const THEME = { // v1.8 : même fond foncé pour les deux, accent rouge (Kangoo)
   b:{K:"#E5484D",B:"#3D86F8",txt:"#B3B8C2",grid:"rgba(255,255,255,.06)",tipBg:"#20242B",tipFg:"#EEF0F4",tipBd:"#2F7CF6",track:"#262A32",needle:"#EEF0F4",muted:"#8B92A0",bad:"#FF9F43",warn:"#F5D04C",acc:"#2F7CF6"}};
 let MODE=0; try{ const m=localStorage.getItem("sv-mode"); if(m==="1") MODE=1; }catch(e){}
 let T=THEME.k;
-const APP_VERSION="1.8";
+const APP_VERSION="1.9";
 const KEY="suivi-vehicules-v1";
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}}, lsSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 let STATE={fills:[],tyres:[],ent:[],rates:{},range:[925,350],tank:[60,20],buy:[3500,10000],fixed:[{},{}],trip:null};
@@ -1269,7 +1304,13 @@ function renderHome(){
 }
 
 // ---------- tableau de bord v1.8 (tuiles style « V18 »)
-let wOff=0, dPer="an", tlK="all";
+let wOff=0, dPer="an", tlK="all", dEdit=false;
+const TUILES={hero:"Véhicule",week:"Semaine",conso:"Conso",cout:"Coût / km",stats:"Statistiques",last:"Derniers pleins",tl:"Timeline",
+  pred:"Prochain plein (IA)",price:"Prix au litre",veh:"Chiffres",kmc:"Coût réel au km",trip:"Coût d'un trajet",month:"Km par mois",conso15:"Conso des derniers pleins"};
+const TILES0={order:["hero","week","conso","cout","stats","last","tl","pred","price","veh","kmc","trip","month","conso15"],half:{conso:true,cout:true}};
+const okTiles=t=>{ if(!t||!Array.isArray(t.order)) return null; const order=[...new Set(t.order.filter(x=>Object.hasOwn(TUILES,x)))], half={};
+  Object.keys(t.half||{}).forEach(x=>{ if(Object.hasOwn(TUILES,x)&&t.half[x]) half[x]=true; }); return {order,half}; };
+function tiles(){ const t=okTiles(STATE.tiles); STATE.tiles=t||JSON.parse(JSON.stringify(TILES0)); return STATE.tiles; }
 const NOMS=["Kangoo","BMW 1200 GS"], JC=["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
 function renderDash(){
   const i=MODE, s=A.stat[i], list=A.per[i], byD=list.slice().sort((a,b)=>b.d.localeCompare(a.d)||b.km-a.km);
@@ -1277,14 +1318,14 @@ function renderDash(){
   // bannière du véhicule
   let p=null; try{ p=predict(i); }catch(e){}
   let nxt=""; if(p&&p.due!=null){ const n=p.due-TODAY; nxt=p.late>p.win?"c'est l'heure !":n<=0?"aujourd'hui":n===1?"demain":`dans ${fmt(n)} j`; }
-  const hero=`<div class="tu hero w"><div class="big">${[car,bike][i]("currentColor")}</div>
+  const hero=`<div class="tu hero"><div class="big">${[car,bike][i]("currentColor")}</div>
     <h2>${NOMS[i]} · ${fmt(s.odo)} km</h2>
     <p>Dernier plein : <b>${dfr(s.last.d)}</b>${nxt?`<br>Prochain plein : <b>${nxt}</b>`:""}</p>
     <button type="button" class="go" id="dPlein">${ic("plus")} Nouveau plein</button></div>`;
   // semaine
   const mon=TODAY-((wdOf(TODAY)+6)%7)+7*wOff, fd=new Set(list.map(f=>day(f.d))), ed=new Set(ents.map(e=>day(e.d)));
   const mo=new Date((mon+3)*864e5).toLocaleDateString("fr-CH",{month:"long",year:"numeric",timeZone:"UTC"});
-  const week=`<div class="tu w"><div class="hd"><span class="ti">${mo.charAt(0).toUpperCase()+mo.slice(1)}</span>
+  const week=`<div class="tu"><div class="hd"><span class="ti">${mo.charAt(0).toUpperCase()+mo.slice(1)}</span>
     <span class="nav2"><button type="button" data-w="-1" aria-label="Semaine d'avant">${ic("caret-left")}</button><button type="button" data-w="1" aria-label="Semaine d'après">${ic("caret-right")}</button></span></div>
     <div class="week">${JC.map((j,k)=>{ const n=mon+k; return `<div class="d${n===TODAY?" on":""}">${j}<b>${new Date(n*864e5).getUTCDate()}</b><i class="${fd.has(n)?"f":ed.has(n)?"e":""}"></i></div>`; }).join("")}</div></div>`;
   // conso
@@ -1306,27 +1347,48 @@ function renderDash(){
   const chf=list.filter(f=>inP(f.d)).reduce((t,f)=>t+(f.P||0),0), km=dPer==="an"?s.kmY:(A.mKm[i][A.mKm[i].length-1]||0);
   const kb=A.mKm[i].slice(-10), kmx=Math.max(...kb,1);
   const dd=list.filter(f=>f.dist>0&&!f.miss&&TODAY-day(f.d)<=365), kpp=dd.length?dd.reduce((t,f)=>t+f.dist,0)/dd.length:null;
-  const stats=`<div class="tu w"><div class="hd"><span class="ti">Statistiques</span>
+  const stats=`<div class="tu"><div class="hd"><span class="ti">Statistiques</span>
     <span class="seg2"><button type="button" data-p="an" aria-pressed="${dPer==="an"}">Année</button><button type="button" data-p="mois" aria-pressed="${dPer==="mois"}">Mois</button></span></div>
     <div class="pair"><div class="num">${fmt(chf)}<small>CHF</small></div><span class="sep"></span><div class="num">${fmt(km)}<small>km</small></div></div>
     <div class="sbar" title="Km par mois">${kb.map((v,k)=>`<i class="${k===kb.length-1?"me":""}" style="height:${Math.max(6,v/kmx*100).toFixed(0)}%"></i>`).join("")}</div>
     <div class="subs"><div>${ic("gas-pump")}<b>${list.filter(f=>inP(f.d)).length}</b>pleins</div><div>${ic("wrench")}<b>${ents.filter(e=>inP(e.d)).length}</b>entretiens</div><div>${ic("road-horizon")}<b>${fmt(kpp)}</b>km / plein</div></div></div>`;
   // derniers pleins
-  const last=`<div class="tu w"><div class="hd"><span class="ti">Derniers pleins</span><span>tout voir ›</span></div><div class="lst" id="dLast" style="margin-top:6px">
+  const last=`<div class="tu"><div class="hd"><span class="ti">Derniers pleins</span><span>tout voir ›</span></div><div class="lst" id="dLast" style="margin-top:6px">
     ${byD.slice(0,3).map(f=>`<div class="it"><span class="av">${ic("gas-pump")}</span><span class="x">${f.L!=null?fmt(f.L,1)+" L":"Litres ?"}<small>${dfr(f.d)}${f.st?" · "+esc(f.st):""}</small></span><span class="pill2">${f.P!=null?fmt(f.P,2)+" CHF":"–"}</span></div>`).join("")}</div></div>`;
   // timeline sobre
   const ev=[].concat(tlK==="ent"?[]:byD.slice(0,8).map(f=>({d:f.d,e:0,t:`Plein ${f.L!=null?fmt(f.L,1)+" L":""}`,s:`${f.st?esc(f.st)+" · ":""}${fmt(f.km)} km`})),
     tlK==="fill"?[]:ents.map(e=>({d:e.d,e:1,t:esc(e.t||"Entretien"),s:e.m!=null?fmt(+e.m,2)+" CHF":(isTyre(e)?"pneus":"entretien")})))
     .sort((a,b)=>b.d.localeCompare(a.d)).slice(0,5);
-  const tl=`<div class="tu w"><div class="hd"><span class="ti">Timeline</span>${ic("clock-counter-clockwise")}</div>
+  const tl=`<div class="tu"><div class="hd"><span class="ti">Timeline</span>${ic("clock-counter-clockwise")}</div>
     <div class="tabs2">${[["all","Tout"],["fill","Pleins"],["ent","Entretien"]].map(([k,n])=>`<button type="button" data-k="${k}" aria-pressed="${tlK===k}">${n}</button>`).join("")}</div>
     <div class="tl">${ev.length?ev.map(x=>`<div class="ev${x.e?" e":""}"><em>${dshort(day(x.d))}</em>${x.t}<small>${x.s}</small></div>`).join(""):`<div class="muted">Rien à afficher.</div>`}</div></div>`;
-  const box=$("#dash"); box.innerHTML=hero+week+conso+cout+stats+last+tl;
-  $("#dPlein").onclick=()=>openSheet(true);
+  const G={hero,week,conso,cout,stats,last,tl}, box=$("#dash"), L=tiles();
+  const pool=$("#tilePool"); box.querySelectorAll(".tsrc").forEach(n=>pool.appendChild(n)); // remet les anciennes tuiles à l'abri avant de redessiner
+  box.classList.toggle("edit",dEdit);
+  box.innerHTML=L.order.map((t,k)=>`<div class="tw${L.half[t]?"":" w"}" data-t="${t}">${dEdit?`<div class="tbar"><span>${TUILES[t]}</span>
+      <button type="button" data-mv="-1" aria-label="Monter" ${k?"":"disabled"}>▲</button><button type="button" data-mv="1" aria-label="Descendre" ${k<L.order.length-1?"":"disabled"}>▼</button>
+      <button type="button" data-sz aria-label="${L.half[t]?"Pleine largeur":"Demi-largeur"}" title="${L.half[t]?"Pleine largeur":"Demi-largeur"}">${L.half[t]?"↔":"½"}</button><button type="button" data-rm aria-label="Retirer">✕</button></div>`:""}${G[t]||""}</div>`).join("")
+    + (dEdit?`<div class="tu w addt"><div class="hd"><span class="ti">Ajouter une tuile</span></div>
+      <div class="chiprow" style="flex-wrap:wrap;margin-top:10px">${Object.keys(TUILES).filter(t=>!L.order.includes(t)).map(t=>`<button type="button" data-add="${t}">＋ ${TUILES[t]}</button>`).join("")||`<span class="muted">Toutes les tuiles sont déjà sur le tableau.</span>`}</div>
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><button type="button" class="btn primary" id="dDone" style="flex:2">Terminé</button><button type="button" class="btn" id="dClear" style="flex:1">Tout retirer</button><button type="button" class="btn" id="dReset" style="flex:1">Par défaut</button></div></div>`
+      :`<button type="button" class="tu w addt" id="dEdit">${ic("sliders-horizontal")} Organiser le tableau</button>`);
+  box.querySelectorAll(".tw").forEach(w=>{ const n=pool.querySelector(`.tsrc[data-t="${w.dataset.t}"]`); if(n) w.appendChild(n); });
+  if(!L.order.length&&!dEdit) box.insertAdjacentHTML("afterbegin",`<div class="tu w muted" style="text-align:center">Ton tableau est vide. Touche « Organiser le tableau » pour choisir tes tuiles.</div>`);
+  const save=()=>{ STATE.tiles=L; persist(); renderDash(); };
+  box.querySelectorAll("[data-mv]").forEach(b=>b.onclick=()=>{ const t=b.closest(".tw").dataset.t, k=L.order.indexOf(t), j=k+(+b.dataset.mv); [L.order[k],L.order[j]]=[L.order[j],L.order[k]]; save(); });
+  box.querySelectorAll("[data-sz]").forEach(b=>b.onclick=()=>{ const t=b.closest(".tw").dataset.t; if(L.half[t]) delete L.half[t]; else L.half[t]=true; save(); });
+  box.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{ const t=b.closest(".tw").dataset.t; L.order=L.order.filter(x=>x!==t); save(); });
+  box.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>{ L.order.push(b.dataset.add); save(); });
+  if(dEdit){ $("#dDone").onclick=()=>{ dEdit=false; renderHome(); };
+    $("#dClear").onclick=()=>{ L.order=[]; save(); };
+    $("#dReset").onclick=()=>{ STATE.tiles=JSON.parse(JSON.stringify(TILES0)); persist(); renderDash(); }; }
+  else $("#dEdit").onclick=()=>{ dEdit=true; renderDash(); };
+  if(dEdit) return; // en mode « organiser », les tuiles ne réagissent pas au toucher
+  if($("#dPlein")) $("#dPlein").onclick=()=>openSheet(true);
   box.querySelectorAll("[data-w]").forEach(b=>b.onclick=()=>{ wOff+=+b.dataset.w; renderDash(); });
   box.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{ dPer=b.dataset.p; renderDash(); });
   box.querySelectorAll(".tabs2 [data-k]").forEach(b=>b.onclick=()=>{ tlK=b.dataset.k; renderDash(); });
-  $("#dLast").closest(".tu").onclick=()=>go("hist");
+  if($("#dLast")) $("#dLast").closest(".tu").onclick=()=>go("hist");
 }
 
 // ---------- 💸 coût réel au km et coût d'un trajet
@@ -1834,7 +1896,7 @@ function save(){
 function backupData(){ // ce que contient chaque sauvegarde (noms lisibles)
   const per=a=>({Kangoo:a[0],BMW:a[1]});
   return {app:"Suivi Véhicules",version:APP_VERSION,
-    reglages:{autonomie:per(STATE.range),reservoir:per(STATE.tank),achat:per(STATE.buy),frais:per(STATE.fixed),trajet:STATE.trip||null},
+    reglages:{autonomie:per(STATE.range),reservoir:per(STATE.tank),achat:per(STATE.buy),frais:per(STATE.fixed),trajet:STATE.trip||null,tuiles:STATE.tiles||null},
     pleins:fills.map(f=>({id:f.id,d:f.d,v:V[f.v].n,km:f.km,L:f.L,P:f.P,full:f.full,ctry:f.ctry||"CH",st:f.st||null,eur:f.eur??null,rate:f.rate??null,opts:f.opts||{},force:!!f.force})),
     pneus:STATE.tyres.map(t=>({id:t.id,d:t.d,v:V[t.v].n,t:t.t,pos:t.pos??null,mod:t.mod??null,km:t.km??null})),
     entretien:STATE.ent.map(e=>({id:e.id,d:e.d,v:V[e.v].n,t:e.t,m:e.m??null,km:e.km??null,k:e.k??null}))};
@@ -1891,7 +1953,8 @@ function backupFrom(j){ // relit les données d'une sauvegarde (ancien .txt ou s
   if(j.reglages){ const g=j.reglages, a=g.autonomie||{}, t=g.reservoir||{}; out.range=[okN(a.Kangoo)||925,okN(a.BMW)||350]; out.tank=[okN(t.Kangoo)||60,okN(t.BMW)||20];
     if(g.achat) out.buy=[okN(g.achat.Kangoo)||0,okN(g.achat.BMW)||0];
     if(g.frais) out.fixed=[okFix(g.frais.Kangoo),okFix(g.frais.BMW)];
-    if(g.trajet) out.trip=okTrip(g.trajet); }
+    if(g.trajet) out.trip=okTrip(g.trajet);
+    if(g.tuiles&&okTiles(g.tuiles)) out.tiles=okTiles(g.tuiles); }
   (j.pneus||[]).forEach(t=>{ const v=vi(t.v), d=okD(t.d); if(v>=0&&d) out.tyres.push(tyreFrom(okId(t.id),d,v,t.t,t.pos,t.mod,t.km)); });
   (j.entretien||[]).forEach(e=>{ const v=vi(e.v); if(v>=0&&e.t){ const x={id:okId(e.id),d:okD(e.d),v,t:okS(e.t,120),m:okN(e.m),km:okN(e.km)}; if(e.k==="E"||e.k==="P") x.k=e.k; out.ent.push(x); } });
   return out; }
@@ -1910,7 +1973,7 @@ function showImportConfirm(name,d){
   $("#impOk").onclick=()=>{ if(!Sauvegarde.copieAvant(`import ${name}`)){ toast("⚠ Mémoire pleine : copie impossible, rien n'a été remplacé. Sauvegarde d'abord sur Drive."); return; } applyImport(pendingImport); pendingImport=null; }; $("#impNo").onclick=()=>{ pendingImport=null; renderBanner(); };
   window.scrollTo({top:0,behavior:"smooth"}); }
 function setData(d){ fills.length=0; d.fills.forEach(f=>fills.push(f)); STATE.tyres=d.tyres; STATE.ent=d.ent;
-  ["range","tank","buy","fixed","trip"].forEach(k=>{ if(d[k]) STATE[k]=d[k]; });
+  ["range","tank","buy","fixed","trip","tiles"].forEach(k=>{ if(d[k]) STATE[k]=d[k]; });
   persist(); ORACLE_CACHE={}; IA_CACHE={}; A=analyse(); }
 function applyImport(d){ setData(d); go("home");
   toast(`✓ ${d.fills.length} pleins importés${d.ent.length?`, ${d.ent.length} entretiens`:""}${d.tyres.length?`, ${d.tyres.length} changements de pneus`:""}`); }
