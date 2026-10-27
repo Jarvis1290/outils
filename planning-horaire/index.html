@@ -174,13 +174,11 @@ button.set{width:100%;background:none;border-left:0;border-right:0;border-top:0;
 .stepper button{width:48px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--surf2);font-size:20px;font-weight:800;cursor:pointer}
 .stepper div{flex:1;text-align:center;font-weight:800}
 
-/* ----- bouton ⏱ flottant ----- */
-#fab{position:fixed;z-index:31;right:18px;bottom:calc(20px + env(safe-area-inset-bottom,0px));width:60px;height:60px;border-radius:19px;border:0;background:var(--accS);color:#fff;
-  display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(30,42,23,.35);cursor:pointer}
-:root[data-ph-theme="fonce"] #fab{color:var(--on-acc)}
-#fab .ico{width:28px;height:28px}
-:root[data-rail="d"] #fab{right:78px}
-:root[data-rail="b"] #fab{bottom:calc(78px + env(safe-area-inset-bottom,0px))}
+/* ----- bouton ⏱ dans l'en-tête (ne recouvre plus rien) ----- */
+header.top{align-items:center}
+#fab{margin-left:auto;align-self:center;width:42px;height:42px;border-radius:14px;border:0;background:var(--soft);color:var(--accS);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none}
+#fab .ico{width:24px;height:24px}
 
 /* ----- panneau du bas ----- */
 #sheetBack{position:fixed;inset:0;z-index:60;background:rgba(15,18,12,.45);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .18s}
@@ -221,8 +219,6 @@ button.set{width:100%;background:none;border-left:0;border-right:0;border-top:0;
 :root[data-rail="d"] #remind{right:72px}
 :root[data-rail="b"] #remind{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
 body.remind .app{padding-bottom:210px}
-body.remind #fab{bottom:calc(104px + env(safe-area-inset-bottom,0px))}
-:root[data-rail="b"] body.remind #fab{bottom:calc(156px + env(safe-area-inset-bottom,0px))}
 
 .toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:90;background:var(--rail);color:#eef0e8;padding:11px 16px;border-radius:12px;font-size:13px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw;text-align:center}
 .toast.on{opacity:1}
@@ -231,12 +227,61 @@ body.remind #fab{bottom:calc(104px + env(safe-area-inset-bottom,0px))}
 .notes p{font-size:13px;line-height:1.5;color:var(--mut);margin:6px 0}
 .notes b{color:var(--fg)}
 .foot{text-align:center;font-size:11px;color:var(--mut);margin-top:16px}
+
+/* ----- Paramètres façon Véhicules ----- */
+.card.stack{display:flex;flex-direction:column;gap:12px}
+.swr{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:14px;font-weight:600;color:var(--fg)}
+.swr>span{min-width:0}
+.swr small{display:block;font-size:11px;font-weight:500;color:var(--mut);margin-top:1px}
+button.swr{width:100%;background:none;border:0;padding:0;text-align:left;cursor:pointer;font:inherit;font-size:14px;font-weight:600}
+.swr .seg2{flex:none}
+.pill{background:var(--soft);border-radius:10px;padding:5px 10px;font-variant-numeric:tabular-nums}
+.lbl{font-size:12px;font-weight:700;color:var(--mut);margin-bottom:6px}
+.rord{display:flex;flex-direction:column;gap:6px}
+.rord .it{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:12px;background:var(--surf2)}
+.rord .it .ico{width:22px;height:22px;color:var(--accS)}
+.rord .it span:not(.ico){flex:1;font-weight:600;font-size:14px}
+.rord .it button{width:38px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--surf);color:var(--fg);cursor:pointer;font-size:12px}
+.rord .it button:disabled{opacity:.3;cursor:default}
+.rord .btn{min-height:40px;font-size:13px;background:var(--surf2);color:var(--fg);border:1px solid var(--line);margin-top:4px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:13px}
+.kv span{color:var(--mut)}
+.kv b{text-align:right;font-variant-numeric:tabular-nums}
+.card .btn{width:100%}
+
+/* ----- ⏱ Mes heures en petit (indicatif) ----- */
+.mini{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+.mini button{flex:1 1 30%;min-width:0;border:1px solid var(--line);background:var(--surf2);border-radius:10px;padding:5px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;gap:0;text-align:left}
+.mini button span{font-size:10px;color:var(--mut);font-weight:600}
+.mini button b{font-size:12px;font-variant-numeric:tabular-nums;color:var(--fg)}
+
+/* ----- frise : poignées arrivée / départ, zoom ----- */
+.frise .knob{position:absolute;top:36px;width:24px;height:24px;margin-left:-12px;border-radius:50%;background:var(--surf);border:3px solid var(--accS);box-shadow:0 1px 4px rgba(0,0,0,.25);touch-action:none;cursor:ew-resize;z-index:3}
+.frise .knob::before{content:"";position:absolute;inset:-12px}
+.frise .knob.proj{border-style:dashed}
+.frise.drag .lab b{color:var(--accS)}
+.frise.big{height:150px;animation:zoomIn .22s ease-out}
+.frise.big .bar,.frise.big .seg,.frise.big .abs{top:52px;height:22px}
+.frise.big .bar{border-radius:11px}
+.frise.big .lunch{top:44px;height:38px;border-radius:9px}
+.frise.big .lunch .hd{top:6px;width:20px;height:26px}
+.frise.big .lunch .hd::after{left:8px;top:3px;height:20px}
+.frise.big .lunch .hd.l{left:-11px}.frise.big .lunch .hd.r{right:-11px}
+.frise.big .knob{top:47px;width:32px;height:32px;margin-left:-16px}
+.frise.big .tick{top:59px}
+.frise.big .now{top:46px;height:34px}
+.frise.big .pz{top:88px}
+.frise.big .lab b{font-size:16px}
+.frise.big .lab.lm{top:20px}
+.frise .hr{position:absolute;top:132px;transform:translateX(-50%);font-size:10px;color:var(--mut);font-variant-numeric:tabular-nums}
+.frise .hr::before{content:"";position:absolute;left:50%;top:-6px;width:1px;height:4px;background:var(--line)}
+@keyframes zoomIn{from{transform:scale(.9);opacity:.4}to{transform:none;opacity:1}}
+.swr{flex-wrap:wrap}
 </style>
 </head>
 <body>
 <nav id="rail" aria-label="Onglets"></nav>
-<main class="app"><header class="top"><h1 id="title">Planning</h1><small id="subtitle"></small></header><div id="view"></div></main>
-<button id="fab" aria-label="Réglages horaires"><span class="ico"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M216 136a88 88 0 1 1-88-88a88 88 0 0 1 88 88" opacity=".2"/><path d="M128 40a96 96 0 1 0 96 96a96.11 96.11 0 0 0-96-96m0 176a80 80 0 1 1 80-80a80.09 80.09 0 0 1-80 80m45.66-125.66a8 8 0 0 1 0 11.32l-40 40a8 8 0 0 1-11.32-11.32l40-40a8 8 0 0 1 11.32 0M96 16a8 8 0 0 1 8-8h48a8 8 0 0 1 0 16h-48a8 8 0 0 1-8-8"/></svg></span></button>
+<main class="app"><header class="top"><h1 id="title">Planning</h1><small id="subtitle"></small><button id="fab" aria-label="Réglages horaires" title="Réglages horaires"><span class="ico"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M216 136a88 88 0 1 1-88-88a88 88 0 0 1 88 88" opacity=".2"/><path d="M128 40a96 96 0 1 0 96 96a96.11 96.11 0 0 0-96-96m0 176a80 80 0 1 1 80-80a80.09 80.09 0 0 1-80 80m45.66-125.66a8 8 0 0 1 0 11.32l-40 40a8 8 0 0 1-11.32-11.32l40-40a8 8 0 0 1 11.32 0M96 16a8 8 0 0 1 8-8h48a8 8 0 0 1 0 16h-48a8 8 0 0 1-8-8"/></svg></span></button></header><div id="view"></div></main>
 <div id="sheetBack"><div id="sheet" role="dialog"></div></div>
 <div id="remind" hidden></div>
 <script>
@@ -719,8 +764,9 @@ function dayPanel(day,c,o){
   var a = d.arrival ? toMin(d.arrival) : (hist?null:c.arr), dep = d.departure ? toMin(d.departure) : (hist?null:c.dep);
   // frise
   var fc=el("div","card");
-  fc.appendChild(el("div","k","Ta journée")); fc.appendChild(el("div","small","glisse le midi · touche une pause · double toucher = roulette"));
-  fc.appendChild(frise(day,d,a,dep,{today:o.today, proj:!d.arrival, projDep:!d.departure, hist:hist, onEdit:o.onEdit}));
+  fc.appendChild(el("div","k","Ta journée")); fc.appendChild(el("div","small",o.big?"glisse l'arrivée, le midi ou le départ · touche une pause · double toucher = roulette":"touche pour agrandir · glisse arrivée, midi, départ · double toucher = roulette"));
+  var zo=function(){ pushSheet({type:"zoom",day:day,hist:hist,d:hist?d:null,onEdit:o.onEdit}); };
+  fc.appendChild(frise(day,d,a,dep,{today:o.today, proj:!d.arrival, projDep:!d.departure, hist:hist, onEdit:o.onEdit, refresh:o.refresh, big:o.big, onZoom:o.big?null:zo}));
   // heures (toucher = roulette)
   var tm=el("div","times");
   [["arrival","Arrivée",a,!d.arrival],["lunchStart","Midi",L1(day,d),!d.lunchStart],["lunchEnd","Reprise",L2(day,d),!d.lunchEnd],["departure","Départ",dep,!d.departure]].forEach(function(f){
@@ -773,17 +819,21 @@ function dayPanel(day,c,o){
 }
 function commit(o){ save(); if(!o||!o.hist) tick(); if(o&&o.hist&&o.onEdit) o.onEdit(); if(o&&o.refresh) o.refresh(); render(); }
 
-// frise de la journée : glisser/étirer le midi, pauses à toucher, double toucher = roulette
+// frise de la journée : glisser arrivée / midi / départ, pauses à toucher, toucher = zoom, double toucher = roulette
 function frise(day,d,a,dep,o){
-  var f=el("div","frise");
+  var big=!!o.big, f=el("div","frise"+(big?" big":""));
   var l1=L1(day,d), l2=L2(day,d), A=a==null?toMin(ref(day).arrival):a, Dp=dep==null?A+600:dep;
-  var lo=Math.floor(Math.min(A,l1,360)/60)*60, hi=Math.ceil(Math.max(Dp,l2,1080)/60)*60, span=hi-lo;
-  var pc=function(m){ return ((m-lo)/span*100)+"%"; };
+  var lo, hi;
+  if(big){ lo=Math.floor((Math.min(A,l1)-30)/30)*30; hi=Math.ceil((Math.max(Dp,l2)+30)/30)*30; }
+  else { lo=Math.floor(Math.min(A,l1,360)/60)*60; hi=Math.ceil(Math.max(Dp,l2,1080)/60)*60; }
+  var span=hi-lo, pc=function(m){ return ((m-lo)/span*100)+"%"; };
+  var cm={hist:o.hist,onEdit:o.onEdit,refresh:o.refresh}, dd=function(){ return o.hist?d:dayObj(day); };
   f.appendChild(el("div","bar"));
-  function seg(x1,x2,proj){ if(x2<=x1) return; var s=el("div","seg"+(proj?" proj":"")); s.style.left=pc(x1); s.style.width=((x2-x1)/span*100)+"%"; f.appendChild(s); return s; }
-  var s1=seg(A,Math.min(l1,Dp),o.proj), s2=seg(Math.max(l2,A),Dp,o.proj||o.projDep);
-  if(s1) s1.style.borderRadius="7px 0 0 7px"; if(s2) s2.style.borderRadius="0 7px 7px 0";
-  if(d.absMin){ var ab=el("div","abs"); ab.style.left=pc(Dp-d.absMin); ab.style.width=(d.absMin/span*100)+"%"; f.appendChild(ab); }
+  if(big){ for(var h=Math.ceil(lo/60)*60; h<=hi; h+=60){ var hs=el("div","hr",String(h/60)); hs.style.left=pc(h); f.appendChild(hs); } }
+  function seg(){ var s=el("div","seg"); f.appendChild(s); return s; }
+  var s1=seg(), s2=seg(); s1.style.borderRadius="7px 0 0 7px"; s2.style.borderRadius="0 7px 7px 0";
+  if(o.proj) s1.classList.add("proj"); if(o.proj||o.projDep) s2.classList.add("proj");
+  var ab=null; if(d.absMin){ ab=el("div","abs"); f.appendChild(ab); }
   // pauses offertes (vendredi : seulement le matin)
   var br=S.settings.breaks;
   [["skipM",br.morning],["skipA",br.afternoon]].forEach(function(p){
@@ -792,46 +842,65 @@ function frise(day,d,a,dep,o){
     var t=el("div","tick"); t.style.left=pc(m); f.appendChild(t);
     var b=el("button","pz"+(d[p[0]]?" off":""),'<i>'+(d[p[0]]?"✕":"✓")+'</i><span>'+fh(m)+(d[p[0]]?" sautée +15":" prise")+'</span>');
     b.style.left=pc(m);
-    b.onclick=function(e){ e.stopPropagation(); var dd=o.hist?d:dayObj(day); dd[p[0]]=!dd[p[0]]; commit(o.hist?{hist:true,onEdit:o.onEdit,refresh:o.refresh}:null); };
+    b.onclick=function(e){ e.stopPropagation(); var x=dd(); x[p[0]]=!x[p[0]]; commit(cm); };
     f.appendChild(b);
   });
-  // midi
-  var lu=el("div","lunch"); lu.style.left=pc(l1); lu.style.width=((l2-l1)/span*100)+"%";
-  lu.innerHTML='<div class="hd l"></div><div class="hd r"></div>';
-  f.appendChild(lu);
-  // étiquettes
-  var la=el("div","lab l0",'<b>'+fh(A)+'</b>arrivée'); la.style.left=pc(A); f.appendChild(la);
-  var lm=el("div","lab lm",'<b>'+fh(l1)+'–'+fh(l2)+'</b>'); lm.style.left=pc((l1+l2)/2); lm.hidden=true; f.appendChild(lm);
-  var ld=el("div","lab l1",'<b>'+fh(Dp)+'</b>départ'); ld.style.left=pc(Dp); f.appendChild(ld);
+  // midi + poignées arrivée / départ
+  var lu=el("div","lunch"); lu.innerHTML='<div class="hd l"></div><div class="hd r"></div>'; f.appendChild(lu);
+  var ka=el("div","knob ka"+(o.proj?" proj":"")), kd=el("div","knob kd"+(o.projDep?" proj":""));
+  ka.setAttribute("aria-label","Arrivée"); kd.setAttribute("aria-label","Départ"); f.appendChild(ka); f.appendChild(kd);
+  var la=el("div","lab l0"), lm=el("div","lab lm"), ld=el("div","lab l1"); lm.hidden=true; f.appendChild(la); f.appendChild(lm); f.appendChild(ld);
   if(o.today){ var nm=nowMin(); if(nm>lo&&nm<hi){ var n=el("div","now"); n.style.left=pc(nm); f.appendChild(n); } }
-  // glisser / étirer le midi (crans de 5 min)
+  // place tout selon les heures (aussi pendant un glissé)
+  function lay(A,l1,l2,Dp){
+    s1.style.left=pc(A); s1.style.width=(Math.max(0,Math.min(l1,Dp)-A)/span*100)+"%";
+    var x2=Math.max(l2,A); s2.style.left=pc(x2); s2.style.width=(Math.max(0,Dp-x2)/span*100)+"%";
+    if(ab){ ab.style.left=pc(Dp-d.absMin); ab.style.width=(d.absMin/span*100)+"%"; }
+    lu.style.left=pc(l1); lu.style.width=((l2-l1)/span*100)+"%";
+    ka.style.left=pc(A); kd.style.left=pc(Dp);
+    la.style.left=pc(A); la.innerHTML='<b>'+fh(A)+'</b>arrivée';
+    ld.style.left=pc(Dp); ld.innerHTML='<b>'+fh(Dp)+'</b>départ';
+    lm.style.left=pc((l1+l2)/2); lm.innerHTML='<b>'+fh(l1)+'–'+fh(l2)+'</b>';
+  }
+  lay(A,l1,l2,Dp);
+  // glisser (crans de 5 min ; en zoom l'échelle est plus fine, donc plus précis)
   var drag=null;
-  lu.addEventListener("pointerdown",function(e){
-    e.preventDefault(); e.stopPropagation(); dragging=true;
-    var kind = e.target.classList.contains("l") ? "l" : e.target.classList.contains("r") ? "r" : "m";
-    drag={kind:kind,x0:e.clientX,s:l1,e:l2,w:f.getBoundingClientRect().width,ns:l1,ne:l2}; lm.hidden=false;
-    try{ lu.setPointerCapture(e.pointerId); }catch(_){}
-  });
-  lu.addEventListener("pointermove",function(e){
+  function startDrag(e,kind,cap){
+    e.preventDefault(); e.stopPropagation(); dragging=true; clearTimeout(zt);
+    drag={kind:kind,x0:e.clientX,w:f.getBoundingClientRect().width,A:A,l1:l1,l2:l2,D:Dp,nA:A,n1:l1,n2:l2,nD:Dp};
+    if(kind!=="a"&&kind!=="d") lm.hidden=false;
+    f.classList.add("drag");
+    try{ cap.setPointerCapture(e.pointerId); }catch(_){}
+  }
+  function moveDrag(e){
     if(!drag) return;
-    var dm=Math.round(((e.clientX-drag.x0)/drag.w*span)/5)*5, s=drag.s, en=drag.e;
-    if(drag.kind==="m"){ s+=dm; en+=dm; } else if(drag.kind==="l"){ s=Math.min(drag.s+dm,en-15); } else { en=Math.max(drag.e+dm,s+15); }
-    s=Math.max(lo,s); en=Math.min(hi,en);
-    drag.ns=s; drag.ne=en;
-    lu.style.left=pc(s); lu.style.width=((en-s)/span*100)+"%"; lm.style.left=pc((s+en)/2); lm.innerHTML='<b>'+fh(s)+'–'+fh(en)+'</b>';
-  });
-  lu.addEventListener("pointerup",function(){ if(!drag) return; var dd=o.hist?d:dayObj(day), ns=drag.ns, ne=drag.ne, ch=ns!==drag.s||ne!==drag.e; drag=null; dragging=false;
-    if(ch){ dd.lunchStart=toClock(ns); dd.lunchEnd=toClock(ne); commit(o.hist?{hist:true,onEdit:o.onEdit,refresh:o.refresh}:null); } });
-  lu.addEventListener("pointercancel",function(){ drag=null; dragging=false; render(); });
-  // double toucher sur la frise = roulette (le champ le plus proche)
-  var lastT=0;
+    var dm=Math.round(((e.clientX-drag.x0)/drag.w*span)/5)*5, q=drag, nA=q.A, n1=q.l1, n2=q.l2, nD=q.D;
+    if(q.kind==="m"){ n1+=dm; n2+=dm; } else if(q.kind==="l"){ n1=Math.min(q.l1+dm,n2-15); } else if(q.kind==="r"){ n2=Math.max(q.l2+dm,n1+15); }
+    else if(q.kind==="a"){ nA=Math.min(q.A+dm,q.D-60); } else { nD=Math.max(q.D+dm,q.A+60); }
+    nA=Math.max(lo,nA); n1=Math.max(lo,n1); n2=Math.min(hi,n2); nD=Math.min(hi,nD);
+    q.nA=nA; q.n1=n1; q.n2=n2; q.nD=nD; lay(nA,n1,n2,nD);
+  }
+  function endDrag(){
+    if(!drag) return; var q=drag; drag=null; dragging=false; f.classList.remove("drag");
+    var x=dd(), ch=false;
+    if(q.kind==="a"){ if(q.nA!==q.A){ x.arrival=toClock(q.nA); ch=true; } }
+    else if(q.kind==="d"){ if(q.nD!==q.D){ x.departure=toClock(q.nD); x.touched=true; x.auto=false; ch=true; } }
+    else if(q.n1!==q.l1||q.n2!==q.l2){ x.lunchStart=toClock(q.n1); x.lunchEnd=toClock(q.n2); ch=true; }
+    if(ch){ if(navigator.vibrate) try{ navigator.vibrate(12); }catch(_){} commit(cm); } else { lm.hidden=true; }
+  }
+  lu.addEventListener("pointerdown",function(e){ startDrag(e, e.target.classList.contains("l")?"l":e.target.classList.contains("r")?"r":"m", lu); });
+  ka.addEventListener("pointerdown",function(e){ startDrag(e,"a",ka); });
+  kd.addEventListener("pointerdown",function(e){ startDrag(e,"d",kd); });
+  [lu,ka,kd].forEach(function(n){ n.addEventListener("pointermove",moveDrag); n.addEventListener("pointerup",endDrag); n.addEventListener("pointercancel",function(){ drag=null; dragging=false; render(); }); });
+  // toucher = zoom (façon Apple) ; double toucher = roulette (le champ le plus proche)
+  var lastT=0, zt=null;
   f.addEventListener("click",function(e){
-    if(e.target.closest(".lunch,.pz")) return;
+    if(e.target.closest(".lunch,.pz,.knob")) return;
     var t=Date.now();
-    if(t-lastT<350){ lastT=0; var r=f.getBoundingClientRect(), m=lo+(e.clientX-r.left)/r.width*span;
+    if(t-lastT<350){ lastT=0; clearTimeout(zt); var r=f.getBoundingClientRect(), m=lo+(e.clientX-r.left)/r.width*span;
       var c=[["arrival",A],["lunchStart",l1],["lunchEnd",l2],["departure",Dp]].sort(function(x,y){ return Math.abs(x[1]-m)-Math.abs(y[1]-m); })[0][0];
-      openDayWheel(day,c,o.hist?{hist:true,d:d,onEdit:o.onEdit,refresh:o.refresh}:null); }
-    else lastT=t;
+      openDayWheel(day,c,o.hist?{hist:true,d:d,onEdit:o.onEdit,refresh:o.refresh}:(o.refresh?{refresh:o.refresh}:null)); }
+    else { lastT=t; if(!big && o.onZoom){ clearTimeout(zt); zt=setTimeout(o.onZoom,360); } }
   });
   return f;
 }
@@ -904,13 +973,6 @@ function renderWeek(v){
   var sc=el("div","card");
   sc.innerHTML='<div class="row"><div><div class="k">Solde de la semaine</div>'+(Math.abs(c.P)>0.5?'<div class="small">dont '+fhm(c.P)+' du pot</div>':'')+'</div><div class="big '+cls(c.solde)+'">'+fhm(c.solde)+'</div></div>';
   v.appendChild(sc);
-  var swc=el("div","card");
-  var sw=el("div","row",'<b style="font-size:15px">Tout sur vendredi</b>');
-  var s=el("button","sw"+(S.report.allFriday?" on":"")); s.setAttribute("aria-label","Tout sur vendredi");
-  s.onclick=function(){ S.report.allFriday=!S.report.allFriday; save(); render(); toast(S.report.allFriday?"Tout le report part sur vendredi":"Ta règle revient : "+modeName()); };
-  sw.appendChild(s); swc.appendChild(sw);
-  swc.appendChild(el("div","small",S.report.allFriday?"Allumé : tout le report part sur vendredi.":"Éteint : règle « "+modeName()+" » (à régler dans ⏱)."));
-  v.appendChild(swc);
   if(S.report.bars){
     var tg=el("div","seg2");
     [["liste",ic("list-bullets")],["barres",ic("chart-bar")]].forEach(function(x){ var b=el("button",weekView===x[0]?"on":null,x[1]); b.setAttribute("aria-label",x[0]); b.onclick=function(){ weekView=x[0]; lsSet("ph-wview",x[0]); render(); }; tg.appendChild(b); });
@@ -1066,6 +1128,14 @@ function renderHistDay(sh,i,day){
   sh.appendChild(del);
 }
 
+// ----- frise en grand (toucher sur la frise) -----
+function renderZoom(sh,z){
+  if(z.hist){ sh.appendChild(sheetHead(LB[z.day])); sh.appendChild(dayPanel(z.day,null,{hist:true,d:z.d,onEdit:z.onEdit,refresh:redrawSheet,big:true})); return; }
+  var i=DAYS.indexOf(z.day), c=computeWeek()[z.day];
+  sh.appendChild(sheetHead(LB[z.day]+" "+dmy(weekDates(S.currentWeek.start)[i])));
+  sh.appendChild(dayPanel(z.day,c,{today:c.today,refresh:redrawSheet,big:true}));
+}
+
 // ----- fiche d'un jour de la semaine en cours -----
 function renderDaySheet(sh,day){
   var i=DAYS.indexOf(day), dates=weekDates(S.currentWeek.start), c=computeWeek()[day];
@@ -1081,10 +1151,10 @@ function renderDaySheet(sh,day){
 // ----- ⏱ Réglages horaires -----
 function renderTimeSettings(sh){
   sh.appendChild(sheetHead(ic("timer")+" Réglages horaires"));
-  sh.appendChild(el("div","sec","Mes heures"));
-  var c=el("div","card"); c.style.marginTop="4px"; c.style.padding="2px 14px";
+  sh.appendChild(el("div","sec","Mes heures <small class=\"muted\" style=\"font-weight:500;text-transform:none;letter-spacing:0\">· indicatif</small>"));
+  var c=el("div","mini");
   var st=S.settings;
-  function rowBtn(label,val,fn){ var b=el("button","set",'<span>'+label+'</span><b>'+val+'</b>'); b.onclick=fn; c.appendChild(b); }
+  function rowBtn(label,val,fn){ var b=el("button",null,'<span>'+label+'</span><b>'+val+'</b>'); b.onclick=fn; c.appendChild(b); }
   rowBtn("Lun – Jeu",fdur(st.weekday.refMin),function(){ openWheel({title:"Lun – Jeu",tabs:[{key:"r",label:"Durée",kind:"dur",get:function(){ return st.weekday.refMin; },set:function(m){ st.weekday.refMin=m; save(); render(); }}]}); });
   rowBtn("Vendredi",fdur(st.friday.refMin),function(){ openWheel({title:"Vendredi",tabs:[{key:"r",label:"Durée",kind:"dur",get:function(){ return st.friday.refMin; },set:function(m){ st.friday.refMin=m; save(); render(); }}]}); });
   rowBtn("Arrivée habituelle",fh(toMin(st.weekday.arrival)),function(){ openWheel({title:"Arrivée habituelle",tabs:[{key:"a",label:"Arrivée",kind:"clock",get:function(){ return toMin(st.weekday.arrival); },set:function(m){ st.weekday.arrival=st.friday.arrival=toClock(m); save(); render(); }}]}); });
@@ -1095,7 +1165,7 @@ function renderTimeSettings(sh){
     {key:"m",label:"Matin",kind:"clock",get:function(){ return toMin(st.breaks.morning); },set:function(m){ st.breaks.morning=toClock(m); save(); render(); }},
     {key:"a",label:"Après-midi",kind:"clock",get:function(){ return toMin(st.breaks.afternoon); },set:function(m){ st.breaks.afternoon=toClock(m); save(); render(); }}]}); });
   sh.appendChild(c);
-  sh.appendChild(el("div","small","Semaine de référence : "+fdur(st.weekday.refMin*4+st.friday.refMin)+". Pauses de 15 min offertes ; une pause sautée compte +15 (vendredi : seulement le matin)."));
+  sh.appendChild(el("div","small","Semaine "+fdur(st.weekday.refMin*4+st.friday.refMin)+" · pause sautée = +15 (vendredi : seulement le matin)."));
 
   sh.appendChild(el("div","sec","Report des heures"));
   var ch=el("div","chips two");
@@ -1103,6 +1173,10 @@ function renderTimeSettings(sh){
   sh.appendChild(ch);
   var expl={vendredi:"Les heures en plus ou en moins partent sur vendredi.",suivant:"Elles partent sur le jour suivant (jeudi → vendredi).",etale:"Elles sont partagées sur les jours restants de la semaine.",perso:"Pour chaque jour, coche le ou les jours qui rattrapent. Plusieurs cases = parts égales."};
   sh.appendChild(el("div","small",expl[S.report.mode]+" Ce qui reste le vendredi soir part dans le pot."));
+  var fr=el("div","card"); fr.style.cssText="margin-top:10px;padding:2px 14px";
+  var r=el("div","set",'<span>Tout sur vendredi <small class="muted" style="display:block;font-size:11px">'+(S.report.allFriday?"allumé : tout part sur vendredi":"rapide, puis ta règle revient")+'</small></span>'), s=el("button","sw"+(S.report.allFriday?" on":""));
+  s.setAttribute("aria-label","Tout sur vendredi"); s.onclick=function(){ S.report.allFriday=!S.report.allFriday; save(); render(); redrawSheet(); toast(S.report.allFriday?"Tout le report part sur vendredi":"Ta règle revient : "+modeName()); };
+  r.appendChild(s); fr.appendChild(r); sh.appendChild(fr);
   if(S.report.mode==="perso"){
     var g=el("div","grid"); g.appendChild(el("div"));
     DAYS.slice(1).forEach(function(x){ g.appendChild(el("div","h","→"+SH[x])); });
@@ -1119,52 +1193,63 @@ function renderTimeSettings(sh){
     sh.appendChild(g);
     sh.appendChild(el("div","small","Ligne vide = vendredi."));
   }
-  sh.appendChild(el("div","sec","Cette semaine"));
-  var c2=el("div","card"); c2.style.marginTop="4px"; c2.style.padding="2px 14px";
-  [["allFriday","Tout sur vendredi"],["bars","Vue barres dans Semaine"]].forEach(function(x){
-    var r=el("div","set",'<span>'+x[1]+'</span>'), s=el("button","sw"+(S.report[x[0]]?" on":""));
-    s.setAttribute("aria-label",x[1]); s.onclick=function(){ S.report[x[0]]=!S.report[x[0]]; save(); render(); redrawSheet(); };
-    r.appendChild(s); c2.appendChild(r);
-  });
-  sh.appendChild(c2);
 }
 
 // ----- ⚙ Paramètres de l'app -----
 function chipRow(opts,cur,fn){ var ch=el("div","chips"); opts.forEach(function(o){ var b=el("button","chip"+(cur===o[0]?" on":""),o[1]); b.onclick=function(){ fn(o[0]); }; ch.appendChild(b); }); return ch; }
+// même principe que Suivi Véhicules : un titre par partie, réglage à gauche, choix en pastilles à droite
+function segRow(label,opts,cur,fn){ var r=el("div","swr",'<span>'+label+'</span>'), g=el("div","seg2");
+  opts.forEach(function(o){ var b=el("button",cur===o[0]?"on":null,o[1]); b.setAttribute("aria-pressed",cur===o[0]); b.onclick=function(){ fn(o[0]); }; g.appendChild(b); });
+  r.appendChild(g); return r; }
+function swRow(label,on,fn,note){ var r=el("div","swr",'<span>'+label+(note?'<small>'+note+'</small>':'')+'</span>'), b=el("button","sw"+(on?" on":"")); b.setAttribute("aria-label",label); b.onclick=fn; r.appendChild(b); return r; }
 function renderSettings(v){
-  var a=el("div","card"); a.appendChild(el("div","k","Affichage"));
-  a.appendChild(el("div","small","Barre")); a.appendChild(chipRow([["g","Gauche"],["d","Droite"],["b","En bas"]],H.rail,function(x){ H.rail=x; lsSet("ph-rail",x); buildRail(); render(); }));
-  if(H.rail!=="b"){ a.appendChild(el("div","small","Icônes")).style.marginTop="8px"; a.appendChild(chipRow([["b","En bas (sous le pouce)"],["h","En haut"]],H.ricons,function(x){ H.ricons=x; lsSet("ph-ricons",x); buildRail(); render(); })); }
-  a.appendChild(el("div","small","Thème")).style.marginTop="8px"; a.appendChild(chipRow([["auto","Auto"],["clair","Clair"],["fonce","Foncé"]],H.phTheme,function(x){ H.phTheme=x; lsSet("ph-theme",x); render(); }));
-  a.appendChild(el("div","small","Ordre des onglets")).style.marginTop="8px";
-  var o=tabOrder();
+  v.appendChild(el("div","sec","Affichage"));
+  var a=el("div","card stack");
+  a.appendChild(segRow("Thème",[["auto","Auto"],["clair","Clair"],["fonce","Foncé"]],H.phTheme,function(x){ H.phTheme=x; lsSet("ph-theme",x); render(); }));
+  a.appendChild(segRow("Barre d'icônes",[["g","À gauche"],["d","À droite"],["b","En bas"]],H.rail,function(x){ H.rail=x; lsSet("ph-rail",x); buildRail(); render(); }));
+  if(H.rail!=="b") a.appendChild(segRow("Icônes de la barre",[["h","En haut"],["b","En bas"]],H.ricons,function(x){ H.ricons=x; lsSet("ph-ricons",x); buildRail(); render(); }));
+  var od=el("div"); od.appendChild(el("div","lbl","Ordre de la barre d'icônes"));
+  var o=tabOrder(), ord=el("div","rord");
   o.forEach(function(t,i){
-    var r=el("div","set",'<span>'+ic(TABS[t].i)+' '+TABS[t].t+'</span>'), bx=el("div","chips"); bx.style.flex="0 0 auto";
-    var up=el("button","chip",ic("caret-up")), dn=el("button","chip",ic("caret-down")); up.style.minWidth=dn.style.minWidth="44px";
+    var r=el("div","it",ic(TABS[t].i)+'<span>'+TABS[t].t+'</span>');
+    var up=el("button",null,"▲"), dn=el("button",null,"▼"); up.setAttribute("aria-label","Monter"); dn.setAttribute("aria-label","Descendre");
     up.disabled=i===0; dn.disabled=i===o.length-1;
     up.onclick=function(){ o.splice(i-1,0,o.splice(i,1)[0]); lsSet("ph-order",o.join(",")); buildRail(); render(); };
     dn.onclick=function(){ o.splice(i+1,0,o.splice(i,1)[0]); lsSet("ph-order",o.join(",")); buildRail(); render(); };
-    bx.appendChild(up); bx.appendChild(dn); r.appendChild(bx); a.appendChild(r);
+    r.appendChild(up); r.appendChild(dn); ord.appendChild(r);
   });
+  var rs=el("button","btn","Ordre par défaut"); rs.onclick=function(){ lsSet("ph-order","today,week,pot"); buildRail(); render(); }; ord.appendChild(rs);
+  ord.appendChild(el("div","small","Paramètres reste toujours au bout de la barre."));
+  od.appendChild(ord); a.appendChild(od);
   v.appendChild(a);
 
-  var R=S.remind, b=el("div","card"); b.appendChild(el("div","k","Rappel de sauvegarde"));
-  var r1=el("div","set",'<span>Rappel</span>'), s=el("button","sw"+(R.on?" on":"")); s.setAttribute("aria-label","Rappel");
-  s.onclick=function(){ R.on=!R.on; save(); render(); }; r1.appendChild(s); b.appendChild(r1);
+  v.appendChild(el("div","sec","Semaine"));
+  var w=el("div","card stack");
+  w.appendChild(swRow("Vue barres",S.report.bars,function(){ S.report.bars=!S.report.bars; save(); render(); },"dans Semaine : blocs de 15 min à glisser d'un jour à l'autre"));
+  v.appendChild(w);
+
+  v.appendChild(el("div","sec","Rappel de sauvegarde"));
+  var R=S.remind, b=el("div","card stack");
+  b.appendChild(swRow("Rappel",R.on,function(){ R.on=!R.on; save(); render(); }));
   if(R.on){
-    b.appendChild(el("div","small","Fréquence"));
-    var fr=chipRow(FREQS,R.freq,function(x){ R.freq=x; R.snooze=null; save(); render(); }); fr.classList.add("two"); b.appendChild(fr);
-    var hb=el("button","set",'<span>Heure du rappel</span><b>'+fh(toMin(R.hour))+'</b>');
+    var fq=el("div"); fq.appendChild(el("div","lbl","Fréquence"));
+    var fr=chipRow(FREQS,R.freq,function(x){ R.freq=x; R.snooze=null; save(); render(); }); fr.classList.add("two"); fq.appendChild(fr); b.appendChild(fq);
+    var hb=el("button","swr",'<span>Heure du rappel</span><b class="pill">'+fh(toMin(R.hour))+'</b>');
     hb.onclick=function(){ openWheel({title:"Heure du rappel",tabs:[{key:"h",label:"Heure",kind:"clock",get:function(){ return toMin(R.hour); },set:function(m){ R.hour=toClock(m); R.snooze=null; save(); render(); }}]}); };
     b.appendChild(hb);
     b.appendChild(el("div","small","Le rappel s'affiche en bas, sous le pouce, avec un gros bouton Sauvegarder. « Plus tard » le fait revenir le lendemain."));
   }
   v.appendChild(b);
-  var sv=el("div"); sv.style.marginTop="12px"; Sauvegarde.panneau(sv); v.appendChild(sv);
-  var q=el("div","card"); q.style.padding="2px 14px";
-  var qb=el("button","set",'<span>'+ic("sparkle")+' Quoi de neuf · comment ça marche</span><b>›</b>'); qb.onclick=function(){ pushSheet({type:"about"}); };
+
+  v.appendChild(el("div","sec","Sauvegarde"));
+  var sv=el("div"); Sauvegarde.panneau(sv); v.appendChild(sv);
+
+  v.appendChild(el("div","sec","À propos"));
+  var q=el("div","card");
+  q.innerHTML='<div class="kv"><span>Version</span><b>'+APP_VERSION+' · '+APP_DATE+'</b><span>Données</span><b>Dans ce téléphone</b><span>Semaines gardées</span><b>'+S.history.length+'</b><span>Pot</span><b class="'+cls(S.pot.totalMin)+'">'+fhm(S.pot.totalMin)+'</b></div>';
+  var qb=el("button","btn",ic("sparkle")+" Quoi de neuf · comment ça marche"); qb.style.marginTop="12px"; qb.onclick=function(){ pushSheet({type:"about"}); };
   q.appendChild(qb); v.appendChild(q);
-  v.appendChild(el("div","foot","Planning Horaire v"+APP_VERSION+" · "+APP_DATE+" · données sur ton téléphone, copie sur Drive"));
+  v.appendChild(el("div","foot","Planning Horaire v"+APP_VERSION+" · données sur ton téléphone, copie sur Drive"));
 }
 function renderAbout(sh){
   sh.appendChild(sheetHead("Quoi de neuf"));
@@ -1175,9 +1260,10 @@ function renderAbout(sh){
     '<li><b>Roulette</b> pour corriger une heure : tu lâches, c\'est enregistré.</li>'+
     '<li><b>Absence</b> sans heure (+15, +30, +1h, +2h).</li>'+
     '<li><b>Rien à valider</b> : départ prévu retenu à minuit, semaine clôturée le dimanche à minuit.</li>'+
-    '<li><b>Report des heures</b> dans ⏱ : tout vendredi, jour suivant, étalé ou Perso ; interrupteur « Tout sur vendredi » ; vue barres pour les exceptions.</li>'+
+    '<li><b>Report des heures</b> dans ⏱ : tout vendredi, jour suivant, étalé ou Perso ; interrupteur « Tout sur vendredi » ; vue barres (Paramètres) pour les exceptions.</li>'+
     '<li><b>Historique éditable</b> avec les dates ; une correction recalcule le pot des semaines suivantes.</li>'+
-    '<li>Barre d\'icônes, thème pistache clair ou foncé, rappel de sauvegarde réglable.</li></ul>'+
+    '<li>Barre d\'icônes, thème pistache clair ou foncé, rappel de sauvegarde réglable.</li>'+
+    '<li>La sauvegarde Drive garde aussi tous tes réglages (horaires, report, affichage, rappel).</li></ul>'+
     '<h3>Comment ça marche</h3>'+
     '<p><b>Référence</b> : '+fdur(S.settings.weekday.refMin)+' du lundi au jeudi, '+fdur(S.settings.friday.refMin)+' le vendredi. La pause de midi est déduite, les pauses de 15 min sont offertes (sautée = +15).</p>'+
     '<p><b>Une journée</b> compte dès que tu as pointé l\'arrivée. Si tu ne notes pas ton départ, le départ prévu est retenu à minuit. Un jour sans arrivée ne compte pas (congé).</p>'+
@@ -1200,6 +1286,7 @@ function redrawSheet(){
   else if(top.type==="hweek") renderHistWeek(sh,top.i);
   else if(top.type==="hday") renderHistDay(sh,top.i,top.day);
   else if(top.type==="about") renderAbout(sh);
+  else if(top.type==="zoom") renderZoom(sh,top);
   bk.classList.add("on");
   if(top.type!=="wheel") sh.scrollTop=y;
 }
@@ -1280,10 +1367,14 @@ function renderRemind(){
 })();
 
 // ---------- sauvegarde Drive (bloc commun SAUVEGARDE ATELIER) ----------
-Sauvegarde.init({
+var SV_CFG={
   app:"PlanningHoraire", nom:"Planning Horaire", cle:KEY, version:APP_VERSION,
-  lire:function(){ return clone(S); },
-  ecrire:function(d){ S=migrate(d); tick(); save(); sheets=[]; redrawSheet(); render(); },
+  // les réglages d'affichage (thème, barre, ordre…) partent aussi dans la sauvegarde
+  lire:function(){ var d=clone(S); d.prefs={theme:H.phTheme,rail:H.rail,ricons:H.ricons,order:tabOrder().join(","),wview:weekView}; return d; },
+  ecrire:function(d){ var pf=d&&d.prefs; if(d) delete d.prefs; S=migrate(d);
+    if(pf){ [["phTheme","theme","ph-theme"],["rail","rail","ph-rail"],["ricons","ricons","ph-ricons"]].forEach(function(x){ if(pf[x[1]]){ H[x[0]]=pf[x[1]]; lsSet(x[2],pf[x[1]]); } });
+      if(pf.order) lsSet("ph-order",pf.order); if(pf.wview){ weekView=pf.wview; lsSet("ph-wview",pf.wview); } buildRail(); }
+    tick(); save(); sheets=[]; redrawSheet(); render(); },
   resume:function(d){
     var n=(d.history||[]).length, cw=d.currentWeek||{}, days=cw.days||cw;
     var j=DAYS.filter(function(x){ return days[x]&&days[x].touched; }).length, pot=(d.pot&&d.pot.totalMin)||0;
@@ -1291,7 +1382,8 @@ Sauvegarde.init({
   },
   valider:function(d){ return d && d.settings && d.currentWeek && d.pot ? null : "données de Planning Horaire incomplètes"; },
   vide:function(d){ var cw=d.currentWeek||{}, days=cw.days||cw; return !(d.history&&d.history.length) && !DAYS.some(function(x){ return days[x]&&(days[x].touched||days[x].arrival&&cw.days); }); }
-});
+};
+Sauvegarde.init(SV_CFG);
 try{ navigator.storage && navigator.storage.persist && navigator.storage.persist(); }catch(e){}
 
 function defaultTab(){ var o=tabOrder(), i=todayIdx(); return (i>=0&&i<5) ? (o.indexOf("today")>=0?"today":o[0]) : "week"; }
@@ -1306,7 +1398,7 @@ save();
 // toutes les 30 s : minuit, clôture du dimanche, marqueur « maintenant »
 setInterval(function(){ var ch=tick(); if(!sheets.length && !dragging && (ch || tab==="today" || tab==="week")) render(); else if(ch) render(); },30000);
 document.addEventListener("visibilitychange",function(){ if(!document.hidden){ var ch=tick(); if(!dragging && !sheets.length) render(); else if(ch) render(); } });
-window.PH={state:function(){ return S; }, compute:computeWeek, tick:tick, migrate:migrate, recalc:function(i){ recalcHistory(i); save(); }};
+window.PH={state:function(){ return S; }, compute:computeWeek, tick:tick, migrate:migrate, recalc:function(i){ recalcHistory(i); save(); }, sv:SV_CFG};
 })();
 </script>
 <script>
