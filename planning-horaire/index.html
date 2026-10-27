@@ -98,14 +98,6 @@ button.set{width:100%;background:none;border-left:0;border-right:0;border-top:0;
 .btn.danger{background:none;color:var(--bad);border:1.5px solid var(--bad)}
 
 /* ----- Aujourd'hui ----- */
-.punch{width:150px;height:150px;border-radius:50%;margin:8px auto 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:0;cursor:pointer;
-  background:var(--acc);color:var(--on-acc);box-shadow:0 8px 22px color-mix(in srgb,var(--accS) 35%,transparent);transition:transform .12s}
-.punch:active{transform:scale(.96)}
-.punch .a{font-size:11px;font-weight:800;letter-spacing:.1em}
-.punch .h{font-size:38px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-.punch .c{font-size:12px;font-weight:600;opacity:.8}
-.punch.todo{background:var(--accS);color:#fff;animation:pulse 2.2s ease-in-out infinite}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accS) 45%,transparent)}50%{box-shadow:0 0 0 14px color-mix(in srgb,var(--accS) 0%,transparent)}}
 .times{display:flex;gap:6px;margin-top:10px}
 .times button{flex:1;min-width:0;border:1px solid var(--line);background:var(--surf2);border-radius:12px;padding:7px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px}
 .times button span{font-size:10px;color:var(--mut);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
@@ -277,6 +269,8 @@ button.swr{width:100%;background:none;border:0;padding:0;text-align:left;cursor:
 .frise .hr::before{content:"";position:absolute;left:50%;top:-6px;width:1px;height:4px;background:var(--line)}
 @keyframes zoomIn{from{transform:scale(.9);opacity:.4}to{transform:none;opacity:1}}
 .swr{flex-wrap:wrap}
+.times button.todo{border:2px solid var(--accS);background:var(--soft)}
+.times button.todo b{color:var(--accS)}
 </style>
 </head>
 <body>
@@ -748,11 +742,6 @@ function renderToday(v){
     v.appendChild(card); return;
   }
   var day=DAYS[ti], d=S.currentWeek.days[day]||{}, c=computeWeek()[day];
-  var btn=el("button","punch"+(d.arrival?"":" todo"));
-  if(d.arrival){ btn.innerHTML='<span class="a">ARRIVÉE</span><span class="h">'+fh(toMin(d.arrival))+'</span><span class="c">✓ pointé</span>'; btn.onclick=function(){ openDayWheel(day,"arrival"); }; }
-  else { btn.innerHTML='<span class="a">POINTER</span><span class="h">'+fh(nowMin())+'</span><span class="c">mon arrivée</span>';
-    btn.onclick=function(){ var dd=dayObj(day); dd.arrival=toClock(nowMin()); save(); if(navigator.vibrate) try{ navigator.vibrate(30); }catch(e){} toast("Arrivée pointée à "+fh(nowMin())); render(); }; }
-  v.appendChild(btn);
   v.appendChild(dayPanel(day,c,{today:true}));
 }
 function dayObj(day){ var w=S.currentWeek; if(!w.days[day]) w.days[day]={arrival:null,lunchStart:null,lunchEnd:null,departure:null,skipM:false,skipA:false,absMin:0,touched:false,auto:false}; return w.days[day]; }
@@ -770,8 +759,11 @@ function dayPanel(day,c,o){
   // heures (toucher = roulette)
   var tm=el("div","times");
   [["arrival","Arrivée",a,!d.arrival],["lunchStart","Midi",L1(day,d),!d.lunchStart],["lunchEnd","Reprise",L2(day,d),!d.lunchEnd],["departure","Départ",dep,!d.departure]].forEach(function(f){
-    var b=el("button",f[3]?"proj":null,'<span>'+f[1]+'</span><b>'+fh(f[2])+'</b><i>'+(f[3]?(f[0]==="departure"?"auto":"prévu"):(f[0]==="departure"&&d.auto?"retenu":" "))+'</i>');
-    b.onclick=function(){ openDayWheel(day,f[0],o); };
+    var b=el("button",(f[3]?"proj":"")+(f[0]==="arrival"&&o.today&&!d.arrival?" todo":""),'<span>'+f[1]+'</span><b>'+fh(f[2])+'</b><i>'+(f[3]?(f[0]==="departure"?"auto":f[0]==="arrival"&&o.today?"je suis là":"prévu"):(f[0]==="departure"&&d.auto?"retenu":" "))+'</i>');
+    b.onclick=function(){
+      // aujourd'hui, Arrivée pas encore notée : un toucher la note à l'heure actuelle, la roulette s'ouvre pour corriger
+      if(f[0]==="arrival" && o.today && !d.arrival){ var dd=dayObj(day); dd.arrival=toClock(nowMin()); save(); tick(); if(navigator.vibrate) try{ navigator.vibrate(30); }catch(e){} toast("Arrivée notée à "+fh(nowMin())); render(); }
+      openDayWheel(day,f[0],o); };
     tm.appendChild(b);
   });
   fc.appendChild(tm);
@@ -949,7 +941,7 @@ function openDayWheel(day,key,o){
   o=o||{};
   var hist=o.hist, get=function(){ return hist ? o.d : (S.currentWeek.days[day]||{}); };
   var cur=function(f){ var d=get(), c=hist?null:computeWeek()[day];
-    if(f==="arrival") return d.arrival?toMin(d.arrival):(c?c.arr:toMin(ref(day).arrival));
+    if(f==="arrival") return d.arrival?toMin(d.arrival):(c&&c.today?Math.round(nowMin()):c?c.arr:toMin(ref(day).arrival));
     if(f==="lunchStart") return L1(day,d); if(f==="lunchEnd") return L2(day,d);
     return d.departure?toMin(d.departure):(c?Math.round(c.dep):toMin(ref(day).arrival)+555); };
   var obj=function(){ return hist ? o.d : dayObj(day); };
@@ -1255,7 +1247,7 @@ function renderAbout(sh){
   sh.appendChild(sheetHead("Quoi de neuf"));
   var n=el("div","notes");
   n.innerHTML='<h3>v2.0 · '+APP_DATE+'</h3><ul>'+
-    '<li><b>Un toucher</b> sur le bouton rond pointe l\'arrivée ; le départ du soir se calcule tout seul.</li>'+
+    '<li><b>Arrivée</b> : un toucher sur la case Arrivée la note à l\'heure actuelle (la roulette s\'ouvre pour corriger) ou glisse sa poignée sur la frise ; le départ du soir se calcule tout seul.</li>'+
     '<li><b>Frise de la journée</b> : glisse ou étire le midi, touche une pause pour la sauter (+15), double toucher pour la roulette.</li>'+
     '<li><b>Roulette</b> pour corriger une heure : tu lâches, c\'est enregistré.</li>'+
     '<li><b>Absence</b> sans heure (+15, +30, +1h, +2h).</li>'+
