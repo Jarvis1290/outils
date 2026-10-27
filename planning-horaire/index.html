@@ -312,6 +312,9 @@ button.swr{width:100%;background:none;border:0;padding:0;text-align:left;cursor:
 .ring .rb{stroke:var(--line)}
 .ring .rf{stroke:var(--good);stroke-linecap:round}
 .ring b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
+.bcol .bl{cursor:pointer;text-align:center;line-height:1.1}
+.bcol .bl small{display:block;font-size:10px;font-weight:500;color:var(--mut)}
+.wbars{margin-top:0}
 </style>
 </head>
 <body>
@@ -519,7 +522,7 @@ const Sauvegarde = (() => {
    - Aujourd'hui : un toucher pointe l'arrivée, le départ du soir se calcule tout seul.
    - Frise de la journée : toucher arrivée / midi / départ puis −5 / +5, toucher une pause pour la sauter (+15), double toucher = roulette.
    - Rien à valider : à minuit, le départ prévu est retenu tout seul ; la semaine se clôture le dimanche à minuit.
-   - Report des heures (⏱) : tout vendredi, jour suivant, étalé, ou Perso (cases). Vue barres pour les exceptions.
+   - Report des heures (⏱) : tout vendredi, jour suivant, étalé, ou Perso (cases). Semaine = graphe en barres pour les exceptions.
    - Historique éditable : une correction recalcule le pot des semaines suivantes. */
 
 var APP_VERSION = "2.0", APP_DATE = "26.10.2026";
@@ -798,7 +801,7 @@ function weekStrip(W){
     else if(x.past){ t="pas<br>pointé"; e=""; st="off"; }
     else { t="dû "+fdur(x.planTarget)+"<br>sortie "+fh(x.dep); e=Math.abs(x.planTarget-x.ref)>0.5?'<span class="muted">'+fsign(x.planTarget-x.ref)+'</span>':'<span class="muted">–</span>'; }
     var b=el("button","wd "+st+(x.today?" today":""),'<b>'+SH[day].toUpperCase()+(x.today?' <i></i>':'')+'</b><small>'+dmy(dates[i]).slice(0,2)+'</small><span class="t">'+t+'</span><span class="e">'+e+'</span>');
-    b.onclick=function(){ pushSheet({type:"day",day:day}); };
+    b.onclick=function(){ pushSheet({type:"zoom",day:day}); };
     box.appendChild(b);
   });
   var sc=el("div","wsolde",'<div><span class="k">Solde semaine</span>'+(Math.abs(W.P)>0.5?'<small>dont '+fhm(W.P)+' du pot</small>':'<small>'+modeName()+'</small>')+'</div><b class="'+cls(W.solde)+'">'+fhm(W.solde)+'</b>');
@@ -837,7 +840,7 @@ function dayPanel(day,c,o){
       openDayWheel(day,f[0],o); };
     tm.appendChild(b);
   });
-  fc.appendChild(tm);
+  if(!o.only) fc.appendChild(tm);
   // absence (petit lien discret)
   var ab=el("div","absrow"), akey=(hist?"h":"c")+day, open=absOpen===akey;
   var l=el("button","lnk",ic("plus-circle")+" Absence"+(d.absMin?' <span class="muted" style="font-weight:500">· '+fdur(d.absMin)+'</span>':""));
@@ -857,12 +860,12 @@ function dayPanel(day,c,o){
     if(d.absMin){ var z=el("button","lnk","Remettre à 0"); z.onclick=function(){ setAbs(0); }; hint.appendChild(document.createElement("br")); hint.appendChild(z); }
     ab.appendChild(hint);
   }
-  fc.appendChild(ab);
+  if(!o.only) fc.appendChild(ab);
   wrap.appendChild(fc);
   function setAbs(m){ var dd=hist?d:dayObj(day); dd.absMin=m; commit(o); }
   function refreshPanel(){ if(o.refresh) o.refresh(); else render(); }
   // départ
-  if(!hist){
+  if(!hist && !o.only){
     var dc=el("div","card dep");
     var parts=[fdur(c.ref)+" à faire"];
     c.from.forEach(function(f){ if(Math.abs(f.min)>0.5) parts.push(fsign(-f.min)+(f.src==="pot"?" du pot":" report "+SH[f.src])); });
@@ -1054,53 +1057,30 @@ function openDayWheel(day,key,o){
 // ----- Semaine -----
 function renderWeek(v){
   var c=computeWeek(), dates=weekDates(S.currentWeek.start);
-  var sc=el("div","card");
-  sc.innerHTML='<div class="row"><div><div class="k">Solde de la semaine</div>'+(Math.abs(c.P)>0.5?'<div class="small">dont '+fhm(c.P)+' du pot</div>':'')+'</div><div class="big '+cls(c.solde)+'">'+fhm(c.solde)+'</div></div>';
-  v.appendChild(sc);
-  if(S.report.bars){
-    var tg=el("div","seg2");
-    [["liste",ic("list-bullets")],["barres",ic("chart-bar")]].forEach(function(x){ var b=el("button",weekView===x[0]?"on":null,x[1]); b.setAttribute("aria-label",x[0]); b.onclick=function(){ weekView=x[0]; lsSet("ph-wview",x[0]); render(); }; tg.appendChild(b); });
-    var hd=el("div","row"); hd.style.marginTop="12px"; hd.appendChild(el("div","k",weekView==="barres"?"Glisse un bloc de 15’ d'un jour à l'autre":"Les 5 jours")); hd.appendChild(tg); v.appendChild(hd);
-  }
-  if(S.report.bars && weekView==="barres"){ v.appendChild(barsView(c,dates)); }
-  else {
-    var dc=el("div","card"); dc.style.padding="6px 8px";
-    DAYS.forEach(function(day,i){
-      var x=c[day], d=x.d, row=el("div","dr"+(x.today?" cur":"")), t, e="", ok="";
-      if(x.done){ t=fh(toMin(d.arrival))+" – "+fh(x.dep); e='<span class="'+cls(x.ecart)+'">'+fsign(x.ecart)+'</span>'; ok=d.auto?'<span title="retenu à minuit">✓</span>':"✓"; }
-      else if(d.arrival){ t="arrivé "+fh(toMin(d.arrival))+" → "+fh(x.dep); e='<span class="muted">'+fsign(x.planTarget-x.ref)+'</span>'; }
-      else if(x.past){ t="pas pointé"; }
-      else { t="sortie "+fh(x.dep); e=Math.abs(x.planTarget-x.ref)>0.5?'<span class="muted">'+fsign(x.planTarget-x.ref)+'</span>':'<span class="muted">'+fdur(x.ref)+'</span>'; }
-      row.innerHTML='<div class="n">'+SH[day]+'<small>'+dmy(dates[i])+'</small></div><div class="t'+(x.done?"":" proj")+'">'+t+(d.absMin?' <small class="muted">· abs. '+fdur(d.absMin)+'</small>':'')+'</div><div class="e">'+e+'</div><div class="ok">'+ok+'</div>';
-      row.onclick=function(){ pushSheet({type:"day",day:day}); };
-      dc.appendChild(row);
-    });
-    v.appendChild(dc);
-  }
+  v.appendChild(barsView(c,dates));
   var hasAdj=Object.keys(S.currentWeek.adj||{}).some(function(k){ return S.currentWeek.adj[k]; });
   if(hasAdj){ var r=el("button","lnk",ic("arrow-counter-clockwise")+" Enlever les exceptions de la semaine"); r.onclick=function(){ S.currentWeek.adj={}; save(); render(); }; v.appendChild(r); }
-  v.appendChild(el("div","foot","Le départ prévu est retenu tout seul à minuit · la semaine se clôture dimanche à minuit"));
 }
-function modeName(){ return MODES.filter(function(m){ return m[0]===S.report.mode; })[0][1]; }
-
 // vue barres : un bloc = 15 min ; on le glisse (ou on le touche puis on touche un autre jour) pour une exception de la semaine
 var selBlk=null;
+function modeName(){ return MODES.filter(function(m){ return m[0]===S.report.mode; })[0][1]; }
 function barsView(c,dates){
-  var box=el("div","card"), bars=el("div","bars");
+  var box=el("div","card wbars"), bars=el("div","bars"), H=Math.max(260,(window.innerHeight||800)-300);
+  bars.style.height=H+"px";
   var maxT=Math.max.apply(null,DAYS.map(function(x){ return c[x].done?c[x].worked:c[x].planTarget; }).concat([600]));
   DAYS.forEach(function(day){
     var x=c[day], col=el("div","bcol"+(x.done?" done":"")), bb=el("div","bb");
     col.dataset.day=day;
     var val = x.done ? x.ecart : x.planTarget - x.ref, n=Math.min(16,Math.round(Math.abs(val)/15));
     var total = x.done ? x.worked : x.planTarget;
-    bb.style.height = Math.max(26, Math.round(total/maxT*200))+"px";
+    bb.style.height = Math.max(26, Math.round(total/maxT*(H-80)))+"px";
     for(var i=0;i<n;i++){
       var b=el("div","blk "+(x.done ? (val>0?"p":"m") : (val<0?"p":"m")));
       if(!x.done){ b.dataset.day=day; b.dataset.sign=val<0?"-1":"1"; if(selBlk&&selBlk.day===day&&i===0) b.classList.add("sel"); }
       bb.appendChild(b);
     }
     col.appendChild(bb);
-    col.appendChild(el("div","bl",SH[day]));
+    var bl=el("div","bl",SH[day]+'<small>'+dmy(dates[DAYS.indexOf(day)])+'</small>'); bl.onclick=function(){ pushSheet({type:"zoom",day:day}); }; col.appendChild(bl);
     col.appendChild(el("div","bv",(x.done?"fait ":"")+fdur(total)));
     col.appendChild(el("div","bv "+cls(val),n?fsign(val):"·"));
     bars.appendChild(col);
@@ -1214,10 +1194,11 @@ function renderHistDay(sh,i,day){
 
 // ----- frise en grand (toucher sur la frise) -----
 function renderZoom(sh,z){
-  if(z.hist){ sh.appendChild(sheetHead(LB[z.day])); sh.appendChild(dayPanel(z.day,null,{hist:true,d:z.d,onEdit:z.onEdit,refresh:redrawSheet,big:true})); return; }
+  if(z.hist){ sh.appendChild(sheetHead(LB[z.day])); sh.appendChild(dayPanel(z.day,null,{hist:true,d:z.d,onEdit:z.onEdit,refresh:redrawSheet,big:true,only:true})); return; }
   var i=DAYS.indexOf(z.day), c=computeWeek()[z.day];
   sh.appendChild(sheetHead(LB[z.day]+" "+dmy(weekDates(S.currentWeek.start)[i])));
-  sh.appendChild(dayPanel(z.day,c,{today:c.today,refresh:redrawSheet,big:true}));
+  sh.appendChild(dayPanel(z.day,c,{today:c.today,refresh:redrawSheet,big:true,only:true}));
+  sh.appendChild(el("div","small",'<div style="text-align:center;margin-top:8px">'+(c.done?'Parti à':'Sortie prévue')+' <b>'+fh(c.dep)+'</b> · '+(c.done?'journée '+fdur(c.worked)+' ('+fsign(c.ecart)+')':fdur(c.planTarget)+' à faire')+'</div>'));
 }
 
 // ----- fiche d'un jour de la semaine en cours -----
@@ -1307,10 +1288,6 @@ function renderSettings(v){
   od.appendChild(ord); a.appendChild(od);
   v.appendChild(a);
 
-  v.appendChild(el("div","sec","Semaine"));
-  var w=el("div","card stack");
-  w.appendChild(swRow("Vue barres",S.report.bars,function(){ S.report.bars=!S.report.bars; save(); render(); },"dans Semaine : blocs de 15 min à glisser d'un jour à l'autre"));
-  v.appendChild(w);
 
   v.appendChild(el("div","sec","Rappel de sauvegarde"));
   var R=S.remind, b=el("div","card stack");
@@ -1344,7 +1321,7 @@ function renderAbout(sh){
     '<li><b>Roulette</b> pour corriger une heure : tu lâches, c\'est enregistré.</li>'+
     '<li><b>Absence</b> sans heure (+15, +30, +1h, +2h).</li>'+
     '<li><b>Rien à valider</b> : départ prévu retenu à minuit, semaine clôturée le dimanche à minuit.</li>'+
-    '<li><b>Report des heures</b> dans ⏱ : tout vendredi, jour suivant, étalé ou Perso ; interrupteur « Tout sur vendredi » ; vue barres (Paramètres) pour les exceptions.</li>'+
+    '<li><b>Report des heures</b> dans ⏱ : tout vendredi, jour suivant, étalé ou Perso ; interrupteur « Tout sur vendredi » ; onglet Semaine en barres pour les exceptions.</li>'+
     '<li><b>Historique éditable</b> avec les dates ; une correction recalcule le pot des semaines suivantes.</li>'+
     '<li>Barre d\'icônes, thème pistache clair ou foncé, rappel de sauvegarde réglable.</li>'+
     '<li>La sauvegarde Drive garde aussi tous tes réglages (horaires, report, affichage, rappel).</li></ul>'+
