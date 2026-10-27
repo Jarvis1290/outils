@@ -1650,7 +1650,7 @@ var Bet=(function(){
     ["triche","L'anneau qui triche",0,function(){ return !!q(".ring b"); },function(){ var b=q(".ring b"); return fib(b,"100%",900)&&setTimeout(function(){ bubble(q(".ring"),"bien essayé 😜",1400); },950)||!!b; }],
     ["rappel","Le lutin du rappel",1,function(){ return !q("#remind").hidden; },function(){ var g=q("#remind .go"); return anim(g,"bet-wink",1400)&&bubble(g,"psst… sauvegarde-moi 💾"); }],
     ["cafe","La pause café",1,function(){ var m=hm(); return (m>=9*60+10&&m<=9*60+50)||(m>=15*60+10&&m<=15*60+50); },
-      function(){ var p=pick(qa(".pz")); if(!p) return false; var r=p.getBoundingClientRect(); fly("☕",r.left+r.width/2-10,r.top-8,"steam",2600); return bubble(p,"une petite pause ? ☕",2200); }],
+      function(){ var z=qa(".pz"), p=hm()<12*60?z[0]:z[z.length-1]; if(!p) return false; var r=p.getBoundingClientRect(); fly("☕",r.left+r.width/2-10,r.top-8,"steam",2600); return bubble(p,"une petite pause ? ☕",2200); }],
     ["lutin","Le lutin qui traverse",1,null,function(){ var h=q("header.top").getBoundingClientRect(), e=fly("🧚",h.left-30,h.top+8,"cross",3000); for(var i=1;i<6;i++) (function(i){ setTimeout(function(){ fly("✨",h.left+i*(h.width/6),h.top+14+Math.random()*12,"spark",900); },i*380); })(i); return !!e; }],
     ["titre","Le titre qui danse",0,null,function(){ var t=q("#title"); if(!t) return false; var s=t.textContent; t.innerHTML=s.split("").map(function(c,i){ return '<span class="bet-ch" style="animation-delay:'+(i*40)+'ms">'+(c===" "?"&nbsp;":c)+'</span>'; }).join(""); setTimeout(function(){ if(t.isConnected) t.textContent=s; },1800); return true; }],
     ["toupie","La roue des Paramètres",1,null,function(){ var g=q('#rail button[data-t="settings"] .ico'); return anim(g,"bet-spin",1200); }],
