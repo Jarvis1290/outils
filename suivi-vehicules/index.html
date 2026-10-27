@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
-<script>try{var D=document.documentElement.dataset,G=function(k,d){return localStorage.getItem(k)||d};D.theme=G("sv-theme","fonce");D.rail=G("sv-rail","g");D.snap=G("sv-snap","f");D.ricons=G("sv-ricons","h");D.rhide=G("sv-rhide","e");}catch(e){}</script>
+<script>try{var D=document.documentElement.dataset,G=function(k,d){return localStorage.getItem(k)||d};D.theme=G("sv-theme","fonce");D.rail=G("sv-rail","g");D.snap=G("sv-snap","f");D.ricons=G("sv-ricons","h");D.rhide=G("sv-rhide","e");D.magic=G("sv-magic","on");}catch(e){}</script>
 <script src="vendor/chart.umd.min.js"></script>
 <script src="vendor/xlsx.full.min.js"></script>
 <style>
@@ -449,10 +449,10 @@ html[data-theme="clair"]{color-scheme:light;
   --fg:#16181D;--fg-2:#4A505C;--fg-3:#848B98;--navbg:#14161A;--scrim:rgba(20,22,26,.45);
   --ok:#16A34A;--warn:#B7791F;--bad:#E8590C;--volt-hi:var(--volt);
   --sh:0 6px 18px -10px rgba(30,35,50,.28),0 0 0 1px rgba(30,35,50,.04);--rail-sh:0 8px 24px -10px rgba(0,0,0,.4)}
-html[data-theme="clair"] .hero{background:linear-gradient(120deg,color-mix(in srgb,var(--volt) 20%,#fff),#fff 80%)}
-html[data-theme="clair"] .sbar i{background:color-mix(in srgb,var(--volt) 16%,#fff)}
-html[data-theme="clair"] .sbar i.me{background:linear-gradient(color-mix(in srgb,var(--volt) 70%,#fff),var(--volt))}
-html[data-theme="clair"] .sheet .in,html[data-theme="clair"] .kpad{box-shadow:0 -10px 30px rgba(20,22,26,.18)}
+html[data-theme="clair"] .hero,html[data-theme="grim"] .hero{background:linear-gradient(120deg,color-mix(in srgb,var(--volt) 20%,#fff),#fff 80%)}
+html[data-theme="clair"] .sbar i,html[data-theme="grim"] .sbar i{background:color-mix(in srgb,var(--volt) 16%,#fff)}
+html[data-theme="clair"] .sbar i.me,html[data-theme="grim"] .sbar i.me{background:linear-gradient(color-mix(in srgb,var(--volt) 70%,#fff),var(--volt))}
+html[data-theme="clair"] .sheet .in,html[data-theme="clair"] .kpad,html[data-theme="grim"] .sheet .in,html[data-theme="grim"] .kpad{box-shadow:0 -10px 30px rgba(20,22,26,.18)}
 nav.tabs{box-shadow:var(--rail-sh)}
 html[data-rail="d"] .app{padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:calc(78px + env(safe-area-inset-right,0px))}
 html[data-rail="d"] nav.tabs{left:auto;right:max(10px,env(safe-area-inset-right,0px))}
@@ -580,7 +580,7 @@ html[data-rail="d"]:not([data-rhide="c"]) #pgdots{right:auto;left:3px}
 .tm .mplus{position:absolute;right:8px;top:8px;width:28px;height:28px;border-radius:50%;border:0;background:var(--volt);color:#fff;display:grid;place-items:center;cursor:pointer;padding:0}
 .tm .mplus .ico{color:#fff}
 .tm.hero{background:linear-gradient(135deg,color-mix(in srgb,var(--volt) 34%,var(--navy)),var(--navy) 85%)}
-html[data-theme="clair"] .tm.hero{background:linear-gradient(135deg,color-mix(in srgb,var(--volt) 22%,#fff),#fff 85%)}
+html[data-theme="clair"] .tm.hero,html[data-theme="grim"] .tm.hero{background:linear-gradient(135deg,color-mix(in srgb,var(--volt) 22%,#fff),#fff 85%)}
 .tw.open > .tvbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;font-weight:650}
 .tvbar button{border:0;background:var(--navy-2);color:var(--fg);border-radius:12px;padding:7px 12px;font:600 12.5px var(--f-body);cursor:pointer;box-shadow:0 0 0 1px var(--line);display:inline-flex;gap:6px;align-items:center}
 /* fenêtre plein écran (tuile ouverte, carte Fun, Quoi de neuf) */
@@ -724,6 +724,34 @@ nav.tabs .in>button[aria-current="page"]{background:transparent!important;box-sh
 .badge2 .bi.liq{filter:none;opacity:1}
 .badge2 .bi.liq .w{opacity:.55} .badge2 .bi.liq .w2{opacity:.3}
 .badge2 .bi.liq>span{position:relative;z-index:2;filter:grayscale(.6)}
+/* thème Grimoire : parchemin, encre brune, filets dorés */
+html[data-theme="grim"]{color-scheme:light;
+  --ink:#E8DCBC;--navy:#F6EDD5;--navy-2:#EEE2C3;--line:#D8C59C;
+  --fg:#2B1F12;--fg-2:#5A4630;--fg-3:#8A7355;--navbg:#2B1F12;--scrim:rgba(43,31,18,.45);
+  --ok:#2F7D4A;--warn:#A86B12;--bad:#B4441B;--volt-hi:var(--volt);
+  --sh:0 6px 18px -10px rgba(70,45,10,.35),0 0 0 1px rgba(168,120,40,.28);--rail-sh:0 8px 24px -10px rgba(40,25,5,.5)}
+html[data-theme="grim"] body{background:radial-gradient(120% 60% at 15% 0%,rgba(255,250,230,.55),transparent 60%),radial-gradient(90% 50% at 100% 100%,rgba(140,95,30,.16),transparent 60%),var(--ink)}
+html[data-theme="grim"] header.top{background:linear-gradient(#E8DCBC 70%,transparent)}
+html[data-theme="grim"] #vTitle,html[data-theme="grim"] .tview .tvh b,html[data-theme="grim"] .h2,html[data-theme="grim"] .hd2,html[data-theme="grim"] .qn-v{font-family:Georgia,"Palatino Linotype","Book Antiqua",serif;letter-spacing:0}
+html[data-theme="grim"] .tu,html[data-theme="grim"] .card{border-color:rgba(168,120,40,.35)}
+html[data-theme="grim"] .tm .mn{font-family:Georgia,"Palatino Linotype",serif;letter-spacing:-.2px}
+html[data-theme="grim"] nav.tabs{background:#2B1F12;box-shadow:0 0 0 1px rgba(201,150,60,.5),var(--rail-sh)}
+/* ciel du moment derrière l'en-tête */
+header.top::before{content:"";position:absolute;inset:0 0 -24px;z-index:-1;pointer-events:none;opacity:0;transition:opacity 1.5s,background 1.5s;background:var(--sky,none)}
+html[data-magic="on"] header.top::before{opacity:var(--skyo,.5)}
+/* étincelles, badge débloqué, tuiles qui flottent */
+.spark{position:fixed;left:0;top:0;width:7px;height:7px;border-radius:50%;pointer-events:none;z-index:90;background:radial-gradient(circle,#fff 0 25%,var(--sc,#F5D04C) 45%,transparent 70%);box-shadow:0 0 8px var(--sc,#F5D04C)}
+.spark.st{width:12px;height:12px;border-radius:0;background:var(--sc,#F5D04C);clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%)}
+.unlock{position:fixed;inset:0;z-index:95;display:grid;place-items:center;pointer-events:none;background:radial-gradient(circle at 50% 45%,rgba(245,208,76,.3),rgba(10,8,2,.55) 60%);animation:ulBg 2.8s forwards}
+@keyframes ulBg{0%,100%{opacity:0}12%,85%{opacity:1}}
+.unlock .ut{background:rgba(20,15,4,.82);border:1px solid rgba(245,208,76,.55);border-radius:16px;padding:10px 16px;display:flex;flex-direction:column;gap:3px;margin-top:6px}
+.unlock>div{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding:0 24px;animation:ulIn 2.8s cubic-bezier(.2,1.4,.4,1) forwards}
+.unlock .ue{font-size:64px;width:120px;height:120px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle,#3a2d08,#1b1404);box-shadow:0 0 0 3px #F5D04C,0 0 50px 8px rgba(245,208,76,.6);animation:ulGlow 1.2s ease-in-out infinite alternate}
+.unlock b{font:750 20px var(--f-disp);color:#F5D04C;text-shadow:0 2px 12px rgba(0,0,0,.6)} .unlock small{color:#fff;font-size:13px;text-shadow:0 1px 8px rgba(0,0,0,.7)}
+@keyframes ulIn{0%{transform:scale(.2);opacity:0}15%{transform:scale(1);opacity:1}82%{transform:scale(1);opacity:1}100%{transform:scale(1.1);opacity:0}}
+@keyframes ulGlow{to{box-shadow:0 0 0 3px #FFE58A,0 0 70px 16px rgba(245,208,76,.75)}}
+html[data-magic="on"] .dash .tu{transform:translate(calc(var(--gx,0) * 3px),calc(var(--gy,0) * 3px));transition:transform .25s ease-out}
+html[data-magic="on"] .dash .tw:nth-child(2n) .tu{transform:translate(calc(var(--gx,0) * 4.5px),calc(var(--gy,0) * 4.5px))}
 @media (prefers-reduced-motion:reduce){ .liq .w{animation:none} ::view-transition-new(root){animation:none} .row.torn{animation-duration:.01s} }
 </style>
 </head>
@@ -844,7 +872,8 @@ nav.tabs .in>button[aria-current="page"]{background:transparent!important;box-sh
     <div class="card vform" id="vehForm" hidden></div>
     <div class="h2">Affichage</div>
     <div class="card" style="display:flex;flex-direction:column;gap:12px">
-      <div class="switch"><span>Thème</span><span class="seg2" id="setTheme"><button type="button" data-x="fonce">Foncé</button><button type="button" data-x="clair">Clair</button></span></div>
+      <div class="switch"><span>Thème</span><span class="seg2" id="setTheme"><button type="button" data-x="fonce">Foncé</button><button type="button" data-x="clair">Clair</button><button type="button" data-x="grim">Grimoire</button></span></div>
+      <div class="switch"><span>Magie <small class="muted">(étincelles, chiffres qui roulent, ciel, tuiles qui flottent)</small></span><span class="seg2" id="setMagic"><button type="button" data-x="on">Oui</button><button type="button" data-x="off">Non</button></span></div>
       <div class="switch"><span>Barre d'icônes</span><span class="seg2" id="setRail"><button type="button" data-x="g">À gauche</button><button type="button" data-x="d">À droite</button><button type="button" data-x="b">En bas</button></span></div>
       <div class="switch" id="riconsRow"><span>Icônes de la barre</span><span class="seg2" id="setRicons"><button type="button" data-x="h">En haut</button><button type="button" data-x="b">En bas</button></span></div>
       <div class="switch"><span>La barre</span><span class="seg2" id="setRhide"><button type="button" data-x="e">Épinglée</button><button type="button" data-x="c">Cachée</button></span></div>
@@ -1208,7 +1237,7 @@ const THEME = { // v1.8 : même fond foncé pour tous, un accent par véhicule
   k:{txt:"#B3B8C2",grid:"rgba(255,255,255,.06)",tipBg:"#20242B",tipFg:"#EEF0F4",tipBd:"#E5484D",track:"#262A32",needle:"#EEF0F4",muted:"#8B92A0",bad:"#FF9F43",warn:"#F5D04C",acc:"#E5484D",fg:"#EEF0F4"}};
 let MODE=0; try{ const m=+localStorage.getItem("sv-mode"); if(m>0) MODE=m; }catch(e){}
 let T=THEME.k;
-const APP_VERSION="3.1";
+const APP_VERSION="3.2";
 const KEY="suivi-vehicules-v1";
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}}, lsSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 let STATE={fills:[],tyres:[],ent:[],rates:{},range:[925,350],tank:[60,20],buy:[3500,10000],fixed:[{},{}],trip:null};
@@ -1337,7 +1366,7 @@ const used = ()=>V.map((_,i)=>i).filter(i=>A.stat[i]);
 const hexMix=(a,b,t)=>{ const p=x=>[1,3,5].map(i=>parseInt(x.slice(i,i+2),16)), A=p(a), B=p(b); return "#"+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,"0")).join(""); };
 const rgba=(x,a)=>`rgba(${[1,3,5].map(i=>parseInt(x.slice(i,i+2),16)).join(",")},${a})`;
 function applyTheme(){
-  const H=document.documentElement, x=V[MODE], light=H.dataset.theme==="clair";
+  const H=document.documentElement, x=V[MODE], light=H.dataset.theme==="clair"||H.dataset.theme==="grim", grim=H.dataset.theme==="grim";
   T=Object.assign({},THEME.k);
   const std=x.id==="k"&&x.c==="#E5484D"?"k":x.id==="b"&&x.c==="#3D86F8"?"b":null;
   H.dataset.mode=std||"x";
@@ -1345,8 +1374,9 @@ function applyTheme(){
   if(!std){ const c=x.c; H.style.setProperty("--volt",c); H.style.setProperty("--volt-hi",light?c:hexMix(c,"#ffffff",.35)); H.style.setProperty("--volt-glow",rgba(c,.28));
     H.style.setProperty("--grad1",hexMix(c,"#ffffff",.18)); H.style.setProperty("--grad2",hexMix(c,"#000000",.12)); H.style.setProperty("--bg-glow",rgba(c,.1)); }
   T.acc=std==="b"?"#2F7CF6":x.c; T.tipBd=T.acc;
-  if(light) Object.assign(T,{txt:"#4A505C",grid:"rgba(20,22,26,.07)",tipBg:"#FFFFFF",tipFg:"#16181D",track:"#E4E7ED",needle:"#16181D",muted:"#848B98",fg:"#16181D"});
-  const mc=document.querySelector('meta[name="theme-color"]'); if(mc) mc.content=light?"#EEF0F5":"#0D0F13";
+  if(grim) Object.assign(T,{txt:"#5A4630",grid:"rgba(90,60,20,.12)",tipBg:"#F6EDD5",tipFg:"#2B1F12",track:"#D8C59C",needle:"#2B1F12",muted:"#8A7355",fg:"#2B1F12",bad:"#B4441B",warn:"#A86B12"});
+  else if(light) Object.assign(T,{txt:"#4A505C",grid:"rgba(20,22,26,.07)",tipBg:"#FFFFFF",tipFg:"#16181D",track:"#E4E7ED",needle:"#16181D",muted:"#848B98",fg:"#16181D"});
+  const mc=document.querySelector('meta[name="theme-color"]'); if(mc) mc.content=grim?"#E8DCBC":light?"#EEF0F5":"#0D0F13"; if(typeof skyNow==="function") skyNow();
   Chart.defaults.color=T.txt; Chart.defaults.borderColor=T.grid;
   Object.assign(tip,{backgroundColor:T.tipBg,borderColor:T.tipBd,titleColor:T.tipFg,bodyColor:T.tipFg});
   $("#sub").textContent = new Date().toLocaleDateString("fr-CH",{weekday:"long",day:"numeric",month:"long"});
@@ -1742,7 +1772,7 @@ function renderDash(){
     return `<div class="tw ${z}${tOpenIn===t?" open":""}" data-t="${t}">${P.G[t]||""}</div>`; }).join("");
   box.querySelectorAll(".tw").forEach(w=>{ if(w.querySelector(".tm")) return; const n=pool.querySelector(`.tsrc[data-t="${w.dataset.t}"]`); if(n) w.appendChild(n); });
   if(!list.length) box.innerHTML=`<div class="tu w muted" style="text-align:center">Ton tableau est vide. Va dans Paramètres → « Organiser le tableau » pour choisir tes tuiles.</div>`;
-  bindTiles(box,renderDash);
+  bindTiles(box,renderDash); rollNums(box);
   box.querySelectorAll(".tm").forEach(m=>m.onclick=e=>{ if(e.target.closest("[data-plein]")) return; tapTile(m.closest(".tw").dataset.t); });
   box.querySelectorAll(".tw.open").forEach(w=>w.onclick=e=>{ if(e.target.closest(TAPX)) return; tOpenIn=null; renderDash(); }); // on retouche la tuile : elle se referme
   const bt=$("#btnTrip"); if(bt) bt.onclick=()=>{ closeTV(); go("cost"); };
@@ -1753,7 +1783,7 @@ function tapTile(t){
   openTile(t); }
 function openTile(t){
   openTV(TUILES[t],body=>{ const P=dashParts(MODE);
-    if(P.G[t]){ body.innerHTML=`<div class="tw w">${P.G[t]}</div>`; bindTiles(body,()=>{ refreshTV(); renderDash(); }); }
+    if(P.G[t]){ body.innerHTML=`<div class="tw w">${P.G[t]}</div>`; bindTiles(body,()=>{ refreshTV(); renderDash(); }); rollNums(body); }
     else { const n=$(`#tilePool .tsrc[data-t="${t}"]`); body.innerHTML=""; if(n) body.appendChild(n); const bt=$("#btnTrip"); if(bt) bt.onclick=()=>{ closeTV(); go("cost"); }; } },
     body=>{ body.querySelectorAll(".tsrc").forEach(n=>$("#tilePool").appendChild(n)); }, "tile:"+t); }
 // liste « Organiser » (tableau de bord et Fun) : taille, ordre, retirer, ajouter
@@ -2340,7 +2370,7 @@ function confirmTap(el,msg,fn){ if(el._armed){ fn(); return; } el._armed=true; c
 // ---------- Paramètres : seulement ce qui est commun à toute l'app
 function renderAff(){
   const H=document.documentElement;
-  [["#setTheme","theme","sv-theme"],["#setRail","rail","sv-rail"],["#setRicons","ricons","sv-ricons"],["#setRhide","rhide","sv-rhide"],["#setSnap","snap","sv-snap"]].forEach(([id,k,key])=>{
+  [["#setTheme","theme","sv-theme"],["#setMagic","magic","sv-magic"],["#setRail","rail","sv-rail"],["#setRicons","ricons","sv-ricons"],["#setRhide","rhide","sv-rhide"],["#setSnap","snap","sv-snap"]].forEach(([id,k,key])=>{
     $(id).querySelectorAll("button").forEach(b=>{ b.setAttribute("aria-pressed",H.dataset[k]===b.dataset.x);
       b.onclick=()=>{ const set=()=>{ H.dataset[k]=b.dataset.x; try{localStorage.setItem(key,b.dataset.x);}catch(e){} railClose(); applyTheme(); renderAff(); pgSched(); setTimeout(railDrop,60); };
         if(k==="theme"&&H.dataset.theme!==b.dataset.x&&document.startViewTransition&&!RM){ // le nouveau thème s'étend en cercle depuis le bouton
@@ -2452,6 +2482,7 @@ function renderMore(){
 
 // ---------- Quoi de neuf : la version en grand, une carte par version ; s'ouvre une fois après chaque mise à jour
 const CHANGELOG=[
+  ["3.2","27.10.2026","Un peu de magie ✨",["Poussière d'étoiles quand tu enregistres un plein, bien plus forte si tu bats ton record de conso","Les grands chiffres des tuiles roulent comme un compteur à l'ouverture","Succès débloqué : le badge apparaît au milieu de l'écran avec un éclat doré","Ciel du moment : l'en-tête prend la teinte de l'aube, du jour, du crépuscule ou de la nuit (avec des étoiles)","Nouveau thème « Grimoire » : parchemin, encre brune et filets dorés","Les tuiles flottent un tout petit peu quand tu penches le téléphone","Paramètres → Magie : Oui / Non pour tout couper d'un coup"]],
   ["3.1","27.10.2026","Un peu de magie",["Thème clair / foncé : le nouveau thème s'étend en cercle depuis le bouton touché","Réservoir « liquide » : la tuile Prochain plein et l'IA du réservoir se remplissent de vagues au niveau estimé","Barre d'onglets liquide : une goutte glisse jusqu'à l'onglet choisi et rebondit","Journal : glisse une ligne vers la gauche pour la supprimer (elle se déchire), avec « Annuler » pendant 6 secondes","Encore du liquide : le réservoir se remplit pendant que tu tapes les litres, budget du mois dans Coût & trajet, prochaine borne de km dans les Stats communes, succès en cours qui se remplissent"]],
   ["3.0.2","27.10.2026","Sauvegarde",["La sauvegarde Drive garde aussi les réglages d'affichage : thème, barre (côté, icônes, épinglée ou cachée, ordre), défilement, ouverture des tuiles et pavé de saisie","Après une restauration, l'app revient exactement comme tu l'avais réglée"]],
   ["3.0.1","26.10.2026","Touche Retour",["La touche Retour d'Android ferme d'abord ce qui est ouvert (tuile, fenêtre, menu), puis revient à l'écran d'avant, au lieu de sortir de l'app","Double appui sur Retour depuis le tableau de bord pour quitter"]],
@@ -2525,7 +2556,7 @@ function funCards(){
       ["🌍","Tour du monde","40 075 km suivis",tot,40075],["🚀","100 000 km","100 000 km suivis",tot,1e5],["🗺️","Globe-trotter","Pleins dans 3 pays",Object.keys(ctr).length,3],
       ["🏪","Habitué","10 pleins à la même station",stTop.length?stTop[0][1].n:0,10],["🧭","Baroudeur","Un road trip détecté",trips.length,1],["💸","Chasseur de prix","10 pleins sous ta moyenne",mN,10],
       ["🔧","Mécano","10 entretiens notés",STATE.ent.filter(e=>e.k!=="F").length,10],["🚗","Collectionneur","3 véhicules suivis",V.length,3],["📅","Fidèle","Un an de suivi",TODAY-first,365]];
-    const ok=B.filter(b=>b[3]>=b[4]).length, nx=B.filter(b=>b[3]<b[4]).sort((a,b)=>b[3]/b[4]-a[3]/a[4])[0];
+    BADGES=B; const ok=B.filter(b=>b[3]>=b[4]).length, nx=B.filter(b=>b[3]<b[4]).sort((a,b)=>b[3]/b[4]-a[3]/a[4])[0];
     return {m:{ic:ic("medal","#F5D04C"),lab:"Succès",n:`${ok}/${B.length}`,u:"",s:nx?`bientôt : ${nx[1]}`:"tout débloqué !"},
       h:card(ic("medal"),`Succès · ${ok}/${B.length}`,B.map(([e,t,d,v,g])=>{ const done=v>=g; return `<div class="badge2${done?" ok":""}">${done?`<span class="bi">${e}</span>`:liquid(Math.min(1,v/g),"#F5D04C","bi",`<span>${e}</span>`)}<span>${t}<small>${d}</small></span><span class="v">${done?"✓":`${fmt(Math.min(v,g))} / ${fmt(g)}`}</span></div>`; }).join(""))}; });
   // journée record
@@ -2861,21 +2892,22 @@ function save(){
   if(r.rate) STATE.lastRate=r.rate;
   persist(); ORACLE_CACHE={}; A=analyse(); closeSheet(); go(curView==="more"?"home":curView);
   const bornes=lastKm&&Math.floor(r.km/5000)>Math.floor(lastKm/5000)?` · 🎉 ${fmt(Math.floor(r.km/5000)*5000)} km franchis !`:"";
-  if(r.conso!=null&&r.conso<prevBest){ toast(`🏆 Record perso battu : ${fmt(r.conso,2)} L/100 km !${bornes}`); }
+  const rec=r.conso!=null&&r.conso<prevBest; sparkle(rec?70:26); setTimeout(checkBadges,400);
+  if(rec){ toast(`🏆 Record perso battu : ${fmt(r.conso,2)} L/100 km !${bornes}`); }
   else if(bornes){ toast(`✓ ${V[sv].n} enregistré${bornes}`); }
   else toast(`✓ ${V[sv].n} enregistré${r.conso!=null?` · ${fmt(r.conso,2)} ${U(sv).c100} km`:r.dist?` · +${fmt(r.dist)} km`:""}${verdict}`);
 }
 
 // ---------- 💾 sauvegarde Drive commune (bloc SAUVEGARDE ATELIER v2) + import des anciens fichiers
 // réglages d'affichage (gardés dans ce téléphone) : aussi dans la sauvegarde, pour tout retrouver après une réinstallation
-const AFF={theme:["sv-theme",["fonce","clair"]],barre:["sv-rail",["g","d","b"]],iconesBarre:["sv-ricons",["h","b"]],barreCachee:["sv-rhide",["e","c"]],
+const AFF={theme:["sv-theme",["fonce","clair","grim"]],magie:["sv-magic",["on","off"]],barre:["sv-rail",["g","d","b"]],iconesBarre:["sv-ricons",["h","b"]],barreCachee:["sv-rhide",["e","c"]],
   defilement:["sv-snap",["f","l"]],ouvrirTuile:["sv-topen",["p","s"]],pave:["sv-pad",["on","off"]]};
 function affRead(){ const o={}; Object.keys(AFF).forEach(k=>{ const v=lsGet(AFF[k][0]); o[k]=AFF[k][1].includes(v)?v:AFF[k][1][0]; }); o.ordreBarre=railOrder(); return o; } // sans réglage : la valeur par défaut (la première)
 function affOk(g){ if(!g||typeof g!=="object") return null; const o={};
   Object.keys(AFF).forEach(k=>{ if(AFF[k][1].includes(g[k])) o[k]=g[k]; });
   if(Array.isArray(g.ordreBarre)){ const r=g.ordreBarre.filter((x,i,a)=>RAIL0.includes(x)&&a.indexOf(x)===i); if(r.length) o.ordreBarre=r; }
   return Object.keys(o).length?o:null; }
-function affApply(o){ if(!o) return; const D=document.documentElement.dataset, DS={theme:"theme",barre:"rail",iconesBarre:"ricons",barreCachee:"rhide",defilement:"snap"};
+function affApply(o){ if(!o) return; const D=document.documentElement.dataset, DS={theme:"theme",magie:"magic",barre:"rail",iconesBarre:"ricons",barreCachee:"rhide",defilement:"snap"};
   Object.keys(AFF).forEach(k=>{ if(o[k]==null) return; lsSet(AFF[k][0],o[k]); if(DS[k]) D[DS[k]]=o[k]; });
   if(o.pave){ padPref=o.pave; applyPad(); }
   if(o.ordreBarre) setRailOrder(o.ordreBarre); tOpenIn=null; railClose(); }
@@ -2987,6 +3019,40 @@ Sauvegarde.init({app:"Vehicules", nom:"Suivi Véhicules", cle:KEY, version:APP_V
   resume:backupResume,
   valider:d=>d&&Array.isArray(d.pleins)?null:"il n'y a pas de pleins dans ce fichier",
   vide:d=>!(d.pleins||[]).length});
+
+// ---------- ✨ magie : étincelles, chiffres qui roulent, badge débloqué, ciel du moment, tuiles qui flottent (Paramètres → Magie)
+const magicOn=()=>document.documentElement.dataset.magic!=="off"&&!RM;
+function sparkle(n,x,y,cols){ if(!magicOn()||!n) return; cols=cols||["#F5D04C","#FFE58A","#FFFFFF",V[MODE].c];
+  x=x??innerWidth/2; y=y??innerHeight*.6;
+  for(let k=0;k<n;k++){ const e=document.createElement("i"); e.className="spark"+(k%4===0?" st":""); e.style.setProperty("--sc",cols[k%cols.length]); document.body.appendChild(e);
+    const a=Math.random()*Math.PI*2, r=60+Math.random()*(n>40?220:150), dx=Math.cos(a)*r, dy=Math.sin(a)*r-80-Math.random()*90, d=900+Math.random()*700;
+    e.animate([{transform:`translate(${x}px,${y}px) scale(.4)`,opacity:1},{transform:`translate(${x+dx*.7}px,${y+dy*.7}px) scale(1.1)`,opacity:1,offset:.55},{transform:`translate(${x+dx}px,${y+dy+70}px) scale(.3) rotate(${Math.random()*360}deg)`,opacity:0}],{duration:d,easing:"cubic-bezier(.2,.7,.4,1)"}).onfinish=()=>e.remove(); } }
+function rollNums(root){ if(!magicOn()||!root) return;
+  root.querySelectorAll(".tm .mn,.num,.kmc .top b").forEach(el=>{ const n=[...el.childNodes].find(x=>x.nodeType===3&&x.data.trim()); if(!n) return;
+    const t=n.data.trim(), m=t.match(/^(−|-)?([\d\u202f\u00a0’' ]+)(?:,(\d+))?$/); if(!m) return;
+    const dec=m[3]?m[3].length:0, v=+(m[2].replace(/[^\d]/g,"")+(dec?"."+m[3]:""))*(m[1]?-1:1); if(!isFinite(v)||v===0) return;
+    const t0=performance.now(), D=650+Math.min(500,String(Math.round(Math.abs(v))).length*60);
+    const step=now=>{ const p=Math.min(1,(now-t0)/D), e=1-Math.pow(1-p,3); n.data=(v*e).toLocaleString("fr-CH",{minimumFractionDigits:dec,maximumFractionDigits:dec}); if(p<1) requestAnimationFrame(step); else n.data=t; };
+    requestAnimationFrame(step); }); }
+let BADGES=[];
+function checkBadges(){ try{ funCards(); }catch(e){ return; } const done=BADGES.filter(b=>b[3]>=b[4]).map(b=>b[1]);
+  let seen=null; try{ seen=JSON.parse(localStorage.getItem("sv-badges")||"null"); }catch(e){}
+  lsSet("sv-badges",JSON.stringify(done)); if(!Array.isArray(seen)) return; // première fois : on note sans fêter
+  const nw=BADGES.filter(b=>b[3]>=b[4]&&!seen.includes(b[1])); if(!nw.length) return; // au plus 2 en grand, les autres sont annoncés
+  const sh=nw.slice(0,2); if(nw.length>2){ sh[1]=sh[1].slice(); sh[1].more=nw.length-2; }
+  sh.forEach((b,k)=>setTimeout(()=>unlockShow(b),900+k*3000)); }
+function unlockShow(b){ const o=document.createElement("div"); o.className="unlock"; o.innerHTML=`<div><span class="ue">${b[0]}</span><span class="ut"><b>Succès débloqué : ${esc(b[1])}</b><small>${esc(b[2])}${b.more?` · et ${b.more} autre${b.more>1?"s":""} !`:""}</small></span></div>`;
+  document.body.appendChild(o); sparkle(46,innerWidth/2,innerHeight*.45,["#F5D04C","#FFE58A","#FFFFFF"]); setTimeout(()=>o.remove(),RM?2000:2900); }
+function skyNow(){ const H=document.documentElement, h=new Date().getHours()+new Date().getMinutes()/60, light=H.dataset.theme!=="fonce";
+  const S=h>=5&&h<8?["radial-gradient(120% 140% at 85% -20%,#FF9A76 0,#FFC48A 35%,transparent 70%)",.55]
+    :h>=8&&h<17?["radial-gradient(120% 140% at 85% -20%,#6EC3FF 0,#A9DCFF 35%,transparent 70%)",light?.45:.3]
+    :h>=17&&h<21?["radial-gradient(120% 140% at 85% -20%,#FF7A59 0,#B05CFF 40%,transparent 72%)",.5]
+    :["radial-gradient(1.5px 1.5px at 20% 30%,#fff,transparent),radial-gradient(1px 1px at 55% 15%,#fff,transparent),radial-gradient(1.5px 1.5px at 80% 45%,#fff,transparent),radial-gradient(1px 1px at 38% 60%,#fff,transparent),radial-gradient(120% 140% at 85% -20%,#3B4BFF 0,#1B1F5A 40%,transparent 72%)",light?.35:.6];
+  H.style.setProperty("--sky",S[0]); H.style.setProperty("--skyo",S[1]); }
+skyNow(); setInterval(skyNow,6e5);
+(function(){ let gx=0,gy=0,raf=0; // les tuiles flottent un peu quand on penche le téléphone
+  addEventListener("deviceorientation",e=>{ if(!magicOn()||e.gamma==null) return; gx=Math.max(-1,Math.min(1,e.gamma/25)); gy=Math.max(-1,Math.min(1,(e.beta-45)/25));
+    if(!raf) raf=requestAnimationFrame(()=>{ raf=0; const H=document.documentElement.style; H.setProperty("--gx",gx.toFixed(2)); H.setProperty("--gy",gy.toFixed(2)); }); },{passive:true}); })();
 
 // ---------- pavé numérique de l'app (repris de l'app de calcul d'atelier)
 let padPref = lsGet("sv-pad")==="off" ? "off" : "on";
