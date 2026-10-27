@@ -833,44 +833,47 @@ html:not([data-rail="b"]) nav.tabs .in{padding:14px 0 24px}
 .liq .lq{position:absolute;inset:0;transition:transform .35s ease-out}
 html[data-magic="on"] .liq .lq{transform:rotate(calc(var(--gx,0) * -12deg))}
 @keyframes slosh{0%,100%{rotate:0deg}15%{rotate:-14deg}38%{rotate:11deg}60%{rotate:-6deg}80%{rotate:2deg}}
-.liq .lq.slosh{animation:slosh 1.6s ease-in-out}
+.liq .lq.slosh{animation:slosh 2.2s ease-in-out}
 /* l'app « vivante » : un chiffre qui saute, une ligne qui frétille */
 @keyframes hop{0%,100%{translate:0 0;rotate:0deg;scale:1}28%{translate:0 -15px;rotate:-6deg;scale:1.08}52%{translate:0 2px;rotate:3deg;scale:.97}74%{translate:0 -4px;rotate:0deg;scale:1}}
-.hop{animation:hop .9s cubic-bezier(.3,1.4,.5,1)}
+.hop{animation:hop 1.4s cubic-bezier(.3,1.3,.5,1)}
 @keyframes wig{0%,100%{translate:0 0;rotate:0deg}20%{translate:11px 0;rotate:1deg}45%{translate:-9px 0;rotate:-1deg}70%{translate:4px 0}}
-.wig{animation:wig .65s ease-in-out}
+.wig{animation:wig 1.3s ease-in-out}
 @media (prefers-reduced-motion:reduce){ .hop,.wig,.liq .lq.slosh{animation:none} .liq .lq{transform:none!important} }
 
 /* bêtises : de petites farces, jamais bloquantes, le vrai chiffre revient toujours */
 .bbl{position:fixed;z-index:80;pointer-events:none;max-width:210px;padding:7px 11px;border-radius:14px;background:var(--fg);color:var(--bg);font:650 13px/1.25 var(--f-body);box-shadow:0 8px 24px rgba(0,0,0,.3);transform-origin:50% 100%;animation:bblIn 2.6s ease both}
 .bbl::after{content:"";position:absolute;left:var(--ax,50%);bottom:-6px;width:12px;height:12px;background:inherit;transform:translateX(-50%) rotate(45deg);border-radius:2px}
 .bbl.dn{transform-origin:50% 0}.bbl.dn::after{bottom:auto;top:-6px}
+.bbl{animation-duration:2.9s}
 @keyframes bblIn{0%{opacity:0;scale:.3}10%{opacity:1;scale:1.08}16%{scale:1}85%{opacity:1;scale:1}100%{opacity:0;scale:.85}}
 @keyframes nope{0%,100%{rotate:0deg}15%{rotate:-7deg}35%{rotate:7deg}55%{rotate:-5deg}75%{rotate:4deg}}
-.nope{animation:nope .9s ease-in-out}
+.nope{animation:nope 1.7s ease-in-out}
 @keyframes dodge{0%,100%{translate:0 0}30%{translate:-46px -10px;rotate:-14deg}60%{translate:-46px -10px;rotate:-14deg}}
-.dodge{animation:dodge 1.2s cubic-bezier(.3,1.4,.5,1)}
+.dodge{animation:dodge 2s cubic-bezier(.3,1.3,.5,1)}
 @keyframes wheelie{0%,100%{rotate:0deg}30%,65%{rotate:-18deg;translate:0 -3px}}
-.wheelie{animation:wheelie 1.3s ease-in-out;transform-origin:100% 100%}
+.wheelie{animation:wheelie 2s ease-in-out;transform-origin:100% 100%}
 @keyframes tilt{0%,100%{rotate:0deg}25%,80%{rotate:-4deg}}
 .tilt{animation:tilt 2.4s ease-in-out}
 @keyframes yawn{0%,100%{scale:1 1}30%{scale:1.04 .9}55%{scale:.97 1.08}75%{scale:1 1}}
-.yawn{animation:yawn 1.6s ease-in-out}
+.yawn{animation:yawn 2.3s ease-in-out}
 @keyframes bumpL{0%,100%{translate:0}35%{translate:9px 0;rotate:3deg}50%{translate:-5px 0}} @keyframes bumpR{0%,100%{translate:0}35%{translate:-9px 0;rotate:-3deg}50%{translate:5px 0}}
-.bumpL{animation:bumpL .9s ease-in-out}.bumpR{animation:bumpR .9s ease-in-out}
+.bumpL{animation:bumpL 1.6s ease-in-out}.bumpR{animation:bumpR 1.6s ease-in-out}
 @keyframes shy{0%,100%{opacity:1;translate:0}25%,70%{opacity:.08;translate:14px 0;scale:.8}}
-.shy{animation:shy 1.8s ease-in-out}
+.shy{animation:shy 2.3s ease-in-out}
 @keyframes nap{0%,100%{rotate:0deg;translate:0}30%,75%{rotate:1.6deg;translate:0 5px}}
 .nap{animation:nap 2.2s ease-in-out;transform-origin:0 50%}
 @keyframes stretch{0%,100%{scale:1 1}40%{scale:1 1.06}60%{scale:1 .97}}
-.stretch{animation:stretch 1.3s ease-in-out;transform-origin:50% 0}
+.stretch{animation:stretch 1.9s ease-in-out;transform-origin:50% 0}
 @keyframes flip{0%,100%{rotate:0deg}30%,70%{rotate:180deg}}
-.flip{animation:flip 1.7s cubic-bezier(.5,1.6,.5,1);display:inline-block}
+.flip{animation:flip 2.3s cubic-bezier(.45,1.4,.5,1);display:inline-block}
 @keyframes sulk{0%,100%{rotate:0 1 0 0deg}25%,75%{rotate:0 1 0 180deg}}
-.sulk{animation:sulk 1.9s ease-in-out;display:inline-block}
+.sulk{animation:sulk 2.4s ease-in-out;display:inline-block}
 @keyframes shiver{0%,100%{translate:0}10%,30%,50%,70%,90%{translate:-2px 0}20%,40%,60%,80%{translate:2px 0}}
-.shiver{animation:shiver .8s linear 2}
-.phares{animation:phares 1.4s ease}
+.shiver{animation:shiver 1s linear 2}
+@keyframes droop{0%,100%{scale:1 1}35%,55%{scale:1 .15}70%{scale:1 1.12}}
+.droop{animation:droop 2s cubic-bezier(.4,1.4,.5,1);transform-origin:50% 100%}
+.phares{animation:phares 2s ease}
 @keyframes phares{0%,100%{filter:none}20%,60%{filter:brightness(1.6)}40%,80%{filter:brightness(.8)}}
 .btoy{position:fixed;z-index:79;pointer-events:none;font-size:26px;line-height:1}
 @media (prefers-reduced-motion:reduce){ .nope,.dodge,.wheelie,.tilt,.yawn,.bumpL,.bumpR,.shy,.nap,.stretch,.flip,.sulk,.shiver,.phares{animation:none} }
@@ -997,7 +1000,6 @@ html[data-magic="on"] .liq .lq{transform:rotate(calc(var(--gx,0) * -12deg))}
       <div class="switch"><span>Magie <small class="muted">(étincelles, chiffres qui roulent, ciel, tuiles qui flottent)</small></span><span class="seg2" id="setMagic"><button type="button" data-x="on">Oui</button><button type="button" data-x="off">Non</button></span></div>
       <div class="switch"><span>Bêtises <small class="muted">(petites farces de l'app, par jour)</small></span><span class="seg2" id="setBet"><button type="button" data-x="0">Aucune</button><button type="button" data-x="1">1</button><button type="button" data-x="3">3</button><button type="button" data-x="5">5</button><button type="button" data-x="fete">Fête 🎉</button></span></div>
       <div class="switch"><span>Genre de bêtises</span><span class="seg2" id="setBetd"><button type="button" data-x="toutes">Toutes</button><button type="button" data-x="discretes">Discrètes seulement</button></span></div>
-      <div class="switch"><span>Voir les bêtises <small class="muted">(une à la fois, dans l'ordre)</small></span><button type="button" class="btn" id="betNow">✨ Montre-m'en une</button></div>
       <div class="switch"><span>Barre d'icônes</span><span class="seg2" id="setRail"><button type="button" data-x="g">À gauche</button><button type="button" data-x="d">À droite</button><button type="button" data-x="b">En bas</button></span></div>
       <div class="switch" id="riconsRow"><span>Icônes de la barre</span><span class="seg2" id="setRicons"><button type="button" data-x="h">En haut</button><button type="button" data-x="b">En bas</button></span></div>
       <div class="switch"><span>La barre</span><span class="seg2" id="setRhide"><button type="button" data-x="e">Épinglée</button><button type="button" data-x="c">Cachée</button></span></div>
@@ -2724,7 +2726,7 @@ function renderMore(){
 
 // ---------- Quoi de neuf : la version en grand, une carte par version ; s'ouvre une fois après chaque mise à jour
 const CHANGELOG=[
-  ["3.5","27.10.2026","Rattrapage et app vivante",["Plein : les km sont facultatifs et un km plus bas que le dernier est accepté (rattrapage), avec un nouveau choix « Je ne sais plus » à côté de complet et partiel","Entretien en deux : « Garage / mécanique » et « Fournitures et divers », chacun sa couleur dans le budget (le frais fixe devient « Parking / box »)","Frais fixes : une ligne par poste et par année, le cadre du haut « En cours » se calcule tout seul","Coût & trajet en sous-onglets (Budget, À prévoir, Coût au km, Trajet)","Plus de pages coupées : les gros blocs se coupent entre deux lignes","Graphiques par année à partir de l'année d'achat","Tuiles un peu plus grandes, écrou de la barre remonté","App vivante : le liquide des réservoirs penche avec le téléphone, et quand tu regardes sans toucher, un graphique se redessine, un chiffre saute ou une ligne frétille","30 bêtises : le chiffre têtu, le bouton + qui s'esquive, la tuile pas d'accord, le klaxon, la météo… Réglage dans Paramètres → Bêtises (Aucune, 1, 3, 5 par jour ou Fête), avec « Montre-m'en une »","Coût & trajet : un seul bouton avec ses 4 petites icônes, chaque toucher passe au sous-onglet suivant"]],
+  ["3.5","27.10.2026","Rattrapage et app vivante",["Plein : les km sont facultatifs et un km plus bas que le dernier est accepté (rattrapage), avec un nouveau choix « Je ne sais plus » à côté de complet et partiel","Entretien en deux : « Garage / mécanique » et « Fournitures et divers », chacun sa couleur dans le budget (le frais fixe devient « Parking / box »)","Frais fixes : une ligne par poste et par année, le cadre du haut « En cours » se calcule tout seul","Coût & trajet en sous-onglets (Budget, À prévoir, Coût au km, Trajet)","Plus de pages coupées : les gros blocs se coupent entre deux lignes","Graphiques par année à partir de l'année d'achat","Tuiles un peu plus grandes, écrou de la barre remonté","App vivante : le liquide des réservoirs penche avec le téléphone, et quand tu regardes sans toucher, un graphique se redessine, un chiffre saute ou une ligne frétille","30 bêtises : le chiffre têtu, le bouton + qui s'esquive, la tuile pas d'accord, le klaxon, la météo… Réglage dans Paramètres → Bêtises (Aucune, 1, 3, 5 par jour ou Fête). Elles prennent leur temps, et un toucher les arrête","Coût & trajet : un seul bouton avec ses 4 petites icônes, chaque toucher passe au sous-onglet suivant"]],
   ["3.4","27.10.2026","Onglet véhicule",["Chaque véhicule a les mêmes onglets au même endroit : Couples de serrage, Comparatif, Pneus et Notes (le Kangoo aussi, ses listes démarrent vides)","Nouvel onglet Notes : notes libres en texte (pressions des pneus, références, choses à retenir), épinglables en haut, avec recherche, gardées dans la sauvegarde Drive","Couples de serrage : plus de page vide, le tableau se coupe ligne par ligne d'une page à l'autre","Fiche technique retirée : réservoir, autonomie, prix et date d'achat se règlent une seule fois dans Paramètres → Véhicules","Mise à jour plus rapide : l'app vérifie s'il y a une nouvelle version quand tu la rouvres"]],
   ["3.3","27.10.2026","Budget 🐷",["Coût & trajet : un vrai coin Budget, par mois, par an et depuis le début (achat compris), pour ce véhicule ou pour tous","Moyenne sur 12 mois et sur tout l'historique, total de l'année, fin d'année estimée et comparaison avec l'an dernier","Graphique des 12 derniers mois avec la ligne de moyenne : touche une barre pour le détail du mois","Où va l'argent : carburant, entretien, pneus et frais fixes, par an et par mois","À prévoir : les frais des 12 prochains mois (assurance, impôt, vignette, entretien, changement de pneus, prochain plein), totaux à 30 jours, 3 mois et 12 mois, et combien mettre de côté chaque mois","Bon à savoir : coût par jour, mois le plus cher, station la moins chère et ce qu'elle t'aurait fait économiser, frais fixes à renouveler"]],
   ["3.2","27.10.2026","Un peu de magie ✨",["Poussière d'étoiles quand tu enregistres un plein, bien plus forte si tu bats ton record de conso","Les grands chiffres des tuiles roulent comme un compteur à l'ouverture","Succès débloqué : le badge apparaît au milieu de l'écran avec un éclat doré","Ciel du moment : l'en-tête prend la teinte de l'aube, du jour, du crépuscule ou de la nuit (avec des étoiles)","Nouveau thème « Grimoire » : parchemin, encre brune et filets dorés","Les tuiles flottent un tout petit peu quand tu penches le téléphone","Paramètres → Magie : Oui / Non pour tout couper d'un coup"]],
@@ -3359,17 +3361,18 @@ if(touchMQ&&touchMQ.addEventListener) touchMQ.addEventListener("change",applyPad
 
 
 // ---------- 🧚 bêtises : 30 petites farces de l'app (Paramètres → Bêtises), coupées par Magie. Jamais bloquantes : le vrai chiffre revient toujours.
+const STOPS=[]; // ce qu'il faut remettre en place si on touche l'écran pendant une bêtise
 const BETISE=(function(){
   const vis=el=>{ if(!el) return false; const r=el.getBoundingClientRect(); return r.width>0&&r.height>0&&r.top>=(PG.top||0)-2&&r.bottom<=innerHeight+2; };
   const seen=el=>{ if(!el) return false; const r=el.getBoundingClientRect(); return r.width>0&&r.height>0&&r.bottom>0&&r.top<innerHeight; }; // en-tête et barre : juste à l'écran
-  const fx=(el,c,d)=>{ el.classList.remove(c); void el.offsetWidth; el.classList.add(c); setTimeout(()=>el.classList.remove(c),d||2600); return 1; };
+  const fx=(el,c,d)=>{ el.classList.remove(c); void el.offsetWidth; el.classList.add(c); setTimeout(()=>el.classList.remove(c),d||3200); return 1; };
   const pick=a=>a[Math.floor(Math.random()*a.length)];
   const one=s=>pick([...document.querySelectorAll(s)].filter(vis));
   const hr=()=>{ const d=new Date(); return d.getHours()+d.getMinutes()/60; }, dow=()=>new Date().getDay(), mon=()=>new Date().getMonth();
   function bub(el,txt){ if(!el) return 0; const r=el.getBoundingClientRect(), b=document.createElement("div"); b.className="bbl"; b.textContent=txt; document.body.appendChild(b);
     const w=b.offsetWidth, hh=b.offsetHeight, cx=r.left+r.width/2, x=Math.max(8,Math.min(innerWidth-w-8,cx-w/2)); let y=r.top-hh-10;
     if(y<(PG.top||0)+4){ y=r.bottom+10; b.classList.add("dn"); } b.style.left=x+"px"; b.style.top=y+"px"; b.style.setProperty("--ax",Math.max(14,Math.min(w-14,cx-x))+"px");
-    setTimeout(()=>b.remove(),2700); return 1; }
+    setTimeout(()=>b.remove(),2900); return 1; }
   function toy(txt,from,to,d,rot){ const e=document.createElement("span"); e.className="btoy"; e.textContent=txt; document.body.appendChild(e);
     e.animate([{transform:`translate(${from[0]}px,${from[1]}px) rotate(0deg)`,opacity:1},{transform:`translate(${to[0]}px,${to[1]}px) rotate(${rot||0}deg)`,opacity:to[2]??1}],{duration:d,easing:"ease-in-out"}).onfinish=()=>e.remove(); return 1; }
   const num=()=>one(".tm .mn,.kmc .top b,.bkpi b,.byr b");
@@ -3378,7 +3381,7 @@ const BETISE=(function(){
   const vbtn=()=>{ const b=document.querySelector('#vtog [aria-pressed="true"]')||document.querySelector("#vtog button"); return seen(b)?b:null; };
   // [nom, discrète, quand (null = toujours), farce]
   const L=[
-    ["Le chiffre têtu",0,null,()=>{ const n=num(), t=txtNode(n); if(!t) return 0; if(n.dataset.tetu) return 0; const old=t.data; n.dataset.tetu=1; t.data=pick(["9 999","42","∞","???"]); fx(n,"hop"); setTimeout(()=>{ t.data=old; delete n.dataset.tetu; bub(n,"hum… pardon 😳"); },1300); return 1; }],
+    ["Le chiffre têtu",0,null,()=>{ const n=num(), t=txtNode(n); if(!t) return 0; if(n.dataset.tetu) return 0; const old=t.data; n.dataset.tetu=1; t.data=pick(["9 999","42","∞","???"]); fx(n,"hop"); const back=()=>{ if(!n.dataset.tetu) return; t.data=old; delete n.dataset.tetu; }; STOPS.push(back); setTimeout(()=>{ if(n.dataset.tetu){ back(); bub(n,"hum… pardon 😳"); } },2000); return 1; }],
     ["Le bouton + qui s'esquive",0,null,()=>{ const f=$("#fab"); if(!seen(f)) return 0; fx(f,"dodge"); return bub(f,"attrape-moi !"); }],
     ["La tuile pas d'accord",0,null,()=>{ const e=tile(); if(!e) return 0; fx(e,"nope"); return bub(e,pick(["Non.","Pas d'accord 🙅","Même pas en rêve"])); }],
     ["Le réservoir qui a soif",0,null,()=>{ const l=one(".liq .lq"); if(!l) return 0; fx(l,"slosh"); return bub(l.parentNode,"glou glou… 🥤"); }],
@@ -3392,7 +3395,8 @@ const BETISE=(function(){
     ["La faim de midi",0,()=>hr()>=11.5&&hr()<13.5,()=>{ const e=tile(); if(!e) return 0; return bub(e,"Une pause croissant ? 🥐"); }],
     ["Les tuiles qui se chamaillent",1,null,()=>{ const a=[...document.querySelectorAll(".dash .tu")].filter(vis); for(let i=0;i+1<a.length;i++){ const r1=a[i].getBoundingClientRect(), r2=a[i+1].getBoundingClientRect(); if(Math.abs(r1.top-r2.top)<4){ fx(a[i],"bumpL"); return fx(a[i+1],"bumpR"); } } return 0; }],
     ["Le chiffre timide",1,null,()=>{ const n=num(); if(!n) return 0; return fx(n,"shy"); }],
-    ["Le graphique farceur",1,null,()=>{ const c=Object.values(charts).find(c=>c&&c.canvas&&c.canvas.isConnected&&vis(c.canvas)); if(!c) return 0; try{ c.hide(0); setTimeout(()=>{ try{ c.show(0); }catch(e){} },900); }catch(e){ return 0; } return 1; }],
+    ["Le graphique farceur",1,null,()=>{ const c=Object.values(charts).find(c=>{ if(!c||!c.canvas||!c.canvas.isConnected) return false; const r=c.canvas.getBoundingClientRect(); return r.height>0&&r.top>=(PG.top||0)-2&&r.top<innerHeight-120; });
+      if(!c){ const bars=[...document.querySelectorAll(".bb")].filter(vis); if(!bars.length) return 0; const a=pick(bars); fx(a,"droop"); return 1; } /* une barre fait semblant de tomber */ try{ c.hide(0); const back=()=>{ try{ c.show(0); }catch(e){} }; STOPS.push(back); setTimeout(back,1600); }catch(e){ return 0; } return 1; }],
     ["Le compteur qui s'emballe",1,null,()=>{ const e=one(".dash .tu"); if(!e) return 0; rollNums(e); return 1; }],
     ["La pompe impatiente",0,null,()=>{ const f=$("#fab"); if(!seen(f)) return 0; fx(f,"wig"); return bub(f,"⛽ un plein ?"); }],
     ["La ligne qui fait la sieste",1,null,()=>{ const r=one("#histList .row,.prow,.pit,.tip,.note,.tbl tr:not(:first-child)"); if(!r) return 0; return fx(r,"nap"); }],
@@ -3410,6 +3414,10 @@ const BETISE=(function(){
     ["Le chiffre qui boude",0,null,()=>{ const n=num(); if(!n) return 0; fx(n,"sulk"); return bub(n,"hmpf 😤"); }],
     ["Le coucou",0,null,()=>{ const b=pick([...document.querySelectorAll("nav.tabs .in>button:not([aria-current])")].filter(seen)); if(!b) return 0; fx(b,"hop"); return bub(b,"coucou 👋"); }]
   ];
+  const FXC=["droop","hop","wig","nope","dodge","wheelie","tilt","yawn","bumpL","bumpR","shy","nap","stretch","flip","sulk","shiver","phares","slosh"];
+  function stop(){ STOPS.splice(0).forEach(f=>{ try{ f(); }catch(e){} }); document.querySelectorAll(".bbl,.btoy").forEach(e=>e.remove());
+    document.querySelectorAll(FXC.map(c=>"."+c).join(",")).forEach(e=>e.classList.remove(...FXC)); }
+  addEventListener("pointerdown",stop,{capture:true,passive:true});
   const setting=()=>lsGet("sv-bet")||"3", discOnly=()=>lsGet("sv-betd")==="discretes";
   const today=()=>new Date().toISOString().slice(0,10);
   let last=0, recent=[];
@@ -3426,7 +3434,7 @@ const BETISE=(function(){
     let k=+(lsGet("sv-betk")||0)||0; const isOk=i=>!L[i][2]||L[i][2]();
     const done=i=>{ lsSet("sv-betk",String((i+1)%L.length)); setTimeout(()=>toast(`Bêtise ${i+1}/30 : ${L[i][0]}${isOk(i)?"":" (d'habitude seulement au bon moment)"}`),900); };
     if(!magicOn()){ toast("Allume d'abord la Magie (Oui)."); return; }
-    const pages=["home","stats","hist"], i=k%L.length; let p=0;
+    const pages=[...new Set([curView==="more"?"home":curView,"home","stats","hist","cost"])], i=k%L.length; let p=0;
     const step=()=>{ if(p>=pages.length){ k=i+1; lsSet("sv-betk",String(k%L.length)); toast(`Bêtise ${i+1}/30 : ${L[i][0]} (rien à faire ici)`); return; }
       const v=pages[p++]; if(curView!==v) go(v); setTimeout(()=>{ if(play(i)) done(i); else step(); },800); };
     step(); }
@@ -3434,9 +3442,10 @@ const BETISE=(function(){
 })();
 function renderBet(){ [["#setBet","sv-bet","3"],["#setBetd","sv-betd","toutes"]].forEach(([id,key,d])=>{ const el=$(id); if(!el) return;
   el.querySelectorAll("button").forEach(b=>{ b.setAttribute("aria-pressed",(lsGet(key)||d)===b.dataset.x); b.onclick=()=>{ lsSet(key,b.dataset.x); renderBet(); }; }); });
-  const n=$("#betNow"); if(n) n.onclick=()=>BETISE.show(); }
+}
 { const ra=renderAff; renderAff=function(){ ra(); renderBet(); }; }
 renderBet();
+/*TEST-BETISES*/
 // ---------- l'app « vivante » : quand on regarde sans toucher, un petit quelque chose bouge (coupé par le réglage Magie)
 (function(){ let tm=0; const arm=()=>{ clearTimeout(tm); tm=setTimeout(wake,6500+Math.random()*7000); };
   const vis=el=>{ const r=el.getBoundingClientRect(); return r.width>0&&r.height>0&&r.top>=(PG.top||0)-2&&r.bottom<=innerHeight+2; };
