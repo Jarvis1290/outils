@@ -721,6 +721,48 @@ nav.tabs .in>button[aria-current="page"]{background:transparent!important;box-sh
 .bud .liq.bar{height:58px;border-radius:16px;margin-top:10px}
 .bud .liq.bar>span{font-size:13px}
 .bud .liq.bar>span b{font-size:16px;white-space:nowrap}
+.bhd{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.bhd .hd2{margin:0}
+.bkpi{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+.bkpi>div{background:var(--ink);border:1px solid var(--line);border-radius:12px;padding:8px 8px;min-width:0}
+.bkpi small{display:block;font-size:11px;color:var(--fg-3)}
+.bkpi b{display:block;font-family:var(--f-num);font-size:clamp(15px,4.6vw,21px);font-weight:700;color:var(--volt-hi);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bkpi span{display:block;font-size:10.5px;color:var(--fg-2);line-height:1.25}
+.bline{font-size:12.5px;color:var(--fg-2);margin-top:10px;line-height:1.45}
+.byr{display:flex;gap:8px 18px;flex-wrap:wrap;margin-top:10px;font-size:13.5px}
+.byr small{display:block;font-size:11px;color:var(--fg-3)}
+.byr b{font-family:var(--f-num)}
+.bch{position:relative;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:4px;height:124px;margin-top:22px;align-items:stretch}
+.bb{display:flex;flex-direction:column;justify-content:flex-end;gap:3px;background:none;border:0;padding:0;cursor:pointer;color:var(--fg-3);min-width:0;font:inherit}
+.bb .bs{flex:1;display:flex;flex-direction:column;justify-content:flex-end;border-radius:5px 5px 2px 2px;overflow:hidden;transition:box-shadow .2s}
+.bb .bs i{display:block;flex:none;min-height:1px}
+.bb small{font-size:9px;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-align:center;height:14px;line-height:14px}
+.bb.cur .bs{opacity:.55}
+.bb[aria-pressed="true"] .bs{box-shadow:0 0 0 2px var(--volt-hi)}
+.bb[aria-pressed="true"] small{color:var(--fg);font-weight:700}
+.bavg{position:absolute;left:0;right:0;bottom:calc(17px + (100% - 17px) * var(--avgf));border-top:1.5px dashed var(--fg-3);pointer-events:none;z-index:1}
+.bavg span{position:absolute;right:0;bottom:2px;font-size:10px;color:var(--fg-2);background:var(--ink);padding:0 4px;border-radius:4px}
+.bdet{font-size:12.5px;margin-top:8px;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center}
+.bsplit{margin-top:8px}
+.pit{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.pit:last-child{border:0}
+.pd{display:flex;flex-direction:column;align-items:center;background:var(--ink);border:1px solid var(--line);border-radius:10px;padding:4px 0;line-height:1.15}
+.pd b{font-family:var(--f-num);font-size:16px}
+.pd small{font-size:10px;color:var(--fg-3)}
+.pit.late .pd{border-color:var(--warn);color:var(--warn)}
+.pit.late .pd small{color:var(--warn)}
+.pit.info{opacity:.72}
+.pt{display:flex;gap:8px;align-items:center;min-width:0}
+.pt>span:last-child{min-width:0}
+.pt b{display:block;font-size:13.5px;font-weight:600}
+.pt em{font-style:normal;color:var(--fg-3);font-weight:500;font-size:12px}
+.pt small{display:block;font-size:11.5px;color:var(--fg-3);line-height:1.3}
+.pm{font-family:var(--f-num);font-weight:600;font-size:13.5px;white-space:nowrap}
+.plist{margin-top:6px}
+.bsave{display:flex;gap:10px;align-items:center;margin-top:12px;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,#FF7AA8 12%,transparent);border:1px solid color-mix(in srgb,#FF7AA8 35%,transparent);font-size:13px;line-height:1.4}
+.tip{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px;line-height:1.45}
+.tip:last-child{border:0}
+.tip .ico{margin-top:1px}
 .badge2 .bi.liq{filter:none;opacity:1}
 .badge2 .bi.liq .w{opacity:.55} .badge2 .bi.liq .w2{opacity:.3}
 .badge2 .bi.liq>span{position:relative;z-index:2;filter:grayscale(.6)}
@@ -916,6 +958,8 @@ html[data-magic="on"] .dash .tw:nth-child(2n) .tu{transform:translate(calc(var(-
   <!-- COÛT & TRAJET (par véhicule) -->
   <section class="view" id="v-cost" hidden>
     <div class="card bud" id="budCard" hidden></div>
+    <div class="card bplan" id="planCard" hidden></div>
+    <div class="card btips" id="tipCard" hidden></div>
     <div class="card kmc" id="costCard"></div>
     <div class="h2" id="tripTitle">Combien coûte un trajet</div>
     <div class="card" id="tripCard">
@@ -1237,7 +1281,7 @@ const THEME = { // v1.8 : même fond foncé pour tous, un accent par véhicule
   k:{txt:"#B3B8C2",grid:"rgba(255,255,255,.06)",tipBg:"#20242B",tipFg:"#EEF0F4",tipBd:"#E5484D",track:"#262A32",needle:"#EEF0F4",muted:"#8B92A0",bad:"#FF9F43",warn:"#F5D04C",acc:"#E5484D",fg:"#EEF0F4"}};
 let MODE=0; try{ const m=+localStorage.getItem("sv-mode"); if(m>0) MODE=m; }catch(e){}
 let T=THEME.k;
-const APP_VERSION="3.2";
+const APP_VERSION="3.3";
 const KEY="suivi-vehicules-v1";
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}}, lsSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 let STATE={fills:[],tyres:[],ent:[],rates:{},range:[925,350],tank:[60,20],buy:[3500,10000],fixed:[{},{}],trip:null};
@@ -1860,17 +1904,111 @@ const TRIP0={v:0,km:100,pe:0,peOn:false,chk:{carb:true,ent:true,pneu:true,ass:tr
 function trip(){ if(!STATE.trip) STATE.trip=JSON.parse(JSON.stringify(TRIP0)); STATE.trip.chk=Object.assign({},TRIP0.chk,STATE.trip.chk); return STATE.trip; }
 function tripSum(v,k){ const t=trip(), c=costs(v); if(!c) return null; let sum=0;
   POSTES.forEach(p=>{ const x=c.r[p[0]]; if(t.chk[p[0]]&&x!=null) sum+=x*k; }); if(t.peOn&&t.pe>0) sum+=t.pe; return {sum,c}; }
-function monthSpend(v){ // CHF dépensés par mois (carburant + entretien et pneus ; pas les frais fixes annuels)
-  const m={}; A.per[v].forEach(f=>{ if(f.P>0){ const k=f.d.slice(0,7); m[k]=(m[k]||0)+f.P; } });
-  STATE.ent.forEach(e=>{ if(e.v===v&&e.d&&e.k!=="F"&&+e.m>0){ const k=e.d.slice(0,7); m[k]=(m[k]||0)+(+e.m); } }); return m; }
-function renderBudget(){ const box=$("#budCard"), v=MODE, m=monthSpend(v), now=dOf(TODAY).slice(0,7);
-  const past=Object.keys(m).filter(k=>k<now).sort().slice(-12);
-  if(past.length<2){ box.hidden=true; return; } box.hidden=false;
-  const first=past[0], [y0,m0]=first.split("-").map(Number), [y1,m1]=now.split("-").map(Number), nM=Math.min(12,(y1-y0)*12+(m1-m0));
-  const avg=past.reduce((t,k)=>t+m[k],0)/Math.max(1,nM), cur=m[now]||0, f=avg>0?cur/avg:0, col=f>=1?T.bad:f>=.85?T.warn:V[v].c;
-  box.innerHTML=`<div class="hd2">${ic("drop","#4FA8FF")} Budget du mois · ${esc(V[v].n)}</div>
-    ${liquid(Math.min(1,f),col,"bar",`<span><span>${MOIS[+now.slice(5)-1]} : ${f>=1?"au-dessus de ta moyenne":f>=.85?"proche de ta moyenne":"sous ta moyenne"}</span><b>${fmt(cur)} / ${fmt(avg)} CHF</b></span>`)}
-    <div class="cap">Carburant, entretien et pneus de ce mois, comparés à ta moyenne par mois sur les 12 derniers mois (sans les frais fixes annuels).</div>`; }
+// ---------- 🐷 budget : par mois, par an, depuis le début, frais à prévoir et conseils (onglet « Coût & trajet »)
+const BCAT=[["carb","gas-pump","Carburant","#4FA8FF"],["ent","wrench","Entretien","#F5A623"],["pneu","tire","Pneus","#A58CFF"],["fixe","shield-check","Frais fixes","#3DD39B"]];
+const MJ=365.25/12, mKey=n=>dOf(n).slice(0,7), mNext=k=>{ let [y,m]=k.split("-").map(Number); if(++m>12){ m=1; y++; } return `${y}-${String(m).padStart(2,"0")}`; };
+const mName=k=>`${MOIS[+k.slice(5)-1]} ${k.slice(0,4)}`;
+function vStart(v){ // début du suivi : premier plein ou premier frais noté (pas l'achat, sinon les moyennes compteraient des années vides)
+  const d=[...A.per[v].map(f=>f.d),...STATE.ent.filter(e=>e.v===v&&e.d&&e.k!=="F").map(e=>e.d)].sort()[0]; return d?day(d):null; }
+function spendIn(v,a,b){ // CHF par poste entre les jours a (inclus) et b (exclu) ; les frais fixes annuels sont lissés jour par jour
+  const o={carb:0,ent:0,pneu:0,fixe:0}, s=vStart(v); if(s==null) return o; a=Math.max(a,s); if(b<=a) return o;
+  A.per[v].forEach(f=>{ const d=day(f.d); if(f.P>0&&d>=a&&d<b) o.carb+=f.P; });
+  STATE.ent.forEach(e=>{ if(e.v!==v||!e.d||e.k==="F"||!(+e.m>0)) return; const d=day(e.d); if(d>=a&&d<b) o[isTyre(e)?"pneu":"ent"]+=+e.m; });
+  FIXES.forEach(k=>o.fixe+=fixAccum(v,k,a,b)); return o; }
+function spendAll(vs,a,b){ const o={carb:0,ent:0,pneu:0,fixe:0}; vs.forEach(v=>{ const x=spendIn(v,a,b); BCAT.forEach(c=>o[c[0]]+=x[c[0]]); }); o.t=o.carb+o.ent+o.pneu+o.fixe; return o; }
+const budAll=()=>lsGet("sv-bud")==="t"&&V.length>1;
+const budVs=()=>budAll()?V.map((_,i)=>i).filter(i=>vStart(i)!=null):[MODE];
+function budget(vs){
+  const st=Math.min(...vs.map(vStart).filter(x=>x!=null)); if(!isFinite(st)||TODAY-st<45) return null;
+  const T1=TODAY+1, now=mKey(TODAY), y=+now.slice(0,4), md=dOf(TODAY).slice(4), r={st,vs};
+  r.all=spendAll(vs,st,T1); r.allD=T1-st; r.allM=r.all.t/r.allD*MJ;
+  const a12=Math.max(st,T1-365); r.l12=spendAll(vs,a12,T1); r.d12=T1-a12; r.m12=r.l12.t/r.d12*MJ; r.y12=r.m12*12; r.day=r.l12.t/r.d12;
+  r.buy=vs.reduce((t,v)=>t+(+STATE.buy[v]||0),0); r.tot=r.all.t+r.buy;
+  const j1=day(`${y}-01-01`), j0=day(`${y-1}-01-01`), same=day(`${y-1}${md}`)+1;
+  r.ytd=spendAll(vs,j1,T1); r.hasPrev=st<=j0+20;
+  if(r.hasPrev){ r.prevSame=spendAll(vs,j0,same); r.prevYear=spendAll(vs,j0,j1); r.proj=r.ytd.t+spendAll(vs,same,j1).t; }
+  else r.proj=r.ytd.t+r.day*(day(`${y+1}-01-01`)-T1);
+  r.months=[]; for(let k=mKey(Math.max(st,T1-400)),n=0;k<=now&&n<40;k=mNext(k),n++){ const a=day(k+"-01"), b=k===now?T1:day(mNext(k)+"-01"); r.months.push({k,cur:k===now,...spendAll(vs,a,b)}); }
+  r.months=r.months.slice(-12);
+  const full=r.months.filter(m=>!m.cur), vari=m=>m.carb+m.ent+m.pneu, cm=r.months[r.months.length-1];
+  r.curVar=vari(cm); r.avgVar=full.length?full.reduce((t,m)=>t+vari(m),0)/full.length:0; r.full=full;
+  return r; }
+function planItems(v){ // ce qui va tomber dans les 12 prochains mois pour un véhicule
+  const L=[], H=TODAY+365, avg=a=>a.reduce((t,e)=>t+(+e.m),0)/a.length, lat=fixLatest(v);
+  Object.keys(lat).forEach(k=>{ const e=lat[k]; let n=day(e.d)+365; const late=n<TODAY-7; if(late) n=TODAY;
+    L.push({v,d:n,late,t:FXN[k]||"Frais fixe",s:late?`payé le ${dfr(e.d)} : renouvelé ? Note-le dans le Journal`:`comme l'an dernier (${dfr(e.d)})`,m:+e.m,i:(FXI[k]||FXI.aut)[0],c:(FXI[k]||FXI.aut)[1],k:"fixe"}); });
+  const E=STATE.ent.filter(e=>e.v===v&&e.d&&e.k!=="F"&&!isTyre(e)&&+e.m>0).sort((a,b)=>a.d.localeCompare(b.d));
+  if(E.length){ const gap=E.length>1?Math.max(120,Math.min(730,(day(E[E.length-1].d)-day(E[0].d))/(E.length-1))):365, m=avg(E.slice(-3));
+    let n=day(E[E.length-1].d)+Math.round(gap), late=false; if(n<TODAY){ n=TODAY; late=true; }
+    for(let i=0;n<=H&&i<4;i++,n+=Math.round(gap)) L.push({v,d:n,late:late&&!i,t:"Entretien",s:E.length>1?`environ tous les ${fmt(gap/MJ)} mois, d'après ton journal`:`environ 1 an après le dernier (${dfr(E[E.length-1].d)})`,m,i:"wrench",c:"#F5A623",k:"ent",est:true}); }
+  if(V[v].tyre==="HE"){ const y=+dOf(TODAY).slice(0,4), last=STATE.tyres.filter(x=>x.v===v).sort((a,b)=>a.d.localeCompare(b.d)).pop();
+    const onW=last?tyreType(last)==="H":(TODAY<day(`${y}-04-01`)||TODAY>=day(`${y}-10-15`)); // sans changement noté : saison du moment
+    const n=onW?day(`${TODAY<day(`${y}-04-01`)?y:y+1}-04-01`):Math.max(TODAY,day(`${y}-10-15`)), P=STATE.ent.filter(e=>e.v===v&&isTyre(e)&&/mont|chang|permut|stock/i.test(e.t||"")&&+e.m>0);
+    if(n<=H) L.push({v,d:n,late:n<=TODAY,t:onW?"Pneus d'été":"Pneus d'hiver",s:n<=TODAY?"c'est la saison : pense au changement":onW?"changement au printemps (vers Pâques)":"changement d'automne (d'octobre à Pâques)",m:P.length?avg(P.slice(-2)):null,i:"tire",c:"#A58CFF",k:"pneu",est:true}); }
+  const p=predict(v), F=A.per[v].filter(f=>f.P>0).slice(-6);
+  if(p&&p.due!=null&&F.length) L.push({v,d:Math.max(TODAY,p.due),t:"Prochain plein",s:"compris dans le carburant par mois",m:avg(F.map(f=>({m:f.P}))),i:"gas-pump",c:"#4FA8FF",k:"carb",est:true,info:true});
+  return L.filter(x=>x.d<=H); }
+function stationTip(vs){ // économie si tous les pleins des 12 derniers mois avaient été faits à la station la moins chère
+  let save=0, best=null; vs.forEach(v=>{ if(!hasFuel(v)) return; const l=A.per[v].filter(f=>f.Pok&&f.st&&TODAY-day(f.d)<=365); if(l.length<4) return;
+    const g={}; l.forEach(f=>{ const k=f.st; (g[k]=g[k]||{P:0,L:0,n:0}); g[k].P+=f.P; g[k].L+=f.L; g[k].n++; });
+    const ok=Object.keys(g).filter(k=>g[k].n>=2).map(k=>[k,g[k].P/g[k].L]).sort((a,b)=>a[1]-b[1]); if(ok.length<2) return;
+    const PL=l.reduce((t,f)=>t+f.P,0), LL=l.reduce((t,f)=>t+f.L,0), s=PL-ok[0][1]*LL; save+=s; if(!best||s>best.s) best={st:ok[0][0],pl:ok[0][1],s,v}; });
+  return best&&save>=15?{...best,save}:null; }
+function budTips(B,items){
+  const out=[], vs=B.vs, cat=B.l12, tot=cat.t||1, nm=vs.length>1?"Tes véhicules te coûtent":`${esc(V[vs[0]].nl||V[vs[0]].n)} te coûte`;
+  out.push(["coins","#E8C062",`${nm} environ <b>${fmt(B.day,2)} CHF par jour</b>, tout compris sauf l'achat (≈ ${fmt(B.day/4.5,1)} café${B.day/4.5>=2?"s":""} ☕ par jour).`]);
+  const late=items.filter(x=>x.late&&x.k==="fixe");
+  if(late.length) out.push(["warning",T.warn,`${late.map(x=>esc(x.t)+(vs.length>1?` (${esc(V[x.v].n)})`:"")).join(", ")} : pas de nouveau paiement noté depuis plus d'un an. Note-${late.length>1?"les":"le"} dans le Journal (Frais fixes) pour garder des prévisions justes.`]);
+  if(B.hasPrev&&B.prevSame.t>0){ const d=B.ytd.t/B.prevSame.t-1, up=d>0;
+    out.push([up?"trend-up":"trend-down",up?T.bad:"#3DD39B",Math.abs(d)<.03?`Cette année, tu dépenses <b>autant</b> que l'an dernier à la même date.`:`Cette année : <b>${up?"+":"−"}${fmt(Math.abs(d)*100)} %</b> par rapport à l'an dernier à la même date (${fmt(B.ytd.t)} contre ${fmt(B.prevSame.t)} CHF).`]); }
+  const big=B.full.slice().sort((a,b)=>b.t-a.t)[0];
+  if(big&&B.full.length>=3){ const c=BCAT.filter(c=>c[0]!=="fixe").sort((a,b)=>(big[b[0]]-B.full.reduce((t,m)=>t+m[b[0]],0)/B.full.length)-(big[a[0]]-B.full.reduce((t,m)=>t+m[a[0]],0)/B.full.length))[0];
+    out.push(["chart-bar","#4FA8FF",`Mois le plus cher : <b>${mName(big.k)}</b> avec ${fmt(big.t)} CHF, surtout à cause ${c[0]==="carb"?"du carburant":c[0]==="ent"?"de l'entretien":"des pneus"}.`]); }
+  const s=stationTip(vs);
+  if(s) out.push(["gas-pump","#3DD39B",`En faisant tes pleins chez <b>${esc(s.st)}</b> (${fmt(s.pl,2)} CHF/L en moyenne), tu aurais économisé environ <b>${fmt(s.save)} CHF</b> sur 12 mois.`]);
+  else if(cat.carb/tot>.5) out.push(["gas-pump","#4FA8FF",`Le carburant fait <b>${fmt(cat.carb/tot*100)} %</b> de tes frais : c'est là que se joue ton budget.`]);
+  if(vs.length>1){ const per=vs.map(v=>[v,spendIn(v,Math.max(B.st,TODAY+1-365),TODAY+1)]).map(([v,o])=>[v,o.carb+o.ent+o.pneu+o.fixe]).sort((a,b)=>b[1]-a[1]);
+    if(per.length>1&&per[1][1]>0) out.push(["scales","#E8C062",`${esc(V[per[0][0]].n)} coûte <b>${fmt(per[0][1]/per[1][1],1)} ×</b> plus que ${esc(V[per[1][0]].n)} (${fmt(per[0][1]/12)} contre ${fmt(per[1][1]/12)} CHF par mois).`]); }
+  return out.slice(0,6); }
+let budSel=null; // mois touché dans le graphique
+function renderBudget(){
+  const box=$("#budCard"), pc=$("#planCard"), tc=$("#tipCard"), vs=budVs(), B=budget(vs), all=budAll(), who=all?"Tous les véhicules":esc(V[MODE].n);
+  const tog=V.length>1?`<span class="seg2" id="budTog"><button type="button" data-x="v" aria-pressed="${!all}">${esc(V[MODE].n)}</button><button type="button" data-x="t" aria-pressed="${all}">Tous</button></span>`:"";
+  if(!B){ box.hidden=false; pc.hidden=tc.hidden=true;
+    box.innerHTML=`<div class="bhd"><div class="hd2">${ic("piggy-bank","#FF7AA8")} Budget</div>${tog}</div><div class="muted">Il faut au moins un mois et demi de pleins ou de frais notés pour calculer un budget.</div>`; budBind(); return; }
+  box.hidden=pc.hidden=tc.hidden=false;
+  const f=B.avgVar>0?B.curVar/B.avgVar:0, col=f>=1?T.bad:f>=.85?T.warn:all?"#4FA8FF":V[MODE].c, now=mKey(TODAY);
+  const mx=Math.max(1,...B.months.map(m=>m.t)), avgH=Math.min(100,B.m12/mx*100);
+  if(!B.months.some(m=>m.k===budSel)) budSel=null;
+  const bars=B.months.map(m=>`<button type="button" class="bb${m.cur?" cur":""}" data-k="${m.k}" aria-pressed="${m.k===budSel}" aria-label="${mName(m.k)} : ${fmt(m.t)} CHF"><span class="bs">${BCAT.map(c=>m[c[0]]>0?`<i style="height:${(m[c[0]]/mx*100).toFixed(1)}%;background:${c[3]}"></i>`:"").reverse().join("")}</span><small>${["janv","févr","mars","avr","mai","juin","juil","août","sept","oct","nov","déc"][+m.k.slice(5)-1]}</small></button>`).join("");
+  box.innerHTML=`<div class="bhd"><div class="hd2">${ic("piggy-bank","#FF7AA8")} Budget · ${who}</div>${tog}</div>
+    ${liquid(Math.min(1,f),col,"bar",`<span><span>${MOIS[+now.slice(5)-1]} : ${f>=1?"au-dessus de ta moyenne":f>=.85?"proche de ta moyenne":"sous ta moyenne"}</span><b>${fmt(B.curVar)} / ${fmt(B.avgVar)} CHF</b></span>`)}
+    <div class="bkpi"><div><small>Par mois</small><b class="num">${fmt(B.m12)}</b><span>CHF · ${B.d12>=360?"sur 12 mois":"depuis le début"}</span></div>
+      <div><small>Par an</small><b class="num">${fmt(B.y12)}</b><span>CHF · rythme actuel</span></div>
+      <div><small>Au total</small><b class="num">${fmt(B.tot)}</b><span>CHF${B.buy>0?" · achat compris":""}</span></div></div>
+    <div class="bline">${ic("sparkle","#A58CFF")} Moyenne sur tout l'historique (${fmt(B.allD/MJ)} mois) : <b>${fmt(B.allM)} CHF / mois</b>${Math.abs(B.allM/B.m12-1)>.05?` <span class="muted">(${B.allM>B.m12?"tu dépenses moins qu'avant":"tu dépenses plus qu'avant"})</span>`:""}</div>
+    <div class="byr"><div><small>${dOf(TODAY).slice(0,4)} jusqu'ici</small><b>${fmt(B.ytd.t)} CHF</b></div><div><small>Fin d'année (estimé)</small><b>≈ ${fmt(B.proj)} CHF</b></div>${B.hasPrev?`<div><small>${+dOf(TODAY).slice(0,4)-1} en tout</small><b>${fmt(B.prevYear.t)} CHF</b></div>`:""}</div>
+    <div class="bch" style="--avgf:${(avgH/100).toFixed(3)}"><div class="bavg"><span>moy. ${fmt(B.m12)}</span></div>${bars}</div>
+    <div class="bdet" id="budDet"></div>
+    <div class="bsplit">${BCAT.filter(c=>B.l12[c[0]]>0||!B.l12.t).map(c=>{ const x=B.l12[c[0]], p=B.l12.t>0?x/B.l12.t:0; return `<div class="prow" style="--pc:${c[3]}"><span class="dot"></span><span>${ic(c[1],c[3])} ${c[2]}</span><span class="v">${fmt(x*365/B.d12)} CHF / an<small>${fmt(p*100)} % · ${fmt(x/B.d12*MJ)} CHF / mois</small></span></div>`; }).join("")}</div>
+    <div class="cap">Tout ce que tu as noté : pleins, entretien, pneus, et frais fixes annuels répartis sur l'année. « Par mois » et « Par an » = rythme des 12 derniers mois. Touche une barre pour le détail du mois.</div>`;
+  // ---- à prévoir
+  const items=vs.flatMap(planItems).sort((a,b)=>a.d-b.d), fuelD=vs.reduce((t,v)=>t+spendIn(v,Math.max(B.st,TODAY+1-365),TODAY+1).carb,0)/B.d12;
+  const inH=h=>items.filter(x=>!x.info&&x.m>0&&x.d<TODAY+h).reduce((t,x)=>t+x.m,0)+fuelD*h, big12=items.filter(x=>!x.info&&x.m>0).reduce((t,x)=>t+x.m,0);
+  pc.innerHTML=`<div class="hd2">${ic("calendar-check","#3DD39B")} À prévoir · 12 prochains mois</div>
+    <div class="bkpi pl"><div><small>30 jours</small><b class="num">${fmt(inH(30))}</b><span>CHF</span></div><div><small>3 mois</small><b class="num">${fmt(inH(91))}</b><span>CHF</span></div><div><small>12 mois</small><b class="num">${fmt(inH(365))}</b><span>CHF</span></div></div>
+    <div class="bline">${ic("gas-pump","#4FA8FF")} Carburant : environ <b>${fmt(fuelD*MJ)} CHF / mois</b>, compris dans ces totaux.</div>
+    <div class="plist">${items.length?items.map(x=>`<div class="pit${x.late?" late":""}${x.info?" info":""}"><span class="pd"><b>${x.late?"!":dOf(x.d).slice(8)*1}</b><small>${x.late?"à voir":MOIS[+dOf(x.d).slice(5,7)-1]}</small></span><span class="pt">${ic(x.i,x.c)} <span><b>${esc(x.t)}${all?` <em>${esc(V[x.v].n)}</em>`:""}</b><small>${x.s}</small></span></span><span class="pm">${x.m>0?`${x.est?"≈ ":""}${fmt(x.m)} CHF`:"–"}</span></div>`).join(""):`<div class="muted">Rien de connu pour l'instant : note tes frais fixes et entretiens dans le Journal.</div>`}</div>
+    ${big12>0?`<div class="bsave">${ic("piggy-bank","#FF7AA8")}<span>Mets de côté environ <b>${fmt(big12/12)} CHF par mois</b> pour les grosses factures (frais fixes, entretien, pneus), en plus du carburant.</span></div>`:""}
+    <div class="cap">Frais fixes : renouvelés un an après le dernier paiement. Entretien : d'après l'écart moyen entre tes entretiens notés. ≈ = estimation.</div>`;
+  tc.innerHTML=`<div class="hd2">${ic("sparkle","#F5D04C")} Bon à savoir</div>${budTips(B,items).map(t=>`<div class="tip">${ic(t[0],t[1])}<span>${t[2]}</span></div>`).join("")}`;
+  budBind(B); rollNums(box); rollNums(pc); }
+function budBind(B){
+  const t=$("#budTog"); if(t) t.querySelectorAll("button").forEach(b=>b.onclick=()=>{ lsSet("sv-bud",b.dataset.x); budSel=null; renderBudget(); pgSched(); });
+  if(!B) return; const det=()=>{ const m=B.months.find(x=>x.k===budSel), el=$("#budDet"); if(!el) return;
+    el.innerHTML=m?`<b>${mName(m.k)}${m.cur?" (en cours)":""} : ${fmt(m.t)} CHF</b> ${BCAT.filter(c=>m[c[0]]>0.5).map(c=>`<span>${ic(c[1],c[3])} ${fmt(m[c[0]])}</span>`).join("")}`:""; el.hidden=!m; };
+  $("#budCard").querySelectorAll(".bb").forEach(b=>b.onclick=()=>{ budSel=budSel===b.dataset.k?null:b.dataset.k; $("#budCard").querySelectorAll(".bb").forEach(x=>x.setAttribute("aria-pressed",x.dataset.k===budSel)); det(); });
+  det(); }
 function renderCost(){ renderBudget(); renderKmCard($("#costCard")); $("#tripTitle").textContent=`Combien coûte un trajet en ${V[MODE].n}`;
   const t=trip(); if(document.activeElement!==$("#tripKm")&&!kpTarget){ $("#tripKm").value=t.km?String(t.km):""; $("#tripPe").value=t.pe?String(t.pe).replace(".",","):""; }
   $("#tripPeOn").checked=!!t.peOn; renderTrip(); applyPad(); }
@@ -2482,6 +2620,7 @@ function renderMore(){
 
 // ---------- Quoi de neuf : la version en grand, une carte par version ; s'ouvre une fois après chaque mise à jour
 const CHANGELOG=[
+  ["3.3","27.10.2026","Budget 🐷",["Coût & trajet : un vrai coin Budget, par mois, par an et depuis le début (achat compris), pour ce véhicule ou pour tous","Moyenne sur 12 mois et sur tout l'historique, total de l'année, fin d'année estimée et comparaison avec l'an dernier","Graphique des 12 derniers mois avec la ligne de moyenne : touche une barre pour le détail du mois","Où va l'argent : carburant, entretien, pneus et frais fixes, par an et par mois","À prévoir : les frais des 12 prochains mois (assurance, impôt, vignette, entretien, changement de pneus, prochain plein), totaux à 30 jours, 3 mois et 12 mois, et combien mettre de côté chaque mois","Bon à savoir : coût par jour, mois le plus cher, station la moins chère et ce qu'elle t'aurait fait économiser, frais fixes à renouveler"]],
   ["3.2","27.10.2026","Un peu de magie ✨",["Poussière d'étoiles quand tu enregistres un plein, bien plus forte si tu bats ton record de conso","Les grands chiffres des tuiles roulent comme un compteur à l'ouverture","Succès débloqué : le badge apparaît au milieu de l'écran avec un éclat doré","Ciel du moment : l'en-tête prend la teinte de l'aube, du jour, du crépuscule ou de la nuit (avec des étoiles)","Nouveau thème « Grimoire » : parchemin, encre brune et filets dorés","Les tuiles flottent un tout petit peu quand tu penches le téléphone","Paramètres → Magie : Oui / Non pour tout couper d'un coup"]],
   ["3.1","27.10.2026","Un peu de magie",["Thème clair / foncé : le nouveau thème s'étend en cercle depuis le bouton touché","Réservoir « liquide » : la tuile Prochain plein et l'IA du réservoir se remplissent de vagues au niveau estimé","Barre d'onglets liquide : une goutte glisse jusqu'à l'onglet choisi et rebondit","Journal : glisse une ligne vers la gauche pour la supprimer (elle se déchire), avec « Annuler » pendant 6 secondes","Encore du liquide : le réservoir se remplit pendant que tu tapes les litres, budget du mois dans Coût & trajet, prochaine borne de km dans les Stats communes, succès en cours qui se remplissent"]],
   ["3.0.2","27.10.2026","Sauvegarde",["La sauvegarde Drive garde aussi les réglages d'affichage : thème, barre (côté, icônes, épinglée ou cachée, ordre), défilement, ouverture des tuiles et pavé de saisie","Après une restauration, l'app revient exactement comme tu l'avais réglée"]],
@@ -2901,7 +3040,7 @@ function save(){
 // ---------- 💾 sauvegarde Drive commune (bloc SAUVEGARDE ATELIER v2) + import des anciens fichiers
 // réglages d'affichage (gardés dans ce téléphone) : aussi dans la sauvegarde, pour tout retrouver après une réinstallation
 const AFF={theme:["sv-theme",["fonce","clair","grim"]],magie:["sv-magic",["on","off"]],barre:["sv-rail",["g","d","b"]],iconesBarre:["sv-ricons",["h","b"]],barreCachee:["sv-rhide",["e","c"]],
-  defilement:["sv-snap",["f","l"]],ouvrirTuile:["sv-topen",["p","s"]],pave:["sv-pad",["on","off"]]};
+  defilement:["sv-snap",["f","l"]],ouvrirTuile:["sv-topen",["p","s"]],pave:["sv-pad",["on","off"]],budget:["sv-bud",["v","t"]]};
 function affRead(){ const o={}; Object.keys(AFF).forEach(k=>{ const v=lsGet(AFF[k][0]); o[k]=AFF[k][1].includes(v)?v:AFF[k][1][0]; }); o.ordreBarre=railOrder(); return o; } // sans réglage : la valeur par défaut (la première)
 function affOk(g){ if(!g||typeof g!=="object") return null; const o={};
   Object.keys(AFF).forEach(k=>{ if(AFF[k][1].includes(g[k])) o[k]=g[k]; });
