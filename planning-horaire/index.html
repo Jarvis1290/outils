@@ -408,6 +408,12 @@ button.swr{width:100%;background:none;border:0;padding:0;text-align:left;cursor:
 @keyframes betZzz{0%{opacity:0;transform:none}20%{opacity:1}100%{opacity:0;transform:translate(30px,-40px) scale(1.4)}}
 body.bet-asleep .app{filter:brightness(.82) saturate(.7);transition:filter 1.5s}
 body:not(.bet-asleep) .app{transition:filter .4s}
+/* La page fait sa vie */
+.bet-veil{position:fixed;inset:0;z-index:90;background:transparent;touch-action:none}
+body.bet-fete{overflow:hidden}
+.bet-actor{will-change:transform}
+.bet-fly.guest{font-size:36px;z-index:96}
+@media (prefers-reduced-motion:reduce){.bet-actor{transition:none!important}}
 </style>
 </head>
 <body>
@@ -1425,9 +1431,10 @@ function renderSettings(v){
   var mg=el("div","card stack"), bc=Bet.cfg();
   mg.appendChild(segRow("Bêtises par jour",[["0","Aucune"],["1","1"],["3","3"],["5","5"],["10","10"]],String(bc.n),function(x){ lsSet("ph-betn",x); render(); }));
   if(bc.n) mg.appendChild(swRow("Discrètes seulement",bc.disc,function(){ lsSet("ph-betd",bc.disc?"0":"1"); render(); },"sans celles qui bougent les tuiles ou font semblant de changer un chiffre"));
+  mg.appendChild(segRow("La page fait sa vie",[["0","Jamais"],["5","5 s"],["20","20 s"],["60","1 min"]],ls("ph-show",window.PH_SHOW_DEF||"20"),function(x){ lsSet("ph-show",x); render(); }));
   mg.appendChild(segRow("Page vivante",[["0","Jamais"],["5","5 s"],["10","10 s"],["30","30 s"]],ls("ph-idle","5"),function(x){ lsSet("ph-idle",x); render(); }));
   var cb=el("button","btn",ic("sparkle")+" Le carnet des bêtises ("+Bet.list.length+")"); cb.onclick=function(){ pushSheet({type:"bets"}); }; mg.appendChild(cb);
-  mg.appendChild(el("div","small","Des petits lutins font parfois des bêtises : un bouton qui boude, un chiffre têtu, une frise qui baille… Certaines n'arrivent qu'à leur heure (midi, pause café, vendredi). Elles durent 2 secondes, ne bloquent jamais rien, et le vrai chiffre revient toujours. « Page vivante » : si tu regardes sans toucher, quelque chose bouge (jamais deux fois pareil) ; après 1 min, la page s'endort."));
+  mg.appendChild(el("div","small","Des petits lutins font parfois des bêtises : un bouton qui boude, un chiffre têtu, une frise qui baille… Certaines n'arrivent qu'à leur heure (midi, pause café, vendredi). Elles durent 2 secondes, ne bloquent jamais rien, et le vrai chiffre revient toujours. « Page vivante » : si tu regardes sans toucher, quelque chose bouge (jamais deux fois pareil) ; après 1 min, la page s'endort. « La page fait sa vie » : sans toucher, tout se promène, bavarde et reçoit des invités ; touche l'écran et tout se range en 5 s (ce toucher-là n'appuie sur rien)."));
   v.appendChild(mg);
 
   v.appendChild(el("div","sec","Rappel de sauvegarde"));
@@ -1466,7 +1473,8 @@ function renderAbout(sh){
   n.innerHTML='<h3>v2.1 · 27.10.2026</h3><ul>'+
     '<li><b>Les bêtises</b> : 31 petits lutins malicieux (bouton boudeur, chiffre têtu, frise qui baille, vendredi impatient, pause café…), certains à leur heure.</li>'+
     '<li>Paramètres → <b>Magie</b> : de 0 à 10 bêtises par jour, « discrètes seulement », et le carnet pour toutes les voir.</li>'+
-    '<li><b>Page vivante</b> : si tu la regardes sans toucher (5, 10 ou 30 s), quelque chose bouge, jamais deux fois pareil ; après 1 min elle s\'endort et te fait coucou au réveil.</li></ul>'+
+    '<li><b>Page vivante</b> : si tu la regardes sans toucher (5, 10 ou 30 s), quelque chose bouge, jamais deux fois pareil ; après 1 min elle s\'endort et te fait coucou au réveil.</li>'+
+    '<li><b>La page fait sa vie</b> : après 20 s sans toucher, les cases se promènent, s\'échangent, se racontent la météo et des histoires, et des invités passent (🐌 🦔 🤖…). Un toucher et tout se range en 5 s ; ce toucher n\'appuie sur aucun bouton.</li></ul>'+
     '<h3>v2.0 · 26.10.2026</h3><ul>'+
     '<li><b>Arrivée</b> : un toucher sur la case Arrivée la note à l\'heure actuelle (la roulette s\'ouvre pour corriger) ou touche-la sur la frise puis −5 / +5 ; le départ du soir se calcule tout seul.</li>'+
     '<li><b>Frise de la journée</b> : touche l\'arrivée, le midi ou le départ puis −5 / +5 (appui long = ça défile), touche une pause pour la sauter (+15), double toucher pour la roulette.</li>'+
@@ -1584,10 +1592,10 @@ function renderRemind(){
 var SV_CFG={
   app:"PlanningHoraire", nom:"Planning Horaire", cle:KEY, version:APP_VERSION,
   // les réglages d'affichage (thème, barre, ordre…) partent aussi dans la sauvegarde
-  lire:function(){ var d=clone(S); d.prefs={theme:H.phTheme,rail:H.rail,ricons:H.ricons,order:tabOrder().join(","),wview:weekView,betn:ls("ph-betn","3"),betd:ls("ph-betd","0"),idle:ls("ph-idle","5")}; return d; },
+  lire:function(){ var d=clone(S); d.prefs={theme:H.phTheme,rail:H.rail,ricons:H.ricons,order:tabOrder().join(","),wview:weekView,betn:ls("ph-betn","3"),betd:ls("ph-betd","0"),idle:ls("ph-idle","5"),show:ls("ph-show","20")}; return d; },
   ecrire:function(d){ var pf=d&&d.prefs; if(d) delete d.prefs; S=migrate(d);
     if(pf){ [["phTheme","theme","ph-theme"],["rail","rail","ph-rail"],["ricons","ricons","ph-ricons"]].forEach(function(x){ if(pf[x[1]]){ H[x[0]]=pf[x[1]]; lsSet(x[2],pf[x[1]]); } });
-      if(pf.order) lsSet("ph-order",pf.order); if(pf.betn!=null) lsSet("ph-betn",pf.betn); if(pf.betd!=null) lsSet("ph-betd",pf.betd); if(pf.idle!=null) lsSet("ph-idle",pf.idle); if(pf.wview){ weekView=pf.wview; lsSet("ph-wview",pf.wview); } buildRail(); }
+      if(pf.order) lsSet("ph-order",pf.order); if(pf.betn!=null) lsSet("ph-betn",pf.betn); if(pf.betd!=null) lsSet("ph-betd",pf.betd); if(pf.idle!=null) lsSet("ph-idle",pf.idle); if(pf.show!=null) lsSet("ph-show",pf.show); if(pf.wview){ weekView=pf.wview; lsSet("ph-wview",pf.wview); } buildRail(); }
     tick(); save(); sheets=[]; redrawSheet(); render(); },
   resume:function(d){
     var n=(d.history||[]).length, cw=d.currentWeek||{}, days=cw.days||cw;
@@ -1610,7 +1618,7 @@ render();
 save();
 
 // toutes les 30 s : minuit, clôture du dimanche, marqueur « maintenant »
-setInterval(function(){ var ch=tick(); if(!sheets.length && !dragging && (ch || tab==="today" || tab==="week")) render(); else if(ch) render(); },30000);
+setInterval(function(){ var ch=tick(); if(Bet.fete().on) return; if(!sheets.length && !dragging && (ch || tab==="today" || tab==="week")) render(); else if(ch) render(); },30000);
 document.addEventListener("visibilitychange",function(){ if(!document.hidden){ var ch=tick(); if(!dragging && !sheets.length) render(); else if(ch) render(); } });
 
 
@@ -1688,7 +1696,7 @@ var Bet=(function(){
   function cfg(){ var n=+ls("ph-betn","3"); return {n:isNaN(n)?3:n, disc:ls("ph-betd","0")==="1"}; }
   function stamp(){ try{ var o=JSON.parse(localStorage.getItem(K)||"{}"); var d=new Date().toDateString(); if(o.d!==d) o={d:d,n:0,t:0}; return o; }catch(e){ return {d:"",n:0,t:0}; } }
   function stampSave(o){ try{ localStorage.setItem(K,JSON.stringify(o)); }catch(e){} }
-  function busy(){ return sheets.length || dragging || document.hidden || fsel; }
+  function busy(){ return sheets.length || dragging || document.hidden || fsel || F.on; }
   function eligible(force){ var c=cfg(); return L.filter(function(b){ if(!force && c.disc && DISC.indexOf(b[0])<0) return false; try{ return !b[3]||b[3](); }catch(e){ return false; } }); }
   function play(b){ try{ return !!b[4](); }catch(e){ return false; } }
   // tente une bêtise ; celles liées à l'heure passent d'abord
@@ -1728,10 +1736,118 @@ var Bet=(function(){
   function sleep(){ asleep=true; document.body.classList.add("bet-asleep"); var h=q("header.top"); if(h){ var r=h.getBoundingClientRect(); fly("💤",r.right-80,r.top+10,"zzz",4000); } }
   function wake(){ if(!asleep) return; asleep=false; document.body.classList.remove("bet-asleep"); setTimeout(function(){ bubble(q("#title"),pick(["re ! 👋","ah, te revoilà 😉","j'ai pas dormi, hein 😳","*s'étire* 🙆"]),1600); },150); }
   ["pointerdown","keydown","wheel","touchstart"].forEach(function(t){ addEventListener(t,function(){ wake(); nextIdle=0; },{capture:true,passive:true}); });
+
+  // ---------- La page fait sa vie : après un moment sans toucher, tout se promène, bavarde, reçoit des invités ----------
+  // Rien n'est modifié : on ne fait que déplacer (transform) ; un voile attrape le 1er toucher (aucun bouton déclenché) et tout se range en 5 s.
+  var F={on:false,ending:false,t:[],acts:[],veil:null,scene:"",n:0,t0:0};
+  function feteDelay(){ var v=+ls("ph-show",window.PH_SHOW_DEF||"20"); return isNaN(v)?20:v; }
+  function later(fn,ms){ F.t.push(setTimeout(fn,ms)); }
+  function mv(a,x,y,r,s,ms){ if(!a||!a.isConnected) return; a.style.transition="transform "+(ms||2600)+"ms cubic-bezier(.45,.05,.35,1)"; a.style.transform="translate("+Math.round(x)+"px,"+Math.round(y)+"px) rotate("+(r||0).toFixed(1)+"deg) scale("+(s||1)+")"; }
+  function ctr(a){ var r=a.getBoundingClientRect(); return {x:r.left+r.width/2,y:r.top+r.height/2,w:r.width,h:r.height}; }
+  function home(a){ var o=a._f0; return {x:o.x,y:o.y}; }  // position d'origine (sans transform)
+  function actors(){
+    var sel=".wd,.wsolde,.ring,.times button,.pz,.bb,.card .big,.lnk,#rail button,#title,#view .btn,#view .set";
+    var all=qa(sel).filter(function(x){ var r=x.getBoundingClientRect(); return r.width>8&&r.bottom>0&&r.top<innerHeight; });
+    all=all.filter(function(x){ return !all.some(function(y){ return y!==x&&y.contains(x); }); });
+    all.sort(function(){ return Math.random()-.5; }); all=all.slice(0,16);
+    all.forEach(function(a){ var r=a.getBoundingClientRect(); a._f0={x:r.left+r.width/2,y:r.top+r.height/2,tr:a.style.transition,tf:a.style.transform}; a.classList.add("bet-actor"); });
+    return all;
+  }
+  function two(){ var a=F.acts.filter(function(x){ return x.isConnected; }); if(a.length<2) return null; var i=Math.floor(Math.random()*a.length), j; do{ j=Math.floor(Math.random()*a.length); }while(j===i); return [a[i],a[j]]; }
+  function say(a,txt,ms){ if(F.on&&!F.ending) bubble(a,txt,ms||2100); }
+  function dialogue(pair,lines,step){ step=step||2300; lines.forEach(function(l,k){ later(function(){ say(pair[k%2],l,step-150); },k*step); }); return lines.length*step; }
+  function soldeTxt(){ var s=solde(); return s?s.textContent.trim():"0h00"; }
+  function heure(){ var m=hm(); return Math.floor(m/60)+"h"+String(m%60).padStart(2,"0"); }
+  var CONV=[
+    function(){ return ["T'as vu la météo ? ☁️","Il pleut des copeaux, paraît-il 🌧️","Prends ton parapluie alors ☂️"]; },
+    function(){ return ["Psst… il dort ?","Je crois… 😴","Alors on bouge tout ! 🤸"]; },
+    function(){ return ["Tu sais ce qu'a fait la DMU ?","Non, raconte !","Une pause café ☕","Comme nous 😏"]; },
+    function(){ return ["Il est quelle heure ?",heure()+" 🕐","Déjà ?!"]; },
+    function(){ return ["C'est combien, le solde ?",soldeTxt()+" 📊","Pas mal ! 👍"]; },
+    function(){ return ["Tu me prêtes 5 minutes ?","Jamais ! 😤","Radin… 🐷"]; },
+    function(){ return ["J'ai rêvé d'un vendredi infini 🌈","Arrête, tu me fais rêver 🥹"]; },
+    function(){ return ["Tu crois qu'il nous regarde ? 👀","Fais comme si de rien n'était…","🎵 lalala 🎵"]; },
+    function(){ return ["Lundi, t'es grognon aujourd'hui","C'est pas moi, c'est le café ☕"]; }
+  ];
+  var METEO=["Météo de l'atelier : 100 % de copeaux, risque de café ☕","Vent de fraise à 3000 tr/min 🌀","Ciel dégagé sur vendredi ☀️","Brouillard de lundi en approche 🌫️","Averse d'huile de coupe en fin de journée 🛢️","Températures en hausse près de la machine à café 🔥"];
+  var HIST=[
+    ["Il était une fois…","une fraise qui voulait voir la mer 🌊","elle a fini en copeaux. Fin. 😢"],
+    ["Il était une fois un lundi…","qui voulait devenir vendredi","il a attendu 4 jours. Fin. 🎉"],
+    ["Vous connaissez l'histoire de PROG1 ?","Chut ! On n'y touche jamais 🤫"],
+    ["Un jour, une pause a été sautée…","on lui a rendu 15 minutes","et elle vécut heureuse ✨"]
+  ];
+  var GUESTS=[["🐌","Je passe, je passe… tout doucement"],["🐦","cui cui ! 🎶"],["🦔","Vous savez où est la cantine ? 🍽️"],["🐝","bzz… y a du miel ici ?"],["👻","bouh ! 👻"],["🐱","miaou… je m'installe 😼"],["🦆","coin coin !"],["🤖","BIP. Analyse de la semaine… OK ✅"],["🐞","Je cherche un bug 🔎"],["🦉","Hou hou… il est tard, non ?"]];
+  var SC={
+    promenade:function(){ function go(){ F.acts.forEach(function(a){ mv(a,(Math.random()-.5)*90,(Math.random()-.5)*70,(Math.random()-.5)*16,1,2400+Math.random()*1600); }); } go(); later(go,4200); later(go,8400); return 12000; },
+    echange:function(){ var p=two(); if(!p) return 0; var a=home(p[0]), b=home(p[1]); say(p[0],"On échange ? 🔄",1800);
+      later(function(){ mv(p[0],b.x-a.x,b.y-a.y,-6,1,3200); mv(p[1],a.x-b.x,a.y-b.y,6,1,3200); },1500);
+      later(function(){ say(p[1],"Ça me va bien ici 😌"); },5200); return 9000; },
+    bavardage:function(){ var p=two(); if(!p) return 0; var a=home(p[0]), b=home(p[1]);
+      mv(p[0],(b.x-a.x)*.3,(b.y-a.y)*.3,4,1,2200); mv(p[1],(a.x-b.x)*.3,(a.y-b.y)*.3,-4,1,2200);
+      var l=pick(CONV)(); later(function(){ dialogue(p,l); },2400); return 2400+l.length*2300; },
+    invite:function(){ var g=pick(GUESTS), ltr=Math.random()<.5, y=innerHeight*(.3+Math.random()*.4);
+      var e=fly(g[0],ltr?-50:innerWidth+10,y,"guest",12000); e.style.transform=ltr?"scaleX(-1)":""; e.style.transition="left 9s linear";
+      later(function(){ e.style.left=(ltr?innerWidth+10:-50)+"px"; },60);
+      later(function(){ if(F.on&&!F.ending) bubble(e,g[1],2600); },3600);
+      F.acts.forEach(function(a,i){ later(function(){ var c=home(a); var away=c.y<y?-26:26; mv(a,(Math.random()-.5)*20,away,(Math.random()-.5)*10,1,900); },1500+i*180); });
+      later(function(){ var p=two(); if(p) dialogue(p,["C'était qui ? 😳","Aucune idée…"],2000); },7000); return 11500; },
+    meteo:function(){ var a=pick(F.acts); if(!a) return 0; mv(a,0,-20,0,1.12,1200); later(function(){ say(a,"📻 "+pick(METEO),3400); },1300);
+      [0,1,2,3].forEach(function(k){ later(function(){ F.acts.forEach(function(x){ if(x!==a) mv(x,(k%2?-6:6),0,(k%2?-3:3),1,260); }); },2200+k*300); }); return 6500; },
+    histoire:function(){ var a=pick(F.acts); if(!a) return 0; var c=home(a);
+      F.acts.forEach(function(x){ if(x===a) return; var h=home(x); mv(x,(c.x-h.x)*.35,(c.y-h.y)*.35,0,.92,2600); }); mv(a,0,0,0,1.1,1500);
+      var h=pick(HIST); h.forEach(function(l,k){ later(function(){ say(a,l,2500); },2200+k*2700); }); return 2600+h.length*2700+600; },
+    course:function(){ var p=two(); if(!p) return 0; say(p[0],"On fait la course ? 🏁",1700); var w=innerWidth;
+      later(function(){ [p[0],p[1]].forEach(function(x,i){ var c=home(x); mv(x,(i?40:w-40)-c.x,0,i?-10:10,1,1600+i*500); }); },1800);
+      later(function(){ [p[0],p[1]].forEach(function(x,i){ var c=home(x); mv(x,(i?w-40:40)-c.x,0,i?10:-10,1,1700); }); },3900);
+      later(function(){ say(p[0],"Gagné ! 🏆"); say(p[1],"Triche ! 😤"); },6000); return 8500; },
+    danse:function(){ var n=0; for(var i=0;i<4;i++) later(function(){ n++; F.acts.forEach(function(a,k){ mv(a,0,(k+n)%2?-14:10,(k+n)%2?8:-8,1,700); }); fly("🎵",Math.random()*(innerWidth-30),innerHeight*.4,"steam",2600); },i*900);
+      later(function(){ var a=pick(F.acts); say(a,"Allez, tout le monde danse ! 💃"); },500); return 4600; },
+    ronde:function(){ var cx=innerWidth/2, cy=innerHeight/2, n=F.acts.length, R=Math.min(cx,cy)*.6;
+      F.acts.forEach(function(a,i){ var h=home(a), t=i/n*Math.PI*2; mv(a,cx+Math.cos(t)*R-h.x,cy+Math.sin(t)*R-h.y,0,.85,3000); });
+      later(function(){ F.acts.forEach(function(a,i){ var h=home(a), t=i/n*Math.PI*2+Math.PI; mv(a,cx+Math.cos(t)*R-h.x,cy+Math.sin(t)*R-h.y,0,.85,3600); }); },3400);
+      later(function(){ say(pick(F.acts),"La ronde ! 🎠"); },1200); return 7800; }
+  };
+  var SCN=Object.keys(SC);
+  function nextScene(){
+    if(!F.on||F.ending) return;
+    if(document.hidden){ feteStop(true); return; }
+    var c=SCN.filter(function(x){ return x!==F.scene; }), s=pick(c); F.scene=s; F.n++;
+    var d=0; try{ d=SC[s](); }catch(e){ d=0; } F.t.push(setTimeout(nextScene,(d||1000)+800));
+  }
+  function feteStart(){
+    if(F.on) return false; if(matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
+    F.acts=actors(); if(F.acts.length<3){ F.acts.forEach(function(a){ a.classList.remove("bet-actor"); }); F.acts=[]; return false; }
+    F.on=true; F.ending=false; F.scene=""; F.n=0; F.t0=Date.now(); document.body.classList.add("bet-fete");
+    var v=el("div","bet-veil"); document.body.appendChild(v); F.veil=v;
+    v.addEventListener("pointerdown",function(e){ e.preventDefault(); e.stopPropagation(); if(F.ending){ feteStop(true); lastAct=Date.now(); } else feteEnd(true); });
+    v.addEventListener("click",function(e){ e.preventDefault(); e.stopPropagation(); });
+    nextScene(); return true;
+  }
+  // au toucher : tout le monde rentre tranquillement à sa place et dit au revoir (5 s)
+  function feteEnd(touch){
+    if(!F.on||F.ending) return; F.ending=true; F.t.forEach(clearTimeout); F.t=[];
+    qa(".bet-bub").forEach(function(b){ b.remove(); });
+    var bye=["salut ! 👋","à plus ! 👋","on range ! 🧹","bisous 😘","oups, il est réveillé 😳","chacun à sa place !","c'était sympa 😄"];
+    F.acts.forEach(function(a,i){ setTimeout(function(){ if(!a.isConnected) return; a.style.transition="transform "+(1600+Math.random()*1400)+"ms cubic-bezier(.3,.7,.3,1)"; a.style.transform="translate(0,0) rotate(0deg) scale(1)"; },i*120); });
+    F.acts.slice(0,3).forEach(function(a,i){ setTimeout(function(){ bubble(a,bye.splice(Math.floor(Math.random()*bye.length),1)[0],1800); },300+i*700); });
+    F.t.push(setTimeout(function(){ feteStop(false); if(touch) lastAct=Date.now(); },5000));  // le compte repart une fois tout rangé
+  }
+  function feteStop(quick){
+    F.t.forEach(clearTimeout); F.t=[];
+    F.acts.forEach(function(a){ a.classList.remove("bet-actor"); var o=a._f0||{}; a.style.transition=quick?"none":(o.tr||""); a.style.transform=o.tf||""; if(quick) setTimeout(function(){ a.style.transition=o.tr||""; },30); delete a._f0; });
+    qa(".bet-fly.guest").forEach(function(x){ x.remove(); });
+    if(F.veil) F.veil.remove(); F.veil=null; F.acts=[]; F.on=false; F.ending=false; document.body.classList.remove("bet-fete");
+  }
+  document.addEventListener("visibilitychange",function(){ if(document.hidden&&F.on) feteStop(true); });
   setInterval(function(){
-    var d=idleDelay(); if(!d || document.hidden || sheets.length || dragging) return;
-    var idle=Date.now()-lastAct;
-    if(idle>=60000){ if(!asleep) sleep(); return; }
+    if(document.hidden || sheets.length || dragging) return;
+    var idle=Date.now()-lastAct, fd=feteDelay();
+    // la fête dure ~3 min, puis la page s'endort (sans fête : endormie après 1 min)
+    var nap=fd?(fd*1000+180000):60000;
+    if(idle>=nap){ if(F.on&&!F.ending) feteEnd(); else if(!F.on&&!asleep) sleep(); return; }
+    if(F.on) return;
+    if(fd && idle>=fd*1000 && !asleep){ feteStart(); return; }
+    var d=idleDelay(); if(!d) return;
     if(idle<d*1000) return;
     if(!nextIdle){ nextIdle=Date.now(); }
     if(Date.now()<nextIdle) return;
@@ -1741,7 +1857,7 @@ var Bet=(function(){
   },1000);
   function onOpen(){ setTimeout(function(){ maybe(0.5); },2500); }
   onOpen(); document.addEventListener("visibilitychange",function(){ if(!document.hidden) onOpen(); });
-  return {list:L, play:play, maybe:maybe, cfg:cfg, eligible:eligible, idle:function(){ return {n:idleN,asleep:asleep,last:lastIdle}; },
+  return {list:L, play:play, maybe:maybe, cfg:cfg, eligible:eligible, idle:function(){ return {n:idleN,asleep:asleep,last:lastIdle}; }, fete:function(){ return {on:F.on,ending:F.ending,scene:F.scene,n:F.n,acts:F.acts.length}; }, feteStart:feteStart, feteEnd:feteEnd,
     // pour le carnet : jouer une bêtise précise tout de suite (sur l'onglet qui lui convient)
     show:function(id){ var b=L.filter(function(x){ return x[0]===id; })[0]; if(!b) return;
       sheets=[]; redrawSheet(); if(b[0]==="barre") go("week"); else { selDay=null; go("today"); }
