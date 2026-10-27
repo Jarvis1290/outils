@@ -271,6 +271,20 @@ button.swr{width:100%;background:none;border:0;padding:0;text-align:left;cursor:
 .swr{flex-wrap:wrap}
 .times button.todo{border:2px solid var(--accS);background:var(--soft)}
 .times button.todo b{color:var(--accS)}
+
+/* ----- frise : réglage par −5 / +5 (rien ne bouge au doigt) ----- */
+.frise .knob,.frise .lunch{cursor:pointer}
+.frise .knob.on{background:var(--accS);border-color:var(--accS);box-shadow:0 0 0 5px color-mix(in srgb,var(--accS) 30%,transparent)}
+.frise .lunch.on{box-shadow:0 0 0 4px var(--accS)}
+.fctl{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:6px;padding:10px;border-radius:14px;background:var(--soft)}
+.frow{display:flex;align-items:center;gap:10px;width:100%}
+.fbtn{flex:none;width:72px;height:56px;border-radius:16px;border:0;background:var(--acc);color:var(--on-acc);font-size:22px;font-weight:800;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;font-variant-numeric:tabular-nums}
+.fbtn:active{transform:scale(.95)}
+.fv{flex:1;text-align:center;line-height:1.2}
+.fv span{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--mut)}
+.fv b{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums}
+.fctl .lnk{align-self:flex-end}
+.fv b{white-space:nowrap;font-size:clamp(17px,5.4vw,24px)}
 </style>
 </head>
 <body>
@@ -476,7 +490,7 @@ const Sauvegarde = (() => {
 "use strict";
 /* Planning Horaire v2.0
    - Aujourd'hui : un toucher pointe l'arrivée, le départ du soir se calcule tout seul.
-   - Frise de la journée : glisser/étirer le midi, toucher une pause pour la sauter (+15), double toucher = roulette.
+   - Frise de la journée : toucher arrivée / midi / départ puis −5 / +5, toucher une pause pour la sauter (+15), double toucher = roulette.
    - Rien à valider : à minuit, le départ prévu est retenu tout seul ; la semaine se clôture le dimanche à minuit.
    - Report des heures (⏱) : tout vendredi, jour suivant, étalé, ou Perso (cases). Vue barres pour les exceptions.
    - Historique éditable : une correction recalcule le pot des semaines suivantes. */
@@ -699,7 +713,7 @@ function recalcHistory(from){
 }
 
 // ---------- affichage ----------
-var tab = null, navStack = [], sheets = [], dragging = false, absOpen = null, weekView = ls("ph-wview","liste");
+var tab = null, navStack = [], sheets = [], dragging = false, absOpen = null, fsel = null, weekView = ls("ph-wview","liste");
 var H = document.documentElement.dataset;
 function tabOrder(){ var o=ls("ph-order","today,week,pot").split(",").filter(function(t){ return TABS[t]; }); ["today","week","pot"].forEach(function(t){ if(o.indexOf(t)<0) o.push(t); }); return o; }
 
@@ -753,7 +767,7 @@ function dayPanel(day,c,o){
   var a = d.arrival ? toMin(d.arrival) : (hist?null:c.arr), dep = d.departure ? toMin(d.departure) : (hist?null:c.dep);
   // frise
   var fc=el("div","card");
-  fc.appendChild(el("div","k","Ta journée")); fc.appendChild(el("div","small",o.big?"glisse l'arrivée, le midi ou le départ · touche une pause · double toucher = roulette":"touche pour agrandir · glisse arrivée, midi, départ · double toucher = roulette"));
+  fc.appendChild(el("div","k","Ta journée")); fc.appendChild(el("div","small",o.big?"touche l'arrivée, le midi ou le départ, puis −5 / +5 · touche une pause · double toucher = roulette":"touche l'arrivée, le midi ou le départ pour le régler · ailleurs = agrandir · double toucher = roulette"));
   var zo=function(){ pushSheet({type:"zoom",day:day,hist:hist,d:hist?d:null,onEdit:o.onEdit}); };
   fc.appendChild(frise(day,d,a,dep,{today:o.today, proj:!d.arrival, projDep:!d.departure, hist:hist, onEdit:o.onEdit, refresh:o.refresh, big:o.big, onZoom:o.big?null:zo}));
   // heures (toucher = roulette)
@@ -811,7 +825,7 @@ function dayPanel(day,c,o){
 }
 function commit(o){ save(); if(!o||!o.hist) tick(); if(o&&o.hist&&o.onEdit) o.onEdit(); if(o&&o.refresh) o.refresh(); render(); }
 
-// frise de la journée : glisser arrivée / midi / départ, pauses à toucher, toucher = zoom, double toucher = roulette
+// frise de la journée : toucher arrivée / midi / départ puis −5 / +5, pauses à toucher, toucher ailleurs = zoom, double toucher = roulette
 function frise(day,d,a,dep,o){
   var big=!!o.big, f=el("div","frise"+(big?" big":""));
   var l1=L1(day,d), l2=L2(day,d), A=a==null?toMin(ref(day).arrival):a, Dp=dep==null?A+600:dep;
@@ -855,36 +869,54 @@ function frise(day,d,a,dep,o){
     lm.style.left=pc((l1+l2)/2); lm.innerHTML='<b>'+fh(l1)+'–'+fh(l2)+'</b>';
   }
   lay(A,l1,l2,Dp);
-  // glisser (crans de 5 min ; en zoom l'échelle est plus fine, donc plus précis)
-  var drag=null;
-  function startDrag(e,kind,cap){
-    e.preventDefault(); e.stopPropagation(); dragging=true; clearTimeout(zt);
-    drag={kind:kind,x0:e.clientX,w:f.getBoundingClientRect().width,A:A,l1:l1,l2:l2,D:Dp,nA:A,n1:l1,n2:l2,nD:Dp};
-    if(kind!=="a"&&kind!=="d") lm.hidden=false;
-    f.classList.add("drag");
-    try{ cap.setPointerCapture(e.pointerId); }catch(_){}
+  // toucher un élément (arrivée, midi, départ) = il s'allume ; puis −5 / +5 dessous (appui long = ça défile). Rien ne bouge au doigt.
+  var skey=(o.hist?"h":"c")+day+(big?"z":""), sel=fsel&&fsel.k===skey?fsel:null;
+  var wrap=el("div","friseW"); wrap.appendChild(f);
+  [[ka,"a"],[lu,"m"],[kd,"d"]].forEach(function(x){
+    if(sel&&sel.p===x[1]) x[0].classList.add("on");
+    x[0].addEventListener("click",function(e){ e.stopPropagation(); clearTimeout(zt); fsel=sel&&sel.p===x[1]?null:{k:skey,p:x[1],m:x[1]==="m"?"move":null}; refresh(); });
+  });
+  function refresh(){ if(o.refresh) o.refresh(); else render(); }
+  if(sel){
+    var v={A:A,l1:l1,l2:l2,D:Dp}, ctl=el("div","fctl");
+    var nm=sel.p==="a"?"Arrivée":sel.p==="d"?"Départ":"Midi";
+    var info=el("div","fv"), show=function(){ info.innerHTML='<span>'+nm+'</span><b>'+(sel.p==="a"?fh(v.A):sel.p==="d"?fh(v.D):fh(v.l1)+'–'+fh(v.l2))+'</b>'; lay(v.A,v.l1,v.l2,v.D); };
+    if(sel.p==="m"){
+      var mc=el("div","seg2");
+      [["move","Déplacer"],["start","Début"],["end","Fin"]].forEach(function(x){ var b=el("button",sel.m===x[0]?"on":null,x[1]); b.onclick=function(){ sel.m=x[0]; refresh(); }; mc.appendChild(b); });
+      ctl.appendChild(mc);
+    }
+    var row=el("div","frow");
+    function step(dm){
+      if(sel.p==="a") v.A=Math.max(0,Math.min(v.D-60,v.A+dm));
+      else if(sel.p==="d") v.D=Math.min(24*60-5,Math.max(v.A+60,v.D+dm));
+      else if(sel.m==="move"){ if(v.l1+dm>=v.A && v.l2+dm<=v.D){ v.l1+=dm; v.l2+=dm; } }
+      else if(sel.m==="start") v.l1=Math.max(v.A,Math.min(v.l2-15,v.l1+dm));
+      else v.l2=Math.min(v.D,Math.max(v.l1+15,v.l2+dm));
+      show(); if(navigator.vibrate) try{ navigator.vibrate(8); }catch(_){}
+    }
+    function save1(){
+      var x=dd(), ch=false;
+      if(sel.p==="a"&&v.A!==A){ x.arrival=toClock(v.A); ch=true; }
+      if(sel.p==="d"&&v.D!==Dp){ x.departure=toClock(v.D); x.touched=true; x.auto=false; ch=true; }
+      if(sel.p==="m"&&(v.l1!==l1||v.l2!==l2)){ x.lunchStart=toClock(v.l1); x.lunchEnd=toClock(v.l2); ch=true; }
+      if(ch) commit(cm);
+    }
+    [[-5,"−5"],[5,"+5"]].forEach(function(x){
+      var b=el("button","fbtn",x[1]), t1=null, t2=null, held=false;
+      var stop=function(){ clearTimeout(t1); clearInterval(t2); if(held){ held=false; dragging=false; save1(); } };
+      b.addEventListener("pointerdown",function(e){ e.preventDefault(); held=true; dragging=true; step(x[0]); t1=setTimeout(function(){ t2=setInterval(function(){ step(x[0]); },110); },420); });
+      b.addEventListener("pointerup",stop); b.addEventListener("pointerleave",stop); b.addEventListener("pointercancel",stop);
+      b.addEventListener("keydown",function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); step(x[0]); save1(); } });
+      row.appendChild(b);
+      if(x[0]<0) row.appendChild(info);
+    });
+    ctl.appendChild(row);
+    var ok=el("button","lnk","Fini"); ok.onclick=function(){ fsel=null; refresh(); }; ctl.appendChild(ok);
+    show(); lm.hidden=sel.p!=="m";
+    wrap.appendChild(ctl);
   }
-  function moveDrag(e){
-    if(!drag) return;
-    var dm=Math.round(((e.clientX-drag.x0)/drag.w*span)/5)*5, q=drag, nA=q.A, n1=q.l1, n2=q.l2, nD=q.D;
-    if(q.kind==="m"){ n1+=dm; n2+=dm; } else if(q.kind==="l"){ n1=Math.min(q.l1+dm,n2-15); } else if(q.kind==="r"){ n2=Math.max(q.l2+dm,n1+15); }
-    else if(q.kind==="a"){ nA=Math.min(q.A+dm,q.D-60); } else { nD=Math.max(q.D+dm,q.A+60); }
-    nA=Math.max(lo,nA); n1=Math.max(lo,n1); n2=Math.min(hi,n2); nD=Math.min(hi,nD);
-    q.nA=nA; q.n1=n1; q.n2=n2; q.nD=nD; lay(nA,n1,n2,nD);
-  }
-  function endDrag(){
-    if(!drag) return; var q=drag; drag=null; dragging=false; f.classList.remove("drag");
-    var x=dd(), ch=false;
-    if(q.kind==="a"){ if(q.nA!==q.A){ x.arrival=toClock(q.nA); ch=true; } }
-    else if(q.kind==="d"){ if(q.nD!==q.D){ x.departure=toClock(q.nD); x.touched=true; x.auto=false; ch=true; } }
-    else if(q.n1!==q.l1||q.n2!==q.l2){ x.lunchStart=toClock(q.n1); x.lunchEnd=toClock(q.n2); ch=true; }
-    if(ch){ if(navigator.vibrate) try{ navigator.vibrate(12); }catch(_){} commit(cm); } else { lm.hidden=true; }
-  }
-  lu.addEventListener("pointerdown",function(e){ startDrag(e, e.target.classList.contains("l")?"l":e.target.classList.contains("r")?"r":"m", lu); });
-  ka.addEventListener("pointerdown",function(e){ startDrag(e,"a",ka); });
-  kd.addEventListener("pointerdown",function(e){ startDrag(e,"d",kd); });
-  [lu,ka,kd].forEach(function(n){ n.addEventListener("pointermove",moveDrag); n.addEventListener("pointerup",endDrag); n.addEventListener("pointercancel",function(){ drag=null; dragging=false; render(); }); });
-  // toucher = zoom (façon Apple) ; double toucher = roulette (le champ le plus proche)
+  // toucher ailleurs = zoom (façon Apple) ; double toucher = roulette (le champ le plus proche)
   var lastT=0, zt=null;
   f.addEventListener("click",function(e){
     if(e.target.closest(".lunch,.pz,.knob")) return;
@@ -894,7 +926,7 @@ function frise(day,d,a,dep,o){
       openDayWheel(day,c,o.hist?{hist:true,d:d,onEdit:o.onEdit,refresh:o.refresh}:(o.refresh?{refresh:o.refresh}:null)); }
     else { lastT=t; if(!big && o.onZoom){ clearTimeout(zt); zt=setTimeout(o.onZoom,360); } }
   });
-  return f;
+  return wrap;
 }
 
 // ----- roulette -----
@@ -1247,8 +1279,8 @@ function renderAbout(sh){
   sh.appendChild(sheetHead("Quoi de neuf"));
   var n=el("div","notes");
   n.innerHTML='<h3>v2.0 · '+APP_DATE+'</h3><ul>'+
-    '<li><b>Arrivée</b> : un toucher sur la case Arrivée la note à l\'heure actuelle (la roulette s\'ouvre pour corriger) ou glisse sa poignée sur la frise ; le départ du soir se calcule tout seul.</li>'+
-    '<li><b>Frise de la journée</b> : glisse ou étire le midi, touche une pause pour la sauter (+15), double toucher pour la roulette.</li>'+
+    '<li><b>Arrivée</b> : un toucher sur la case Arrivée la note à l\'heure actuelle (la roulette s\'ouvre pour corriger) ou touche-la sur la frise puis −5 / +5 ; le départ du soir se calcule tout seul.</li>'+
+    '<li><b>Frise de la journée</b> : touche l\'arrivée, le midi ou le départ puis −5 / +5 (appui long = ça défile), touche une pause pour la sauter (+15), double toucher pour la roulette.</li>'+
     '<li><b>Roulette</b> pour corriger une heure : tu lâches, c\'est enregistré.</li>'+
     '<li><b>Absence</b> sans heure (+15, +30, +1h, +2h).</li>'+
     '<li><b>Rien à valider</b> : départ prévu retenu à minuit, semaine clôturée le dimanche à minuit.</li>'+
