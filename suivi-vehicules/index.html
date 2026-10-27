@@ -684,8 +684,9 @@ nav.tabs [data-v="more"][aria-current="page"]{opacity:1;box-shadow:0 0 0 3px col
 ::view-transition-new(root){animation:svCircle .6s cubic-bezier(.6,0,.25,1)}
 @keyframes svCircle{from{clip-path:circle(0 at var(--tx,50%) var(--ty,50%))}to{clip-path:circle(var(--tr,150vmax) at var(--tx,50%) var(--ty,50%))}}
 .liq{position:relative;overflow:hidden;isolation:isolate}
-.liq .w{position:absolute;width:320%;aspect-ratio:1;left:-110%;top:calc(100% - var(--lv));border-radius:42%;background:var(--lc);animation:liqSpin 9s linear infinite,liqRise 1.4s cubic-bezier(.3,0,.2,1) both}
+.liq .w{position:absolute;width:320%;aspect-ratio:1;left:-110%;top:calc(100% - var(--lv));border-radius:42%;background:var(--lc);animation:liqSpin 9s linear infinite,liqRise 1.4s cubic-bezier(.3,0,.2,1) backwards}
 .liq .w2{opacity:.45;border-radius:38%;top:calc(100% - var(--lv) - 5px);animation-duration:13s,1.4s;animation-direction:reverse,normal}
+.liq .w{transition:top .7s cubic-bezier(.3,1.3,.5,1),background .4s}
 @keyframes liqSpin{to{rotate:360deg}}
 @keyframes liqRise{from{top:100%}}
 .tank{height:132px;border-radius:26px;background:var(--navy-2);box-shadow:inset 0 0 0 2px var(--line),inset 0 -14px 26px rgba(0,0,0,.25);max-width:150px;margin:0 auto}
@@ -712,6 +713,17 @@ nav.tabs .in>button[aria-current="page"]{background:transparent!important;box-sh
 #histList{overflow:hidden}
 .toast.undo button{border:0;background:none;color:var(--volt-hi);font:700 14px var(--f-body);padding:4px 2px;cursor:pointer}
 .swtip{font-size:11.5px;color:var(--fg-3);text-align:center;padding:8px 2px 2px}
+.liq.bar{height:34px;border-radius:12px;background:var(--navy-2);box-shadow:inset 0 0 0 1px var(--line)}
+.liq.bar .w{opacity:.55} .liq.bar .w2{opacity:.3}
+.liq.bar>span{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 12px;font:600 12.5px var(--f-body);z-index:2;color:var(--fg)}
+.liq.bar>span b{font-family:var(--f-num)}
+.ftank{margin-top:2px} .ftank .liq.bar{height:40px}
+.bud .liq.bar{height:58px;border-radius:16px;margin-top:10px}
+.bud .liq.bar>span{font-size:13px}
+.bud .liq.bar>span b{font-size:16px;white-space:nowrap}
+.badge2 .bi.liq{filter:none;opacity:1}
+.badge2 .bi.liq .w{opacity:.55} .badge2 .bi.liq .w2{opacity:.3}
+.badge2 .bi.liq>span{position:relative;z-index:2;filter:grayscale(.6)}
 @media (prefers-reduced-motion:reduce){ .liq .w{animation:none} ::view-transition-new(root){animation:none} .row.torn{animation-duration:.01s} }
 </style>
 </head>
@@ -874,6 +886,7 @@ nav.tabs .in>button[aria-current="page"]{background:transparent!important;box-sh
 
   <!-- COÛT & TRAJET (par véhicule) -->
   <section class="view" id="v-cost" hidden>
+    <div class="card bud" id="budCard" hidden></div>
     <div class="card kmc" id="costCard"></div>
     <div class="h2" id="tripTitle">Combien coûte un trajet</div>
     <div class="card" id="tripCard">
@@ -938,6 +951,7 @@ nav.tabs .in>button[aria-current="page"]{background:transparent!important;box-sh
       <div class="field"><label for="fDate">Date</label><input id="fDate" type="date"></div>
       <div class="field"><label for="fKm">Km compteur</label><input id="fKm" type="text" inputmode="numeric" autocomplete="off"><div class="hint" id="hKm"></div></div>
       <div class="field fuelOnly"><label for="fL" id="lbL">Litres</label><input id="fL" type="text" inputmode="decimal" autocomplete="off" placeholder="0.00"></div>
+      <div class="field full fuelOnly ftank" id="fTank"></div>
       <div class="field fuelOnly"><label for="fP" id="lbP">Prix total CHF</label><input id="fP" type="text" inputmode="decimal" autocomplete="off" placeholder="0.00"></div>
       <div class="field full fuelOnly"><label>Pays</label><div class="chiprow" id="fCtry"></div></div>
       <div class="typ seg fuelOnly" id="fCur"><button type="button" aria-pressed="true" data-c="CHF">🇨🇭 Payé en CHF</button><button type="button" aria-pressed="false" data-c="EUR">🇪🇺 Payé en €</button></div>
@@ -1535,7 +1549,7 @@ const ORACLE_LINES={
 function oracleLine(kind){ const a=ORACLE_LINES[kind]; return a[(TODAY+kind.length)%a.length]; }
 
 function liquid(frac,c,cls,txt){ // réservoir « liquide » : deux vagues qui tournent, hauteur = niveau
-  const f=Math.max(0,Math.min(1,frac||0)), col=f<.15?T.bad:f<.35?T.warn:c;
+  const f=Math.max(0,Math.min(1,frac||0)), col=/tank|bg/.test(cls||"")?(f<.15?T.bad:f<.35?T.warn:c):c; // rouge / orange seulement pour un réservoir presque vide
   return `<div class="liq ${cls||""}" style="--lv:${(f*100).toFixed(1)}%;--lc:${col}" aria-hidden="true"><div class="w"></div><div class="w w2"></div>${txt||""}</div>`; }
 function gauge(frac,c){
   const a0=Math.PI, a=Math.PI*(1-frac), r=52, cx=64, cy=62;
@@ -1816,7 +1830,18 @@ const TRIP0={v:0,km:100,pe:0,peOn:false,chk:{carb:true,ent:true,pneu:true,ass:tr
 function trip(){ if(!STATE.trip) STATE.trip=JSON.parse(JSON.stringify(TRIP0)); STATE.trip.chk=Object.assign({},TRIP0.chk,STATE.trip.chk); return STATE.trip; }
 function tripSum(v,k){ const t=trip(), c=costs(v); if(!c) return null; let sum=0;
   POSTES.forEach(p=>{ const x=c.r[p[0]]; if(t.chk[p[0]]&&x!=null) sum+=x*k; }); if(t.peOn&&t.pe>0) sum+=t.pe; return {sum,c}; }
-function renderCost(){ renderKmCard($("#costCard")); $("#tripTitle").textContent=`Combien coûte un trajet en ${V[MODE].n}`;
+function monthSpend(v){ // CHF dépensés par mois (carburant + entretien et pneus ; pas les frais fixes annuels)
+  const m={}; A.per[v].forEach(f=>{ if(f.P>0){ const k=f.d.slice(0,7); m[k]=(m[k]||0)+f.P; } });
+  STATE.ent.forEach(e=>{ if(e.v===v&&e.d&&e.k!=="F"&&+e.m>0){ const k=e.d.slice(0,7); m[k]=(m[k]||0)+(+e.m); } }); return m; }
+function renderBudget(){ const box=$("#budCard"), v=MODE, m=monthSpend(v), now=dOf(TODAY).slice(0,7);
+  const past=Object.keys(m).filter(k=>k<now).sort().slice(-12);
+  if(past.length<2){ box.hidden=true; return; } box.hidden=false;
+  const first=past[0], [y0,m0]=first.split("-").map(Number), [y1,m1]=now.split("-").map(Number), nM=Math.min(12,(y1-y0)*12+(m1-m0));
+  const avg=past.reduce((t,k)=>t+m[k],0)/Math.max(1,nM), cur=m[now]||0, f=avg>0?cur/avg:0, col=f>=1?T.bad:f>=.85?T.warn:V[v].c;
+  box.innerHTML=`<div class="hd2">${ic("drop","#4FA8FF")} Budget du mois · ${esc(V[v].n)}</div>
+    ${liquid(Math.min(1,f),col,"bar",`<span><span>${MOIS[+now.slice(5)-1]} : ${f>=1?"au-dessus de ta moyenne":f>=.85?"proche de ta moyenne":"sous ta moyenne"}</span><b>${fmt(cur)} / ${fmt(avg)} CHF</b></span>`)}
+    <div class="cap">Carburant, entretien et pneus de ce mois, comparés à ta moyenne par mois sur les 12 derniers mois (sans les frais fixes annuels).</div>`; }
+function renderCost(){ renderBudget(); renderKmCard($("#costCard")); $("#tripTitle").textContent=`Combien coûte un trajet en ${V[MODE].n}`;
   const t=trip(); if(document.activeElement!==$("#tripKm")&&!kpTarget){ $("#tripKm").value=t.km?String(t.km):""; $("#tripPe").value=t.pe?String(t.pe).replace(".",","):""; }
   $("#tripPeOn").checked=!!t.peOn; renderTrip(); applyPad(); }
 function renderTrip(){
@@ -2112,7 +2137,8 @@ function monthsIn(a,b){ const out=[], d0=new Date(a*864e5), d1=new Date(b*864e5)
 function odo(i){ const P=A.per[i]; if(!P||!P.length) return null; const kms=P.map(f=>f.km); return {mx:Math.max(...kms),mn:Math.min(...kms)}; }
 function borne(i){ const o=odo(i); if(!o) return ""; const step=["velo","trott"].includes(V[i].type)?1000:5000; let cur=o.mx; try{ cur=odoAt(i,dOf(TODAY))||o.mx; }catch(e){}
   const nx=(Math.floor(cur/step)+1)*step; let dn=null; try{ const p=profile(i); dn=dayWhen(i,p.ld,nx-p.last.km); }catch(e){}
-  return `${ic("flag-checkered")} prochaine borne <b>${fmt(nx)} km</b> dans ≈ ${fmt(nx-cur)} km${dn?`, vers ${MOIS[new Date(dn*864e5).getUTCMonth()]} ${new Date(dn*864e5).getUTCFullYear()}`:""}`; }
+  const f=(cur-(nx-step))/step;
+  return `<div style="margin:2px 0 8px">${liquid(f,V[i].c,"bar",`<span><span>${ic("flag-checkered")} ${fmt(Math.round(cur))} km</span><b>${fmt(nx)} km</b></span>`)}</div>${ic("flag-checkered")} prochaine borne <b>${fmt(nx)} km</b> dans ≈ ${fmt(nx-cur)} km${dn?`, vers ${MOIS[new Date(dn*864e5).getUTCMonth()]} ${new Date(dn*864e5).getUTCFullYear()}`:""}`; }
 function renderCom(){
   const box=$("#statCom"); while(comV.length<V.length) comV.push(true); comV.length=V.length;
   const sel=V.map((_,i)=>i).filter(i=>comV[i]&&A.stat[i]); const [a,b,pl]=comRange();
@@ -2426,7 +2452,7 @@ function renderMore(){
 
 // ---------- Quoi de neuf : la version en grand, une carte par version ; s'ouvre une fois après chaque mise à jour
 const CHANGELOG=[
-  ["3.1","27.10.2026","Un peu de magie",["Thème clair / foncé : le nouveau thème s'étend en cercle depuis le bouton touché","Réservoir « liquide » : la tuile Prochain plein et l'IA du réservoir se remplissent de vagues au niveau estimé","Barre d'onglets liquide : une goutte glisse jusqu'à l'onglet choisi et rebondit","Journal : glisse une ligne vers la gauche pour la supprimer (elle se déchire), avec « Annuler » pendant 6 secondes"]],
+  ["3.1","27.10.2026","Un peu de magie",["Thème clair / foncé : le nouveau thème s'étend en cercle depuis le bouton touché","Réservoir « liquide » : la tuile Prochain plein et l'IA du réservoir se remplissent de vagues au niveau estimé","Barre d'onglets liquide : une goutte glisse jusqu'à l'onglet choisi et rebondit","Journal : glisse une ligne vers la gauche pour la supprimer (elle se déchire), avec « Annuler » pendant 6 secondes","Encore du liquide : le réservoir se remplit pendant que tu tapes les litres, budget du mois dans Coût & trajet, prochaine borne de km dans les Stats communes, succès en cours qui se remplissent"]],
   ["3.0.2","27.10.2026","Sauvegarde",["La sauvegarde Drive garde aussi les réglages d'affichage : thème, barre (côté, icônes, épinglée ou cachée, ordre), défilement, ouverture des tuiles et pavé de saisie","Après une restauration, l'app revient exactement comme tu l'avais réglée"]],
   ["3.0.1","26.10.2026","Touche Retour",["La touche Retour d'Android ferme d'abord ce qui est ouvert (tuile, fenêtre, menu), puis revient à l'écran d'avant, au lieu de sortir de l'app","Double appui sur Retour depuis le tableau de bord pour quitter"]],
   ["3.0","26.10.2026","Nouveaux véhicules",["Paramètres → Véhicules : ajoute un vélo, une trottinette, un scooter… avec son nom, son type, sa couleur, son carburant et son icône","Plus de 3 véhicules : un menu en haut pour choisir","Sans carburant : tu notes juste le compteur, l'entretien et les frais","Modifier ou supprimer un véhicule (une copie est gardée avant)","Journal, stats, stats communes, coût, Fun et sauvegarde Drive prennent tous les véhicules"]],
@@ -2501,7 +2527,7 @@ function funCards(){
       ["🔧","Mécano","10 entretiens notés",STATE.ent.filter(e=>e.k!=="F").length,10],["🚗","Collectionneur","3 véhicules suivis",V.length,3],["📅","Fidèle","Un an de suivi",TODAY-first,365]];
     const ok=B.filter(b=>b[3]>=b[4]).length, nx=B.filter(b=>b[3]<b[4]).sort((a,b)=>b[3]/b[4]-a[3]/a[4])[0];
     return {m:{ic:ic("medal","#F5D04C"),lab:"Succès",n:`${ok}/${B.length}`,u:"",s:nx?`bientôt : ${nx[1]}`:"tout débloqué !"},
-      h:card(ic("medal"),`Succès · ${ok}/${B.length}`,B.map(([e,t,d,v,g])=>{ const done=v>=g; return `<div class="badge2${done?" ok":""}"><span class="bi">${e}</span><span>${t}<small>${d}</small>${done?"":`<div class="prog"><i style="width:${Math.min(100,v/g*100).toFixed(0)}%"></i></div>`}</span><span class="v">${done?"✓":`${fmt(Math.min(v,g))} / ${fmt(g)}`}</span></div>`; }).join(""))}; });
+      h:card(ic("medal"),`Succès · ${ok}/${B.length}`,B.map(([e,t,d,v,g])=>{ const done=v>=g; return `<div class="badge2${done?" ok":""}">${done?`<span class="bi">${e}</span>`:liquid(Math.min(1,v/g),"#F5D04C","bi",`<span>${e}</span>`)}<span>${t}<small>${d}</small></span><span class="v">${done?"✓":`${fmt(Math.min(v,g))} / ${fmt(g)}`}</span></div>`; }).join(""))}; });
   // journée record
   safe("record",()=>{ let all=[]; U0.forEach(i=>{ let best=null; const l=per[i];
       for(let k=1;k<l.length;k++){ const dd=day(l[k].d)-day(l[k-1].d); if(dd>=1&&dd<=2&&!l[k].miss){ const r=(l[k].km-l[k-1].km)/dd; if(!best||r>best.r) best={r,a:l[k-1].d,b:l[k].d,km:l[k].km-l[k-1].km,i}; } }
@@ -2793,11 +2819,17 @@ function preview(){
     else if(km>list[i].km) res.conso=Ls/(km-list[i].km)*100; }
   return res;
 }
+function fTank(L){ // le réservoir se remplit pendant qu'on tape les litres
+  const box=$("#fTank"), t=defTank(sv), u=U(sv).vol, f=L>0?L/t:0, col=L>t*1.1?T.bad:V[sv].c;
+  const txt=L>0?`<span><span>${L>t*1.1?"Plus que le réservoir ?":`${fmt(f*100)} % du réservoir`}</span><b>${fmt(L,1)} / ${fmt(t)} ${u}</b></span>`:`<span><span class="muted">Le réservoir se remplit pendant que tu tapes</span><b>${fmt(t)} ${u}</b></span>`;
+  if(!box.firstChild||box._v!==sv){ box.innerHTML=liquid(f,col,"bar",txt); box._v=sv; }
+  else { const q=box.firstChild; q.style.setProperty("--lv",(Math.min(1,f)*100).toFixed(1)+"%"); q.style.setProperty("--lc",col); q.querySelector(":scope>span").outerHTML=txt; } }
 function live(){ const r=preview();
   $("#lPL").textContent=r.L&&r.P?fmt(r.P/r.L,3):"–";
   $("#conv").textContent = r.eur!=null&&r.P!=null ? `= ${fmt(r.P,2)} CHF` : "= – CHF";
   $("#lKm").textContent=r.dist!=null?(r.dist>=0?"+":"")+fmt(r.dist):"–";
   $("#lC").textContent=r.conso!=null?fmt(r.conso,2):"–"; $("#hC").textContent=r.why||"";
+  if(hasFuel(sv)) fTank(r.L);
   if(r.L&&r.P){ const pl=r.P/r.L, ref=refPrice(sv,$("#fDate").value||dOf(TODAY),EDIT); if(ref){ const d=pl/ref-1;
       $("#hP").innerHTML= Math.abs(d)<.005 ? `≈ pareil que ta moyenne 3 mois (${fmt(ref,3)} CHF/L)` : `<span class="${d>0?"up":"dn"}">${d>0?"▲ +":"▼ −"}${fmt(Math.abs(d)*100)} %</span> vs ta moyenne 3 mois (${fmt(ref,3)} CHF/L) · ${d>0?`≈ ${fmt((pl-ref)*r.L,2)} CHF de plus`:`≈ ${fmt((ref-pl)*r.L,2)} CHF économisés 👍`}`; } else $("#hP").textContent=""; }
   else $("#hP").textContent="";
