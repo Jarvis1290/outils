@@ -252,7 +252,8 @@ button.swr{width:100%;background:none;border:0;padding:0;text-align:left;cursor:
 .frise .knob::before{content:"";position:absolute;inset:-12px}
 .frise .knob.proj{border-style:dashed}
 .frise.drag .lab b{color:var(--accS)}
-.frise.big{height:150px;animation:zoomIn .22s ease-out}
+.frise.big{height:150px}
+#sheet .frise.big{animation:zoomIn .22s ease-out}
 .frise.big .bar,.frise.big .seg,.frise.big .abs{top:52px;height:22px}
 .frise.big .bar{border-radius:11px}
 .frise.big .lunch{top:44px;height:38px;border-radius:9px}
@@ -315,6 +316,24 @@ button.swr{width:100%;background:none;border:0;padding:0;text-align:left;cursor:
 .bcol .bl{cursor:pointer;text-align:center;line-height:1.1}
 .bcol .bl small{display:block;font-size:10px;font-weight:500;color:var(--mut)}
 .wbars{margin-top:0}
+
+/* ----- 27.10 : solde en haut, jour en cours plus grand, ronds début / fin du midi ----- */
+.wtop .wsolde{margin:0 0 10px}
+.wd.today .t{font-size:15px;font-weight:700;color:var(--fg)}
+.wd.today b{font-size:14px}
+.frise .lunch .hd{top:50%;width:22px;height:22px;margin-top:-11px;border-radius:50%;background:var(--surf);border:3px solid var(--lunch);box-shadow:0 1px 3px rgba(0,0,0,.25);z-index:2}
+.frise .lunch .hd::after{display:none}
+.frise .lunch .hd::before{content:"";position:absolute;inset:-10px}
+.frise .lunch .hd.l{left:-11px}.frise .lunch .hd.r{right:-11px;left:auto}
+.frise.big .lunch .hd{width:30px;height:30px;margin-top:-15px}
+.frise.big .lunch .hd.l{left:-15px}.frise.big .lunch .hd.r{right:-15px}
+.frise .lunch .hd.on{background:var(--lunch)}
+.frise .lunch{touch-action:none}
+.frise .knob{touch-action:none}
+/* ronds du midi : début en haut à gauche, fin en bas à droite, pour ne jamais se chevaucher */
+.frise .lunch .hd,.frise.big .lunch .hd{width:24px;height:24px;margin:0}
+.frise .lunch .hd.l,.frise.big .lunch .hd.l{left:-12px;right:auto;top:-14px;bottom:auto}
+.frise .lunch .hd.r,.frise.big .lunch .hd.r{right:-12px;left:auto;top:auto;bottom:-14px}
 </style>
 </head>
 <body>
@@ -788,7 +807,7 @@ function renderToday(v){
   }
   var day=DAYS[ti], W=computeWeek(), c=W[day];
   v.appendChild(weekStrip(W));
-  v.appendChild(dayPanel(day,c,{today:true}));
+  v.appendChild(dayPanel(day,c,{today:true,big:true}));
   var h=reportHint(W); if(h) v.appendChild(h);
 }
 // bande des 5 jours (comme la maquette casino, en sobre) : toucher un jour = sa fiche
@@ -806,7 +825,9 @@ function weekStrip(W){
   });
   var sc=el("div","wsolde",'<div><span class="k">Solde semaine</span>'+(Math.abs(W.P)>0.5?'<small>dont '+fhm(W.P)+' du pot</small>':'<small>'+modeName()+'</small>')+'</div><b class="'+cls(W.solde)+'">'+fhm(W.solde)+'</b>');
   sc.onclick=function(){ go("week"); };
-  var wrap=el("div"); wrap.appendChild(box); wrap.appendChild(sc); return wrap;
+  var ti=DAYS.findIndex(function(x){ return W[x].today; });
+  if(ti>=0) box.style.gridTemplateColumns=DAYS.map(function(x,i){ return i===ti?"1.7fr":"1fr"; }).join(" ");
+  var wrap=el("div","wtop"); wrap.appendChild(sc); wrap.appendChild(box); return wrap;
 }
 // petite phrase : où partent les heures en plus ou en moins
 function reportHint(W){
@@ -827,7 +848,7 @@ function dayPanel(day,c,o){
   var a = d.arrival ? toMin(d.arrival) : (hist?null:c.arr), dep = d.departure ? toMin(d.departure) : (hist?null:c.dep);
   // frise
   var fc=el("div","card");
-  fc.appendChild(el("div","k","Ta journée")); fc.appendChild(el("div","small",o.big?"touche l'arrivée, le midi ou le départ, puis −5 / +5 · touche une pause · double toucher = roulette":"touche l'arrivée, le midi ou le départ pour le régler · ailleurs = agrandir · double toucher = roulette"));
+  fc.appendChild(el("div","k","Ta journée")); fc.appendChild(el("div","small",o.big?"glisse ou touche l'arrivée, le midi (ronds = début / fin) ou le départ, puis −5 / +5 · touche une pause · double toucher = roulette":"touche l'arrivée, le midi ou le départ pour le régler · ailleurs = agrandir · double toucher = roulette"));
   var zo=function(){ pushSheet({type:"zoom",day:day,hist:hist,d:hist?d:null,onEdit:o.onEdit}); };
   fc.appendChild(frise(day,d,a,dep,{today:o.today, proj:!d.arrival, projDep:!d.departure, hist:hist, onEdit:o.onEdit, refresh:o.refresh, big:o.big, onZoom:o.big?null:zo}));
   // heures (toucher = roulette)
@@ -932,13 +953,42 @@ function frise(day,d,a,dep,o){
     lm.style.left=pc((l1+l2)/2); lm.innerHTML='<b>'+fh(l1)+'–'+fh(l2)+'</b>';
   }
   lay(A,l1,l2,Dp);
-  // toucher un élément (arrivée, midi, départ) = il s'allume ; puis −5 / +5 dessous (appui long = ça défile). Rien ne bouge au doigt.
+  // toucher un élément (arrivée, midi, départ) = il s'allume, −5 / +5 dessous (appui long = ça défile).
+  // En grand, on peut aussi le glisser au doigt : seul l'élément touché bouge, après 8 px, par crans de 5 min.
   var skey=(o.hist?"h":"c")+day+(big?"z":""), sel=fsel&&fsel.k===skey?fsel:null;
   var wrap=el("div","friseW"); wrap.appendChild(f);
-  [[ka,"a"],[lu,"m"],[kd,"d"]].forEach(function(x){
-    if(sel&&sel.p===x[1]) x[0].classList.add("on");
-    x[0].addEventListener("click",function(e){ e.stopPropagation(); clearTimeout(zt); fsel=sel&&sel.p===x[1]?null:{k:skey,p:x[1],m:x[1]==="m"?"move":null}; refresh(); });
-  });
+  if(sel){ (sel.p==="a"?ka:sel.p==="d"?kd:lu).classList.add("on"); if(sel.p==="m"&&sel.m!=="move") lu.querySelector(sel.m==="start"?".hd.l":".hd.r").classList.add("on"); }
+  var gd=null;
+  function gStart(e,p,m,node){ e.preventDefault(); e.stopPropagation(); clearTimeout(zt);
+    gd={p:p,m:m,x0:e.clientX,w:f.getBoundingClientRect().width,moved:false,n:{A:A,l1:l1,l2:l2,D:Dp}};
+    try{ node.setPointerCapture(e.pointerId); }catch(_){} }
+  function gMove(e){
+    if(!gd) return; var dx=e.clientX-gd.x0;
+    if(!gd.moved){ if(!big||Math.abs(dx)<8) return; gd.moved=true; dragging=true; gd.x0=e.clientX; dx=0; f.classList.add("drag"); if(gd.p==="m") lm.hidden=false; }
+    var dm=Math.round((dx/gd.w*span)/5)*5, n={A:A,l1:l1,l2:l2,D:Dp};
+    if(gd.p==="a") n.A=Math.max(lo,Math.min(Dp-60,A+dm));
+    else if(gd.p==="d") n.D=Math.min(hi,Math.max(A+60,Dp+dm));
+    else if(gd.m==="start") n.l1=Math.max(A,Math.min(l2-15,l1+dm));
+    else if(gd.m==="end") n.l2=Math.min(Dp,Math.max(l1+15,l2+dm));
+    else { var k=Math.max(A-l1,Math.min(Dp-l2,dm)); n.l1=l1+k; n.l2=l2+k; }
+    if(n.A!==gd.n.A||n.D!==gd.n.D||n.l1!==gd.n.l1||n.l2!==gd.n.l2){ if(navigator.vibrate) try{ navigator.vibrate(6); }catch(_){} }
+    gd.n=n; lay(n.A,n.l1,n.l2,n.D);
+  }
+  function gEnd(){
+    if(!gd) return; var g=gd; gd=null; dragging=false; f.classList.remove("drag");
+    if(!g.moved){ fsel=(sel&&sel.p===g.p&&(g.p!=="m"||sel.m===g.m))?null:{k:skey,p:g.p,m:g.m}; refresh(); return; }
+    fsel={k:skey,p:g.p,m:g.m};
+    var x=dd(), n=g.n, ch=false;
+    if(n.A!==A){ x.arrival=toClock(n.A); ch=true; }
+    if(n.D!==Dp){ x.departure=toClock(n.D); x.touched=true; x.auto=false; ch=true; }
+    if(n.l1!==l1||n.l2!==l2){ x.lunchStart=toClock(n.l1); x.lunchEnd=toClock(n.l2); ch=true; }
+    if(ch) commit(cm); else refresh();
+  }
+  ka.addEventListener("pointerdown",function(e){ gStart(e,"a",null,ka); });
+  kd.addEventListener("pointerdown",function(e){ gStart(e,"d",null,kd); });
+  lu.addEventListener("pointerdown",function(e){ gStart(e,"m",e.target.classList.contains("l")?"start":e.target.classList.contains("r")?"end":"move",lu); });
+  [ka,kd,lu].forEach(function(n){ n.addEventListener("pointermove",gMove); n.addEventListener("pointerup",gEnd); n.addEventListener("pointercancel",function(){ gd=null; dragging=false; f.classList.remove("drag"); lay(A,l1,l2,Dp); });
+    n.addEventListener("click",function(e){ e.stopPropagation(); }); });
   function refresh(){ if(o.refresh) o.refresh(); else render(); }
   if(sel){
     var v={A:A,l1:l1,l2:l2,D:Dp}, ctl=el("div","fctl");
