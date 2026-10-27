@@ -1,6 +1,6 @@
 // Service worker dédié au Planning Horaire (indépendant des autres outils du repo)
 // réseau d'abord (toujours la dernière version en ligne), cache seulement hors ligne.
-const CACHE_NAME = "planning-horaire-v2.0";
+const CACHE_NAME = "planning-horaire-v2.1";
 const FILES = [
   "index.html",
   "manifest.json",
