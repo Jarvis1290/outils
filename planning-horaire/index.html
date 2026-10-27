@@ -414,6 +414,12 @@ body.bet-fete{overflow:hidden}
 .bet-actor{will-change:transform}
 .bet-fly.guest{font-size:36px;z-index:96}
 @media (prefers-reduced-motion:reduce){.bet-actor{transition:none!important}}
+.bet-fly.prop{font-size:30px;z-index:96;animation:betPropIn .5s cubic-bezier(.3,1.5,.5,1)}
+@keyframes betPropIn{from{opacity:0;transform:scale(.3)}}
+.bet-fly.num{z-index:96;width:120px;text-align:center;font:800 30px/1 system-ui,sans-serif;color:var(--lunch);text-shadow:0 2px 0 var(--page),0 4px 14px rgba(0,0,0,.25);white-space:nowrap;animation:betNum 2.6s ease-out forwards}
+@keyframes betNum{0%{opacity:0;transform:scale(.3)}22%{opacity:1;transform:scale(1.35)}70%{opacity:1;transform:scale(1) translateY(-10px)}100%{opacity:0;transform:translateY(-40px)}}
+.bet-fly.story{left:50%!important;z-index:96;padding:8px 16px;border-radius:20px;background:var(--fg);color:var(--page);font:800 15px/1.2 system-ui,sans-serif;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.3);animation:betStory 3.2s ease-in-out forwards}
+@keyframes betStory{0%{opacity:0;transform:translateX(-50%) scale(.6)}15%,80%{opacity:1;transform:translateX(-50%) scale(1)}100%{opacity:0;transform:translateX(-50%) translateY(-12px)}}
 </style>
 </head>
 <body>
@@ -1748,7 +1754,7 @@ var Bet=(function(){
 
   // ---------- La page fait sa vie : après un moment sans toucher, tout se promène, bavarde, reçoit des invités ----------
   // Rien n'est modifié : on ne fait que déplacer (transform) ; un voile attrape le 1er toucher (aucun bouton déclenché) et tout se range en 5 s.
-  var F={on:false,ending:false,t:[],acts:[],veil:null,scene:"",n:0,t0:0};
+  var F={on:false,ending:false,t:[],acts:[],veil:null,scene:"",n:0,t0:0,since:0,tab0:null,sel0:null};
   function feteDelay(){ var v=+ls("ph-show",window.PH_SHOW_DEF||"20"); return isNaN(v)?20:v; }
   function later(fn,ms){ F.t.push(setTimeout(fn,ms)); }
   function mv(a,x,y,r,s,ms){ if(!a||!a.isConnected) return; a.style.transition="transform "+(ms||2600)+"ms cubic-bezier(.45,.05,.35,1)"; a.style.transform="translate("+Math.round(x)+"px,"+Math.round(y)+"px) rotate("+(r||0).toFixed(1)+"deg) scale("+(s||1)+")"; }
@@ -1816,17 +1822,127 @@ var Bet=(function(){
       later(function(){ F.acts.forEach(function(a,i){ var h=home(a), t=i/n*Math.PI*2+Math.PI; mv(a,cx+Math.cos(t)*R-h.x,cy+Math.sin(t)*R-h.y,0,.85,3600); }); },3400);
       later(function(){ say(pick(F.acts),"La ronde ! 🎠"); },1200); return 7800; }
   };
+  // ---------- Des vies : petites histoires en plusieurs actes (titre, accessoires, chiffres qui surgissent) ----------
+  function prop(txt,x,y,ms,sz){ var e=fly(txt,x-(sz||30)/2,y-(sz||30)/2,"prop",ms||12000); if(sz) e.style.fontSize=sz+"px"; return e; }
+  function glide(e,x,y,ms){ if(!e) return; e.style.transition="left "+(ms||1200)+"ms ease-in-out, top "+(ms||1200)+"ms ease-in-out, opacity .4s"; var s=parseFloat(e.style.fontSize)||30; e.style.left=(x-s/2)+"px"; e.style.top=(y-s/2)+"px"; }
+  function num(txt,x,y){ var e=fly(txt,x,y,"num",2600); e.style.left=Math.max(8,Math.min(innerWidth-160,x-60))+"px"; return e; }
+  function titre(txt){ var e=fly("✨ "+txt+" ✨",0,Math.max(70,innerHeight*.12),"story",3200); return e; }
+  function to(a,x,y,ms,r,s){ if(!a||!a._f0) return; var h=home(a); mv(a,x-h.x,y-h.y,r||0,s||1,ms); }
+  function cx(){ return innerWidth/2+24; } function cy(){ return innerHeight*.45; }
+  function nm(a){ if(!a) return "?"; var t=a.getAttribute("aria-label")||(a.querySelector("b")?a.querySelector("b").textContent:a.textContent)||"?"; t=t.trim().split(/\s+/)[0]; var D={LUN:"Lundi",MAR:"Mardi",MER:"Mercredi",JEU:"Jeudi",VEN:"Vendredi"}; return D[t.toUpperCase()]||(t.length>12?t.slice(0,12):t); }
+  function find(sel){ return F.acts.filter(function(a){ return a.matches(sel); }); }
+  function tile(i){ var w=find(".wd"); return w.filter(function(a){ return nm(a)===["Lundi","Mardi","Mercredi","Jeudi","Vendredi"][i]; })[0]; }
+  function duo(a,b){ var p=two()||[]; a=a||p[0]; b=(b&&b!==a)?b:(p[1]!==a?p[1]:p[0]); return a&&b&&a!==b?[a,b]:null; }
+  function others(ex){ return F.acts.filter(function(a){ return ex.indexOf(a)<0; }); }
+  var VIES={
+    the:function(){ var p=duo(); if(!p) return 0; var x=cx(), y=cy(); titre("L'heure du thé");
+      later(function(){ to(p[0],x-60,y,2600,-4); to(p[1],x+60,y,2600,4); },600);
+      later(function(){ prop("🫖",x,y-6,14000,34); prop("☕",x-26,y+20,13000,22); prop("☕",x+26,y+20,13000,22); },3000);
+      [0,1,2].forEach(function(k){ later(function(){ fly("〰️",x-30+k*20,y-30,"steam",2600); },3600+k*2400); });
+      var l=["Un sucre ? 🍬","Deux ! Je suis gourmand 😋","Tu as vu le solde ?",soldeTxt()+", pas mal hein 😌","Santé ! 🫖"];
+      later(function(){ dialogue(p,l,2500); },3400); later(function(){ num(soldeTxt(),x,y-90); },3400+2500*3+300); return 3400+l.length*2500+600; },
+    resto:function(){ var p=duo(tile(4),tile(0)); if(!p) return 0; var x=cx(), y=cy(); titre("Dîner aux chandelles");
+      later(function(){ to(p[0],x-70,y,2800); to(p[1],x+70,y,2800); },600);
+      later(function(){ prop("🕯️",x,y-30,18000,26); prop("🍝",x-28,y+24,16000,24); prop("🍷",x+28,y+24,16000,24); },3200);
+      later(function(){ var w=prop("🤵",innerWidth+20,y-60,9000,34); later(function(){ glide(w,x+110,y-60,1800); },60); later(function(){ bubble(w,"Bonsoir messieurs-dames 🎩",2200); },2000); later(function(){ glide(w,innerWidth+40,y-60,1800); },4600); },3800);
+      later(function(){ say(p[0],nm(p[0])+" : c'est moi qui invite 😎",2400); },6800);
+      later(function(){ var f=prop("🧾",innerWidth+20,y+60,9000,30); later(function(){ glide(f,x,y+60,1500); },60); later(function(){ num("142.50 CHF",x,y+30); },1700); },9600);
+      later(function(){ say(p[0],"… "+nm(p[1])+", tu peux payer ? 😅",2400); },12000);
+      later(function(){ mv(p[1],0,0,0,.75,900); to(p[1],x+70,y,900,-10,.75); say(p[1],"Pourquoi c'est toujours moi ?! 😩",2400); },14600);
+      return 17800; },
+    drague:function(){ var b=find(".wsolde")[0]||find(".ring")[0]; var p=duo(tile(1),b); if(!p) return 0; titre("Coup de foudre ?");
+      var h=home(p[1]); later(function(){ to(p[0],h.x-50,h.y+40,3000,-8); },600);
+      later(function(){ say(p[0],"T'as de beaux chiffres, tu sais 😏",2500); for(var i=0;i<5;i++) (function(i){ later(function(){ fly(pick(["💕","💗","💘"]),h.x-60+Math.random()*40,h.y+20,"steam",2600); },i*300); })(i); },3800);
+      later(function(){ mv(p[1],0,0,0,1.18,900); say(p[1],"Désolé… je suis déjà avec le pot 🐷",2600); },6800);
+      later(function(){ to(p[0],h.x-50,h.y+70,1200,22,.85); fly("💔",h.x-60,h.y+30,"moon",2600); },9800);
+      later(function(){ say(p[0],"Bon… je retourne travailler 😔",2200); mv(p[1],0,0,0,1,800); },11200);
+      return 13800; },
+    chien:function(){ var a=pick(F.acts); if(!a) return 0; var h=home(a), y=h.y, pot=q('#rail button[data-t="pot"]'); titre("La promenade du chien");
+      var d=prop("🐕",-40,y+30,20000,34); d.style.transform="scaleX(-1)";
+      later(function(){ glide(d,h.x-50,y+30,2200); },600);
+      later(function(){ say(a,"Wouf ? Ah, c'est l'heure de la promenade 🦮",2400); },2800);
+      later(function(){ glide(d,innerWidth*.7,y+30,3200); to(a,innerWidth*.7-50,y,3300,6); },5200);
+      later(function(){ bubble(d,"snif snif 👃",1800); },8600);
+      if(pot){ var pr=pot.getBoundingClientRect(); later(function(){ glide(d,pr.right+24,pr.top+pr.height/2,2600); to(a,pr.right+70,pr.top+pr.height/2,2700,-6); },10600);
+        later(function(){ bubble(pot,"Hé ! C'est mon coin ici 🐷",2200); bubble(d,"WOUF ! 🐶",1800); },13400);
+        later(function(){ d.style.transform=""; glide(d,innerWidth+50,y+30,3000); to(a,h.x,h.y,3000); },16000); return 19400; }
+      later(function(){ glide(d,innerWidth+50,y+30,2400); to(a,h.x,h.y,2600); },10800); return 13600; },
+    muscu:function(){ var a=find(".bb")[0]||find(".ring")[0]||pick(F.acts); if(!a) return 0; var h=home(a); titre("Séance de muscu");
+      later(function(){ to(a,cx(),cy(),2400); },600);
+      later(function(){ prop("🏋️",cx(),cy()-70,16000,36); say(a,"Allez, une série ! 💪",2000); },3200);
+      [1,2,3,4,5].forEach(function(k){ later(function(){ mv(a,cx()-h.x,cy()-h.y-24,0,1+k*.06,450); later(function(){ mv(a,cx()-h.x,cy()-h.y,0,1+k*.06,450); },500); num(String(k),cx()+40,cy()-110); },5200+k*1100); });
+      later(function(){ for(var i=0;i<4;i++) fly("💦",cx()-40+Math.random()*80,cy()-30,"steam",2600); mv(a,cx()-h.x,cy()-h.y,0,1.45,1200); },11400);
+      later(function(){ say(a,"Regarde-moi ces heures ! "+soldeTxt()+" 😤",2600); },12800);
+      return 15800; },
+    foot:function(){ var pl=F.acts.slice(0,5); if(pl.length<3) return 0; titre("Le grand match"); var h0=home(pl[0]);
+      var b=prop("⚽",h0.x,h0.y+30,20000,26);
+      pl.forEach(function(a,i){ later(function(){ var h=home(a); glide(b,h.x,h.y+20,900); later(function(){ mv(a,0,-18,i%2?8:-8,1.05,350); later(function(){ mv(a,0,0,0,1,350); },380); if(i===1) say(a,"À moi ! 🙋",1400); },900); },800+i*1400); });
+      var t=800+pl.length*1400; later(function(){ prop("🥅",innerWidth-36,cy(),8000,40); glide(b,innerWidth-36,cy(),900); },t);
+      later(function(){ num("BUUUT ! ⚽",cx(),cy()-60); F.acts.forEach(function(a,i){ later(function(){ mv(a,0,-24,0,1.1,300); later(function(){ mv(a,0,0,0,1,300); },320); },i*80); }); },t+1000);
+      return t+3600; },
+    jeux:function(){ var p=duo(); if(!p) return 0; titre("Cache-cache !"); var h=home(p[1]);
+      later(function(){ say(p[0],"Je compte jusqu'à 3… 🙈",2000); },500);
+      later(function(){ to(p[1],h.x,h.y,900,0,.25); },1200);
+      ["1","2","3"].forEach(function(t,k){ later(function(){ num(t,home(p[0]).x,home(p[0]).y-60); },2400+k*1000); });
+      later(function(){ others([p[1]]).forEach(function(a){ mv(a,(Math.random()-.5)*80,(Math.random()-.5)*60,(Math.random()-.5)*20,1,1400); }); say(p[0],"Où es-tu ? 🔍",2000); },5600);
+      later(function(){ mv(p[1],0,0,0,1.35,600); say(p[1],"COUCOU ! 😜",1800); },8400);
+      later(function(){ titre("Chaises musicales"); var hs=F.acts.map(home); hs.sort(function(){ return Math.random()-.5; }); F.acts.forEach(function(a,i){ var t=hs[i], hh=home(a); mv(a,t.x-hh.x,t.y-hh.y,0,1,2200); }); for(var i=0;i<4;i++) fly("🎵",Math.random()*(innerWidth-40),cy(),"steam",2600); },10600);
+      later(function(){ var l=pick(F.acts); fly("⏸️",cx()-15,cy()-100,"moon",2000); mv(l,0,60,25,.7,900); say(l,"Perdu… 😢",1800); },14200);
+      return 16600; },
+    debat:function(){ var c; try{ c=computeWeek(); }catch(e){ return 0; } var w=find(".wd"); if(w.length<2) return SC.bavardage();
+      var p=duo(w[0],w[1]); var ix=p.map(function(a){ return ["Lundi","Mardi","Mercredi","Jeudi","Vendredi"].indexOf(nm(a)); }); if(ix[0]<0||ix[1]<0) return SC.bavardage();
+      var e=ix.map(function(i){ var x=c[DAYS[i]]; return x&&x.done?x.ecart:0; }); titre("Le grand débat");
+      var x=cx(), y=cy(); later(function(){ to(p[0],x-70,y,2400,-5); to(p[1],x+70,y,2400,5); },500);
+      later(function(){ say(p[0],"Moi j'ai fait "+fsign(e[0])+" ! 😤",2400); num(fsign(e[0]),x-70,y-90); },3200);
+      later(function(){ say(p[1],"Pff ! Moi "+fsign(e[1])+" 💪",2400); num(fsign(e[1]),x+70,y-90); },6000);
+      var win=e[0]>=e[1]?0:1; later(function(){ to(p[win],win?x+70:x-70,y,900,0,1.3); to(p[1-win],win?x-70:x+70,y,900,0,.8); },8800);
+      later(function(){ var j=find(".wsolde")[0]||find(".ring")[0]; if(j) say(j,"Total "+soldeTxt()+", tout le monde se calme 😌",2600); else num(soldeTxt(),x,y-60); },10200);
+      return 13200; },
+    rencontre:function(){ var p=duo(); if(!p) return 0; var x=cx(), y=cy(); titre("Une rencontre"); 
+      later(function(){ to(p[0],40,y,1800); to(p[1],innerWidth-20,y,1800); },400);
+      later(function(){ to(p[0],x-45,y,4200,-3); to(p[1],x+45,y,4200,3); },2600);
+      later(function(){ say(p[0],"Oh… pardon 😳",1800); },7000); later(function(){ say(p[1],"Non, c'est moi… 🥹",1800); },8600);
+      later(function(){ for(var i=0;i<8;i++) fly(pick(["💕","💖","✨"]),x-40+Math.random()*80,y-20,"steam",2600); },9800);
+      later(function(){ prop("💒",x,y-90,6000,50); num("💍",x,y-30); },11200);
+      later(function(){ var o=others(p)[0]; if(o) say(o,"Vive les "+nm(p[0])+"-"+nm(p[1])+" ! 🎉",2600); for(var i=0;i<6;i++) fly(pick(["🎉","🎊","✨"]),Math.random()*(innerWidth-30),-20,"fall",2600); },12600);
+      return 15600; },
+    karaoke:function(){ var a=find('#rail button[data-t="pot"]')[0]||pick(F.acts); if(!a) return 0; var x=cx(), y=cy(); titre("Soirée karaoké");
+      later(function(){ to(a,x,y,2400,0,1.2); },500); later(function(){ prop("🎤",x+40,y+10,12000,28); },2800);
+      later(function(){ say(a,"🎵 Laaa laaa… les heures sup' ! 🎶",2600); },3400);
+      [0,1,2,3,4].forEach(function(k){ later(function(){ fly(pick(["🎵","🎶","🎼"]),x-20+Math.random()*60,y-40,"steam",2600); mv(a,x-home(a).x,y-home(a).y,k%2?8:-8,1.2+k*.04,400); },3600+k*700); });
+      later(function(){ others([a]).forEach(function(o){ var h=home(o); mv(o,(h.x<x?-40:40),0,h.x<x?-12:12,.9,900); }); var o=others([a])[0]; if(o) say(o,"Aïe, mes oreilles ! 🙉",2200); },7000);
+      later(function(){ say(a,"Merci, merci ! 🙇",2000); for(var i=0;i<5;i++) fly("👏",Math.random()*(innerWidth-40),cy()+60,"steam",2600); num("★★★★☆",x,y-90); },10000);
+      return 12800; },
+    // un personnage appuie sur un onglet : toute la troupe part vivre sur une autre page
+    onglet:function(){ var ts=["today","week","pot"].filter(function(t){ return t!==tab && q('#rail button[data-t="'+t+'"]'); }); if(!ts.length) return 0;
+      var t=pick(ts), rb=q('#rail button[data-t="'+t+'"]'), g=pick(F.acts.filter(function(a){ return !rb.contains(a)&&a!==rb; })); if(!g) return 0; var r=rb.getBoundingClientRect();
+      say(g,pick(["Venez, on va voir "+TABS[t].t+" ! 👉","On déménage ! 📦","Il paraît qu'il y a une fête à côté 🎉"]),2200);
+      later(function(){ to(g,r.right+50,r.top+r.height/2,2200,-10,.9); others([g]).forEach(function(a){ var h=home(a); mv(a,(r.right+60-h.x)*.35,(r.top-h.y)*.35,0,.95,2400); }); },1600);
+      later(function(){ anim(rb,"bet-hop",900); },3900);
+      later(function(){ resetActs(); go(t,true); F.acts=actors(); if(F.acts.length<3){ return; }
+        var dir=Math.random()<.5?-1:1; F.acts.forEach(function(a){ a.style.transition="none"; a.style.transform="translate("+(dir*innerWidth)+"px,"+((Math.random()-.5)*120)+"px) rotate("+(dir*20)+"deg)"; }); void document.body.offsetWidth;
+        F.acts.forEach(function(a,i){ later(function(){ mv(a,(Math.random()-.5)*40,(Math.random()-.5)*30,(Math.random()-.5)*8,1,1600+Math.random()*900); },i*90); });
+        later(function(){ titre(pick(["Nouvelle page, nouvelle vie","Bienvenue chez "+TABS[t].t,"On s'installe ici !"])); },900); },4600);
+      return 8200; }
+  };
+  function resetActs(){ F.acts.forEach(function(a){ a.classList.remove("bet-actor"); var o=a._f0||{}; a.style.transition="none"; a.style.transform=o.tf||""; delete a._f0; }); void document.body.offsetWidth; F.acts.forEach(function(a){ if(a._f0===undefined) a.style.transition=""; }); F.acts=[]; }
+  Object.keys(VIES).forEach(function(k){ SC[k]=VIES[k]; });
   var SCN=Object.keys(SC);
   function nextScene(){
     if(!F.on||F.ending) return;
     if(document.hidden){ feteStop(true); return; }
-    var c=SCN.filter(function(x){ return x!==F.scene; }), s=pick(c); F.scene=s; F.n++;
+    // surtout des histoires ; de temps en temps (toutes les 2-3 scènes) la troupe change d'onglet
+    var V=Object.keys(VIES).filter(function(x){ return x!=="onglet"; }), s;
+    if(F.since>=2+Math.floor(Math.random()*2)){ s="onglet"; F.since=0; }
+    else { var c=(Math.random()<.75?V:SCN.filter(function(x){ return !VIES[x]; })).filter(function(x){ return x!==F.scene; }); s=pick(c); F.since++; }
+    if(F.forced){ s=F.forced; F.forced=null; }
+    F.scene=s; F.n++;
     var d=0; try{ d=SC[s](); }catch(e){ d=0; } F.t.push(setTimeout(nextScene,(d||1000)+800));
   }
-  function feteStart(){
-    if(F.on) return false; if(matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
+  function feteStart(first){
+    if(F.on) return false; F.forced=first||null; if(matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
     F.acts=actors(); if(F.acts.length<3){ F.acts.forEach(function(a){ a.classList.remove("bet-actor"); }); F.acts=[]; return false; }
-    F.on=true; F.ending=false; F.scene=""; F.n=0; F.t0=Date.now(); document.body.classList.add("bet-fete");
+    F.on=true; F.ending=false; F.scene=""; F.n=0; F.since=0; F.t0=Date.now(); F.tab0=tab; F.sel0=selDay; document.body.classList.add("bet-fete");
     var v=el("div","bet-veil"); document.body.appendChild(v); F.veil=v;
     v.addEventListener("pointerdown",function(e){ e.preventDefault(); e.stopPropagation(); if(F.ending){ feteStop(true); lastAct=Date.now(); } else feteEnd(true); });
     v.addEventListener("click",function(e){ e.preventDefault(); e.stopPropagation(); });
@@ -1835,7 +1951,10 @@ var Bet=(function(){
   // au toucher : tout le monde rentre tranquillement à sa place et dit au revoir (5 s)
   function feteEnd(touch){
     if(!F.on||F.ending) return; F.ending=true; F.t.forEach(clearTimeout); F.t=[];
-    qa(".bet-bub").forEach(function(b){ b.remove(); });
+    qa(".bet-bub,.bet-fly").forEach(function(b){ b.remove(); });
+    // la troupe était partie sur un autre onglet : on revient à la page de départ, tout le monde arrive en vrac et se range
+    if(tab!==F.tab0||selDay!==F.sel0){ resetActs(); selDay=F.sel0; go(F.tab0,true); F.acts=actors();
+      F.acts.forEach(function(a){ a.style.transition="none"; a.style.transform="translate("+((Math.random()-.5)*300)+"px,"+((Math.random()-.5)*400)+"px) rotate("+((Math.random()-.5)*40)+"deg)"; }); void document.body.offsetWidth; }
     var bye=["salut ! 👋","à plus ! 👋","on range ! 🧹","bisous 😘","oups, il est réveillé 😳","chacun à sa place !","c'était sympa 😄"];
     F.acts.forEach(function(a,i){ setTimeout(function(){ if(!a.isConnected) return; a.style.transition="transform "+(1600+Math.random()*1400)+"ms cubic-bezier(.3,.7,.3,1)"; a.style.transform="translate(0,0) rotate(0deg) scale(1)"; },i*120); });
     F.acts.slice(0,3).forEach(function(a,i){ setTimeout(function(){ bubble(a,bye.splice(Math.floor(Math.random()*bye.length),1)[0],1800); },300+i*700); });
@@ -1844,15 +1963,16 @@ var Bet=(function(){
   function feteStop(quick){
     F.t.forEach(clearTimeout); F.t=[];
     F.acts.forEach(function(a){ a.classList.remove("bet-actor"); var o=a._f0||{}; a.style.transition=quick?"none":(o.tr||""); a.style.transform=o.tf||""; if(quick) setTimeout(function(){ a.style.transition=o.tr||""; },30); delete a._f0; });
-    qa(".bet-fly.guest").forEach(function(x){ x.remove(); });
+    qa(".bet-fly.guest,.bet-fly.prop").forEach(function(x){ x.remove(); });
+    if(quick && F.on && (tab!==F.tab0||selDay!==F.sel0)){ F.acts=[]; selDay=F.sel0; go(F.tab0,true); }
     if(F.veil) F.veil.remove(); F.veil=null; F.acts=[]; F.on=false; F.ending=false; document.body.classList.remove("bet-fete");
   }
   document.addEventListener("visibilitychange",function(){ if(document.hidden&&F.on) feteStop(true); });
   setInterval(function(){
     if(document.hidden || sheets.length || dragging) return;
     var idle=Date.now()-lastAct, fd=feteDelay();
-    // la fête dure ~3 min, puis la page s'endort (sans fête : endormie après 1 min)
-    var nap=fd?(fd*1000+180000):60000;
+    // la fête dure ~5 min, puis la page s'endort (sans fête : endormie après 1 min)
+    var nap=fd?(fd*1000+300000):60000;
     if(idle>=nap){ if(F.on&&!F.ending) feteEnd(); else if(!F.on&&!asleep) sleep(); return; }
     if(F.on) return;
     if(fd && idle>=fd*1000 && !asleep){ feteStart(); return; }
@@ -1869,9 +1989,9 @@ var Bet=(function(){
   return {list:L, play:play, maybe:maybe, cfg:cfg, eligible:eligible, idle:function(){ return {n:idleN,asleep:asleep,last:lastIdle}; }, fete:function(){ return {on:F.on,ending:F.ending,scene:F.scene,n:F.n,acts:F.acts.length}; }, feteStart:feteStart, feteEnd:feteEnd,
     // page de test seulement : passer en revue toutes les bêtises, les effets « page vivante » et la fête
     demoList:function(){ var N={respire:"La frise qui respire",retourne:"La tuile qui se retourne",yeux:"Les yeux 👀",vague:"La vague d'icônes",etincelle:"Les étincelles",renifle:"Le cochon qui renifle",rond:"Le rond qui gigote",pastilles:"Les pastilles qui dansent",titre:"Le titre",anneau:"L'anneau fier",cases:"Les cases qui brillent",barres:"Les barres qui sautent",tuiles:"Les tuiles qui sautent",pensee:"Une pensée",solde:"Le solde qui brille",lutin:"Le lutin"};
-      return L.map(function(b){ return {id:b[0],nom:b[1],k:"b"}; }).concat(IDL.map(function(e){ return {id:e[0],nom:"Vivante · "+(N[e[0]]||e[0]),k:"i"}; }),[{id:"fete",nom:"La page fait sa vie (touche pour ranger)",k:"f"}]); },
+      return L.map(function(b){ return {id:b[0],nom:b[1],k:"b"}; }).concat(Object.keys(VIES).map(function(k){ var T2={the:"L'heure du thé",resto:"Dîner aux chandelles",drague:"Coup de foudre ?",chien:"La promenade du chien",muscu:"Séance de muscu",foot:"Le grand match",jeux:"Cache-cache et chaises musicales",debat:"Le grand débat",rencontre:"Une rencontre",karaoke:"Soirée karaoké",onglet:"On change d'onglet"}; return {id:k,nom:"Vie · "+(T2[k]||k)+" (touche pour ranger)",k:"v"}; }),IDL.map(function(e){ return {id:e[0],nom:"Vivante · "+(N[e[0]]||e[0]),k:"i"}; }),[{id:"fete",nom:"La page fait sa vie (touche pour ranger)",k:"f"}]); },
     demo:function(it){ if(F.on) feteStop(true); if(it.k==="b") return Bet.show(it.id); sheets=[]; redrawSheet(); selDay=null; go("today");
-      setTimeout(function(){ if(it.k==="f"){ if(F.on) feteStop(true); feteStart(); } else { var e=IDL.filter(function(x){ return x[0]===it.id; })[0]; if(!e||!e[1]()) toast("Pas possible ici"); } },450); },
+      setTimeout(function(){ if(it.k==="f"||it.k==="v"){ if(F.on) feteStop(true); feteStart(it.k==="v"?it.id:null); } else { var e=IDL.filter(function(x){ return x[0]===it.id; })[0]; if(!e||!e[1]()) toast("Pas possible ici"); } },450); },
     // pour le carnet : jouer une bêtise précise tout de suite (sur l'onglet qui lui convient)
     show:function(id){ var b=L.filter(function(x){ return x[0]===id; })[0]; if(!b) return;
       sheets=[]; redrawSheet(); if(b[0]==="barre") go("week"); else { selDay=null; go("today"); }
