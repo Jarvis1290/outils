@@ -148,6 +148,7 @@ nav.tabs .fabslot{position:relative}
 .field input{width:100%;box-sizing:border-box;background:var(--ink);border:1px solid var(--line);color:var(--fg);border-radius:10px;padding:12px;font-family:var(--f-num);font-size:18px}
 .field input:focus{border-color:var(--volt);outline:none;box-shadow:0 0 0 3px var(--volt-glow)}
 .field .hint{font-size:11.5px;color:var(--fg-3);min-height:15px}
+.field .hint.warn{color:var(--warn)}
 .field .hint b{color:var(--volt-hi);font-weight:500}
 .typ{grid-column:1/-1}
 .eur{border:1px solid color-mix(in srgb,var(--volt) 45%,transparent);background:color-mix(in srgb,var(--volt) 6%,transparent);border-radius:12px;padding:10px}
@@ -810,6 +811,73 @@ html[data-magic="on"] header.top::before{opacity:var(--skyo,.5)}
 html[data-magic="on"] .dash .tu{transform:translate(calc(var(--gx,0) * 3px),calc(var(--gy,0) * 3px));transition:transform .25s ease-out}
 html[data-magic="on"] .dash .tw:nth-child(2n) .tu{transform:translate(calc(var(--gx,0) * 4.5px),calc(var(--gy,0) * 4.5px))}
 @media (prefers-reduced-motion:reduce){ .liq .w{animation:none} ::view-transition-new(root){animation:none} .row.torn{animation-duration:.01s} }
+
+/* v3.5 : sous-onglets de Coût & trajet, mini-icônes dans la barre, barre et tuiles */
+#costSeg{margin-bottom:2px}
+#costSeg button{display:flex;align-items:center;justify-content:center;gap:5px;padding:9px 2px;font-size:12px}
+#costSeg button .ico{font-size:15px}
+@media (max-width:420px){ #costSeg button{flex-direction:column;gap:2px;font-size:11px} }
+#v-cost:not([data-ct="bud"]) [data-ct="bud"],#v-cost:not([data-ct="plan"]) [data-ct="plan"],#v-cost:not([data-ct="km"]) [data-ct="km"],#v-cost:not([data-ct="trip"]) [data-ct="trip"]{display:none!important}
+nav.tabs .q4{display:grid;grid-template-columns:repeat(2,12px);gap:2px;width:26px;height:26px;place-content:center}
+nav.tabs .q4 i{display:grid;place-items:center;width:12px;height:12px;border-radius:4px;opacity:.9;transition:transform .25s,background .25s,opacity .25s}
+nav.tabs .q4 .ico,nav.tabs .q4 svg{width:11px!important;height:11px!important;font-size:11px}
+nav.tabs [aria-current="page"] .q4 i{opacity:.45}
+nav.tabs .q4 i.on{opacity:1!important;transform:scale(1.25);background:color-mix(in srgb,var(--volt) 35%,transparent)}
+html:not([data-rail="b"]) nav.tabs .in{padding:14px 0 24px}
+.tu.tm{min-height:110px;padding:12px 13px}
+.tm .mh{font-size:12px}
+.tm .mn{font-size:26.5px}
+.tm .mn.lg{font-size:19.5px}
+.tm .ms{font-size:11.5px}
+/* réservoirs : la surface penche avec le téléphone, et clapote de temps en temps */
+.liq .lq{position:absolute;inset:0;transition:transform .35s ease-out}
+html[data-magic="on"] .liq .lq{transform:rotate(calc(var(--gx,0) * -12deg))}
+@keyframes slosh{0%,100%{rotate:0deg}15%{rotate:-14deg}38%{rotate:11deg}60%{rotate:-6deg}80%{rotate:2deg}}
+.liq .lq.slosh{animation:slosh 2.8s ease-in-out}
+/* l'app « vivante » : un chiffre qui saute, une ligne qui frétille */
+@keyframes hop{0%,100%{translate:0 0;rotate:0deg;scale:1}28%{translate:0 -26px;rotate:-8deg;scale:1.22}52%{translate:0 3px;rotate:4deg;scale:.95}74%{translate:0 -6px;rotate:0deg;scale:1.04}}
+.hop{animation:hop 2s cubic-bezier(.3,1.3,.5,1)}
+@keyframes wig{0%,100%{translate:0 0;rotate:0deg}20%{translate:18px 0;rotate:2deg}45%{translate:-15px 0;rotate:-2deg}70%{translate:6px 0}}
+.wig{animation:wig 1.8s ease-in-out}
+@media (prefers-reduced-motion:reduce){ .hop,.wig,.liq .lq.slosh{animation:none} .liq .lq{transform:none!important} }
+
+/* bêtises : de petites farces, jamais bloquantes, le vrai chiffre revient toujours */
+.bbl{position:fixed;z-index:80;pointer-events:none;max-width:260px;padding:10px 15px;border-radius:18px;background:#FFF6D6;color:#241A00;font:700 16px/1.25 var(--f-body);box-shadow:0 8px 24px rgba(0,0,0,.3);transform-origin:50% 100%;animation:bblIn 2.6s ease both}
+.bbl::after{content:"";position:absolute;left:var(--ax,50%);bottom:-6px;width:12px;height:12px;background:inherit;transform:translateX(-50%) rotate(45deg);border-radius:2px}
+.bbl.dn{transform-origin:50% 0}.bbl.dn::after{bottom:auto;top:-6px}
+.bbl{animation-duration:3.6s}
+@keyframes bblIn{0%{opacity:0;scale:.3}10%{opacity:1;scale:1.08}16%{scale:1}85%{opacity:1;scale:1}100%{opacity:0;scale:.85}}
+@keyframes nope{0%,100%{rotate:0deg;scale:1}15%{rotate:-12deg;scale:1.1}35%{rotate:12deg;scale:1.1}55%{rotate:-8deg;scale:1.05}75%{rotate:5deg}}
+.nope{animation:nope 2.6s ease-in-out}
+@keyframes dodge{0%,100%{translate:0 0}25%{translate:-90px 30px;rotate:-25deg;scale:1.2}55%{translate:-90px 30px;rotate:-25deg;scale:1.2}70%{translate:20px 0;rotate:10deg}}
+.dodge{animation:dodge 3s cubic-bezier(.3,1.3,.5,1)}
+@keyframes wheelie{0%,100%{rotate:0deg}30%,70%{rotate:-32deg;translate:0 -6px;scale:1.15}}
+.wheelie{animation:wheelie 3s ease-in-out;transform-origin:100% 100%}
+@keyframes tilt{0%,100%{rotate:0deg}25%,80%{rotate:-9deg;translate:0 8px}}
+.tilt{animation:tilt 3.4s ease-in-out}
+@keyframes yawn{0%,100%{scale:1 1}30%{scale:1.12 .8}55%{scale:.94 1.18}75%{scale:1 1}}
+.yawn{animation:yawn 3s ease-in-out}
+@keyframes bumpL{0%,100%{translate:0}30%{translate:22px 0;rotate:6deg}45%{translate:-10px 0}65%{translate:16px 0;rotate:4deg}} @keyframes bumpR{0%,100%{translate:0}30%{translate:-22px 0;rotate:-6deg}45%{translate:10px 0}65%{translate:-16px 0;rotate:-4deg}}
+.bumpL{animation:bumpL 2.6s ease-in-out}.bumpR{animation:bumpR 2.6s ease-in-out}
+@keyframes shy{0%,100%{opacity:1;translate:0}25%,70%{opacity:.05;translate:40px 0;scale:.5}}
+.bbl.big{font-size:20px;padding:12px 18px;max-width:300px}
+.shy{animation:shy 3s ease-in-out}
+@keyframes nap{0%,100%{rotate:0deg;translate:0}30%,75%{rotate:4deg;translate:0 12px}}
+.nap{animation:nap 3.2s ease-in-out;transform-origin:0 50%}
+@keyframes stretch{0%,100%{scale:1 1}40%{scale:1.05 1.14}60%{scale:1 .93}}
+.stretch{animation:stretch 2.6s ease-in-out;transform-origin:50% 0}
+@keyframes flip{0%,100%{rotate:0deg}30%,70%{rotate:180deg}}
+.flip{animation:flip 3s cubic-bezier(.45,1.4,.5,1);display:inline-block}
+@keyframes sulk{0%,100%{rotate:0 1 0 0deg}25%,75%{rotate:0 1 0 180deg}}
+.sulk{animation:sulk 3.2s ease-in-out;display:inline-block}
+@keyframes shiver{0%,100%{translate:0}10%,30%,50%,70%,90%{translate:-2px 0}20%,40%,60%,80%{translate:2px 0}}
+.shiver{animation:shiver 1s linear 3}
+@keyframes droop{0%,100%{scale:1 1}30%,60%{scale:1 .05}75%{scale:1 1.25}}
+.droop{animation:droop 3s cubic-bezier(.4,1.4,.5,1);transform-origin:50% 100%}
+.phares{animation:phares 2.6s ease}
+@keyframes phares{0%,100%{filter:none}20%,60%{filter:brightness(1.6)}40%,80%{filter:brightness(.8)}}
+.btoy{position:fixed;z-index:79;pointer-events:none;font-size:42px;line-height:1}
+@media (prefers-reduced-motion:reduce){ .nope,.dodge,.wheelie,.tilt,.yawn,.bumpL,.bumpR,.shy,.nap,.stretch,.flip,.sulk,.shiver,.phares{animation:none} }
 </style>
 </head>
 <body>
@@ -931,6 +999,9 @@ html[data-magic="on"] .dash .tw:nth-child(2n) .tu{transform:translate(calc(var(-
     <div class="card" style="display:flex;flex-direction:column;gap:12px">
       <div class="switch"><span>Thème</span><span class="seg2" id="setTheme"><button type="button" data-x="fonce">Foncé</button><button type="button" data-x="clair">Clair</button><button type="button" data-x="grim">Grimoire</button></span></div>
       <div class="switch"><span>Magie <small class="muted">(étincelles, chiffres qui roulent, ciel, tuiles qui flottent)</small></span><span class="seg2" id="setMagic"><button type="button" data-x="on">Oui</button><button type="button" data-x="off">Non</button></span></div>
+      <div class="switch"><span>Bêtises <small class="muted">(petites farces de l'app, par jour)</small></span><span class="seg2" id="setBet"><button type="button" data-x="0">Aucune</button><button type="button" data-x="1">1</button><button type="button" data-x="3">3</button><button type="button" data-x="5">5</button><button type="button" data-x="fete">Fête 🎉</button></span></div>
+      <div class="switch"><span>Page vivante <small class="muted">(sans toucher l'écran : un petit quelque chose toutes les 5 s)</small></span><span class="seg2" id="setViv"><button type="button" data-x="on">Oui</button><button type="button" data-x="off">Non</button></span></div>
+      <div class="switch"><span>Genre de bêtises</span><span class="seg2" id="setBetd"><button type="button" data-x="toutes">Toutes</button><button type="button" data-x="discretes">Discrètes seulement</button></span></div>
       <div class="switch"><span>Barre d'icônes</span><span class="seg2" id="setRail"><button type="button" data-x="g">À gauche</button><button type="button" data-x="d">À droite</button><button type="button" data-x="b">En bas</button></span></div>
       <div class="switch" id="riconsRow"><span>Icônes de la barre</span><span class="seg2" id="setRicons"><button type="button" data-x="h">En haut</button><button type="button" data-x="b">En bas</button></span></div>
       <div class="switch"><span>La barre</span><span class="seg2" id="setRhide"><button type="button" data-x="e">Épinglée</button><button type="button" data-x="c">Cachée</button></span></div>
@@ -971,13 +1042,14 @@ html[data-magic="on"] .dash .tw:nth-child(2n) .tu{transform:translate(calc(var(-
   </section>
 
   <!-- COÛT & TRAJET (par véhicule) -->
-  <section class="view" id="v-cost" hidden>
-    <div class="card bud" id="budCard" hidden></div>
-    <div class="card bplan" id="planCard" hidden></div>
-    <div class="card btips" id="tipCard" hidden></div>
-    <div class="card kmc" id="costCard"></div>
-    <div class="h2" id="tripTitle">Combien coûte un trajet</div>
-    <div class="card" id="tripCard">
+  <section class="view" id="v-cost" hidden data-ct="bud">
+    <div class="seg" id="costSeg"></div>
+    <div class="card bud" id="budCard" hidden data-ct="bud"></div>
+    <div class="card btips" id="tipCard" hidden data-ct="bud"></div>
+    <div class="card bplan" id="planCard" hidden data-ct="plan"></div>
+    <div class="card kmc" id="costCard" data-ct="km"></div>
+    <div class="h2" id="tripTitle" data-ct="trip">Combien coûte un trajet</div>
+    <div class="card" id="tripCard" data-ct="trip">
       <div class="fields"><div class="field full"><label for="tripKm">Km du trajet</label><input id="tripKm" type="text" inputmode="numeric" autocomplete="off" placeholder="100"></div></div>
       <div class="ttot"><b id="tripTot">–</b><small id="tripSub"></small></div>
       <div id="tripList"></div>
@@ -1016,7 +1088,7 @@ html[data-magic="on"] .dash .tw:nth-child(2n) .tu{transform:translate(calc(var(-
     <div id="shPlein">
     <div class="fields">
       <div class="field"><label for="fDate">Date</label><input id="fDate" type="date"></div>
-      <div class="field"><label for="fKm">Km compteur</label><input id="fKm" type="text" inputmode="numeric" autocomplete="off"><div class="hint" id="hKm"></div></div>
+      <div class="field"><label for="fKm" id="lbKm">Km compteur</label><input id="fKm" type="text" inputmode="numeric" autocomplete="off"><div class="hint" id="hKm"></div></div>
       <div class="field fuelOnly"><label for="fL" id="lbL">Litres</label><input id="fL" type="text" inputmode="decimal" autocomplete="off" placeholder="0.00"></div>
       <div class="field full fuelOnly ftank" id="fTank"></div>
       <div class="field fuelOnly"><label for="fP" id="lbP">Prix total CHF</label><input id="fP" type="text" inputmode="decimal" autocomplete="off" placeholder="0.00"></div>
@@ -1029,7 +1101,7 @@ html[data-magic="on"] .dash .tw:nth-child(2n) .tu{transform:translate(calc(var(-
       </div>
       <div class="field full fuelOnly"><label>Station</label><div class="chiprow" id="fSt"></div>
         <input class="txt" id="fStOther" type="text" placeholder="Nom de la station" hidden><div class="hint" id="hSt"></div></div>
-      <div class="typ seg fuelOnly" id="fType"><button type="button" aria-pressed="true" data-t="1">Plein complet</button><button type="button" aria-pressed="false" data-t="0">Partiel</button></div>
+      <div class="typ seg fuelOnly" id="fType"><button type="button" aria-pressed="true" data-t="1">Plein complet</button><button type="button" aria-pressed="false" data-t="0">Partiel</button><button type="button" aria-pressed="false" data-t="?">Je ne sais plus</button></div>
       <div class="live fuelOnly"><div><b id="lPL">–</b><small>CHF / L</small></div><div><b id="lKm">–</b><small>Km parcourus</small></div><div><b id="lC">–</b><small>L / 100 km</small></div></div>
       <div class="field full fuelOnly"><div class="hint" id="hC"></div><div class="hint" id="hP"></div></div>
       <label class="switch field full" id="forceBox" hidden><span>Compter quand même<br><small style="color:var(--fg-3)" id="forceWhy"></small></span><input type="checkbox" id="fForce"></label>
@@ -1041,7 +1113,8 @@ html[data-magic="on"] .dash .tw:nth-child(2n) .tu{transform:translate(calc(var(-
     </div>
     <div id="shEnt" hidden>
       <div class="fields">
-        <div class="field"><label for="eDate">Date</label><input id="eDate" type="date"></div>
+        <div class="field" id="eDateBox"><label for="eDate">Date</label><input id="eDate" type="date"></div>
+        <div class="field" id="eYearBox" hidden><label for="eYear">Année</label><input id="eYear" type="text" inputmode="numeric" autocomplete="off" maxlength="4"></div>
         <div class="field"><label for="eKm">Km compteur (facultatif)</label><input id="eKm" type="text" inputmode="numeric" autocomplete="off"></div>
         <div class="field full"><label>Type</label><div class="seg" id="eKind"></div></div>
         <div class="field full" id="eFkBox" hidden><label>Poste (montant pour l'année)</label><div class="seg" id="eFk" style="grid-auto-flow:row;grid-template-columns:repeat(3,1fr)"></div></div>
@@ -1275,7 +1348,7 @@ const THEME = { // v1.8 : même fond foncé pour tous, un accent par véhicule
   k:{txt:"#B3B8C2",grid:"rgba(255,255,255,.06)",tipBg:"#20242B",tipFg:"#EEF0F4",tipBd:"#E5484D",track:"#262A32",needle:"#EEF0F4",muted:"#8B92A0",bad:"#FF9F43",warn:"#F5D04C",acc:"#E5484D",fg:"#EEF0F4"}};
 let MODE=0; try{ const m=+localStorage.getItem("sv-mode"); if(m>0) MODE=m; }catch(e){}
 let T=THEME.k;
-const APP_VERSION="3.4";
+const APP_VERSION="3.5";
 const KEY="suivi-vehicules-v1";
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}}, lsSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 let STATE={fills:[],tyres:[],ent:[],rates:{},range:[925,350],tank:[60,20],buy:[3500,10000],fixed:[{},{}],trip:null};
@@ -1325,8 +1398,12 @@ const MOIS=["janv","févr","mars","avr","mai","juin","juil","août","sept","oct"
 const nv = el=>{ const n=parseFloat(String(el.value||"").replace(/[\s'’]/g,"").replace(",",".")); return isNaN(n)?NaN:n; }; // lit un champ chiffré (virgule ou point)
 const dfr = s=>{const [y,m,d]=s.split("-");return `${+d} ${MOIS[m-1]} ${y}`};
 
+const hasKm=f=>typeof f.km==="number"&&f.km>0;
 function analyse(){
-  const per = V.map((_,i)=>fills.filter(f=>f.v===i).sort((a,b)=>a.km-b.km||a.d.localeCompare(b.d)));
+  const per = V.map((_,i)=>fills.filter(f=>f.v===i&&hasKm(f)).sort((a,b)=>a.km-b.km||a.d.localeCompare(b.d)));
+  const nk = V.map((_,i)=>fills.filter(f=>f.v===i&&!hasKm(f))); // pleins sans km (rattrapage) : comptent pour l'argent, pas pour la conso
+  nk.forEach((list,vi)=>{ const TK=defTank(vi), B=bounds(vi); list.forEach(f=>{ f.dist=null; f.prevD=null; f.conso=null; f.miss=0; f.weird=false; f.ign=[]; f.alert=null;
+    f.Lok=f.L!=null&&f.L>0&&(f.L<=TK*1.1||f.force); f.Pok=f.Lok&&f.P!=null&&f.P>0&&((f.P/f.L>=B.pmin&&f.P/f.L<=B.pmax)||f.force); if(f.P==null&&!f.kmOnly) f.alert="Montant non noté"; }); });
   per.forEach((list,vi)=>{
     let lastFull=-1; const RG=defRange(vi), TK=defTank(vi), B=bounds(vi);
     list.forEach((f,i)=>{
@@ -1340,7 +1417,8 @@ function analyse(){
       if(f.dist!=null && f.dist<0){ f.ign.push("km plus petit que le plein d'avant"); }
       if(f.full && lastFull>=0){
         let L=0, miss=false;
-        for(let j=lastFull+1;j<=i;j++){ if(!list[j].Lok||list[j].miss) miss=true; else L+=list[j].L; }
+        for(let j=lastFull+1;j<=i;j++){ if(!list[j].Lok||list[j].miss||list[j].vague) miss=true; else L+=list[j].L; }
+        if(nk[vi].some(g=>g.d>list[lastFull].d&&g.d<=f.d)) miss=true; // un plein sans km entre les deux : litres inconnus pour ce trajet
         const km=f.km-list[lastFull].km;
         if(!miss && km>0){ const c=L/km*100; if((c<B.cmin||c>B.cmax)&&!f.force) f.ign.push(`conso impossible ${fmt(c,1)} ${U(vi).c100}`); else f.conso=c; }
       }
@@ -1389,7 +1467,9 @@ function analyse(){
     months.forEach((m,mi)=>{ if(active[x][mi]&&active[y][mi]&&mKm[y][mi]>=lo&&mKm[y][mi]<hi){n++;k+=mKm[x][mi];b+=mKm[y][mi];} });
     return {lab,sub,n,k:n?k/n:0,b:n?b/n:0}; });
   const season=V.map((_,vi)=>Array.from({length:12},(_,m)=>{ let s=0,n=0; months.forEach((mo,mi)=>{ if(mo.getMonth()===m&&active[vi][mi]){s+=mKm[vi][mi];n++;} }); return n?s/n:0; }));
-  return {per,months,mKm,active,stat,cmp,season,duel};
+  const all=per.map((l,i)=>l.concat(nk[i]).sort((a,b)=>a.d.localeCompare(b.d)||(a.km||0)-(b.km||0)));
+  stat.forEach((s,i)=>{ if(s) s.chf=all[i].reduce((t,f)=>t+(f.P||0),0); });
+  return {per,all,months,mKm,active,stat,cmp,season,duel};
 }
 let A = analyse();
 
@@ -1444,7 +1524,7 @@ const TODAY = day(new Date().toISOString().slice(0,10));
 const dOf = n=>{const d=new Date(n*864e5);return d.toISOString().slice(0,10)};
 const dshort = n=>{const d=new Date(n*864e5);return `${d.getUTCDate()} ${MOIS[d.getUTCMonth()]}`};
 function refPrice(v,d,excl){
-  const list=A.per[v].filter(g=>g!==excl&&g.Pok&&g.d<=d);
+  const list=A.all[v].filter(g=>g!==excl&&g.Pok&&g.d<=d);
   let w=list.filter(g=>day(d)-day(g.d)<=90);
   if(w.length<2) w=list.slice().sort((a,b)=>b.d.localeCompare(a.d)).slice(0,3);
   if(!w.length) return null;
@@ -1618,7 +1698,7 @@ function oracleLine(kind){ const a=ORACLE_LINES[kind]; return a[(TODAY+kind.leng
 
 function liquid(frac,c,cls,txt){ // réservoir « liquide » : deux vagues qui tournent, hauteur = niveau
   const f=Math.max(0,Math.min(1,frac||0)), col=/tank|bg/.test(cls||"")?(f<.15?T.bad:f<.35?T.warn:c):c; // rouge / orange seulement pour un réservoir presque vide
-  return `<div class="liq ${cls||""}" style="--lv:${(f*100).toFixed(1)}%;--lc:${col}" aria-hidden="true"><div class="w"></div><div class="w w2"></div>${txt||""}</div>`; }
+  return `<div class="liq ${cls||""}" style="--lv:${(f*100).toFixed(1)}%;--lc:${col}" aria-hidden="true"><div class="lq"><div class="w"></div><div class="w w2"></div></div>${txt||""}</div>`; }
 function gauge(frac,c){
   const a0=Math.PI, a=Math.PI*(1-frac), r=52, cx=64, cy=62;
   const x=cx+r*Math.cos(a), y=cy-r*Math.sin(a);
@@ -1651,7 +1731,7 @@ function renderFeatured(){
       <div style="display:flex;flex-direction:column;gap:6px;min-width:0"><div class="otag">${ic("brain")} L'IA du réservoir</div><div class="when">${when}</div><div class="sub">${sub}</div>
       <div class="sub oline">« ${oracleLine(kind)} »</div>
       <div class="sub" style="color:var(--fg-3)">${info}<br>Autonomie ≈ ${fmt(p.kmFill)} km · compteur ≈ ${fmt(Math.round(p.odo/10)*10)} km</div></div>${score}</div>`; }).join("");
-  $("#priceCards").innerHTML=[MODE].map(i=>{ const list=A.per[i].filter(f=>f.Pok); if(!list.length) return `<div class="card muted">Pas encore de plein avec litres et montant.</div>`;
+  $("#priceCards").innerHTML=[MODE].map(i=>{ const list=A.all[i].filter(f=>f.Pok); if(!list.length) return `<div class="card muted">Pas encore de plein avec litres et montant.</div>`;
     const f=list.slice().sort((a,b)=>b.d.localeCompare(a.d))[0], pl=f.P/f.L, ref=refPrice(i,f.d,f);
     const diff=ref?(pl-ref)*f.L:0; const last8=list.slice().sort((a,b)=>a.d.localeCompare(b.d)).slice(-8);
     const mx=Math.max(...last8.map(g=>g.P/g.L)), mn=Math.min(...last8.map(g=>g.P/g.L))*.9||0;
@@ -1852,9 +1932,9 @@ $("#tview").addEventListener("click",e=>{ if(!TV||!$("#tview").classList.contain
 
 // ---------- 💸 coût réel au km et coût d'un trajet (onglet « Coût & trajet »)
 const POSTES=[["carb","drop","Carburant","#4FA8FF"],["ent","wrench","Entretien","#F5A623"],["pneu","tire","Pneus","#A58CFF"],["ass","shield-check","Assurance","#3DD39B"],["imp","receipt","Impôt / plaques","#E8C062"],
-  ["vig","road-horizon","Vignette","#FF7AA8"],["gar","letter-circle-p","Garage / parking","#6FD3DC"],["aut","plus-circle","Autre","#9AA0A8"],["amo","trend-down","Achat (amortissement)","#FF6B5A"]];
+  ["vig","road-horizon","Vignette","#FF7AA8"],["gar","letter-circle-p","Parking / box","#6FD3DC"],["aut","plus-circle","Autre","#9AA0A8"],["amo","trend-down","Achat (amortissement)","#FF6B5A"]];
 const FIXES=["ass","imp","vig","gar","aut"];
-const FXN={ass:"Assurance",imp:"Impôt / plaques",vig:"Vignette",gar:"Garage / parking",aut:"Autre"};
+const FXN={ass:"Assurance",imp:"Impôt / plaques",vig:"Vignette",gar:"Parking / box",aut:"Autre"};
 const isTyre=e=>e.k?e.k==="P":/pneu/i.test(e.t||"");
 const fixEntries=v=>STATE.ent.filter(e=>e.v===v&&e.k==="F"&&e.d&&+e.m>0);
 function fixAccum(v,fk,a,b){ // CHF payés pour un poste entre les jours a et b : chaque montant annuel compte de sa date jusqu'au suivant
@@ -1899,17 +1979,17 @@ function trip(){ if(!STATE.trip) STATE.trip=JSON.parse(JSON.stringify(TRIP0)); S
 function tripSum(v,k){ const t=trip(), c=costs(v); if(!c) return null; let sum=0;
   POSTES.forEach(p=>{ const x=c.r[p[0]]; if(t.chk[p[0]]&&x!=null) sum+=x*k; }); if(t.peOn&&t.pe>0) sum+=t.pe; return {sum,c}; }
 // ---------- 🐷 budget : par mois, par an, depuis le début, frais à prévoir et conseils (onglet « Coût & trajet »)
-const BCAT=[["carb","gas-pump","Carburant","#4FA8FF"],["ent","wrench","Entretien","#F5A623"],["pneu","tire","Pneus","#A58CFF"],["fixe","shield-check","Frais fixes","#3DD39B"]];
+const BCAT=[["carb","gas-pump","Carburant","#4FA8FF"],["ent","wrench","Garage / mécanique","#F5A623"],["four","drop","Fournitures","#FF7AA8"],["pneu","tire","Pneus","#A58CFF"],["fixe","shield-check","Frais fixes","#3DD39B"]];
 const MJ=365.25/12, mKey=n=>dOf(n).slice(0,7), mNext=k=>{ let [y,m]=k.split("-").map(Number); if(++m>12){ m=1; y++; } return `${y}-${String(m).padStart(2,"0")}`; };
 const mName=k=>`${MOIS[+k.slice(5)-1]} ${k.slice(0,4)}`;
 function vStart(v){ // début du suivi : premier plein ou premier frais noté (pas l'achat, sinon les moyennes compteraient des années vides)
-  const d=[...A.per[v].map(f=>f.d),...STATE.ent.filter(e=>e.v===v&&e.d&&e.k!=="F").map(e=>e.d)].sort()[0]; return d?day(d):null; }
+  const d=[...A.all[v].map(f=>f.d),...STATE.ent.filter(e=>e.v===v&&e.d&&e.k!=="F").map(e=>e.d)].sort()[0]; return d?day(d):null; }
 function spendIn(v,a,b){ // CHF par poste entre les jours a (inclus) et b (exclu) ; les frais fixes annuels sont lissés jour par jour
-  const o={carb:0,ent:0,pneu:0,fixe:0}, s=vStart(v); if(s==null) return o; a=Math.max(a,s); if(b<=a) return o;
-  A.per[v].forEach(f=>{ const d=day(f.d); if(f.P>0&&d>=a&&d<b) o.carb+=f.P; });
-  STATE.ent.forEach(e=>{ if(e.v!==v||!e.d||e.k==="F"||!(+e.m>0)) return; const d=day(e.d); if(d>=a&&d<b) o[isTyre(e)?"pneu":"ent"]+=+e.m; });
+  const o={carb:0,ent:0,four:0,pneu:0,fixe:0}, s=vStart(v); if(s==null) return o; a=Math.max(a,s); if(b<=a) return o;
+  A.all[v].forEach(f=>{ const d=day(f.d); if(f.P>0&&d>=a&&d<b) o.carb+=f.P; });
+  STATE.ent.forEach(e=>{ if(e.v!==v||!e.d||e.k==="F"||!(+e.m>0)) return; const d=day(e.d); if(d>=a&&d<b) o[isTyre(e)?"pneu":e.k==="S"?"four":"ent"]+=+e.m; });
   FIXES.forEach(k=>o.fixe+=fixAccum(v,k,a,b)); return o; }
-function spendAll(vs,a,b){ const o={carb:0,ent:0,pneu:0,fixe:0}; vs.forEach(v=>{ const x=spendIn(v,a,b); BCAT.forEach(c=>o[c[0]]+=x[c[0]]); }); o.t=o.carb+o.ent+o.pneu+o.fixe; return o; }
+function spendAll(vs,a,b){ const o={carb:0,ent:0,four:0,pneu:0,fixe:0}; vs.forEach(v=>{ const x=spendIn(v,a,b); BCAT.forEach(c=>o[c[0]]+=x[c[0]]); }); o.t=o.carb+o.ent+o.four+o.pneu+o.fixe; return o; }
 const budAll=()=>lsGet("sv-bud")==="t"&&V.length>1;
 const budVs=()=>budAll()?V.map((_,i)=>i).filter(i=>vStart(i)!=null):[MODE];
 function budget(vs){
@@ -1924,14 +2004,14 @@ function budget(vs){
   else r.proj=r.ytd.t+r.day*(day(`${y+1}-01-01`)-T1);
   r.months=[]; for(let k=mKey(Math.max(st,T1-400)),n=0;k<=now&&n<40;k=mNext(k),n++){ const a=day(k+"-01"), b=k===now?T1:day(mNext(k)+"-01"); r.months.push({k,cur:k===now,...spendAll(vs,a,b)}); }
   r.months=r.months.slice(-12);
-  const full=r.months.filter(m=>!m.cur), vari=m=>m.carb+m.ent+m.pneu, cm=r.months[r.months.length-1];
+  const full=r.months.filter(m=>!m.cur), vari=m=>m.carb+m.ent+m.four+m.pneu, cm=r.months[r.months.length-1];
   r.curVar=vari(cm); r.avgVar=full.length?full.reduce((t,m)=>t+vari(m),0)/full.length:0; r.full=full;
   return r; }
 function planItems(v){ // ce qui va tomber dans les 12 prochains mois pour un véhicule
   const L=[], H=TODAY+365, avg=a=>a.reduce((t,e)=>t+(+e.m),0)/a.length, lat=fixLatest(v);
   Object.keys(lat).forEach(k=>{ const e=lat[k]; let n=day(e.d)+365; const late=n<TODAY-7; if(late) n=TODAY;
     L.push({v,d:n,late,t:FXN[k]||"Frais fixe",s:late?`payé le ${dfr(e.d)} : renouvelé ? Note-le dans le Journal`:`comme l'an dernier (${dfr(e.d)})`,m:+e.m,i:(FXI[k]||FXI.aut)[0],c:(FXI[k]||FXI.aut)[1],k:"fixe"}); });
-  const E=STATE.ent.filter(e=>e.v===v&&e.d&&e.k!=="F"&&!isTyre(e)&&+e.m>0).sort((a,b)=>a.d.localeCompare(b.d));
+  const E=STATE.ent.filter(e=>e.v===v&&e.d&&e.k!=="F"&&e.k!=="S"&&!isTyre(e)&&+e.m>0).sort((a,b)=>a.d.localeCompare(b.d));
   if(E.length){ const gap=E.length>1?Math.max(120,Math.min(730,(day(E[E.length-1].d)-day(E[0].d))/(E.length-1))):365, m=avg(E.slice(-3));
     let n=day(E[E.length-1].d)+Math.round(gap), late=false; if(n<TODAY){ n=TODAY; late=true; }
     for(let i=0;n<=H&&i<4;i++,n+=Math.round(gap)) L.push({v,d:n,late:late&&!i,t:"Entretien",s:E.length>1?`environ tous les ${fmt(gap/MJ)} mois, d'après ton journal`:`environ 1 an après le dernier (${dfr(E[E.length-1].d)})`,m,i:"wrench",c:"#F5A623",k:"ent",est:true}); }
@@ -1939,11 +2019,11 @@ function planItems(v){ // ce qui va tomber dans les 12 prochains mois pour un v�
     const onW=last?tyreType(last)==="H":(TODAY<day(`${y}-04-01`)||TODAY>=day(`${y}-10-15`)); // sans changement noté : saison du moment
     const n=onW?day(`${TODAY<day(`${y}-04-01`)?y:y+1}-04-01`):Math.max(TODAY,day(`${y}-10-15`)), P=STATE.ent.filter(e=>e.v===v&&isTyre(e)&&/mont|chang|permut|stock/i.test(e.t||"")&&+e.m>0);
     if(n<=H) L.push({v,d:n,late:n<=TODAY,t:onW?"Pneus d'été":"Pneus d'hiver",s:n<=TODAY?"c'est la saison : pense au changement":onW?"changement au printemps (vers Pâques)":"changement d'automne (d'octobre à Pâques)",m:P.length?avg(P.slice(-2)):null,i:"tire",c:"#A58CFF",k:"pneu",est:true}); }
-  const p=predict(v), F=A.per[v].filter(f=>f.P>0).slice(-6);
+  const p=predict(v), F=A.all[v].filter(f=>f.P>0).slice(-6);
   if(p&&p.due!=null&&F.length) L.push({v,d:Math.max(TODAY,p.due),t:"Prochain plein",s:"compris dans le carburant par mois",m:avg(F.map(f=>({m:f.P}))),i:"gas-pump",c:"#4FA8FF",k:"carb",est:true,info:true});
   return L.filter(x=>x.d<=H); }
 function stationTip(vs){ // économie si tous les pleins des 12 derniers mois avaient été faits à la station la moins chère
-  let save=0, best=null; vs.forEach(v=>{ if(!hasFuel(v)) return; const l=A.per[v].filter(f=>f.Pok&&f.st&&TODAY-day(f.d)<=365); if(l.length<4) return;
+  let save=0, best=null; vs.forEach(v=>{ if(!hasFuel(v)) return; const l=A.all[v].filter(f=>f.Pok&&f.st&&TODAY-day(f.d)<=365); if(l.length<4) return;
     const g={}; l.forEach(f=>{ const k=f.st; (g[k]=g[k]||{P:0,L:0,n:0}); g[k].P+=f.P; g[k].L+=f.L; g[k].n++; });
     const ok=Object.keys(g).filter(k=>g[k].n>=2).map(k=>[k,g[k].P/g[k].L]).sort((a,b)=>a[1]-b[1]); if(ok.length<2) return;
     const PL=l.reduce((t,f)=>t+f.P,0), LL=l.reduce((t,f)=>t+f.L,0), s=PL-ok[0][1]*LL; save+=s; if(!best||s>best.s) best={st:ok[0][0],pl:ok[0][1],s,v}; });
@@ -1957,11 +2037,11 @@ function budTips(B,items){
     out.push([up?"trend-up":"trend-down",up?T.bad:"#3DD39B",Math.abs(d)<.03?`Cette année, tu dépenses <b>autant</b> que l'an dernier à la même date.`:`Cette année : <b>${up?"+":"−"}${fmt(Math.abs(d)*100)} %</b> par rapport à l'an dernier à la même date (${fmt(B.ytd.t)} contre ${fmt(B.prevSame.t)} CHF).`]); }
   const big=B.full.slice().sort((a,b)=>b.t-a.t)[0];
   if(big&&B.full.length>=3){ const c=BCAT.filter(c=>c[0]!=="fixe").sort((a,b)=>(big[b[0]]-B.full.reduce((t,m)=>t+m[b[0]],0)/B.full.length)-(big[a[0]]-B.full.reduce((t,m)=>t+m[a[0]],0)/B.full.length))[0];
-    out.push(["chart-bar","#4FA8FF",`Mois le plus cher : <b>${mName(big.k)}</b> avec ${fmt(big.t)} CHF, surtout à cause ${c[0]==="carb"?"du carburant":c[0]==="ent"?"de l'entretien":"des pneus"}.`]); }
+    out.push(["chart-bar","#4FA8FF",`Mois le plus cher : <b>${mName(big.k)}</b> avec ${fmt(big.t)} CHF, surtout à cause ${c[0]==="carb"?"du carburant":c[0]==="ent"?"du garage":c[0]==="four"?"des fournitures":"des pneus"}.`]); }
   const s=stationTip(vs);
   if(s) out.push(["gas-pump","#3DD39B",`En faisant tes pleins chez <b>${esc(s.st)}</b> (${fmt(s.pl,2)} CHF/L en moyenne), tu aurais économisé environ <b>${fmt(s.save)} CHF</b> sur 12 mois.`]);
   else if(cat.carb/tot>.5) out.push(["gas-pump","#4FA8FF",`Le carburant fait <b>${fmt(cat.carb/tot*100)} %</b> de tes frais : c'est là que se joue ton budget.`]);
-  if(vs.length>1){ const per=vs.map(v=>[v,spendIn(v,Math.max(B.st,TODAY+1-365),TODAY+1)]).map(([v,o])=>[v,o.carb+o.ent+o.pneu+o.fixe]).sort((a,b)=>b[1]-a[1]);
+  if(vs.length>1){ const per=vs.map(v=>[v,spendIn(v,Math.max(B.st,TODAY+1-365),TODAY+1)]).map(([v,o])=>[v,o.carb+o.ent+o.four+o.pneu+o.fixe]).sort((a,b)=>b[1]-a[1]);
     if(per.length>1&&per[1][1]>0) out.push(["scales","#E8C062",`${esc(V[per[0][0]].n)} coûte <b>${fmt(per[0][1]/per[1][1],1)} ×</b> plus que ${esc(V[per[1][0]].n)} (${fmt(per[0][1]/12)} contre ${fmt(per[1][1]/12)} CHF par mois).`]); }
   return out.slice(0,6); }
 let budSel=null; // mois touché dans le graphique
@@ -1989,7 +2069,7 @@ function renderBudget(){
   // ---- à prévoir
   const items=vs.flatMap(planItems).sort((a,b)=>a.d-b.d), fuelD=vs.reduce((t,v)=>t+spendIn(v,Math.max(B.st,TODAY+1-365),TODAY+1).carb,0)/B.d12;
   const inH=h=>items.filter(x=>!x.info&&x.m>0&&x.d<TODAY+h).reduce((t,x)=>t+x.m,0)+fuelD*h, big12=items.filter(x=>!x.info&&x.m>0).reduce((t,x)=>t+x.m,0);
-  pc.innerHTML=`<div class="hd2">${ic("calendar-check","#3DD39B")} À prévoir · 12 prochains mois</div>
+  pc.innerHTML=`<div class="hd2">${ic("calendar-check","#3DD39B")} À prévoir · 12 prochains mois · ${who}</div>
     <div class="bkpi pl"><div><small>30 jours</small><b class="num">${fmt(inH(30))}</b><span>CHF</span></div><div><small>3 mois</small><b class="num">${fmt(inH(91))}</b><span>CHF</span></div><div><small>12 mois</small><b class="num">${fmt(inH(365))}</b><span>CHF</span></div></div>
     <div class="bline">${ic("gas-pump","#4FA8FF")} Carburant : environ <b>${fmt(fuelD*MJ)} CHF / mois</b>, compris dans ces totaux.</div>
     <div class="plist">${items.length?items.map(x=>`<div class="pit${x.late?" late":""}${x.info?" info":""}"><span class="pd"><b>${x.late?"!":dOf(x.d).slice(8)*1}</b><small>${x.late?"à voir":MOIS[+dOf(x.d).slice(5,7)-1]}</small></span><span class="pt">${ic(x.i,x.c)} <span><b>${esc(x.t)}${all?` <em>${esc(V[x.v].n)}</em>`:""}</b><small>${x.s}</small></span></span><span class="pm">${x.m>0?`${x.est?"≈ ":""}${fmt(x.m)} CHF`:"–"}</span></div>`).join(""):`<div class="muted">Rien de connu pour l'instant : note tes frais fixes et entretiens dans le Journal.</div>`}</div>
@@ -2003,7 +2083,18 @@ function budBind(B){
     el.innerHTML=m?`<b>${mName(m.k)}${m.cur?" (en cours)":""} : ${fmt(m.t)} CHF</b> ${BCAT.filter(c=>m[c[0]]>0.5).map(c=>`<span>${ic(c[1],c[3])} ${fmt(m[c[0]])}</span>`).join("")}`:""; el.hidden=!m; };
   $("#budCard").querySelectorAll(".bb").forEach(b=>b.onclick=()=>{ budSel=budSel===b.dataset.k?null:b.dataset.k; $("#budCard").querySelectorAll(".bb").forEach(x=>x.setAttribute("aria-pressed",x.dataset.k===budSel)); det(); });
   det(); }
-function renderCost(){ renderBudget(); renderKmCard($("#costCard")); $("#tripTitle").textContent=`Combien coûte un trajet en ${V[MODE].n}`;
+const CTABS=[["bud","piggy-bank","Budget","#FF7AA8"],["plan","calendar-check","À prévoir","#3DD39B"],["km","coins","Coût au km","#E8C062"],["trip","suitcase-rolling","Trajet","#4FA8FF"]];
+let costTab="bud";
+function costGo(k){ costTab=k; if(curView!=="cost") go("cost"); else { renderCost(); cancelAnimationFrame(PG.anim); PG.anim=0; window.scrollTo({top:0}); PG.cur=0; pgSched(); } }
+(function(){ const c=$('nav.tabs [data-v="cost"]'); if(c) c.innerHTML=`<span class="q4">${CTABS.map(x=>`<i data-ct="${x[0]}">${ic(x[1],x[3])}</i>`).join("")}</span>`; })();
+const costNext=()=>CTABS[(CTABS.findIndex(c=>c[0]===costTab)+1)%CTABS.length];
+function railSub(){ const c=$('nav.tabs [data-v="cost"]'); if(!c) return; const on=curView==="cost";
+  c.querySelectorAll(".q4 i").forEach(i=>i.classList.toggle("on",on&&i.dataset.ct===costTab));
+  const cur=CTABS.find(x=>x[0]===costTab)[2], t=on?`Coût & trajet : ${cur} (touche encore : ${costNext()[2]})`:"Coût & trajet"; c.title=t; c.setAttribute("aria-label",t); }
+function renderCost(){ $("#v-cost").dataset.ct=costTab;
+  $("#costSeg").innerHTML=CTABS.map(c=>`<button type="button" data-k="${c[0]}" aria-pressed="${c[0]===costTab}">${ic(c[1],c[3])} ${c[2]}</button>`).join("");
+  $("#costSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>costGo(b.dataset.k)); railSub();
+  renderBudget(); renderKmCard($("#costCard")); $("#tripTitle").textContent=`Combien coûte un trajet en ${V[MODE].n}`;
   const t=trip(); if(document.activeElement!==$("#tripKm")&&!kpTarget){ $("#tripKm").value=t.km?String(t.km):""; $("#tripPe").value=t.pe?String(t.pe).replace(".",","):""; }
   $("#tripPeOn").checked=!!t.peOn; renderTrip(); applyPad(); }
 function renderTrip(){
@@ -2077,7 +2168,8 @@ function renderStats(){
   if(statK==="prix"){ const pts=list.filter(f=>f.Pok).map(f=>({d:f.d,y:f.P/f.L}));
     $("#statHead").innerHTML=stockHead(pts,s.pL,"CHF/"+u.vol,3);
     mk("cStat",line(pts,"Prix",s.pL,"CHF/"+u.vol,3)); $("#statCap").textContent=`Prix au ${u.vol==="kWh"?"kWh":"litre"} de chaque plein (${pts.length} avec montant).`; }
-  const years=[...new Set(A.months.map(m=>m.getFullYear()))], cy=new Date().getFullYear();
+  const y0=Math.max(STATE.buyD[statV]?+STATE.buyD[statV].slice(0,4):0, list.length?+list.reduce((m,f)=>f.d<m?f.d:m,"9999").slice(0,4):0); // depuis l'achat (ou le premier plein)
+  const years=[...new Set(A.months.map(m=>m.getFullYear()))].filter(y=>y>=y0), cy=new Date().getFullYear();
   if(statK==="annee"){ const km=years.map(y=>Math.round(A.months.reduce((t,m,mi)=>t+(m.getFullYear()===y?A.mKm[statV][mi]:0),0)));
     const ci=years.indexOf(cy), kc=ci>=0?km[ci]:0, sea=A.season[statV], st=sea.reduce((a,b)=>a+b,0), now=new Date(), mo=now.getMonth(), dim=new Date(cy,mo+1,0).getDate();
     let frac=st?(sea.slice(0,mo).reduce((a,b)=>a+b,0)+sea[mo]*now.getDate()/dim)/st:0; if(!(frac>.04)) frac=(TODAY-day(cy+"-01-01")+1)/365;
@@ -2139,7 +2231,7 @@ function renderPriceGroups(kind,list,col){
 
 let histV=-1, histMax=80;
 let histT="all";
-const EKIND={E:["wrench","Entretien","#F5A623"],P:["tire","Pneus","#A58CFF"],F:["receipt","Frais fixe","#E8C062"]};
+const EKIND={E:["wrench","Garage / mécanique","#F5A623"],S:["drop","Fournitures et divers","#FF7AA8"],P:["tire","Pneus","#A58CFF"],F:["receipt","Frais fixe","#E8C062"]};
 const FXI={ass:["shield-check","#3DD39B"],imp:["receipt","#E8C062"],vig:["road-horizon","#FF7AA8"],gar:["letter-circle-p","#6FD3DC"],aut:["plus-circle","#9AA0A8"]};
 const ekOf=e=>e.k&&EKIND[e.k]?e.k:(isTyre(e)?"P":"E");
 const guessFk=t=>{ t=String(t||"").toLowerCase(); return /assur/.test(t)?"ass":/imp[oô]t|plaque|taxe/.test(t)?"imp":/vignette/.test(t)?"vig":/garage|parking|box|place/.test(t)?"gar":"aut"; };
@@ -2153,29 +2245,30 @@ function renderHist(){
   histV=MODE; // le journal suit le véhicule choisi en haut
   $("#histType").querySelectorAll("button").forEach(b=>{ if(b.dataset.k==="fill") b.textContent=hasFuel(MODE)?"Pleins":"Relevés"; b.setAttribute("aria-pressed",b.dataset.k===histT); b.onclick=()=>{ histT=b.dataset.k; renderHist(); }; });
   const fx=histT==="fix", u=U(histV);
-  const F=histT==="ent"||fx?[]:A.per.flat().filter(f=>histV<0||f.v===histV).map(f=>({d:f.d,km:f.km,f}));
+  const F=histT==="ent"||fx?[]:A.all.flat().filter(f=>histV<0||f.v===histV).map(f=>({d:f.d,km:f.km,f}));
   const E=histT==="fill"?[]:STATE.ent.filter(e=>(histV<0||e.v===histV)&&(fx?e.k==="F":histT==="ent"?e.k!=="F":true)).map(e=>({d:e.d||"0000-00-00",km:+e.km||0,e}));
-  const allF=F.concat(E).sort((a,b)=>b.d.localeCompare(a.d)||b.km-a.km), all=allF.slice(0,histMax);
+  const allF=F.concat(E).sort((a,b)=>b.d.localeCompare(a.d)||(b.km||0)-(a.km||0)), all=allF.slice(0,histMax);
   // résumé des frais fixes : le dernier montant de chaque poste compte pour l'année
   const fs=$("#fixSum"); fs.hidden=!fx;
   if(fx){ const lat=fixLatest(MODE), tot=FIXES.reduce((t,k)=>t+(lat[k]?+lat[k].m:0),0);
-    fs.innerHTML=`<div class="card"><div class="hd2">${ic("receipt","#E8C062")} Frais fixes · ${esc(V[MODE].n)} <span class="muted" style="float:right;font-weight:500">${fmt(tot)} CHF / an</span></div>
-      <div class="fxs">${FIXES.map(k=>`<div>${ic(FXI[k][0],FXI[k][1])} ${FXN[k]}<b>${lat[k]?fmt(+lat[k].m)+" CHF":"–"}</b><small>${lat[k]?"depuis le "+dfr(lat[k].d):"pas noté"}</small></div>`).join("")}</div>
+    fs.innerHTML=`<div class="card"><div class="hd2">${ic("receipt","#E8C062")} En cours · ${esc(V[MODE].n)} <span class="muted" style="float:right;font-weight:500">${fmt(tot)} CHF / an</span></div>
+      <div class="muted" style="font-size:12.5px;margin:-4px 0 8px">Calculé tout seul : la dernière année notée de chaque poste. Tu notes en dessous une ligne par poste et par année.</div>
+      <div class="fxs">${FIXES.map(k=>`<div>${ic(FXI[k][0],FXI[k][1])} ${FXN[k]}<b>${lat[k]?fmt(+lat[k].m)+" CHF":"–"}</b><small>${lat[k]?"année "+lat[k].d.slice(0,4):"pas noté"}</small></div>`).join("")}</div>
       <button type="button" class="btn primary" id="fixAdd" style="margin-top:12px">${ic("plus-circle")} Noter un frais fixe</button>
-      <div class="cap">Note le montant de l'année (assurance, impôt…) à sa date. Le dernier de chaque poste compte ; pour le coût au km, chaque montant compte de sa date jusqu'au suivant (le premier compte aussi pour les années d'avant, depuis le premier plein).</div></div>`;
+      <div class="cap">Une ligne par poste et par année (ex. assurance 2026, assurance 2027). Pour le coût au km et le budget, chaque montant compte de son année jusqu'à la suivante (le premier compte aussi pour les années d'avant, depuis le premier plein).</div></div>`;
     $("#fixAdd").onclick=()=>openEnt(null,{k:"F"}); }
   let html="",cur="";
   all.forEach(x=>{ const k=fx?x.d.slice(0,4):x.d.slice(0,7); if(k!==cur){cur=k;const[y,m]=k.split("-");html+=`<div class="monthsep">${fx?(+y?y:"Sans date"):+y?MOIS[m-1]+" "+y:"Sans date"}</div>`;}
     if(x.e){ const e=x.e, K=EKIND[ekOf(e)], fi=e.k==="F"?FXI[e.fk||"aut"]:null;
       html+=`<div class="row" role="button" tabindex="0" data-eid="${e.id}" style="--c:${fi?fi[1]:K[2]}"><div class="ic">${fi?ic(fi[0],fi[1]):ic(K[0],K[2])}</div>
-      <div class="t"><b>${esc(e.t)}</b><div>${e.d?dfr(e.d):"date non notée"} · ${e.k==="F"?(FXN[e.fk]||"frais fixe").toLowerCase()+" · par an":K[1].toLowerCase()} · ${esc(V[e.v].n)}${e.km?` · ${fmt(+e.km)} km`:""}</div></div>
+      <div class="t"><b>${esc(e.t)}</b><div>${e.k==="F"&&e.d?"année "+e.d.slice(0,4):e.d?dfr(e.d):"date non notée"} · ${e.k==="F"?(FXN[e.fk]||"frais fixe").toLowerCase()+" · par an":K[1].toLowerCase()} · ${esc(V[e.v].n)}${e.km?` · ${fmt(+e.km)} km`:""}</div></div>
       <div class="v">${e.m!=null&&e.m!==""?fmt(+e.m,2)+" CHF":"–"}<small>${ic("pencil-simple","var(--fg-3)")} modifier</small></div></div>`; return; }
     const f=x.f;
     if(f.kmOnly){ html+=`<div class="row" role="button" tabindex="0" data-id="${f.id}" style="--c:${V[f.v].c}"><div class="ic">${ic("speedometer",V[f.v].c)}</div>
       <div class="t"><b>${fmt(f.km)} km</b><div>${dfr(f.d)} · relevé du compteur${f.dist?` · +${fmt(f.dist)} km`:""}</div></div><div class="v">–</div></div>`; return; }
     html+=`<div class="row" role="button" tabindex="0" data-id="${f.id}" style="--c:${V[f.v].c}"><div class="ic">${esc(V[f.v].n.slice(0,3))}</div>
-      <div class="t"><b>${fmt(f.km)} km</b>${f.conso!=null?`<span class="pill ok">${fmt(f.conso,2)} ${u.c100}</span>`:""}${f.eur!=null?`<span class="pill" style="color:var(--volt-hi);border-color:color-mix(in srgb,var(--volt) 50%,transparent)">€</span>`:""}${f.ign&&f.ign.length?f.ign.map(x=>`<span class="pill w">⚠ ignoré : ${x}</span>`).join(""):""}${f.weird?`<span class="pill w">conso inhabituelle</span>`:""}${f.force?`<span class="pill ok">compté quand même</span>`:""}${f.alert?`<span class="pill" style="color:var(--fg-3);border-color:var(--line)">${f.alert}</span>`:""}
-      <div>${CTRY[f.ctry||"CH"].f} ${dfr(f.d)} · ${f.full?u.plein:"partiel"}${f.dist?` · +${fmt(f.dist)} km`:""}${f.st?` · ${esc(f.st)}`:""}${Object.keys(f.opts||{}).filter(k=>f.opts[k]).map(k=>" "+ic(OPTS.find(o=>o[0]===k)[2])).join("")}</div></div>
+      <div class="t"><b>${hasKm(f)?fmt(f.km)+" km":"km non noté"}</b>${f.conso!=null?`<span class="pill ok">${fmt(f.conso,2)} ${u.c100}</span>`:""}${f.eur!=null?`<span class="pill" style="color:var(--volt-hi);border-color:color-mix(in srgb,var(--volt) 50%,transparent)">€</span>`:""}${f.ign&&f.ign.length?f.ign.map(x=>`<span class="pill w">⚠ ignoré : ${x}</span>`).join(""):""}${f.weird?`<span class="pill w">conso inhabituelle</span>`:""}${f.force?`<span class="pill ok">compté quand même</span>`:""}${f.alert?`<span class="pill" style="color:var(--fg-3);border-color:var(--line)">${f.alert}</span>`:""}
+      <div>${CTRY[f.ctry||"CH"].f} ${dfr(f.d)} · ${f.vague?"je ne sais plus":f.full?u.plein:"partiel"}${f.dist?` · +${fmt(f.dist)} km`:""}${f.st?` · ${esc(f.st)}`:""}${Object.keys(f.opts||{}).filter(k=>f.opts[k]).map(k=>" "+ic(OPTS.find(o=>o[0]===k)[2])).join("")}</div></div>
       <div class="v">${f.P!=null?fmt(f.P,2)+" CHF":"–"}<small>${f.eur!=null?fmt(f.eur,2)+" € · ":""}${f.L!=null?fmt(f.L,2)+" "+u.vol:"– "+u.vol}</small></div></div>`; });
   $("#histList").innerHTML=(html||`<div class="muted" style="padding:12px 2px">${fx?"Aucun frais fixe noté pour ce véhicule.":"Rien de noté."}</div>`)+(allF.length>all.length?`<button class="btn" type="button" id="histMore" style="margin:8px 0">Afficher plus (${allF.length-all.length} de plus)</button>`:"")+`<div class="cap" style="padding:8px 2px">Touche une ligne pour la modifier ou la supprimer. Le bouton + en haut note un plein ou un entretien.</div>`;
   if(html) $("#histList").insertAdjacentHTML("beforeend",`<div class="swtip">← Glisse une ligne vers la gauche pour la supprimer</div>`);
@@ -2195,12 +2288,12 @@ function setShM(m){
 }
 function renderEKind(){ $("#eKind").innerHTML=Object.keys(EKIND).map(k=>`<button type="button" aria-pressed="${k===eKind}" data-k="${k}">${ic(EKIND[k][0],EKIND[k][2])} ${EKIND[k][1]}</button>`).join("");
   $("#eKind").querySelectorAll("button").forEach(b=>b.onclick=()=>{ eKind=b.dataset.k; renderEKind(); });
-  const F=eKind==="F"; $("#eFkBox").hidden=!F; $("#lbDesc").textContent=F?"Détail (facultatif)":"Ce qui a été fait"; $("#eDesc").placeholder=F?FXN[eFk]:"Ex. vidange + filtre, plaquettes…";
+  const F=eKind==="F"; $("#eFkBox").hidden=!F; $("#eDateBox").hidden=F; $("#eYearBox").hidden=!F; $("#eKm").closest(".field").hidden=F; $("#lbDesc").textContent=F?"Détail (facultatif)":"Ce qui a été fait"; $("#eDesc").placeholder=F?FXN[eFk]:"Ex. vidange + filtre, plaquettes…"; if(eKind==="S") $("#eDesc").placeholder="Ex. huile, ampoule, liquide lave-glace…";
   $("#eFk").innerHTML=FIXES.map(k=>`<button type="button" aria-pressed="${k===eFk}" data-f="${k}">${ic(FXI[k][0],FXI[k][1])} ${FXN[k]}</button>`).join("");
   $("#eFk").querySelectorAll("button").forEach(b=>b.onclick=()=>{ eFk=b.dataset.f; renderEKind(); });
   if(!$("#sheet").hidden) $("#shTitle").textContent=sheetTitle("e"); }
 function fillEnt(pre){ const e=ENTEDIT;
-  $("#eDate").value=e?(e.d||""):dOf(TODAY); $("#eKm").value=e&&e.km?String(e.km):""; $("#eDesc").value=e?e.t:""; $("#eAmt").value=e&&e.m!=null?String(e.m).replace(".",","):"";
+  $("#eDate").value=e?(e.d||""):dOf(TODAY); $("#eYear").value=e&&e.d?e.d.slice(0,4):String(new Date().getFullYear()); $("#eKm").value=e&&e.km?String(e.km):""; $("#eDesc").value=e?e.t:""; $("#eAmt").value=e&&e.m!=null?String(e.m).replace(".",","):"";
   eKind=e?ekOf(e):(pre&&pre.k)||"E"; eFk=e&&e.fk?e.fk:(pre&&pre.fk)||"ass"; $("#eDel").hidden=!e; $("#eDel")._armed=false;
   const l=lastOf(sv); $("#eKm").placeholder=l?`≈ ${l.km}`:"km"; }
 function openEnt(e,pre){ EDIT=null; ENTEDIT=e||null; sv=e?e.v:MODE;
@@ -2209,10 +2302,12 @@ function openEnt(e,pre){ EDIT=null; ENTEDIT=e||null; sv=e?e.v:MODE;
   fillEnt(pre); setShM("e"); applyPad(); $("#scrim").classList.add("on"); $("#sheet").classList.add("on"); }
 $("#eAdd").onclick=()=>{ const F=eKind==="F"; const t=$("#eDesc").value.trim()||(F?FXN[eFk]:""); if(!t){ toast("Écris ce qui a été fait."); return; }
   const m=nv($("#eAmt")), km=nv($("#eKm")), x={d:$("#eDate").value||null,v:sv,t,m:isNaN(m)?null:m,k:eKind};
-  if(F){ if(!x.d){ toast("Mets la date du frais."); return; } if(!(x.m>0)){ toast("Mets le montant de l'année."); return; } x.fk=eFk; } else if(ENTEDIT) delete ENTEDIT.fk;
+  if(F){ const y=parseInt($("#eYear").value,10); if(!(y>=1980&&y<=2100)){ toast("Mets l'année (ex. 2026)."); return; }
+    x.d=ENTEDIT&&ENTEDIT.d&&+ENTEDIT.d.slice(0,4)===y?ENTEDIT.d:`${y}-01-01`; }
+  if(F){ if(!(x.m>0)){ toast("Mets le montant de l'année."); return; } x.fk=eFk; } else if(ENTEDIT) delete ENTEDIT.fk;
   if(!isNaN(km)&&km>0) x.km=Math.round(km); else x.km=null;
   if(ENTEDIT) Object.assign(ENTEDIT,x); else STATE.ent.push({id:uid(),...x});
-  const was=!!ENTEDIT; persist(); closeSheet(); views[curView](); toast(was?"✓ Ligne modifiée":F?`✓ ${FXN[eFk]} noté : ${fmt(x.m)} CHF / an`:"✓ Entretien noté"); };
+  const was=!!ENTEDIT; persist(); closeSheet(); views[curView](); toast(was?"✓ Ligne modifiée":F?`✓ ${FXN[eFk]} ${x.d.slice(0,4)} noté : ${fmt(x.m)} CHF`:eKind==="S"?"✓ Fourniture notée":"✓ Entretien noté"); };
 $("#eDel").onclick=()=>confirmTap($("#eDel"),"Toucher encore pour supprimer",()=>{ const id=ENTEDIT&&ENTEDIT.id; STATE.ent=STATE.ent.filter(x=>x.id!==id); persist(); closeSheet(); views[curView](); toast("Ligne supprimée"); });
 
 // glisser une ligne du Journal vers la gauche = la supprimer (elle se déchire), avec « Annuler » pendant 6 s
@@ -2241,17 +2336,17 @@ function swipeDel(r){ const fid=r.dataset.id, eid=r.dataset.eid;
 })();
 
 // ---------- timeline sobre, une case par type d'événement
-const TLT={fill:["gas-pump","Pleins","#4FA8FF"],E:["wrench","Entretien","#3DD39B"],P:["tire","Pneus","#F5A623"],F:["receipt","Frais fixes","#E8C062"],buy:["hand-coins","Achat","#6CB0FF"]};
+const TLT={fill:["gas-pump","Pleins","#4FA8FF"],E:["wrench","Garage / mécanique","#F5A623"],S:["drop","Fournitures","#FF7AA8"],P:["tire","Pneus","#F5A623"],F:["receipt","Frais fixes","#E8C062"],buy:["hand-coins","Achat","#6CB0FF"]};
 let tlMax=60;
 function tlEvents(v){
   const out=[];
-  A.per[v].forEach(f=>out.push({k:"fill",d:f.d,t:f.kmOnly?"Relevé du compteur":`${hasFuel(v)?(U(v).plein==="recharge"?"Recharge":"Plein"):"Relevé"} ${f.L!=null?fmt(f.L,1)+" "+U(v).vol:""}`,s:`${fmt(f.km)} km${f.st?" · "+esc(f.st):""}`,m:f.P}));
+  A.all[v].forEach(f=>out.push({k:"fill",d:f.d,t:f.kmOnly?"Relevé du compteur":`${hasFuel(v)?(U(v).plein==="recharge"?"Recharge":"Plein"):"Relevé"} ${f.L!=null?fmt(f.L,1)+" "+U(v).vol:""}`,s:`${fmt(f.km)} km${f.st?" · "+esc(f.st):""}`,m:f.P}));
   STATE.ent.filter(e=>e.v===v&&e.d).forEach(e=>out.push({k:ekOf(e),d:e.d,t:esc(e.t),s:e.k==="F"?(FXN[e.fk]||"frais")+" · par an":e.km?fmt(+e.km)+" km":"",m:e.m!=null&&e.m!==""?+e.m:null,e}));
   STATE.tyres.filter(x=>x.v===v).forEach(x=>{ const T=TTYPE[tyreType(x)]; out.push({k:"P",d:x.d,t:`Pneus ${T.n.toLowerCase()} montés`,s:[x.mod?esc(x.mod):"",x.pos?TPOS[x.pos]:""].filter(Boolean).join(" · "),m:null}); });
   if(STATE.buyD[v]) out.push({k:"buy",d:STATE.buyD[v],t:`Achat : ${esc(V[v].nl||V[v].n)}`,s:"",m:+STATE.buy[v]||null});
   return out.sort((a,b)=>b.d.localeCompare(a.d)); }
 function renderTl(){
-  const v=MODE, on=STATE.tlTypes||(STATE.tlTypes={fill:false,E:true,P:true,F:true,buy:true});
+  const v=MODE, on=STATE.tlTypes||(STATE.tlTypes={fill:false,E:true,S:true,P:true,F:true,buy:true}); if(on.S==null) on.S=on.E!==false;
   $("#tlTypes").innerHTML=Object.keys(TLT).map(k=>`<button type="button" aria-pressed="${!!on[k]}" data-k="${k}">${on[k]?"☑":"☐"} ${ic(TLT[k][0],TLT[k][2])} ${k==="fill"&&!hasFuel(v)?"Relevés":TLT[k][1]}</button>`).join("");
   $("#tlTypes").querySelectorAll("button").forEach(b=>b.onclick=()=>{ on[b.dataset.k]=!on[b.dataset.k]; persist(); renderTl(); });
   const all=tlEvents(v).filter(x=>on[x.k]), ev=all.slice(0,tlMax); let y="", h="";
@@ -2308,12 +2403,12 @@ function renderCom(){
   // face-à-face
   const ents=(i,k)=>STATE.ent.filter(e=>e.v===i&&e.d&&day(e.d)>=a&&day(e.d)<=b&&(k?e.k==="F":e.k!=="F")).reduce((t,e)=>t+(+e.m||0),0);
   const fixP=i=>FIXES.reduce((t,k)=>t+fixAccum(i,k,a,b),0);
-  const carb=i=>A.per[i].filter(f=>day(f.d)>=a&&day(f.d)<=b).reduce((t,f)=>t+(f.P||0),0);
-  const pLi=i=>{ const l=A.per[i].filter(f=>f.Pok&&day(f.d)>=a&&day(f.d)<=b), L=l.reduce((t,f)=>t+f.L,0); return L?l.reduce((t,f)=>t+f.P,0)/L:null; };
+  const carb=i=>A.all[i].filter(f=>day(f.d)>=a&&day(f.d)<=b).reduce((t,f)=>t+(f.P||0),0);
+  const pLi=i=>{ const l=A.all[i].filter(f=>f.Pok&&day(f.d)>=a&&day(f.d)<=b), L=l.reduce((t,f)=>t+f.L,0); return L?l.reduce((t,f)=>t+f.P,0)/L:null; };
   const chfT=i=>carb(i)+ents(i)+fixP(i);
   const R=[["Km sur la période",(i,k)=>km[k],0,"max",""],["Carburant",i=>carb(i),0,"min"," CHF"],["Entretien et pneus",i=>ents(i),0,"min"," CHF"],["Frais fixes (part)",i=>fixP(i),0,"min"," CHF"],
     ["Total dépensé",i=>chfT(i),0,"min"," CHF"],["Coût par km",(i,k)=>km[k]?chfT(i)/km[k]:null,2,"min"," CHF"],["Conso moyenne",i=>hasFuel(i)?cAvg(i,a,b):null,2,"min",""],["Prix moyen",i=>hasFuel(i)?pLi(i):null,3,"min"," CHF"],
-    ["Pleins / relevés",i=>A.per[i].filter(f=>day(f.d)>=a&&day(f.d)<=b).length,0,"",""]];
+    ["Pleins / relevés",i=>A.all[i].filter(f=>day(f.d)>=a&&day(f.d)<=b).length,0,"",""]];
   const wins=sel.map(()=>0);
   const rows=R.map(([lab,fn,dg,best,unit])=>{ const v=sel.map((i,k)=>fn(i,k)); let w=-1;
     if(best&&sel.length>1){ const ok=v.map((x,k)=>x!=null&&!(lab==="Conso moyenne"&&U(sel[k]).vol!==U(sel[0]).vol)?k:-1).filter(k=>k>=0);
@@ -2333,7 +2428,7 @@ function renderCom(){
       borderColor:V[i].c,backgroundColor:V[i].c,spanGaps:true,tension:.3,pointRadius:3,borderWidth:2.2}))},
     options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tip,callbacks:{label:c=>` ${c.dataset.label} : ${fmt(c.parsed.y,2)} ${U(fu[c.datasetIndex]).c100}`}}},scales:{x:{grid:{display:false},ticks:{maxRotation:0,autoSkipPadding:6}},y:{ticks:{callback:v=>fmt(v,1)}}}}});
   const mm=k=>{ const s=day(k+"-01"), e=day(k.slice(0,4)+"-"+k.slice(5)+"-01")+new Date(+k.slice(0,4),+k.slice(5),0).getDate(); return [Math.max(s,a),Math.min(e,b+1)]; };
-  const dsC=[["Carburant","#4FA8FF",k=>sel.reduce((t,i)=>t+A.per[i].filter(f=>f.d.startsWith(k)).reduce((s,f)=>s+(f.P||0),0),0)],
+  const dsC=[["Carburant","#4FA8FF",k=>sel.reduce((t,i)=>t+A.all[i].filter(f=>f.d.startsWith(k)).reduce((s,f)=>s+(f.P||0),0),0)],
     ["Entretien et pneus","#F5A623",k=>sel.reduce((t,i)=>t+STATE.ent.filter(e=>e.v===i&&e.k!=="F"&&e.d&&e.d.startsWith(k)).reduce((s,e)=>s+(+e.m||0),0),0)],
     ["Frais fixes","#E8C062",k=>{ const [x,y]=mm(k); return sel.reduce((t,i)=>t+FIXES.reduce((s,f)=>s+fixAccum(i,f,x,y),0),0); }]];
   mk("cChf",{type:"bar",data:{labels:lab,datasets:dsC.map(([n,c,fn])=>({label:n,data:MS.map(k=>Math.round(fn(k))),backgroundColor:c,borderRadius:3,stack:"s"}))},
@@ -2545,7 +2640,7 @@ function railOrder(){ let o=null; try{ o=JSON.parse(localStorage.getItem("sv-ord
   if(!Array.isArray(o)||o.includes("fab")||o.includes("cmp")) return RAIL0.slice(); // ancien format (v2.1) : nouvel ordre par défaut
   o=o.filter((x,i,a)=>RAIL0.includes(x)&&a.indexOf(x)===i); RAIL0.forEach(x=>{ if(!o.includes(x)) o.push(x); }); return o; }
 function setRailOrder(o){ try{ if(o) localStorage.setItem("sv-order",JSON.stringify(o)); else localStorage.removeItem("sv-order"); }catch(e){} applyRailOrder(); }
-function applyRailOrder(){ const box=$("nav.tabs .in"); railOrder().forEach(x=>box.appendChild($(railSel(x)))); if(typeof railDrop==="function") setTimeout(railDrop,30); }
+function applyRailOrder(){ const box=$("nav.tabs .in"); railOrder().forEach(x=>box.appendChild($(railSel(x))));  if(typeof railDrop==="function") setTimeout(railDrop,30); }
 let ATELIER_SVG=null;
 function updateRail(){ const b=$('nav.tabs [data-v="veh"]'); if(!b) return; if(ATELIER_SVG==null) ATELIER_SVG=b.innerHTML;
   const TT=vehTabs(MODE); b.hidden=!TT.length; const at=V[MODE]&&V[MODE].atelier;
@@ -2633,6 +2728,7 @@ function renderMore(){
 
 // ---------- Quoi de neuf : la version en grand, une carte par version ; s'ouvre une fois après chaque mise à jour
 const CHANGELOG=[
+  ["3.5","27.10.2026","Rattrapage et app vivante",["Plein : les km sont facultatifs et un km plus bas que le dernier est accepté (rattrapage), avec un nouveau choix « Je ne sais plus » à côté de complet et partiel","Entretien en deux : « Garage / mécanique » et « Fournitures et divers », chacun sa couleur dans le budget (le frais fixe devient « Parking / box »)","Frais fixes : une ligne par poste et par année, le cadre du haut « En cours » se calcule tout seul","Coût & trajet en sous-onglets (Budget, À prévoir, Coût au km, Trajet)","Plus de pages coupées : les gros blocs se coupent entre deux lignes","Graphiques par année à partir de l'année d'achat","Tuiles un peu plus grandes, écrou de la barre remonté","App vivante : le liquide des réservoirs penche avec le téléphone, et quand tu regardes sans toucher, un graphique se redessine, un chiffre saute ou une ligne frétille","35 bêtises : le chiffre têtu, le bouton + qui s'esquive, la tuile pas d'accord, le klaxon, la météo… Réglage dans Paramètres → Bêtises (Aucune, 1, 3, 5 par jour ou Fête). Elles prennent leur temps, et un toucher les arrête","Page vivante : sans toucher l'écran, toutes les 5 s il se passe quelque chose. Parfois des farces restent (faux chiffres, drôles d'étiquettes) ou l'app change d'onglet toute seule : un toucher et tout se remet en place avec un « Ah non, pardon ! »","Coût & trajet : un seul bouton avec ses 4 petites icônes, chaque toucher passe au sous-onglet suivant"]],
   ["3.4","27.10.2026","Onglet véhicule",["Chaque véhicule a les mêmes onglets au même endroit : Couples de serrage, Comparatif, Pneus et Notes (le Kangoo aussi, ses listes démarrent vides)","Nouvel onglet Notes : notes libres en texte (pressions des pneus, références, choses à retenir), épinglables en haut, avec recherche, gardées dans la sauvegarde Drive","Couples de serrage : plus de page vide, le tableau se coupe ligne par ligne d'une page à l'autre","Fiche technique retirée : réservoir, autonomie, prix et date d'achat se règlent une seule fois dans Paramètres → Véhicules","Mise à jour plus rapide : l'app vérifie s'il y a une nouvelle version quand tu la rouvres"]],
   ["3.3","27.10.2026","Budget 🐷",["Coût & trajet : un vrai coin Budget, par mois, par an et depuis le début (achat compris), pour ce véhicule ou pour tous","Moyenne sur 12 mois et sur tout l'historique, total de l'année, fin d'année estimée et comparaison avec l'an dernier","Graphique des 12 derniers mois avec la ligne de moyenne : touche une barre pour le détail du mois","Où va l'argent : carburant, entretien, pneus et frais fixes, par an et par mois","À prévoir : les frais des 12 prochains mois (assurance, impôt, vignette, entretien, changement de pneus, prochain plein), totaux à 30 jours, 3 mois et 12 mois, et combien mettre de côté chaque mois","Bon à savoir : coût par jour, mois le plus cher, station la moins chère et ce qu'elle t'aurait fait économiser, frais fixes à renouveler"]],
   ["3.2","27.10.2026","Un peu de magie ✨",["Poussière d'étoiles quand tu enregistres un plein, bien plus forte si tu bats ton record de conso","Les grands chiffres des tuiles roulent comme un compteur à l'ouverture","Succès débloqué : le badge apparaît au milieu de l'écran avec un éclat doré","Ciel du moment : l'en-tête prend la teinte de l'aube, du jour, du crépuscule ou de la nuit (avec des étoiles)","Nouveau thème « Grimoire » : parchemin, encre brune et filets dorés","Les tuiles flottent un tout petit peu quand tu penches le téléphone","Paramètres → Magie : Oui / Non pour tout couper d'un coup"]],
@@ -2796,8 +2892,9 @@ function go(v,dir,back){ closeTV(); if(v!=="home") tOpenIn=null; if(v!=="fun") f
   const el=$("#v-"+v); el.classList.remove("in-l","in-r"); if(dir){ void el.offsetWidth; el.classList.add(dir>0?"in-r":"in-l"); }
   document.querySelectorAll("nav.tabs [data-v]").forEach(b=>{ if(b.dataset.v===v) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current"); });
   if(railHidden()) railClose();
-  views[v](); cancelAnimationFrame(PG.anim); PG.anim=0; window.scrollTo({top:0}); PG.cur=0; pgSched(); railDrop(); }
+  views[v](); cancelAnimationFrame(PG.anim); PG.anim=0; window.scrollTo({top:0}); PG.cur=0; pgSched(); railDrop(); railSub(); }
 document.querySelectorAll("nav.tabs [data-v]").forEach(b=>b.onclick=()=>go(b.dataset.v));
+$('nav.tabs [data-v="cost"]').onclick=()=>{ if(curView==="cost") costGo(costNext()[0]); else go("cost"); };
 // barre « liquide » : une goutte glisse jusqu'à l'onglet choisi, s'étire en route puis rebondit
 function railDrop(){ const d=$("#rdrop"), b=document.querySelector('nav.tabs .in>button[aria-current="page"]'); if(!d) return;
   if(!b||!b.offsetWidth){ d.style.opacity=0; d._p=null; return; }
@@ -2881,7 +2978,7 @@ function paginate(){
     while(j+1<units.length&&Math.abs(T(units[j+1])-t)<3) j++; // même ligne (tuiles côte à côte)
     let b=Math.max(...units.slice(i,j+1).map(B));
     const k=Math.floor((t-top+1)/H), end=top+(k+1)*H;
-    if(b>end+1&&i===j&&(t-(top+k*H)<H*.4||b-t>H-10)&&!units[i].classList.contains("tu")&&units[i].tagName!=="TR"){ // gros bloc qui laisserait la page presque vide (ou plus haut qu'une page) : on le découpe par lignes
+    if(b>end+1&&i===j&&(t-(top+k*H)<H*.4||b-t>H*.3)&&!units[i].classList.contains("tu")&&units[i].tagName!=="TR"){ // gros bloc qui laisserait la page presque vide (ou plus haut qu'une page) : on le découpe par lignes
       const sub=pgSub(units[i]); if(sub.length>1){ units.splice(i,1,...sub); continue; } }
     if(b>end+1&&b-t<=H-10){ // la ligne serait coupée : on la pousse en haut de la page suivante, et on laisse du vide
       const tr=units[i].tagName==="TR", sp=document.createElement(tr?"tr":"div"); sp.className="pgsp"; if(tr) sp.innerHTML=`<td colspan="9" style="padding:0;border:0;height:inherit"></td>`; units[i].parentNode.insertBefore(sp,units[i]);
@@ -2915,11 +3012,11 @@ const pgObs=new MutationObserver(()=>pgSched()); pgObs.observe($(".app"),{childL
 })();
 
 // saisie
-let sv=0, sFull=true, sCur="CHF", sCtry="CH", sSt=null, sOpts={}, EDIT=null, rateManual=false;
+let sv=0, sVague=false, sFull=true, sCur="CHF", sCtry="CH", sSt=null, sOpts={}, EDIT=null, rateManual=false;
 function renderCtry(){ $("#fCtry").innerHTML=["CH","FR","IT","DE","AT"].map(c=>`<button type="button" aria-pressed="${c===sCtry}" data-c="${c}">${CTRY[c].f} ${CTRY[c].n}</button>`).join("");
   $("#fCtry").querySelectorAll("button").forEach(b=>b.onclick=()=>{ sCtry=b.dataset.c; sSt=null; renderCtry(); setCur(CTRY[sCtry].eur?"EUR":"CHF"); renderSt(); }); }
 function renderSt(){
-  const recent=[...new Set(A.per[sv].filter(f=>f.st&&(f.ctry||"CH")===sCtry).sort((a,b)=>b.d.localeCompare(a.d)).map(f=>f.st))].slice(0,3);
+  const recent=[...new Set(A.all[sv].filter(f=>f.st&&(f.ctry||"CH")===sCtry).sort((a,b)=>b.d.localeCompare(a.d)).map(f=>f.st))].slice(0,3);
   const list=recent.concat((STATIONS[sCtry]||[]).filter(x=>!recent.includes(x)));
   $("#fSt").innerHTML=list.map(x=>`<button type="button" class="${recent.includes(x)?"recent":""}" aria-pressed="${x===sSt}" data-s="${esc(x)}">${esc(x)}</button>`).join("")+`<button type="button" aria-pressed="${sSt==="__autre"}" data-s="__autre">Autre…</button>`;
   $("#fStOther").hidden = sSt!=="__autre";
@@ -2946,19 +3043,19 @@ function openSheet(fresh,edit){
   sheetUnits();
   if(fresh==="veh"){ const l=lastOf(sv); $("#hKm").innerHTML=l?`Dernier : <b>${fmt(l.km)}</b> le ${dfr(l.d)}`:`Premier ${hasFuel(sv)?U(sv).plein:"relevé"} de ce véhicule`; $("#shTitle").textContent=sheetTitle("p"); setShM($("#shEnt").hidden?"p":"e"); renderSt(); live(); return; }
   if(e){
-    $("#fDate").value=e.d; $("#fKm").value=e.km; $("#fL").value=e.L??""; sCtry=e.ctry||"CH";
+    $("#fDate").value=e.d; $("#fKm").value=hasKm(e)?e.km:""; $("#fL").value=e.L??""; sCtry=e.ctry||"CH";
     sCur = e.eur!=null?"EUR":"CHF"; $("#fP").value = e.eur!=null?e.eur:(e.P??""); $("#fR").value = e.rate??""; rateManual = e.rate!=null;
-    sFull=!!e.full; sOpts={...(e.opts||{})};
+    sFull=!!e.full; sVague=!!e.vague; sOpts={...(e.opts||{})};
     const known=(STATIONS[sCtry]||[]).includes(e.st); sSt = e.st?(known?e.st:"__autre"):null; $("#fStOther").value = e.st&&!known?e.st:"";
   } else {
     $("#fDate").value=dOf(TODAY); $("#fKm").value=""; $("#fL").value=""; $("#fP").value="";
-    sOpts={}; sSt=null; sFull=true; $("#fStOther").value=""; rateManual=false;
+    sOpts={}; sSt=null; sFull=true; sVague=false; $("#fStOther").value=""; rateManual=false;
     const lastC=lastOf(sv); sCtry = "CH"; sCur="CHF";
   }
   const l=lastOf(sv); $("#fKm").placeholder=l?String(l.km):"km";
   $("#hKm").innerHTML=l&&!e?`Dernier : <b>${fmt(l.km)}</b> le ${dfr(l.d)}`:"";
   $("#fExtras").open = Object.values(sOpts).some(Boolean);
-  $("#fType").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",(x.dataset.t==="1")===sFull));
+  setFType();
   renderCtry(); renderSt(); renderOpts();
   $("#fCur").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.c===sCur)); $("#eurBox").hidden=sCur!=="EUR"; $("#lbP").textContent=sCur==="EUR"?"Prix total €":"Prix total CHF";
   if(sCur==="EUR"&&!rateManual) loadRate();
@@ -2990,7 +3087,9 @@ $("#fDate").addEventListener("change",()=>{ if(sCur==="EUR"){ rateManual=false; 
 $("#btnDel").onclick=()=>{ if(!EDIT) return; confirmTap($("#btnDel"),"Toucher encore pour supprimer ce plein",()=>{ const id=EDIT.id; fills.splice(fills.findIndex(f=>f.id===id),1); persist(); A=analyse(); closeSheet(); views[curView](); toast("Plein supprimé"); }); };
 $("#fab").onclick=()=>openSheet(true); $("#close").onclick=closeSheet; $("#scrim").onclick=closeSheet;
 $("#fCur").querySelectorAll("button").forEach(b=>b.onclick=()=>setCur(b.dataset.c));
-$("#fType").querySelectorAll("button").forEach(b=>b.onclick=()=>{sFull=b.dataset.t==="1";$("#fType").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b));live();});
+const fTypeOf=()=>sVague?"?":sFull?"1":"0";
+function setFType(){ $("#fType").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.t===fTypeOf())); $("#lbKm").textContent=hasFuel(sv)?"Km compteur (facultatif)":"Km compteur"; }
+$("#fType").querySelectorAll("button").forEach(b=>b.onclick=()=>{ sFull=b.dataset.t==="1"; sVague=b.dataset.t==="?"; setFType(); live(); });
 function preview(){
   const km=nv($("#fKm"))||0, l=EDIT?null:lastOf(sv);
   if(!hasFuel(sv)) return {km,L:null,P:null,eur:null,rate:null,dist:l&&km?km-l.km:null,conso:null,why:"",kmOnly:true};
@@ -2998,12 +3097,13 @@ function preview(){
   const rate=nv($("#fR")); const P = sCur==="EUR" ? (isNaN(rate)?NaN:P0*rate) : P0;
   const res={km,L:isNaN(L)?null:L,P:isNaN(P)?null:Math.round(P*100)/100,eur:sCur==="EUR"&&!isNaN(P0)?P0:null,rate:sCur==="EUR"?rate:null,dist:l&&km?km-l.km:null,conso:null};
   res.why="";
-  if(!sFull) res.why="Partiel : la conso sera calculée au prochain plein complet.";
+  if(!sFull) res.why=sVague?"Je ne sais plus : il compte pour les dépenses, la conso repart au prochain plein complet.":"Partiel : la conso sera calculée au prochain plein complet.";
+  if(!km) res.why=(res.why?res.why+" ":"")+"Sans km : il compte pour les dépenses et les prix, pas pour la conso.";
   if(!EDIT&&sFull&&km&&res.L){ const list=A.per[sv]; let i=list.length-1, Ls=res.L, miss=false; while(i>=0&&!list[i].full){ if(list[i].L==null) miss=true; else Ls+=list[i].L; i--; }
     if(i>=0&&list[i].L==null&&i===list.length-1) miss=false;
     if(i<0) res.why="Premier plein : la conso démarrera au prochain.";
     else if(miss) res.why="Conso impossible : des litres manquent depuis le dernier plein complet.";
-    else if(km>list[i].km) res.conso=Ls/(km-list[i].km)*100; }
+    else if(km>list[i].km&&!list.slice(i+1).some(f=>f.vague)) res.conso=Ls/(km-list[i].km)*100; }
   return res;
 }
 function fTank(L){ // le réservoir se remplit pendant qu'on tape les litres
@@ -3020,16 +3120,19 @@ function live(){ const r=preview();
   if(r.L&&r.P){ const pl=r.P/r.L, ref=refPrice(sv,$("#fDate").value||dOf(TODAY),EDIT); if(ref){ const d=pl/ref-1;
       $("#hP").innerHTML= Math.abs(d)<.005 ? `≈ pareil que ta moyenne 3 mois (${fmt(ref,3)} CHF/L)` : `<span class="${d>0?"up":"dn"}">${d>0?"▲ +":"▼ −"}${fmt(Math.abs(d)*100)} %</span> vs ta moyenne 3 mois (${fmt(ref,3)} CHF/L) · ${d>0?`≈ ${fmt((pl-ref)*r.L,2)} CHF de plus`:`≈ ${fmt((ref-pl)*r.L,2)} CHF économisés 👍`}`; } else $("#hP").textContent=""; }
   else $("#hP").textContent="";
-  const st=curStation(); const g=st?groupPrices(A.per[sv].filter(f=>f!==EDIT),f=>f.st===st?"x":null)[0]:null;
+  const st=curStation(); const g=st?groupPrices(A.all[sv].filter(f=>f!==EDIT),f=>f.st===st?"x":null)[0]:null;
   $("#hSt").textContent = st ? (g?`Chez ${st}, tu paies en moyenne ${fmt(g.pl,3)} CHF/L (${g.n} plein${g.n>1?"s":""}).`:`Premier plein noté chez ${st}.`) : "";
-  const ok=r.km>0&&(EDIT||!lastOf(sv)||r.dist>0); $("#slide").classList.toggle("disabled",!ok); return ok; }
+  const low=r.km>0&&r.dist!=null&&r.dist<=0;
+  $("#hKm").classList.toggle("warn",low); if(low){ const l=lastOf(sv); $("#hKm").innerHTML=`Plus bas que le dernier (<b>${fmt(l.km)}</b> le ${dfr(l.d)}) : ok pour un rattrapage, il sera rangé à sa place.`; }
+  else if(!EDIT){ const l=lastOf(sv); $("#hKm").innerHTML=l?`Dernier : <b>${fmt(l.km)}</b> le ${dfr(l.d)}`:""; }
+  const ok=!!$("#fDate").value&&(hasFuel(sv)?(r.km>0||r.L>0||r.P>0):r.km>0); $("#slide").classList.toggle("disabled",!ok); return ok; }
 ["#fKm","#fL","#fP","#fDate","#fR","#fStOther"].forEach(s=>$(s).addEventListener("input",live));
 // glissière
 (function(){
   const sl=$("#slide"), kn=sl.querySelector(".knob"), fi=sl.querySelector(".fill"); let x0=null, dx=0;
   const maxX=()=>sl.clientWidth-kn.offsetWidth-8;
   const set=v=>{dx=Math.max(0,Math.min(maxX(),v));kn.style.transform=`translateX(${dx}px)`;fi.style.width=(dx+54)+"px";};
-  kn.addEventListener("pointerdown",e=>{ if(sl.classList.contains("disabled")){toast(EDIT?"Entre le km du compteur.":"Entre au moins le km du compteur (plus grand que le dernier).");return;} x0=e.clientX; kn.setPointerCapture(e.pointerId); });
+  kn.addEventListener("pointerdown",e=>{ if(sl.classList.contains("disabled")){toast(hasFuel(sv)?"Entre au moins la date et les litres, le montant ou le km.":"Entre le km du compteur.");return;} x0=e.clientX; kn.setPointerCapture(e.pointerId); });
   kn.addEventListener("pointermove",e=>{ if(x0!=null) set(e.clientX-x0); });
   const up=()=>{ if(x0==null) return; x0=null;
     if(dx>maxX()*.88){ save(); } kn.style.transition="transform .2s";fi.style.transition="width .2s";set(0);setTimeout(()=>{kn.style.transition="";fi.style.transition=""},220); };
@@ -3038,16 +3141,16 @@ function live(){ const r=preview();
 function save(){
   const r=preview(); if(!live()) return;
   if(EDIT){
-    Object.assign(EDIT,{d:$("#fDate").value,v:sv,km:r.km,L:r.L,P:r.P,eur:r.eur,rate:r.rate,full:r.kmOnly?false:sFull,ctry:sCtry,st:r.kmOnly?null:curStation(),opts:r.kmOnly?{}:{...sOpts},force:!$("#forceBox").hidden&&$("#fForce").checked}); if(r.kmOnly) EDIT.kmOnly=true; else delete EDIT.kmOnly;
+    Object.assign(EDIT,{d:$("#fDate").value,v:sv,km:r.km||null,L:r.L,P:r.P,eur:r.eur,rate:r.rate,full:r.kmOnly?false:sFull,ctry:sCtry,st:r.kmOnly?null:curStation(),opts:r.kmOnly?{}:{...sOpts},force:!$("#forceBox").hidden&&$("#fForce").checked}); if(r.kmOnly) EDIT.kmOnly=true; else delete EDIT.kmOnly; if(sVague&&!r.kmOnly) EDIT.vague=true; else delete EDIT.vague;
     if(r.rate) STATE.lastRate=r.rate;
     persist(); A=analyse(); closeSheet(); views[curView](); toast("✓ Plein modifié"); return;
   }
   const prevBest=Math.min(...A.per[sv].filter(f=>f.conso!=null).map(f=>f.conso)), lastKm=lastOf(sv)?lastOf(sv).km:0;
   let verdict=""; try{ const pr=predict(sv); if(pr&&pr.due!=null&&sFull){ const e=day($("#fDate").value)-pr.due; verdict=Math.abs(e)<=2?` · 🧠 L'IA avait prévu le ${dshort(pr.due)} : 🎯 dans le mille !`:Math.abs(e)<=pr.win?` · 🧠 Prévu le ${dshort(pr.due)} : à ${Math.abs(e)} j près 👍`:` · 🧠 Prévu le ${dshort(pr.due)} : raté de ${Math.abs(e)} j 😅`; } }catch(_){}
-  const nf={id:uid(),d:$("#fDate").value,v:sv,km:r.km,L:r.L,P:r.P,eur:r.eur,rate:r.rate,full:r.kmOnly?false:sFull,ctry:sCtry,st:r.kmOnly?null:curStation(),opts:r.kmOnly?{}:{...sOpts}}; if(r.kmOnly) nf.kmOnly=true; fills.push(nf);
+  const nf={id:uid(),d:$("#fDate").value,v:sv,km:r.km||null,L:r.L,P:r.P,eur:r.eur,rate:r.rate,full:r.kmOnly?false:sFull,ctry:sCtry,st:r.kmOnly?null:curStation(),opts:r.kmOnly?{}:{...sOpts}}; if(r.kmOnly) nf.kmOnly=true; if(sVague&&!r.kmOnly) nf.vague=true; fills.push(nf);
   if(r.rate) STATE.lastRate=r.rate;
   persist(); ORACLE_CACHE={}; A=analyse(); closeSheet(); go(curView==="more"?"home":curView);
-  const bornes=lastKm&&Math.floor(r.km/5000)>Math.floor(lastKm/5000)?` · 🎉 ${fmt(Math.floor(r.km/5000)*5000)} km franchis !`:"";
+  const bornes=lastKm&&r.km>lastKm&&Math.floor(r.km/5000)>Math.floor(lastKm/5000)?` · 🎉 ${fmt(Math.floor(r.km/5000)*5000)} km franchis !`:"";
   const rec=r.conso!=null&&r.conso<prevBest; sparkle(rec?70:26); setTimeout(checkBadges,400);
   if(rec){ toast(`🏆 Record perso battu : ${fmt(r.conso,2)} L/100 km !${bornes}`); }
   else if(bornes){ toast(`✓ ${V[sv].n} enregistré${bornes}`); }
@@ -3057,7 +3160,7 @@ function save(){
 // ---------- 💾 sauvegarde Drive commune (bloc SAUVEGARDE ATELIER v2) + import des anciens fichiers
 // réglages d'affichage (gardés dans ce téléphone) : aussi dans la sauvegarde, pour tout retrouver après une réinstallation
 const AFF={theme:["sv-theme",["fonce","clair","grim"]],magie:["sv-magic",["on","off"]],barre:["sv-rail",["g","d","b"]],iconesBarre:["sv-ricons",["h","b"]],barreCachee:["sv-rhide",["e","c"]],
-  defilement:["sv-snap",["f","l"]],ouvrirTuile:["sv-topen",["p","s"]],pave:["sv-pad",["on","off"]],budget:["sv-bud",["v","t"]]};
+  defilement:["sv-snap",["f","l"]],ouvrirTuile:["sv-topen",["p","s"]],pave:["sv-pad",["on","off"]],budget:["sv-bud",["v","t"]],betises:["sv-bet",["3","0","1","5","fete"]],genreBetises:["sv-betd",["toutes","discretes"]],pageVivante:["sv-viv",["on","off"]]};
 function affRead(){ const o={}; Object.keys(AFF).forEach(k=>{ const v=lsGet(AFF[k][0]); o[k]=AFF[k][1].includes(v)?v:AFF[k][1][0]; }); o.ordreBarre=railOrder(); return o; } // sans réglage : la valeur par défaut (la première)
 function affOk(g){ if(!g||typeof g!=="object") return null; const o={};
   Object.keys(AFF).forEach(k=>{ if(AFF[k][1].includes(g[k])) o[k]=g[k]; });
@@ -3072,7 +3175,7 @@ function backupData(){ // ce que contient chaque sauvegarde (noms lisibles)
   return {app:"Suivi Véhicules",version:APP_VERSION,
     vehicules:V.map(x=>({id:x.id,n:x.n,nl:x.nl,type:x.type,c:x.c,fuel:x.fuel,ico:x.ico,tyre:x.tyre||"",atelier:!!x.atelier})),
     reglages:{autonomie:per(STATE.range),reservoir:per(STATE.tank),achat:per(STATE.buy),trajet:STATE.trip||null,tuiles:STATE.tiles||null,fun:STATE.fun||null,dateAchat:per(STATE.buyD),timeline:STATE.tlTypes||null,ongletsVehicule:(()=>{ const o={}; V.forEach((x,i)=>{ const d=vx(i); o[x.n]={couples:d.couples,comparatif:d.cmp,notes:d.notes}; }); return o; })(),affichage:affRead()},
-    pleins:fills.map(f=>{ const o={id:f.id,d:f.d,v:V[f.v].n,km:f.km,L:f.L,P:f.P,full:f.full,ctry:f.ctry||"CH",st:f.st||null,eur:f.eur??null,rate:f.rate??null,opts:f.opts||{},force:!!f.force}; if(f.kmOnly) o.kmOnly=true; return o; }),
+    pleins:fills.map(f=>{ const o={id:f.id,d:f.d,v:V[f.v].n,km:f.km,L:f.L,P:f.P,full:f.full,ctry:f.ctry||"CH",st:f.st||null,eur:f.eur??null,rate:f.rate??null,opts:f.opts||{},force:!!f.force}; if(f.kmOnly) o.kmOnly=true; if(f.vague) o.vague=true; return o; }),
     pneus:STATE.tyres.map(t=>({id:t.id,d:t.d,v:V[t.v].n,t:t.t,pos:t.pos??null,mod:t.mod??null,km:t.km??null})),
     entretien:STATE.ent.map(e=>({id:e.id,d:e.d,v:V[e.v].n,t:e.t,m:e.m??null,km:e.km??null,k:e.k??null,fk:e.fk??null}))};
 }
@@ -3134,7 +3237,7 @@ function backupFrom(j){ // relit les données d'une sauvegarde (ancien .txt ou s
   const named=VL.length>0; if(!named) VL=JSON.parse(JSON.stringify(VDEF));
   const vi=n=>{ const s=String(n??"").toLowerCase(), k=VL.findIndex(x=>x.n.toLowerCase()===s); return k>=0?k:named?-1:vehOf(n); };
   const out={fills:[],tyres:[],ent:[],veh:VL}, per=(o,d)=>VL.map(x=>okN(o&&o[x.n])??d);
-  (j.pleins||[]).forEach(f=>{ const v=vi(f.v), d=okD(f.d), km=okN(f.km); if(v<0||!d||km==null) return; const x={id:okId(f.id),d,v,km,L:okN(f.L),P:okN(f.P),full:!!f.full,ctry:Object.hasOwn(CTRY,f.ctry)?f.ctry:"CH",st:okS(f.st,60),eur:okN(f.eur),rate:okN(f.rate),opts:okOpts(f.opts),force:!!f.force}; if(f.kmOnly) x.kmOnly=true; out.fills.push(x); });
+  (j.pleins||[]).forEach(f=>{ const v=vi(f.v), d=okD(f.d), km=okN(f.km); if(v<0||!d||(km==null&&okN(f.L)==null&&okN(f.P)==null)) return; const x={id:okId(f.id),d,v,km,L:okN(f.L),P:okN(f.P),full:!!f.full,ctry:Object.hasOwn(CTRY,f.ctry)?f.ctry:"CH",st:okS(f.st,60),eur:okN(f.eur),rate:okN(f.rate),opts:okOpts(f.opts),force:!!f.force}; if(f.kmOnly) x.kmOnly=true; if(f.vague&&!f.full) x.vague=true; out.fills.push(x); });
   if(j.reglages){ const g=j.reglages; out.range=per(g.autonomie,0).map((x,i)=>x||TYPES[VL[i].type].range); out.tank=per(g.reservoir,0).map((x,i)=>x||TYPES[VL[i].type].tank);
     if(g.achat) out.buy=per(g.achat,0);
     if(g.frais) out.fixed=VL.map(x=>okFix(g.frais[x.n]));
@@ -3142,7 +3245,7 @@ function backupFrom(j){ // relit les données d'une sauvegarde (ancien .txt ou s
     if(g.trajet) out.trip=okTrip(g.trajet);
     if(g.tuiles&&okTiles(g.tuiles)) out.tiles=okTiles(g.tuiles);
     if(g.dateAchat) out.buyD=VL.map(x=>okD(g.dateAchat[x.n]));
-    if(g.timeline&&typeof g.timeline==="object"){ out.tlTypes={}; ["fill","E","P","F","buy"].forEach(k=>out.tlTypes[k]=!!g.timeline[k]); }
+    if(g.timeline&&typeof g.timeline==="object"){ out.tlTypes={}; ["fill","E","S","P","F","buy"].forEach(k=>out.tlTypes[k]=!!g.timeline[k]); }
     if(Array.isArray(g.couples)) out.couples=okRows(g.couples,BTAB.couples.cols);
     if(Array.isArray(g.pneusComparatif)) out.pneusCmp=okRows(g.pneusComparatif,BTAB.pneus.cols);
     if(g.ongletsVehicule&&typeof g.ongletsVehicule==="object"){ out.vx={}; VL.forEach(x=>{ const o=g.ongletsVehicule[x.n]; if(!o||typeof o!=="object") return;
@@ -3150,7 +3253,7 @@ function backupFrom(j){ // relit les données d'une sauvegarde (ancien .txt ou s
         notes:Array.isArray(o.notes)?o.notes.slice(0,500).filter(n=>n&&typeof n==="object").map(n=>({id:okId(n.id),d:okD(n.d),t:okS(n.t,80)||"",x:okS(n.x,4000)||"",pin:!!n.pin})):[]}; }); }
     out.aff=affOk(g.affichage); }
   (j.pneus||[]).forEach(t=>{ const v=vi(t.v), d=okD(t.d); if(v>=0&&d) out.tyres.push(tyreFrom(okId(t.id),d,v,t.t,t.pos,t.mod,t.km)); });
-  (j.entretien||[]).forEach(e=>{ const v=vi(e.v); if(v>=0&&e.t){ const x={id:okId(e.id),d:okD(e.d),v,t:okS(e.t,120),m:okN(e.m),km:okN(e.km)}; if(e.k==="E"||e.k==="P"||e.k==="F") x.k=e.k; if(x.k==="F") x.fk=FXN[e.fk]?e.fk:guessFk(e.t); out.ent.push(x); } });
+  (j.entretien||[]).forEach(e=>{ const v=vi(e.v); if(v>=0&&e.t){ const x={id:okId(e.id),d:okD(e.d),v,t:okS(e.t,120),m:okN(e.m),km:okN(e.km)}; if(e.k==="E"||e.k==="S"||e.k==="P"||e.k==="F") x.k=e.k; if(x.k==="F") x.fk=FXN[e.fk]?e.fk:guessFk(e.t); out.ent.push(x); } });
   return out; }
 let pendingImport=null;
 $("#btnImport").onclick=()=>$("#fileImport").click();
@@ -3189,7 +3292,7 @@ function sparkle(n,x,y,cols){ if(!magicOn()||!n) return; cols=cols||["#F5D04C","
     const a=Math.random()*Math.PI*2, r=60+Math.random()*(n>40?220:150), dx=Math.cos(a)*r, dy=Math.sin(a)*r-80-Math.random()*90, d=900+Math.random()*700;
     e.animate([{transform:`translate(${x}px,${y}px) scale(.4)`,opacity:1},{transform:`translate(${x+dx*.7}px,${y+dy*.7}px) scale(1.1)`,opacity:1,offset:.55},{transform:`translate(${x+dx}px,${y+dy+70}px) scale(.3) rotate(${Math.random()*360}deg)`,opacity:0}],{duration:d,easing:"cubic-bezier(.2,.7,.4,1)"}).onfinish=()=>e.remove(); } }
 function rollNums(root){ if(!magicOn()||!root) return;
-  root.querySelectorAll(".tm .mn,.num,.kmc .top b").forEach(el=>{ const n=[...el.childNodes].find(x=>x.nodeType===3&&x.data.trim()); if(!n) return;
+  root.querySelectorAll(".tm .mn,.num,.kmc .top b").forEach(el=>{ if(el.dataset.tetu) return; const n=[...el.childNodes].find(x=>x.nodeType===3&&x.data.trim()); if(!n) return;
     const t=n.data.trim(), m=t.match(/^(−|-)?([\d\u202f\u00a0’' ]+)(?:,(\d+))?$/); if(!m) return;
     const dec=m[3]?m[3].length:0, v=+(m[2].replace(/[^\d]/g,"")+(dec?"."+m[3]:""))*(m[1]?-1:1); if(!isFinite(v)||v===0) return;
     const t0=performance.now(), D=650+Math.min(500,String(Math.round(Math.abs(v))).length*60);
@@ -3257,6 +3360,141 @@ $("#sPad").querySelectorAll("button").forEach(b=>b.onclick=()=>{ padPref=b.datas
 if(touchMQ&&touchMQ.addEventListener) touchMQ.addEventListener("change",applyPad);
 
 // ---------- hors ligne
+
+
+// ---------- 🧚 bêtises : 30 petites farces de l'app (Paramètres → Bêtises), coupées par Magie. Jamais bloquantes : le vrai chiffre revient toujours.
+const PERSIST=[]; let FARCE_VIEW=null; // farces qui restent jusqu'au prochain toucher
+const STOPS=[]; // ce qu'il faut remettre en place si on touche l'écran pendant une bêtise
+const BETISE=(function(){
+  const vis=el=>{ if(!el) return false; const r=el.getBoundingClientRect(); return r.width>0&&r.height>0&&r.top>=(PG.top||0)-2&&r.bottom<=innerHeight+2; };
+  const seen=el=>{ if(!el) return false; const r=el.getBoundingClientRect(); return r.width>0&&r.height>0&&r.bottom>0&&r.top<innerHeight; }; // en-tête et barre : juste à l'écran
+  const fx=(el,c,d)=>{ el.classList.remove(c); void el.offsetWidth; el.classList.add(c); setTimeout(()=>el.classList.remove(c),d||4000); return 1; };
+  const pick=a=>a[Math.floor(Math.random()*a.length)];
+  const one=s=>pick([...document.querySelectorAll(s)].filter(vis));
+  const hr=()=>{ const d=new Date(); return d.getHours()+d.getMinutes()/60; }, dow=()=>new Date().getDay(), mon=()=>new Date().getMonth();
+  function bub(el,txt,big){ if(!el) return 0; const r=el.getBoundingClientRect(), b=document.createElement("div"); b.className="bbl"+(big?" big":""); b.textContent=txt; document.body.appendChild(b);
+    const w=b.offsetWidth, hh=b.offsetHeight, cx=r.left+r.width/2, x=Math.max(8,Math.min(innerWidth-w-8,cx-w/2)); let y=r.top-hh-10;
+    if(y<(PG.top||0)+4){ y=r.bottom+10; b.classList.add("dn"); } b.style.left=x+"px"; b.style.top=y+"px"; b.style.setProperty("--ax",Math.max(14,Math.min(w-14,cx-x))+"px");
+    setTimeout(()=>b.remove(),3600); return 1; }
+  function toy(txt,from,to,d,rot){ const e=document.createElement("span"); e.className="btoy"; e.textContent=txt; document.body.appendChild(e);
+    e.animate([{transform:`translate(${from[0]}px,${from[1]}px) rotate(0deg)`,opacity:1},{transform:`translate(${to[0]}px,${to[1]}px) rotate(${rot||0}deg)`,opacity:to[2]??1}],{duration:d,easing:"ease-in-out"}).onfinish=()=>e.remove(); return 1; }
+  const num=()=>one(".tm .mn,.kmc .top b,.bkpi b,.byr b");
+  const txtNode=el=>{ if(!el) return null; const own=[...el.childNodes].find(x=>x.nodeType===3&&x.data.trim()); if(own) return own;
+    const w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT,{acceptNode:x=>x.data.trim()?1:3}); return w.nextNode(); };
+  const tile=()=>one(".dash .tu,.tu.tm,.card");
+  const vbtn=()=>{ const b=document.querySelector('#vtog [aria-pressed="true"]')||document.querySelector("#vtog button"); return seen(b)?b:null; };
+  // [nom, discrète, quand (null = toujours), farce]
+  const L=[
+    ["Le chiffre têtu",0,null,()=>{ const n=num(), t=txtNode(n); if(!t) return 0; if(n.dataset.tetu) return 0; const old=t.data; n.dataset.tetu=1; t.data=pick(["9 999","42","∞","???"]); fx(n,"hop"); const back=()=>{ if(!n.dataset.tetu) return; t.data=old; delete n.dataset.tetu; }; STOPS.push(back); setTimeout(()=>{ if(n.dataset.tetu){ back(); bub(n,"hum… pardon 😳"); } },2800); return 1; }],
+    ["Le bouton + qui s'esquive",0,null,()=>{ const f=$("#fab"); if(!seen(f)) return 0; fx(f,"dodge"); return bub(f,"attrape-moi !"); }],
+    ["La tuile pas d'accord",0,null,()=>{ const e=tile(); if(!e) return 0; fx(e,"nope"); return bub(e,pick(["Non.","Pas d'accord 🙅","Même pas en rêve"])); }],
+    ["Le réservoir qui a soif",0,null,()=>{ const l=one(".liq .lq"); if(!l) return 0; fx(l,"slosh"); return bub(l.parentNode,"glou glou… 🥤"); }],
+    ["Les bulles de pensée",0,null,()=>{ const e=tile(); if(!e) return 0; return bub(e,pick(["On roule ? 🚗","Encore un plein ?","J'ai vu une station moins chère…","Et si on lavait la voiture ? 🧽","Je compte les km 🤓","Tu me regardes ? 👀"])); }],
+    ["Le klaxon",0,null,()=>{ const b=vbtn()||$("#vTitle"); if(!seen(b)) return 0; fx(b,"hop"); return bub(b,"tut tut ! 📯"); }],
+    ["La roue arrière",1,null,()=>{ const b=vbtn(); if(!b) return 0; return fx(b,"wheelie"); }],
+    ["Lundi grognon",0,()=>dow()===1&&hr()<12,()=>{ const e=tile(); if(!e) return 0; fx(e,"tilt"); return bub(e,"lundi… 😑"); }],
+    ["Vendredi en vadrouille",0,()=>dow()===5&&hr()>=13,()=>{ const e=tile(); if(!e) return 0; fx(e,"hop"); return bub(e,"Week-end ! On part où ? 🗺️"); }],
+    ["Trop tôt",0,()=>hr()<7,()=>{ const e=tile(); if(!e) return 0; fx(e,"yawn"); return bub(e,"Zzz… trop tôt 😴"); }],
+    ["Les phares",0,()=>hr()>=20||hr()<5,()=>{ const h=$("header.top"); fx(h,"phares"); return bub(h,"Phares allumés ? 🔦"); }],
+    ["La faim de midi",0,()=>hr()>=11.5&&hr()<13.5,()=>{ const e=tile(); if(!e) return 0; return bub(e,"Une pause croissant ? 🥐"); }],
+    ["Les tuiles qui se chamaillent",1,null,()=>{ const a=[...document.querySelectorAll(".dash .tu")].filter(vis); for(let i=0;i+1<a.length;i++){ const r1=a[i].getBoundingClientRect(), r2=a[i+1].getBoundingClientRect(); if(Math.abs(r1.top-r2.top)<4){ fx(a[i],"bumpL"); return fx(a[i+1],"bumpR"); } } return 0; }],
+    ["Le chiffre timide",1,null,()=>{ const n=num(); if(!n) return 0; return fx(n,"shy"); }],
+    ["Le graphique farceur",1,null,()=>{ const c=Object.values(charts).find(c=>{ if(!c||!c.canvas||!c.canvas.isConnected) return false; const r=c.canvas.getBoundingClientRect(); return r.height>0&&r.top>=(PG.top||0)-2&&r.top<innerHeight-120; });
+      if(!c){ const bars=[...document.querySelectorAll(".bb")].filter(vis); if(!bars.length) return 0; const a=pick(bars); fx(a,"droop"); return 1; } /* une barre fait semblant de tomber */ try{ c.hide(0); const back=()=>{ try{ c.show(0); }catch(e){} }; STOPS.push(back); setTimeout(back,2600); }catch(e){ return 0; } return 1; }],
+    ["Le compteur qui s'emballe",1,null,()=>{ const e=one(".dash .tu"); if(!e) return 0; rollNums(e); return 1; }],
+    ["La pompe impatiente",0,null,()=>{ const f=$("#fab"); if(!seen(f)) return 0; fx(f,"wig"); return bub(f,"⛽ un plein ?"); }],
+    ["La ligne qui fait la sieste",1,null,()=>{ const r=one("#histList .row,.prow,.pit,.tip,.note,.tbl tr:not(:first-child)"); if(!r) return 0; return fx(r,"nap"); }],
+    ["Les essuie-glaces",1,null,()=>{ const h=$("header.top"), r=h.getBoundingClientRect(); return toy("〰️",[-40,r.top+r.height/2-13],[innerWidth+40,r.top+r.height/2-13,.2],1400,0); }],
+    ["Le clignotant",1,null,()=>{ const e=document.createElement("span"); e.className="btoy"; e.textContent="🟠"; e.style.cssText=`right:6px;top:${(PG.top||60)+10}px;font-size:14px`; document.body.appendChild(e);
+      e.animate([{opacity:1},{opacity:0},{opacity:1},{opacity:0},{opacity:1},{opacity:0}],{duration:2200}).onfinish=()=>e.remove(); return 1; }],
+    ["L'étincelle filante",1,null,()=>{ sparkle(18,40+Math.random()*(innerWidth-80),(PG.top||60)+40); return 1; }],
+    ["Le pneu qui roule",1,null,()=>toy("🛞",[-40,innerHeight-70],[innerWidth+40,innerHeight-70],2600,720)],
+    ["Le petit nuage",1,null,()=>{ const f=$("#fab"); if(!seen(f)) return 0; const r=f.getBoundingClientRect(); return toy("💨",[r.left-10,r.top],[r.left-80,r.top-40,0],1500,-20); }],
+    ["Le cochon gourmand",0,null,()=>{ const c=$('nav.tabs [data-v="cost"]'); if(!seen(c)) return 0; fx(c,"hop"); return bub(c,"miam, des sous 🐷"); }],
+    ["La barre qui s'étire",1,null,()=>{ const n=$("nav.tabs .in"); if(!seen(n)) return 0; return fx(n,"stretch"); }],
+    ["Le titre à l'envers",0,null,()=>{ const e=one(".view:not([hidden]) .h2")||$("#vTitle"); if(!seen(e)) return 0; return fx(e,"flip"); }],
+    ["La météo",0,null,()=>{ const e=tile(); if(!e) return 0; const m=mon(); if(m===11||m<2){ fx(e,"shiver"); return bub(e,"Brrr ❄️ antigel dans le lave-glace ?"); } if(m>=5&&m<=7) return bub(e,"Il fait chaud ☀️ les pneus, ça va ?"); return bub(e,"Il pleut ? 🌧️ essuie-glaces prêts !"); }],
+    ["L'anniversaire",0,()=>{ const d=(STATE.buyD||[])[MODE]; return !!d&&d.slice(5)===new Date().toISOString().slice(5,10); },()=>{ sparkle(40,innerWidth/2,innerHeight*.4); return bub($("#vTitle"),`Joyeux anniversaire ${V[MODE].n} ! 🎂`); }],
+    ["Le chiffre qui boude",0,null,()=>{ const n=num(); if(!n) return 0; fx(n,"sulk"); return bub(n,"hmpf 😤"); }],
+    ["La farce du chiffre fou",0,null,()=>farce("num")],
+    ["La farce de l'étiquette",0,null,()=>farce("lbl")],
+    ["La farce du titre",0,null,()=>farce("title")],
+    ["La farce du nom",0,null,()=>farce("veh")],
+    ["L'onglet baladeur",0,null,()=>tabWalk()],
+    ["Le coucou",0,null,()=>{ const b=pick([...document.querySelectorAll("nav.tabs .in>button:not([aria-current])")].filter(seen)); if(!b) return 0; fx(b,"hop"); return bub(b,"coucou 👋"); }]
+  ];
+  const FXC=["droop","hop","wig","nope","dodge","wheelie","tilt","yawn","bumpL","bumpR","shy","nap","stretch","flip","sulk","shiver","phares","slosh"];
+  function stop(e){ STOPS.splice(0).forEach(f=>{ try{ f(); }catch(e){} }); document.querySelectorAll(".bbl,.btoy").forEach(e=>e.remove());
+    document.querySelectorAll(FXC.map(c=>"."+c).join(",")).forEach(e=>e.classList.remove(...FXC));
+    const fab=e&&e.target&&e.target.closest&&e.target.closest("#betFab"), dirty=PERSIST.length||FARCE_VIEW;
+    if(!dirty) return;
+    if(!fab){ const eat=ev=>{ ev.preventDefault(); ev.stopPropagation(); }; addEventListener("click",eat,{capture:true,once:true}); setTimeout(()=>removeEventListener("click",eat,{capture:true}),700); } // ce toucher range, il n'appuie sur rien
+    const P=PERSIST.splice(0), v=FARCE_VIEW; FARCE_VIEW=null;
+    const fix=()=>{ P.forEach(p=>{ p.back(); if(p.el.isConnected) fx(p.el,"hop"); }); const w=P.map(p=>p.el).find(x=>x.isConnected&&vis(x));
+      if(!fab) bub(w||$("#vTitle"),pick(["Ah non, pardon ! 😳","Oups, pardon ! 🙈","Ah non… c'était pour rire ! 😅"]),true); };
+    if(v&&v!==curView){ go(v,-1); setTimeout(fix,350); } else fix(); }
+  addEventListener("pointerdown",stop,{capture:true,passive:true});
+  // les farces qui restent : un faux chiffre, une étiquette ou un titre farfelu, qui ne bougent plus jusqu'à ton prochain toucher
+  const FN=["42 000 000","3,14","🍌","−12","∞","1 banane","007","9 999 999","0,000 1","🤡"], FL=["Conso de café","Km de rêve","Bisous / km","Crêpes / an","Nombre de chats","Siestes","Vitesse d'escargot","Tours de rond-point","Litres de jus","Bonbons"], FT=["Tableau de bêtises","Grimoire secret","Ici, rien à voir 👀","Page des lutins","Garage enchanté"];
+  function fake(el,txt){ const tn=txtNode(el); if(!tn||el.dataset.tetu) return 0; const old=tn.data; el.dataset.tetu=1; tn.data=txt; fx(el,"hop");
+    PERSIST.push({el,back:()=>{ if(tn.data===txt) tn.data=old; delete el.dataset.tetu; }}); return 1; }
+  function farce(k){ if(PERSIST.length>=7) return 0;
+    if(k==="num"){ const n=[...document.querySelectorAll(".tm .mn,.kmc .top b,.bkpi b,.byr b")].filter(e=>vis(e)&&!e.dataset.tetu); return n.length?fake(pick(n),pick(FN)):0; }
+    if(k==="lbl"){ const n=[...document.querySelectorAll(".tm .mh")].filter(e=>vis(e)&&!e.dataset.tetu&&txtNode(e)&&txtNode(e).data.trim().length>2); return n.length?fake(pick(n),pick(FL)):0; }
+    if(k==="title"){ const e=$("#vTitle"); return seen(e)?fake(e,pick(FT)):0; }
+    if(k==="veh"){ const b=vbtn(); if(!b) return 0; const n=V[MODE].n, f=n==="Kangoo"?"Kangourou 🦘":n.length>3?n.slice(0,3)+"-Tracteur 🚜":"Bolide 🏎️"; const e=$("#vTitle"); return 0||(e&&seen(e)?(bub(b,`Je m'appelle ${f} !`),1):0); }
+    return 0; }
+  const VIEWS=["home","hist","tl","stats","cost","fun"];
+  function tabWalk(){ if(FARCE_VIEW) return 0; const next=pick(VIEWS.filter(v=>v!==curView&&$(railSel(v))&&!$(railSel(v)).hidden)); if(!next) return 0;
+    const b=$(railSel(next)); FARCE_VIEW=curView; if(seen(b)){ fx(b,"hop"); bub(b,pick(["Je vais voir par là 👉","Hop, on change !","Tiens, et ici ?"])); } setTimeout(()=>{ if(FARCE_VIEW) go(next,1); },900); return 1; }
+  const setting=()=>lsGet("sv-bet")||"3", discOnly=()=>lsGet("sv-betd")==="discretes";
+  const today=()=>new Date().toISOString().slice(0,10);
+  let last=0, recent=[];
+  function quota(){ const s=setting(); if(s==="0") return false; if(s==="fete") return Date.now()-last>12e3;
+    let c={}; try{ c=JSON.parse(localStorage.getItem("sv-betn")||"{}"); }catch(e){} const n=c.d===today()?c.n:0;
+    return n<+s&&Date.now()-last>15*60e3&&Math.random()<.35; }
+  function count(){ let c={}; try{ c=JSON.parse(localStorage.getItem("sv-betn")||"{}"); }catch(e){} lsSet("sv-betn",JSON.stringify({d:today(),n:(c.d===today()?c.n:0)+1})); }
+  function play(i){ try{ return !!L[i][3](); }catch(e){ console.warn("bêtise",L[i][0],e); return false; } }
+  function tryOne(){ // au calme : une bêtise de temps en temps, jamais deux fois la même d'affilée ; celles du moment (lundi, midi…) passent en premier
+    if(!quota()) return false; const ok=L.map((b,i)=>i).filter(i=>(!discOnly()||L[i][1])&&!recent.includes(i)&&(!L[i][2]||L[i][2]()));
+    const tm=ok.filter(i=>L[i][2]), order=(tm.length&&Math.random()<.6?tm:[]).concat(ok.sort(()=>Math.random()-.5));
+    for(const i of order){ if(play(i)){ last=Date.now(); recent.push(i); if(recent.length>10) recent.shift(); count(); return true; } } return false; }
+  function show(){ // Paramètres : « Montre-m'en une » passe les 30 dans l'ordre
+    let k=+(lsGet("sv-betk")||0)||0; const isOk=i=>!L[i][2]||L[i][2]();
+    const done=i=>{ lsSet("sv-betk",String((i+1)%L.length)); setTimeout(()=>toast(`Bêtise ${i+1}/${L.length} : ${L[i][0]}${isOk(i)?"":" (d'habitude seulement au bon moment)"}`),900); };
+    if(!magicOn()){ toast("Allume d'abord la Magie (Oui)."); return; }
+    const i=k%L.length, pages=[...new Set([curView==="more"?"home":curView,"home","stats","hist","cost"])]; let p=0;
+    const step=()=>{ if(p>=pages.length){ k=i+1; lsSet("sv-betk",String(k%L.length)); toast(`Bêtise ${i+1}/${L.length} : ${L[i][0]} (rien à faire ici)`); return; }
+      const v=pages[p++]; if(curView!==v) go(v); setTimeout(()=>{ if(play(i)) done(i); else step(); },800); };
+    step(); }
+  return {tryOne,show,list:L,bub,toy,farce,tabWalk,get dirty(){ return PERSIST.length+(FARCE_VIEW?1:0); }};
+})();
+function renderBet(){ [["#setBet","sv-bet","3"],["#setBetd","sv-betd","toutes"],["#setViv","sv-viv","on"]].forEach(([id,key,d])=>{ const el=$(id); if(!el) return;
+  el.querySelectorAll("button").forEach(b=>{ b.setAttribute("aria-pressed",(lsGet(key)||d)===b.dataset.x); b.onclick=()=>{ lsSet(key,b.dataset.x); renderBet(); }; }); });
+}
+{ const ra=renderAff; renderAff=function(){ ra(); renderBet(); }; }
+renderBet();
+/*TEST-BETISES*/
+// ---------- l'app « vivante » : quand on regarde sans toucher, un petit quelque chose bouge (coupé par le réglage Magie)
+(function(){ let tm=0, ticks=0; const viv=()=>lsGet("sv-viv")!=="off", arm=()=>{ clearTimeout(tm); tm=setTimeout(wake,viv()?4800+Math.random()*1200:6500+Math.random()*7000); };
+  const vis=el=>{ const r=el.getBoundingClientRect(); return r.width>0&&r.height>0&&r.top>=(PG.top||0)-2&&r.bottom<=innerHeight+2; };
+  const fx=(el,c)=>{ el.classList.remove(c); void el.offsetWidth; el.classList.add(c); setTimeout(()=>el.classList.remove(c),1400); };
+  const pick=a=>a[Math.floor(Math.random()*a.length)];
+  function wake(){ arm(); if(!magicOn()||document.hidden||$("#sheet").classList.contains("on")||document.body.classList.contains("typing")||txtFocus()) return;
+    const opts=[], all=s=>[...document.querySelectorAll(s)].filter(vis);
+    const ch=Object.keys(charts).filter(k=>{ const c=charts[k]; return c&&c.canvas&&c.canvas.isConnected&&vis(c.canvas); });
+    if(ch.length) opts.push(()=>{ const c=charts[pick(ch)]; try{ c.reset(); c.update(); }catch(e){} }); // le graphique se redessine
+    const n=all(".tm .mn,.num,.kmc .top b,.bkpi b,.pm,.byr b"); if(n.length) opts.push(()=>fx(pick(n),"hop"));
+    const l=all(".liq .lq"); if(l.length) opts.push(()=>fx(pick(l),"slosh"));
+    const r=all("#histList .row,.prow,.pit,.tip,.note,.tbl tr:not(:first-child)"); if(r.length) opts.push(()=>fx(pick(r),"wig"));
+    if(viv()){ ticks++; const bet=lsGet("sv-bet")!=="0", r=Math.random(); // page vivante : on mélange tout
+      if(bet&&ticks>=5&&r<.4&&BETISE.tabWalk()){ ticks=0; return; }
+      if(bet&&r<.38&&BETISE.farce(pick(["num","num","lbl","title"]))) return;
+      if(r<.7&&BETISE.tryOne()) return;
+      if(opts.length) pick(opts)(); return; }
+    if(BETISE.tryOne()) return;
+    if(opts.length) pick(opts)(); }
+  ["pointerdown","keydown","wheel","touchstart"].forEach(e=>addEventListener(e,arm,{passive:true})); arm(); })();
 if("serviceWorker" in navigator){ // nouvelle version : vérifiée à chaque retour dans l'app, rechargée dès qu'on ne saisit rien
   const had=!!navigator.serviceWorker.controller; let swReg=null, swNew=false;
   const swReload=()=>{ if(!swNew) return; if($("#sheet").classList.contains("on")||document.body.classList.contains("typing")||txtFocus()||(curView==="veh"&&nEdit)) return; swNew=false; location.reload(); };
