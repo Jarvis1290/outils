@@ -1159,7 +1159,7 @@ const THEME = { // v1.8 : même fond foncé pour tous, un accent par véhicule
   k:{txt:"#B3B8C2",grid:"rgba(255,255,255,.06)",tipBg:"#20242B",tipFg:"#EEF0F4",tipBd:"#E5484D",track:"#262A32",needle:"#EEF0F4",muted:"#8B92A0",bad:"#FF9F43",warn:"#F5D04C",acc:"#E5484D",fg:"#EEF0F4"}};
 let MODE=0; try{ const m=+localStorage.getItem("sv-mode"); if(m>0) MODE=m; }catch(e){}
 let T=THEME.k;
-const APP_VERSION="3.0.1";
+const APP_VERSION="3.0.2";
 const KEY="suivi-vehicules-v1";
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}}, lsSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 let STATE={fills:[],tyres:[],ent:[],rates:{},range:[925,350],tank:[60,20],buy:[3500,10000],fixed:[{},{}],trip:null};
@@ -2357,6 +2357,7 @@ function renderMore(){
 
 // ---------- Quoi de neuf : la version en grand, une carte par version ; s'ouvre une fois après chaque mise à jour
 const CHANGELOG=[
+  ["3.0.2","27.10.2026","Sauvegarde",["La sauvegarde Drive garde aussi les réglages d'affichage : thème, barre (côté, icônes, épinglée ou cachée, ordre), défilement, ouverture des tuiles et pavé de saisie","Après une restauration, l'app revient exactement comme tu l'avais réglée"]],
   ["3.0.1","26.10.2026","Touche Retour",["La touche Retour d'Android ferme d'abord ce qui est ouvert (tuile, fenêtre, menu), puis revient à l'écran d'avant, au lieu de sortir de l'app","Double appui sur Retour depuis le tableau de bord pour quitter"]],
   ["3.0","26.10.2026","Nouveaux véhicules",["Paramètres → Véhicules : ajoute un vélo, une trottinette, un scooter… avec son nom, son type, sa couleur, son carburant et son icône","Plus de 3 véhicules : un menu en haut pour choisir","Sans carburant : tu notes juste le compteur, l'entretien et les frais","Modifier ou supprimer un véhicule (une copie est gardée avant)","Journal, stats, stats communes, coût, Fun et sauvegarde Drive prennent tous les véhicules"]],
   ["2.5","26.10.2026","Fun & duel",["Fun & records et « Moto ou voiture » réunis : le duel Kangoo vs BMW 1200 est une carte","Nouvelles cartes : Succès (badges), Station préférée, Pleins par pays, Malin ou pas","Baignoires et CO₂ réunis dans « Ça représente quoi »","Les bornes kilométriques passent dans l'odomètre, l'effet clim dans Stats","Cartes en mini qui s'ouvrent en grand ; retire celles que tu n'aimes pas (Organiser les cartes)"]],
@@ -2756,11 +2757,23 @@ function save(){
 }
 
 // ---------- 💾 sauvegarde Drive commune (bloc SAUVEGARDE ATELIER v2) + import des anciens fichiers
+// réglages d'affichage (gardés dans ce téléphone) : aussi dans la sauvegarde, pour tout retrouver après une réinstallation
+const AFF={theme:["sv-theme",["fonce","clair"]],barre:["sv-rail",["g","d","b"]],iconesBarre:["sv-ricons",["h","b"]],barreCachee:["sv-rhide",["e","c"]],
+  defilement:["sv-snap",["f","l"]],ouvrirTuile:["sv-topen",["p","s"]],pave:["sv-pad",["on","off"]]};
+function affRead(){ const o={}; Object.keys(AFF).forEach(k=>{ const v=lsGet(AFF[k][0]); o[k]=AFF[k][1].includes(v)?v:AFF[k][1][0]; }); o.ordreBarre=railOrder(); return o; } // sans réglage : la valeur par défaut (la première)
+function affOk(g){ if(!g||typeof g!=="object") return null; const o={};
+  Object.keys(AFF).forEach(k=>{ if(AFF[k][1].includes(g[k])) o[k]=g[k]; });
+  if(Array.isArray(g.ordreBarre)){ const r=g.ordreBarre.filter((x,i,a)=>RAIL0.includes(x)&&a.indexOf(x)===i); if(r.length) o.ordreBarre=r; }
+  return Object.keys(o).length?o:null; }
+function affApply(o){ if(!o) return; const D=document.documentElement.dataset, DS={theme:"theme",barre:"rail",iconesBarre:"ricons",barreCachee:"rhide",defilement:"snap"};
+  Object.keys(AFF).forEach(k=>{ if(o[k]==null) return; lsSet(AFF[k][0],o[k]); if(DS[k]) D[DS[k]]=o[k]; });
+  if(o.pave){ padPref=o.pave; applyPad(); }
+  if(o.ordreBarre) setRailOrder(o.ordreBarre); tOpenIn=null; railClose(); }
 function backupData(){ // ce que contient chaque sauvegarde (noms lisibles)
   const per=a=>{ const o={}; V.forEach((x,i)=>o[x.n]=a[i]??null); return o; };
   return {app:"Suivi Véhicules",version:APP_VERSION,
     vehicules:V.map(x=>({id:x.id,n:x.n,nl:x.nl,type:x.type,c:x.c,fuel:x.fuel,ico:x.ico,tyre:x.tyre||"",atelier:!!x.atelier})),
-    reglages:{autonomie:per(STATE.range),reservoir:per(STATE.tank),achat:per(STATE.buy),trajet:STATE.trip||null,tuiles:STATE.tiles||null,fun:STATE.fun||null,dateAchat:per(STATE.buyD),timeline:STATE.tlTypes||null,couples:STATE.couples||null,pneusComparatif:STATE.pneusCmp||null},
+    reglages:{autonomie:per(STATE.range),reservoir:per(STATE.tank),achat:per(STATE.buy),trajet:STATE.trip||null,tuiles:STATE.tiles||null,fun:STATE.fun||null,dateAchat:per(STATE.buyD),timeline:STATE.tlTypes||null,couples:STATE.couples||null,pneusComparatif:STATE.pneusCmp||null,affichage:affRead()},
     pleins:fills.map(f=>{ const o={id:f.id,d:f.d,v:V[f.v].n,km:f.km,L:f.L,P:f.P,full:f.full,ctry:f.ctry||"CH",st:f.st||null,eur:f.eur??null,rate:f.rate??null,opts:f.opts||{},force:!!f.force}; if(f.kmOnly) o.kmOnly=true; return o; }),
     pneus:STATE.tyres.map(t=>({id:t.id,d:t.d,v:V[t.v].n,t:t.t,pos:t.pos??null,mod:t.mod??null,km:t.km??null})),
     entretien:STATE.ent.map(e=>({id:e.id,d:e.d,v:V[e.v].n,t:e.t,m:e.m??null,km:e.km??null,k:e.k??null,fk:e.fk??null}))};
@@ -2832,7 +2845,8 @@ function backupFrom(j){ // relit les données d'une sauvegarde (ancien .txt ou s
     if(g.dateAchat) out.buyD=VL.map(x=>okD(g.dateAchat[x.n]));
     if(g.timeline&&typeof g.timeline==="object"){ out.tlTypes={}; ["fill","E","P","F","buy"].forEach(k=>out.tlTypes[k]=!!g.timeline[k]); }
     if(Array.isArray(g.couples)) out.couples=okRows(g.couples,BTAB.couples.cols);
-    if(Array.isArray(g.pneusComparatif)) out.pneusCmp=okRows(g.pneusComparatif,BTAB.pneus.cols); }
+    if(Array.isArray(g.pneusComparatif)) out.pneusCmp=okRows(g.pneusComparatif,BTAB.pneus.cols);
+    out.aff=affOk(g.affichage); }
   (j.pneus||[]).forEach(t=>{ const v=vi(t.v), d=okD(t.d); if(v>=0&&d) out.tyres.push(tyreFrom(okId(t.id),d,v,t.t,t.pos,t.mod,t.km)); });
   (j.entretien||[]).forEach(e=>{ const v=vi(e.v); if(v>=0&&e.t){ const x={id:okId(e.id),d:okD(e.d),v,t:okS(e.t,120),m:okN(e.m),km:okN(e.km)}; if(e.k==="E"||e.k==="P"||e.k==="F") x.k=e.k; if(x.k==="F") x.fk=FXN[e.fk]?e.fk:guessFk(e.t); out.ent.push(x); } });
   return out; }
@@ -2854,7 +2868,7 @@ function setData(d){ fills.length=0; d.fills.forEach(f=>fills.push(f)); STATE.ty
   if(d.veh){ STATE.veh=d.veh; ["range","tank","buy","buyD","fixed"].forEach(k=>{ if(!d[k]) STATE[k]=[]; }); }
   ["range","tank","buy","fixed","trip","tiles","fun","buyD","tlTypes","couples","pneusCmp"].forEach(k=>{ if(d[k]) STATE[k]=d[k]; });
   if(d.fixed) STATE.fx2=false; fixVeh(); migrateFix(); comV=[];
-  persist(); ORACLE_CACHE={}; IA_CACHE={}; A=analyse(); applyTheme(); }
+  persist(); ORACLE_CACHE={}; IA_CACHE={}; A=analyse(); affApply(d.aff); applyTheme(); }
 function applyImport(d){ setData(d); go("home");
   toast(`✓ ${d.fills.length} pleins importés${d.ent.length?`, ${d.ent.length} entretiens`:""}${d.tyres.length?`, ${d.tyres.length} changements de pneus`:""}`); }
 Sauvegarde.init({app:"Vehicules", nom:"Suivi Véhicules", cle:KEY, version:APP_VERSION,
