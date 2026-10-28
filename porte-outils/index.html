@@ -131,7 +131,6 @@ textarea{min-height:80px;resize:vertical}
 </div>
 
 <script src="vendor/jsQR.js"></script>
-<script src="vendor/xlsx.mini.min.js"></script>
 <script>
 /* === SAUVEGARDE ATELIER v1 — début (copie identique dans chaque app, source : /mnt/project-files/sauvegarde-drive) === */
 /* Sauvegarde Drive commune aux apps d'atelier.
@@ -144,7 +143,7 @@ textarea{min-height:80px;resize:vertical}
        lire:() => donnees, ecrire:d => {...}, resume:d => "12 porte-outils…", valider:d => null|"erreur", vide:d => true|false });
      Sauvegarde.panneau(element)   // carte avec boutons, aperçu d'import, copies
      Sauvegarde.bandeau()          // HTML du rappel ("" si pas besoin)
-     Sauvegarde.copieAvant(raison) // à appeler avant tout autre remplacement des données (ex. import Excel) ; false = échec
+     Sauvegarde.copieAvant(raison) // à appeler avant tout autre remplacement des données ; false = échec
 */
 const Sauvegarde = (() => {
   const MARQUE = "---- DONNÉES (ne pas modifier sous cette ligne) ----";
@@ -309,7 +308,7 @@ function save(changed=true){
   if(changed) db.changesSinceExport = (db.changesSinceExport||0) + 1;
   try{ localStorage.setItem(KEY, JSON.stringify(db)); }catch(e){ toast("Enregistrement impossible sur ce téléphone"); }
 }
-const APP_VERSION = "1.1";
+const APP_VERSION = "1.2";
 Sauvegarde.init({app:"PorteOutils", nom:"Porte-outils", cle:KEY, version:APP_VERSION,
   lire:() => ({porteOutils:db.porteOutils, outils:db.outils, montages:db.montages, machines:db.machines}),
   ecrire:d => { db = Object.assign(EMPTY(), d); save(false); route(); },
@@ -366,8 +365,8 @@ function vHome(){
   setTop("Porte-outils CNC"); setNav("home");
   if(!db.porteOutils.length && !db.outils.length){
     view.innerHTML = `<div class="card"><h2 style="margin-top:0">Bienvenue</h2>
-      <p>L'app est vide. Importe ton fichier <b>Outils_CNC_import.xlsx</b> pour charger tes porte-outils et tes outils.</p>
-      <a class="btn primary block" href="#/donnees">Importer mes données</a></div>`;
+      <p>L'app est vide. Importe ta sauvegarde Drive (fichier .txt) pour retrouver tes porte-outils et tes outils.</p>
+      <a class="btn primary block" href="#/donnees">Importer ma sauvegarde</a></div>`;
     return;
   }
   const last = newestFirst(db.montages).slice(0,8);
@@ -558,49 +557,15 @@ function vData(){
       <div class="grid2" style="margin-top:8px"><div><b>${db.porteOutils.length}</b> porte-outils</div><div><b>${db.outils.length}</b> outils</div><div><b>${db.montages.length}</b> montages</div></div>
       </div>
     <div id="svPanel"></div>
-    <div class="card" style="display:flex;flex-direction:column;gap:12px">
-      <div><b>Importer un fichier Excel</b><div class="muted">Pour le premier chargement de ton fichier Outils_CNC_import.xlsx (onglets PorteOutils, Outils, Montages). Les données actuelles sont d'abord gardées dans « Copies avant import ».</div></div>
-      <input type="file" id="fileIn" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
-      <div id="impBox" hidden class="confirm"><div id="impTxt"></div><div class="btns"><button class="btn primary" id="bImpOk">Remplacer mes données</button><button class="btn" id="bImpNo">Annuler</button></div></div>
-    </div>
     <div class="card" style="display:flex;flex-direction:column;gap:12px"><b>Machines</b>
       <div class="chips">${db.machines.map((m,i)=>`<span class="chip">${esc(m)} <button type="button" data-i="${i}" class="rmM" aria-label="Retirer ${esc(m)}" style="border:0;background:none;color:var(--danger);cursor:pointer">×</button></span>`).join("")}</div>
       <form class="inline" id="fM"><input id="newM" placeholder="Nouvelle machine"><button class="btn" type="submit">Ajouter</button></form></div>
     <p class="muted" style="font-size:14px">Les données restent uniquement dans ce téléphone (navigateur). Sauvegarde régulièrement sur Drive : c'est ta copie de sécurité. App v${APP_VERSION}</p>`;
   Sauvegarde.panneau($("#svPanel"));
-  let pending = null;
-  $("#fileIn").onchange = async e => {
-    const file = e.target.files[0]; if(!file) return;
-    try{ pending = await readXlsx(file); }catch(err){ toast("Fichier illisible : " + err.message); return; }
-    $("#impTxt").innerHTML = `Le fichier contient <b>${pending.porteOutils.length}</b> porte-outils, <b>${pending.outils.length}</b> outils et <b>${pending.montages.length}</b> montages.<br>Les données actuelles de l'app seront remplacées.`;
-    $("#impBox").hidden = false;
-  };
-  $("#bImpNo").onclick = () => { pending = null; $("#impBox").hidden = true; $("#fileIn").value = ""; };
-  $("#bImpOk").onclick = () => { if(!pending) return; if(Sauvegarde.remplacer(pending, "import Excel")) toast("Données importées"); };
   document.querySelectorAll(".rmM").forEach(b => b.onclick = () => { db.machines.splice(+b.dataset.i,1); save(); vData(); });
   $("#fM").onsubmit = e => { e.preventDefault(); const v = $("#newM").value.trim(); if(v && !db.machines.includes(v)){ db.machines.push(v); save(); } vData(); };
 }
 
-/* ================= Excel ================= */
-const COLS = {
-  PorteOutils:["CodePO","TypeAttachement","Machine","Statut","Notes"],
-  Outils:["RefOutil","Fabricant","TypeOutil","Diametre","LongUtile","LongTotale","NbDents","MatiereOutil","Notes"],
-  Montages:["IDMontage","DateMontage","IDPorteOutil","RefOutil","LongSortie","Machine","PosteT","MatiereUsinee","Notes"]
-};
-function readXlsx(file){
-  return file.arrayBuffer().then(buf => {
-    const wb = XLSX.read(buf, {type:"array"});
-    const sheet = n => { const k = wb.SheetNames.find(s => s.toLowerCase() === n.toLowerCase()); return k ? XLSX.utils.sheet_to_json(wb.Sheets[k], {defval:"", raw:true}) : null; };
-    const po = sheet("PorteOutils"), ou = sheet("Outils"), mo = sheet("Montages") || [];
-    if(!po || !ou) throw new Error("onglets PorteOutils et Outils introuvables");
-    const pick = (rows, cols, fix) => rows.map(r => { const o = {}; cols.forEach(c => o[c] = r[c] ?? ""); return fix ? fix(o, r) : o; });
-    const porteOutils = pick(po, COLS.PorteOutils, (o, r) => { o.CodePO = normCode(o.CodePO || r.ID); o.Statut = str(o.Statut) || "En stock"; ["TypeAttachement","Machine","Notes"].forEach(k => o[k] = str(o[k])); return o; }).filter(o => o.CodePO);
-    const outils = pick(ou, COLS.Outils, o => { o.RefOutil = str(o.RefOutil); ["Diametre","LongUtile","LongTotale","NbDents"].forEach(k => o[k] = num(o[k])); ["Fabricant","TypeOutil","MatiereOutil","Notes"].forEach(k => o[k] = str(o[k])); return o; }).filter(o => o.RefOutil);
-    const montages = pick(mo, COLS.Montages, o => { COLS.Montages.forEach(k => o[k] = str(o[k])); o.IDPorteOutil = normCode(o.IDPorteOutil); return o; }).filter(o => o.IDPorteOutil && o.IDMontage !== "A-SUPPRIMER");
-    const machines = [...new Set(["Fp4","DMU 50 eco", ...porteOutils.map(p=>p.Machine), ...montages.map(m=>m.Machine)].filter(Boolean))];
-    return {porteOutils, outils, montages, machines};
-  });
-}
 /* ================= Scanner ================= */
 let stream = null, scanning = false, detector = null, torchOn = false;
 async function openScanner(){
