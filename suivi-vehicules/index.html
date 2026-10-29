@@ -718,6 +718,8 @@ nav.tabs .in>button[aria-current="page"]{background:transparent!important;box-sh
 .liq.bar .w{opacity:.55} .liq.bar .w2{opacity:.3}
 .liq.bar>span{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 12px;font:600 12.5px var(--f-body);z-index:2;color:var(--fg)}
 .liq.bar>span b{font-family:var(--f-num)}
+.bnote{font-size:12px;color:var(--fg-3);line-height:1.4;margin:6px 2px 0}
+.bnote b{color:var(--fg-2);font-weight:600}
 .ftank{margin-top:2px} .ftank .liq.bar{height:40px}
 .bud .liq.bar{height:58px;border-radius:16px;margin-top:10px}
 .bud .liq.bar>span{font-size:13px}
@@ -823,7 +825,7 @@ nav.tabs .q4 i{display:grid;place-items:center;width:12px;height:12px;border-rad
 nav.tabs .q4 .ico,nav.tabs .q4 svg{width:11px!important;height:11px!important;font-size:11px}
 nav.tabs [aria-current="page"] .q4 i{opacity:.45}
 nav.tabs .q4 i.on{opacity:1!important;transform:scale(1.25);background:color-mix(in srgb,var(--volt) 35%,transparent)}
-html:not([data-rail="b"]) nav.tabs .in{padding:14px 0 24px}
+html:not([data-rail="b"]) nav.tabs .in{padding:14px 0 24px;box-sizing:border-box;gap:min(8px,1.1vh)} /* padding compris dans la hauteur : la dernière icône ne dépasse plus */
 .tu.tm{min-height:110px;padding:12px 13px}
 .tm .mh{font-size:12px}
 .tm .mn{font-size:26.5px}
@@ -1064,7 +1066,7 @@ html[data-magic="on"] .liq .lq{transform:rotate(calc(var(--gx,0) * -12deg))}
   <section class="view" id="v-cost" hidden data-ct="bud">
     <div class="seg" id="costSeg"></div>
     <div class="card bud" id="budCard" hidden data-ct="bud"></div>
-    <div class="card btips" id="tipCard" hidden data-ct="bud"></div>
+    <div class="card btips pgnew" id="tipCard" hidden data-ct="bud"></div>
     <div class="card bplan" id="planCard" hidden data-ct="plan"></div>
     <div class="card kmc" id="costCard" data-ct="km"></div>
     <div class="h2" id="tripTitle" data-ct="trip">Combien coûte un trajet</div>
@@ -1372,7 +1374,7 @@ const THEME = { // v1.8 : même fond foncé pour tous, un accent par véhicule
   k:{txt:"#B3B8C2",grid:"rgba(255,255,255,.06)",tipBg:"#20242B",tipFg:"#EEF0F4",tipBd:"#E5484D",track:"#262A32",needle:"#EEF0F4",muted:"#8B92A0",bad:"#FF9F43",warn:"#F5D04C",acc:"#E5484D",fg:"#EEF0F4"}};
 let MODE=0; try{ const m=+localStorage.getItem("sv-mode"); if(m>0) MODE=m; }catch(e){}
 let T=THEME.k;
-const APP_VERSION="3.5.2";
+const APP_VERSION="3.5.3";
 const KEY="suivi-vehicules-v1";
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}}, lsSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 let STATE={fills:[],tyres:[],ent:[],rates:{},range:[925,350],tank:[60,20],buy:[3500,10000],fixed:[{},{}],trip:null};
@@ -1419,6 +1421,7 @@ const esc = s=>String(s ?? "").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;","
 const fmt = (x,d=0)=>x==null||isNaN(x)?"–":x.toLocaleString("fr-CH",{minimumFractionDigits:d,maximumFractionDigits:d});
 const day = s=>Math.round(new Date(s+"T12:00:00").getTime()/864e5);
 const MOIS=["janv","févr","mars","avr","mai","juin","juil","août","sept","oct","nov","déc"];
+const MOISL=["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
 const nv = el=>{ const n=parseFloat(String(el.value||"").replace(/[\s'’]/g,"").replace(",",".")); return isNaN(n)?NaN:n; }; // lit un champ chiffré (virgule ou point)
 const dfr = s=>{const [y,m,d]=s.split("-");return `${+d} ${MOIS[m-1]} ${y}`};
 
@@ -2080,7 +2083,8 @@ function renderBudget(){
   if(!B.months.some(m=>m.k===budSel)) budSel=null;
   const bars=B.months.map(m=>`<button type="button" class="bb${m.cur?" cur":""}" data-k="${m.k}" aria-pressed="${m.k===budSel}" aria-label="${mName(m.k)} : ${fmt(m.t)} CHF"><span class="bs">${BCAT.map(c=>m[c[0]]>0?`<i style="height:${(m[c[0]]/mx*100).toFixed(1)}%;background:${c[3]}"></i>`:"").reverse().join("")}</span><small>${["janv","févr","mars","avr","mai","juin","juil","août","sept","oct","nov","déc"][+m.k.slice(5)-1]}</small></button>`).join("");
   box.innerHTML=`<div class="bhd"><div class="hd2">${ic("piggy-bank","#FF7AA8")} Budget · ${who}</div>${tog}</div>
-    ${liquid(Math.min(1,f),col,"bar",`<span><span>${MOIS[+now.slice(5)-1]} : ${f>=1?"au-dessus de ta moyenne":f>=.85?"proche de ta moyenne":"sous ta moyenne"}</span><b>${fmt(B.curVar)} / ${fmt(B.avgVar)} CHF</b></span>`)}
+    ${liquid(Math.min(1,f),col,"bar",`<span><span>${MOISL[+now.slice(5)-1]} : ${f>=1?"au-dessus de ta moyenne":f>=.85?"proche de ta moyenne":"sous ta moyenne"}</span><b>${fmt(B.curVar)} CHF</b></span>`)}
+    <div class="bnote">${fmt(B.curVar)} CHF = pleins, garage, fournitures et pneus ${(m=>/^[aeiou]/.test(m)?"d'"+m:"de "+m)(MOISL[+now.slice(5)-1].toLowerCase())} jusqu'ici. Ta moyenne pour les mêmes dépenses : <b>${fmt(B.avgVar)} CHF par mois</b> (${B.full.length} mois d'avant). Sans les frais fixes.</div>
     <div class="bkpi"><div><small>Par mois</small><b class="num">${fmt(B.m12)}</b><span>CHF · ${B.d12>=360?"sur 12 mois":"depuis le début"}</span></div>
       <div><small>Par an</small><b class="num">${fmt(B.y12)}</b><span>CHF · rythme actuel</span></div>
       <div><small>Au total</small><b class="num">${fmt(B.tot)}</b><span>CHF${B.buy>0?" · achat compris":""}</span></div></div>
@@ -2887,6 +2891,7 @@ function renderMore(){
 
 // ---------- Quoi de neuf : la version en grand, une carte par version ; s'ouvre une fois après chaque mise à jour
 const CHANGELOG=[
+  ["3.5.3","29.10.2026","Budget plus clair",["Budget : le bandeau du mois dit ce qui est compté et d'où vient la moyenne","Bon à savoir sur son propre écran","Barre d'icônes : la dernière icône n'est plus coupée en bas"]],
   ["3.5.2","29.10.2026","Photos et nouvelle icône",["Photos des pleins, entretiens et frais : une ou plusieurs photos par entrée, en pleine qualité, à agrandir d'un toucher","Paramètres : sauvegarde des photos à part (.zip), import qui n'efface rien","Nouvelle icône Trajet : trait doré sur fond vert anglais"]],
   ["3.5.1","27.10.2026","Page vivante plus calme",["Un petit quelque chose toutes les 8 à 11 s au lieu de 5","Les farces qui restent arrivent après 20 s sans toucher","Le changement d'onglet tout seul seulement après 1 minute sans toucher"]],
   ["3.5","27.10.2026","Rattrapage et app vivante",["Plein : les km sont facultatifs et un km plus bas que le dernier est accepté (rattrapage), avec un nouveau choix « Je ne sais plus » à côté de complet et partiel","Entretien en deux : « Garage / mécanique » et « Fournitures et divers », chacun sa couleur dans le budget (le frais fixe devient « Parking / box »)","Frais fixes : une ligne par poste et par année, le cadre du haut « En cours » se calcule tout seul","Coût & trajet en sous-onglets (Budget, À prévoir, Coût au km, Trajet)","Plus de pages coupées : les gros blocs se coupent entre deux lignes","Graphiques par année à partir de l'année d'achat","Tuiles un peu plus grandes, écrou de la barre remonté","App vivante : le liquide des réservoirs penche avec le téléphone, et quand tu regardes sans toucher, un graphique se redessine, un chiffre saute ou une ligne frétille","35 bêtises : le chiffre têtu, le bouton + qui s'esquive, la tuile pas d'accord, le klaxon, la météo… Réglage dans Paramètres → Bêtises (Aucune, 1, 3, 5 par jour ou Fête). Elles prennent leur temps, et un toucher les arrête","Page vivante : sans toucher l'écran, toutes les 5 s il se passe quelque chose. Parfois des farces restent (faux chiffres, drôles d'étiquettes) ou l'app change d'onglet toute seule : un toucher et tout se remet en place avec un « Ah non, pardon ! »","Coût & trajet : un seul bouton avec ses 4 petites icônes, chaque toucher passe au sous-onglet suivant"]],
@@ -3139,6 +3144,9 @@ function paginate(){
     while(j+1<units.length&&Math.abs(T(units[j+1])-t)<3) j++; // même ligne (tuiles côte à côte)
     let b=Math.max(...units.slice(i,j+1).map(B));
     const k=Math.floor((t-top+1)/H), end=top+(k+1)*H;
+    if(units[i].classList.contains("pgnew")&&t>top+k*H+12){ // une fenêtre par écran : ce bloc commence toujours en haut d'une nouvelle page
+      const sp=document.createElement("div"); sp.className="pgsp"; units[i].parentNode.insertBefore(sp,units[i]);
+      sp.style.height="0px"; sp.style.height=Math.max(0,end+8-T(units[i]))+"px"; continue; }
     if(b>end+1&&i===j&&(t-(top+k*H)<H*.4||b-t>H*.3)&&!units[i].classList.contains("tu")&&units[i].tagName!=="TR"){ // gros bloc qui laisserait la page presque vide (ou plus haut qu'une page) : on le découpe par lignes
       const sub=pgSub(units[i]); if(sub.length>1){ units.splice(i,1,...sub); continue; } }
     if(b>end+1&&b-t<=H-10){ // la ligne serait coupée : on la pousse en haut de la page suivante, et on laisse du vide
