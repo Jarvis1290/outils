@@ -425,6 +425,11 @@ body.bet-fete{overflow:hidden}
 .bet-fly.case{display:grid;place-items:center;width:58px;height:40px;border:3px solid var(--fg);border-radius:8px;background:var(--page);color:var(--fg);font:800 18px/1 system-ui,sans-serif;z-index:95}
 .bet-fly.board{padding:6px 14px;border-radius:14px;background:var(--fg);color:var(--page);font:800 18px/1.2 system-ui,sans-serif;white-space:nowrap;transform:translateX(-35%);z-index:99}
 .bet-fly.num.big{width:240px;font-size:26px;white-space:normal;line-height:1.15;animation-duration:3.2s}
+
+/* v2.2 : horaire continu (sans midi) et apéro */
+.frise .lunch.none{opacity:0;pointer-events:none}
+.frise .apero{position:absolute;top:40px;height:14px;background:repeating-linear-gradient(45deg,#d4a017 0 4px,transparent 4px 8px)}
+.times button.nol b{color:var(--mut)}
 </style>
 </head>
 <body>
@@ -635,7 +640,7 @@ const Sauvegarde = (() => {
    - Report des heures (⏱) : tout vendredi, jour suivant, étalé, ou Perso (cases). Semaine = graphe en barres pour les exceptions.
    - Historique éditable : une correction recalcule le pot des semaines suivantes. */
 
-var APP_VERSION = "2.1", APP_DATE = "27.10.2026";
+var APP_VERSION = "2.2", APP_DATE = "29.10.2026";
 var KEY = "planning-horaire-v3";
 var DAYS = ["lundi","mardi","mercredi","jeudi","vendredi"];
 var SH = {lundi:"Lun",mardi:"Mar",mercredi:"Mer",jeudi:"Jeu",vendredi:"Ven"};
@@ -689,7 +694,7 @@ function defState(){
 }
 function normDay(o){
   return {arrival:o.arrival||null, lunchStart:o.lunchStart||null, lunchEnd:o.lunchEnd||null, departure:o.departure||null,
-    skipM:!!(o.skipM||o.skipMorningBreak), skipA:!!(o.skipA||o.skipAfternoonBreak), absMin:+o.absMin||0, touched:!!o.touched, auto:!!o.auto};
+    skipM:!!(o.skipM||o.skipMorningBreak), skipA:!!(o.skipA||o.skipAfternoonBreak), absMin:+o.absMin||0, noLunch:!!o.noLunch, apero:+o.apero||0, touched:!!o.touched, auto:!!o.auto};
 }
 // Données v1.x (ou fichier de sauvegarde ancien) → v2. Ne perd rien : jours validés, pot, historique.
 function migrate(d){
@@ -736,7 +741,8 @@ function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ t
 // ---------- calculs d'une journée ----------
 function ref(day){ return day==="vendredi" ? S.settings.friday : S.settings.weekday; }
 function L1(day,d){ return toMin((d&&d.lunchStart)||ref(day).lunchStart); }
-function L2(day,d){ return toMin((d&&d.lunchEnd)||ref(day).lunchEnd); }
+function L2(day,d){ return d&&d.noLunch ? L1(day,d) : toMin((d&&d.lunchEnd)||ref(day).lunchEnd); } // horaire continu : midi de 0 min
+function away(d){ return (d&&d.absMin||0)+(d&&d.apero||0); } // absence + apéro : du temps pas travaillé
 function breakBonus(day,d){ var b=0; if(d&&d.skipM) b+=15; if(day!=="vendredi" && d&&d.skipA) b+=15; return b; }
 function presence(a,dep,l1,l2){ // temps de présence moins la pause de midi (seulement la partie qui tombe dans la journée)
   if(dep<=a) return 0;
@@ -744,10 +750,10 @@ function presence(a,dep,l1,l2){ // temps de présence moins la pause de midi (se
   return dep-a-lunch;
 }
 function worked(day,d){ var a=toMin(d.arrival), dep=toMin(d.departure); if(a==null||dep==null) return null;
-  return presence(a,dep,L1(day,d),L2(day,d)) + breakBonus(day,d) - (d.absMin||0); }
+  return presence(a,dep,L1(day,d),L2(day,d)) + breakBonus(day,d) - away(d); }
 // heure de départ pour faire `target` minutes en arrivant à `a`
 function departFor(day,d,a,target){
-  var need = Math.max(0, target + (d.absMin||0) - breakBonus(day,d)), l1=L1(day,d), l2=L2(day,d);
+  var need = Math.max(0, target + away(d) - breakBonus(day,d)), l1=L1(day,d), l2=L2(day,d);
   if(a>=l2 || a+need<=l1) return {dep:a+need, skipsLunch:a<l1};
   return {dep:l2+need-(l1-a), skipsLunch:false};
 }
@@ -914,7 +920,7 @@ function weekStrip(W){
     else { t="dû "+fdur(x.planTarget)+"<br>sortie "+fh(x.dep); e=Math.abs(x.planTarget-x.ref)>0.5?'<span class="muted">'+fsign(x.planTarget-x.ref)+'</span>':'<span class="muted">–</span>'; }
     var b=el("button","wd "+st+(x.today?" today":""),'<b>'+SH[day].toUpperCase()+(x.today?' <i></i>':'')+'</b><small>'+dmy(dates[i]).slice(0,2)+'</small><span class="t">'+t+'</span><span class="e">'+e+'</span>');
     if((selDay||(W[day].today&&day))===day) b.classList.add("sel");
-    b.onclick=function(){ selDay=x.today?null:day; fsel=null; render(); window.scrollTo(0,0); };
+    b.onclick=function(){ if(day==='vendredi'&&aperoTap()) return; selDay=x.today?null:day; fsel=null; render(); window.scrollTo(0,0); };
     box.appendChild(b);
   });
   var sc=el("div","wsolde",'<div><span class="k">Solde semaine</span>'+(Math.abs(W.P)>0.5?'<small>dont '+fhm(W.P)+' du pot</small>':'<small>'+modeName()+'</small>')+'</div><b class="'+cls(W.solde)+'">'+fhm(W.solde)+'</b>');
@@ -922,6 +928,21 @@ function weekStrip(W){
   var ti=selDay?DAYS.indexOf(selDay):DAYS.findIndex(function(x){ return W[x].today; });
   if(ti>=0) box.style.gridTemplateColumns=DAYS.map(function(x,i){ return i===ti?"1.7fr":"1fr"; }).join(" ");
   var wrap=el("div","wtop"); wrap.appendChild(sc); wrap.appendChild(box); return wrap;
+}
+// secret : 5 touchers rapides sur Vendredi (bande du haut) = l'apéro, 20 ou 30 min pas travaillées
+var apT={n:0,t:0};
+function aperoTap(){ var t=Date.now(); apT.n=t-apT.t<600?apT.n+1:1; apT.t=t; if(apT.n<5) return false; apT.n=0; selDay=computeWeek().vendredi.today?null:"vendredi"; fsel=null; render(); pushSheet({type:"apero"}); return true; }
+function renderApero(sh){
+  sh.appendChild(sheetHead("🍻 L'apéro du vendredi"));
+  var d=S.currentWeek.days.vendredi||{}, ch=el("div","chips");
+  sh.appendChild(el("div","small","Le temps de l'apéro ne compte pas comme travaillé : l'heure de sortie recule d'autant, et si tu pars quand même, le manque part dans le report."));
+  [[20,"20 min"],[30,"30 min"],[0,"Pas d'apéro"]].forEach(function(x){
+    var b=el("button","chip"+((d.apero||0)===x[0]?" on":""),x[1]);
+    b.onclick=function(){ var dd=dayObj("vendredi"); dd.apero=x[0]; save(); tick(); closeSheet(); var c=computeWeek().vendredi;
+      toast(x[0]?"🍻 Apéro "+x[0]+" min · "+(c.done?"journée "+fsign(c.ecart):"tu sors à "+fh(c.dep)):"Apéro enlevé"); };
+    ch.appendChild(b);
+  });
+  sh.appendChild(ch);
 }
 // petite phrase : où partent les heures en plus ou en moins
 function reportHint(W){
@@ -933,7 +954,7 @@ function reportHint(W){
   if(!parts.length) return null;
   var c=el("div","hint",ic("info")+'<div>'+parts.join("<br>")+'</div>'); return c;
 }
-function dayObj(day){ var w=S.currentWeek; if(!w.days[day]) w.days[day]={arrival:null,lunchStart:null,lunchEnd:null,departure:null,skipM:false,skipA:false,absMin:0,touched:false,auto:false}; return w.days[day]; }
+function dayObj(day){ var w=S.currentWeek; if(!w.days[day]) w.days[day]={arrival:null,lunchStart:null,lunchEnd:null,departure:null,skipM:false,skipA:false,absMin:0,noLunch:false,apero:0,touched:false,auto:false}; return w.days[day]; }
 
 // panneau d'une journée (Aujourd'hui, fiche d'un jour de la semaine, ou jour de l'historique)
 function dayPanel(day,c,o){
@@ -950,7 +971,7 @@ function dayPanel(day,c,o){
   [["arrival","Arrivée",a,!d.arrival],["lunchStart","Midi",L1(day,d),!d.lunchStart],["lunchEnd","Reprise",L2(day,d),!d.lunchEnd],["departure","Départ",dep,!d.departure]].forEach(function(f){
     // le midi compte d'office (pas « prévu ») ; arrivée et départ gardent leur repère
     var lunchF=f[0]==="lunchStart"||f[0]==="lunchEnd", pj=f[3]&&!lunchF;
-    var b=el("button",(pj?"proj":"")+(f[0]==="arrival"&&o.today&&!d.arrival?" todo":""),'<span>'+f[1]+'</span><b>'+fh(f[2])+'</b><i>'+(pj?(f[0]==="departure"?"auto":o.today?"je suis là":"prévu"):(f[0]==="departure"&&d.auto?"retenu":" "))+'</i>');
+    var b=el("button",(pj?"proj":"")+(f[0]==="arrival"&&o.today&&!d.arrival?" todo":"")+(lunchF&&d.noLunch?" nol":""),'<span>'+f[1]+'</span><b>'+(lunchF&&d.noLunch?"–":fh(f[2]))+'</b><i>'+(lunchF&&d.noLunch?(f[0]==="lunchStart"?"aucun":"continu"):pj?(f[0]==="departure"?"auto":o.today?"je suis là":"prévu"):(f[0]==="departure"&&d.auto?"retenu":" "))+'</i>');
     b.onclick=function(){
       // aujourd'hui, Arrivée pas encore notée : un toucher la note à l'heure actuelle
       if(f[0]==="arrival" && o.today && !d.arrival){ var dd=dayObj(day); dd.arrival=toClock(nowMin()); save(); tick(); if(navigator.vibrate) try{ navigator.vibrate(30); }catch(e){} toast("Arrivée notée à "+fh(nowMin())); }
@@ -991,6 +1012,8 @@ function dayPanel(day,c,o){
     c.from.forEach(function(f){ if(Math.abs(f.min)>0.5) parts.push(fsign(-f.min)+(f.src==="pot"?" du pot":" report "+SH[f.src])); });
     if(c.adj) parts.push(fsign(c.adj)+" exception");
     if(d.absMin) parts.push("+"+fdur(d.absMin)+" absence");
+    if(d.apero) parts.push("+"+fdur(d.apero)+" apéro 🍻");
+    if(d.noLunch) parts.push("sans midi");
     var bb=breakBonus(day,d); if(bb) parts.push("−"+fdur(bb)+" pause sautée");
     if(c.done){
       dc.innerHTML='<div class="row"><div><div class="k">'+(d.auto?"Départ retenu":"Parti à")+'</div><div class="big">'+fh(c.dep)+'</div></div><div class="detail">Journée '+fdur(c.worked)+'<br><b class="'+cls(c.ecart)+'" style="font-size:16px">'+fsign(c.ecart)+'</b> sur la référence</div></div>';
@@ -999,7 +1022,7 @@ function dayPanel(day,c,o){
       var ring="";
       if(o.today && d.arrival){ var a0=toMin(d.arrival), pr=Math.max(0,Math.min(1,(nowMin()-a0)/Math.max(1,c.dep-a0))), R=26, C=2*Math.PI*R;
         ring='<div class="ring"><svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="'+R+'" class="rb"/><circle cx="32" cy="32" r="'+R+'" class="rf" stroke-dasharray="'+C.toFixed(1)+'" stroke-dashoffset="'+(C*(1-pr)).toFixed(1)+'"/></svg><b>'+Math.round(pr*100)+'%</b></div>'; }
-      dc.innerHTML='<div class="row">'+ring+'<div style="flex:1"><div class="k">Tu sors à</div><div class="big">'+fh(c.dep)+'</div></div><div class="detail">'+parts.join("<br>")+(c.skipsLunch?"<br>pas besoin de midi":"")+(d.arrival?"":"<br><i>si tu arrives à "+fh(c.arr)+"</i>")+'</div></div>';
+      dc.innerHTML='<div class="row">'+ring+'<div style="flex:1"><div class="k">Tu sors à</div><div class="big">'+fh(c.dep)+'</div></div><div class="detail">'+parts.join("<br>")+(c.skipsLunch&&!d.noLunch?"<br>pas besoin de midi":"")+(d.arrival?"":"<br><i>si tu arrives à "+fh(c.arr)+"</i>")+'</div></div>';
       if(o.today && d.arrival){ var now=el("button","lnk",ic("sign-out")+" Je pars maintenant"); now.onclick=function(){ var dd=dayObj(day); dd.departure=toClock(nowMin()); dd.touched=true; dd.auto=false; commit(o); toast("Départ noté à "+fh(nowMin())); }; dc.appendChild(now); }
     }
     wrap.appendChild(dc);
@@ -1023,6 +1046,7 @@ function frise(day,d,a,dep,o){
   var s1=seg(), s2=seg(); s1.style.borderRadius="7px 0 0 7px"; s2.style.borderRadius="0 7px 7px 0";
   if(o.proj) s1.classList.add("proj"); if(o.proj||o.projDep) s2.classList.add("proj");
   var ab=null; if(d.absMin){ ab=el("div","abs"); f.appendChild(ab); }
+  var ap=null; if(d.apero){ ap=el("div","apero"); ap.title="Apéro"; f.appendChild(ap); }
   // pauses offertes (vendredi : seulement le matin)
   var br=S.settings.breaks;
   [["skipM",br.morning],["skipA",br.afternoon]].forEach(function(p){
@@ -1035,7 +1059,7 @@ function frise(day,d,a,dep,o){
     f.appendChild(b);
   });
   // midi + poignées arrivée / départ
-  var lu=el("div","lunch"); lu.innerHTML='<div class="hd l"></div><div class="hd r"></div>'; f.appendChild(lu);
+  var lu=el("div","lunch"+(d.noLunch?" none":"")); lu.innerHTML='<div class="hd l"></div><div class="hd r"></div>'; f.appendChild(lu);
   var ka=el("div","knob ka"+(o.proj?" proj":"")), kd=el("div","knob kd"+(o.projDep?" proj":""));
   ka.setAttribute("aria-label","Arrivée"); kd.setAttribute("aria-label","Départ"); f.appendChild(ka); f.appendChild(kd);
   var la=el("div","lab l0"), lm=el("div","lab lm"), ld=el("div","lab l1"); lm.hidden=true; f.appendChild(la); f.appendChild(lm); f.appendChild(ld);
@@ -1045,11 +1069,12 @@ function frise(day,d,a,dep,o){
     s1.style.left=pc(A); s1.style.width=(Math.max(0,Math.min(l1,Dp)-A)/span*100)+"%";
     var x2=Math.max(l2,A); s2.style.left=pc(x2); s2.style.width=(Math.max(0,Dp-x2)/span*100)+"%";
     if(ab){ ab.style.left=pc(Dp-d.absMin); ab.style.width=(d.absMin/span*100)+"%"; }
+    if(ap){ ap.style.left=pc(Dp-(d.absMin||0)-d.apero); ap.style.width=(d.apero/span*100)+"%"; }
     lu.style.left=pc(l1); lu.style.width=((l2-l1)/span*100)+"%";
     ka.style.left=pc(A); kd.style.left=pc(Dp);
     la.style.left=pc(A); la.innerHTML='<b>'+fh(A)+'</b>arrivée';
     ld.style.left=pc(Dp); ld.innerHTML='<b>'+fh(Dp)+'</b>départ';
-    lm.style.left=pc((l1+l2)/2); lm.innerHTML='<b>'+fh(l1)+'–'+fh(l2)+'</b>';
+    lm.style.left=pc((l1+l2)/2); lm.innerHTML=d.noLunch?'<b>sans midi</b>':'<b>'+fh(l1)+'–'+fh(l2)+'</b>';
   }
   lay(A,l1,l2,Dp);
   // toucher un élément (arrivée, midi, départ) = il s'allume, −5 / +5 dessous (appui long = ça défile).
@@ -1092,10 +1117,11 @@ function frise(day,d,a,dep,o){
   if(sel){
     var v={A:A,l1:l1,l2:l2,D:Dp}, ctl=el("div","fctl");
     var nm=sel.p==="a"?"Arrivée":sel.p==="d"?"Départ":"Midi";
-    var info=el("div","fv"), show=function(){ info.innerHTML='<span>'+nm+'</span><b>'+(sel.p==="a"?fh(v.A):sel.p==="d"?fh(v.D):fh(v.l1)+'–'+fh(v.l2))+'</b>'; lay(v.A,v.l1,v.l2,v.D); };
+    var info=el("div","fv"), show=function(){ info.innerHTML='<span>'+nm+'</span><b>'+(sel.p==="a"?fh(v.A):sel.p==="d"?fh(v.D):d.noLunch?"aucun":fh(v.l1)+'–'+fh(v.l2))+'</b>'; lay(v.A,v.l1,v.l2,v.D); };
     if(sel.p==="m"){
       var mc=el("div","seg2");
-      [["move","Déplacer"],["start","Début"],["end","Fin"]].forEach(function(x){ var b=el("button",sel.m===x[0]?"on":null,x[1]); b.onclick=function(){ sel.m=x[0]; refresh(); }; mc.appendChild(b); });
+      [["move","Déplacer"],["start","Début"],["end","Fin"]].forEach(function(x){ var b=el("button",sel.m===x[0]&&!d.noLunch?"on":null,x[1]); b.onclick=function(){ sel.m=x[0]; if(d.noLunch){ dd().noLunch=false; commit(cm); return; } refresh(); }; mc.appendChild(b); });
+      var nb=el("button",d.noLunch?"on":null,"Aucun"); nb.onclick=function(){ var x=dd(); x.noLunch=!x.noLunch; commit(cm); toast(x.noLunch?"Horaire continu : pas de midi":"Le midi revient"); }; mc.appendChild(nb);
       ctl.appendChild(mc);
     }
     var row=el("div","frow");
@@ -1123,7 +1149,7 @@ function frise(day,d,a,dep,o){
       row.appendChild(b);
       if(x[0]<0) row.appendChild(info);
     });
-    ctl.appendChild(row);
+    if(!(sel.p==="m"&&d.noLunch)) ctl.appendChild(row);
     var ok=el("button","lnk","Fini"); ok.onclick=function(){ fsel=null; refresh(); }; ctl.appendChild(ok);
     show(); lm.hidden=sel.p!=="m";
     wrap.appendChild(ctl);
@@ -1165,6 +1191,7 @@ function renderWheel(sh,spec){
     spec.tabs.forEach(function(x){ var b=el("button","chip"+(x.key===t.key?" on":""),x.label); b.onclick=function(){ spec.active=x.key; redrawSheet(); }; ch.appendChild(b); });
     sh.appendChild(ch);
   }
+  if(t.kind==="none"){ if(spec.note) sh.appendChild(spec.note(t)); return; }
   var v=t.get(), val=el("div","wval");
   function showVal(m){ val.innerHTML=t.label+' · <b>'+(t.kind==="dur"?fdur(m):fh(m))+'</b>'+(t.extra?' '+t.extra(m):''); }
   showVal(v);
@@ -1192,12 +1219,18 @@ function openDayWheel(day,key,o){
   var after=function(){ save(); if(hist){ if(o.onEdit) o.onEdit(); } else tick(); render(); };
   var tabs=[
     {key:"arrival",label:"Arrivée",kind:"clock",get:function(){ return cur("arrival"); },set:function(m){ obj().arrival=toClock(m); after(); }},
-    {key:"lunchStart",label:"Midi",kind:"clock",get:function(){ return cur("lunchStart"); },set:function(m){ var d=obj(), e=L2(day,d), dur=e-L1(day,d); d.lunchStart=toClock(m); if(e<=m) d.lunchEnd=toClock(m+Math.max(15,dur)); after(); }},
-    {key:"lunchEnd",label:"Reprise",kind:"clock",get:function(){ return cur("lunchEnd"); },set:function(m){ var d=obj(), s=L1(day,d); d.lunchEnd=toClock(m); if(m<=s) d.lunchStart=toClock(m-45); after(); }},
+    {key:"lunchStart",label:"Midi",kind:"clock",get:function(){ return cur("lunchStart"); },set:function(m){ var d=obj(); d.noLunch=false; var e=L2(day,d), dur=e-L1(day,d); d.lunchStart=toClock(m); if(e<=m) d.lunchEnd=toClock(m+Math.max(15,dur)); after(); }},
+    {key:"lunchEnd",label:"Reprise",kind:"clock",get:function(){ return cur("lunchEnd"); },set:function(m){ var d=obj(), s=L1(day,d); d.noLunch=false; d.lunchEnd=toClock(m); if(m<=s) d.lunchStart=toClock(m-45); after(); }},
+    {key:"noLunch",label:"Aucun",kind:"none"},
     {key:"departure",label:"Départ",kind:"clock",get:function(){ return cur("departure"); },set:function(m){ var d=obj(); if(!d.arrival) d.arrival=toClock(cur("arrival")); d.departure=toClock(m); d.touched=true; d.auto=false; after(); }}
   ];
   openWheel({title:LB[day]+(hist?" (historique)":""),tabs:tabs,active:key,note:function(t){
     var d=get(), box=el("div");
+    if(t.key==="noLunch"){ // horaire continu : on enlève tout le midi de la journée
+      box.appendChild(el("div","small",'<div style="text-align:center;margin:6px 0 10px">Horaire continu : toute la pause de midi est enlevée, l’heure de sortie avance d’autant.</div>'));
+      var nb=el("button","btn"+(d.noLunch?"":" pri"),d.noLunch?"Remettre le midi":"🍽️ Pas de midi aujourd'hui");
+      nb.onclick=function(){ var x=obj(); x.noLunch=!x.noLunch; after(); redrawSheet(); toast(x.noLunch?"Horaire continu : pas de midi":"Le midi revient"); };
+      box.appendChild(nb); return box; }
     if(!hist && t.key==="departure" && d.departure){ var b=el("button","lnk","Remettre le départ en automatique"); b.onclick=function(){ var dd=dayObj(day); dd.departure=null; dd.touched=false; dd.auto=false; save(); tick(); render(); closeSheet(); }; box.appendChild(b); }
     if(!hist && t.key==="departure" && !d.departure) box.appendChild(el("div","small",'<div style="text-align:center">Sans rien toucher, ce départ est retenu tout seul à minuit.</div>'));
     return box; }});
@@ -1481,7 +1514,9 @@ function renderBets(sh){
 function renderAbout(sh){
   sh.appendChild(sheetHead("Quoi de neuf"));
   var n=el("div","notes");
-  n.innerHTML='<h3>v2.1 · 27.10.2026</h3><ul>'+
+  n.innerHTML='<h3>v2.2 · 29.10.2026</h3><ul>'+
+    '<li><b>Horaire continu</b> : sur la frise, touche le midi puis « Aucun » (ou onglet « Aucun » dans la roulette) pour enlever toute la pause de midi d\'une journée.</li>'+
+    '</ul><h3>v2.1 · 27.10.2026</h3><ul>'+
     '<li><b>Les bêtises</b> : 31 petits lutins malicieux (bouton boudeur, chiffre têtu, frise qui baille, vendredi impatient, pause café…), certains à leur heure.</li>'+
     '<li>Paramètres → <b>Magie</b> : de 0 à 10 bêtises par jour, « discrètes seulement », et le carnet pour toutes les voir.</li>'+
     '<li><b>Page vivante</b> : si tu la regardes sans toucher (5, 10 ou 30 s), quelque chose bouge, jamais deux fois pareil ; après 1 min elle s\'endort et te fait coucou au réveil.</li>'+
@@ -1520,6 +1555,7 @@ function redrawSheet(){
   else if(top.type==="about") renderAbout(sh);
   else if(top.type==="zoom") renderZoom(sh,top);
   else if(top.type==="bets") renderBets(sh);
+  else if(top.type==="apero") renderApero(sh);
   bk.classList.add("on");
   if(top.type!=="wheel") sh.scrollTop=y;
 }
