@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
+<meta name="color-scheme" content="dark">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Kardex</title>
 <meta name="theme-color" content="#0E1014">
@@ -476,7 +477,6 @@ body.fpon{overflow:hidden}
 .nx.pave>span{aspect-ratio:1}
 .nx.aff .on{fill:currentColor;filter:drop-shadow(0 0 1.5px color-mix(in srgb,currentColor 75%,transparent))}
 .nx.aff .off{fill:currentColor;opacity:.12}
-.nx.aff>span::after{content:"";position:absolute;left:-5%;right:-5%;top:50%;height:1px;background:rgba(0,0,0,.55)}
 .nx>span.flap{animation:nxFlap .17s ease-in-out}
 @keyframes nxFlap{0%{transform:perspective(60px) rotateX(0)}45%{transform:perspective(60px) rotateX(-82deg);filter:brightness(2)}100%{transform:perspective(60px) rotateX(0)}}
 .tr.arr .nx{animation:nxGlow .7s ease}
@@ -490,8 +490,7 @@ body.fpon{overflow:hidden}
 @container (max-height:44px){.tr .n{inset:0 0 7px}.tr .n b{font-size:min(80cqh,40cqw)}.tr .seg{position:absolute;left:6px;right:6px;bottom:3px;height:4px}}
 .fl .nx{height:.86em}
 .tp .n b .nx{height:.9em}
-.rth .nx{height:15px}
-.rth{min-width:34px;height:26px}
+.rth{min-width:0;width:30px;height:8px;border-radius:4px}
 .rbub b .nx{height:44px}
 .fpm .ph .big .nx{height:28px}
 .sl .big b .nx{height:30px}
@@ -762,7 +761,7 @@ const Sauvegarde = (() => {
 const CATS=[[1, "Divers", "#db0fca"], [2, "Stock de Fraise", "#DDD9C3"], [4, "Tournage", "#DBEEF4"], [6, "Taraud & Alésoirs", "#E6E0EC"], [10, "Outils rotatifs", "#B7DEE8"], [13, "VIS/RONDELLES Inox", "#00B0F0"], [14, "VIS/RONDELLES Acier", "#58B600"], [15, "Visseries (bois/Torx/etc…)", "#FFFF00"], [99, "Fraiseuses", "#0C4DE4"], [100, "Consommable de montage", "#9F0EE1"], [101, "Machine à Batterie", "#09DC2C"], [102, "Machine 220V", "#3A8830"], [103, "Levage", "#08f7e7"], [105, "Pneumatique", "#3EB3D0"], [106, "Percages/Foret", "#8662ea"], [107, "Cliquets", "#ff0080"], [108, "Outils à mains", "#00FA79"], [109, "Metrologie d'atelier", "#E4F21C"]];
 const ARTS=[[119, "Laboratoire", 1, 1], [415, "M6", 13, 39], [416, "M6", 14, 49], [417, "Loupe", 1, 32], [418, "Fraises Inox", 2, 2], [419, "Fraises à Rayon", 2, 2], [420, "Fraise en \"T\"", 2, 2], [421, "Fraises Aluminium", 2, 3], [422, "Chargeur Batteries", 102, 24], [423, "M5", 14, 48], [424, "Matériel de Tournage", 4, 14], [425, "Plaquettes", 4, 6], [426, "M10", 14, 51], [427, "M12", 14, 52], [428, "M14", 14, 52], [429, "M16", 14, 28], [430, "M24", 14, 28], [431, "M8", 14, 50], [433, "Rondelles M8", 14, 53], [434, "M4", 14, 47], [435, "M3", 14, 46], [436, "M1 à M2.5", 14, 45], [437, "Plateau magnétique", 99, 15], [438, "Matériel fraiseuses", 99, 15], [439, "Equerre de fraisage", 99, 36], [440, "M5", 13, 37], [441, "M8", 13, 40], [442, "M10", 13, 41], [443, "M4", 13, 38], [444, "M4 Poulets", 13, 38], [445, "Péteuse", 105, 11], [446, "Outils pneumatiques", 105, 11], [447, "Reserve scotch", 100, 25], [448, "DMU 50", 99, 25], [449, "M12", 13, 42], [450, "M14", 13, 42], [451, "Fils ressort Inox", 13, 42], [452, "Billes INOX", 13, 42], [453, "Goupilles Inox", 100, 42], [454, "Ressorts Inox", 100, 42], [455, "M2 à M3", 13, 29], [456, "NEF 400", 4, 54], [457, "Tasseau FP4", 99, 54], [458, "Dremel® 12V", 101, 20], [459, "Dremel 220V😂", 102, 20], [460, "Thermogun", 102, 20], [462, "Crayon électrique", 102, 20], [463, "Fer à souder", 102, 24], [464, "Rivet pop", 100, 33], [465, "Tubtara", 100, 33], [466, "Tarauds M2 à M10", 6, 21], [467, "Queues de cochon🐷", 6, 21], [468, "Scotch doubles face", 100, 56], [469, "Mini-Grip", 100, 56], [470, "Rubalise", 100, 56], [471, "Elastique", 100, 56], [472, "Clinquant", 100, 58], [473, "Cuivre Béryllium", 100, 58], [474, "O-ring", 100, 30], [475, "Brides métalliques", 100, 30], [476, "Joints", 100, 30], [477, "Span-Set® ", 103, 27], [478, "Torx", 15, 44], [479, "Vis à bois", 15, 44], [480, "Clous", 15, 44], [482, "M7", 15, 26], [483, "Goupilles Acier", 15, 55], [484, "Rivets", 15, 55], [485, "Bouterolle", 15, 55], [486, "cordes", 100, 56], [487, "Ficelles", 100, 56], [488, "Visseuses Makita", 101, 13], [489, "Meuleuse", 101, 13], [490, "Scie sabre", 102, 13], [491, "Perforateur + Aspir.", 101, 13], [492, "Sauteuse", 101, 13], [493, "Talkie-Walkie", 101, 24], [494, "Vis Amercaines", 15, 26], [495, "Spécial", 15, 26], [496, "Niveau à bulle", 109, 32], [498, "Mètre à ruban", 109, 32], [499, "Chevillière", 109, 32], [500, "Fil à plomb", 109, 32], [501, "Règle 1000mm", 109, 32], [502, "Règle 1500mm", 109, 32], [503, "Camera-Thermo", 109, 32], [504, "Mèches laiton", 106, 23], [505, "Mèche longue", 106, 23], [506, "Métrique fin", 6, 17], [507, "Tarauds spéciaux", 6, 17], [508, "Tarauds", 6, 17], [509, "Alesoirs:...", 6, 22], [510, "Fraise pivots/Stock", 106, 22], [511, "Mèches à centrer", 106, 22], [512, "Vérins", 103, 27], [513, "Anneau de levage", 103, 27], [514, "Patins", 103, 27], [515, "Cordes", 103, 27], [516, "Levage palonnier", 103, 16], [517, "Patins Vert", 103, 16], [518, "Grandes sangles Span", 103, 16], [519, "Mèche NC", 106, 5], [520, "Courte de Ø1 à Ø10", 106, 5], [521, "Long de Ø1 à Ø13", 106, 4], [522, "Cles à Cliquets", 107, 7], [523, " Cles à œil", 107, 7], [524, "Cles à fourche", 107, 7], [525, "Cles dynamométriques", 107, 8], [526, "Douilles 3/4", 107, 8], [527, "Soldes de Vis", 15, 57], [528, "Rondelles ressort", 15, 57], [529, "Bellevilles", 15, 57], [530, "Seeger", 15, 57], [531, "Insert métrique", 15, 57], [532, "Pistolet silicone", 1, 31], [534, "Lève panneau", 103, 31], [535, "Fraise scie", 2, 18], [536, "Fraise Modulaire", 2, 18], [537, "Fraise Rayon", 2, 18], [538, "Fraise de forme", 2, 18], [539, "Fraise surfacer", 2, 18], [540, "Fraise Bricolage", 2, 60], [541, "Fraise scies", 2, 10], [542, "Helicoil", 100, 24], [543, "Brides électro", 100, 24], [544, "Camera Snake ", 109, 32], [545, "Seringue 500ml", 1, 59], [546, "Visseuse Placo DEWAL", 101, 13], [547, "Fein", 1, 12], [548, "Agrafeuse", 1, 12], [549, " Grignoteuse Bosch®", 1, 12], [550, "Emporte-pièces ", 1, 12], [551, "Chalumeau", 1, 12], [552, "Coupe sangle", 1, 34], [553, "Extracteur", 1, 34], [554, "Sandow", 1, 34], [555, "Arraches à billes", 1, 34], [556, "Fraise à étage", 2, 10], [557, "Fraise cloche", 2, 10], [558, "Fraise 3 tailles", 2, 10], [559, "Rodoirs", 1, 10], [560, "Tournevis", 108, 19], [561, "Clés à fourche", 108, 19], [562, "Imbus", 108, 19], [563, "Antigel", 1, 19], [564, "Pierres&limes💎", 108, 19], [565, "Ciseaux", 1, 19], [566, "Pince Monseigneur", 108, 59], [567, "Talurit", 108, 59], [568, "Pince pour cables", 108, 59], [569, "Ventouse de levage", 1, 59], [570, "Grande Hilti®", 102, 35], [571, "Hilti:accesoires", 102, 35], [572, "Tampons perceuse Hil", 102, 43], [573, " Perforateur Hitachi", 102, 9], [574, "Perceuses 220V", 102, 9], [575, "Mèche à Béton", 1, 9], [577, "Perceuse angulaire", 102, 9], [578, "Tampon chimique", 1, 9], [579, "Tête à aléser", 99, 15], [580, "Brut posage", 99, 36], [581, "Tire-fils", 1, 32], [582, "Makita", 102, 9], [583, "Multimètres ", 109, 32], [584, "Mèche pour pneu", 1, 16], [585, "Marteau pneumatique ", 105, 11], [586, "Meuleuse à air", 105, 11], [587, "Pistolet AVEX", 1, 11], [588, "Dynafile", 1, 11], [589, "Edalco", 4, 14], [590, "Pistolet SIKA", 105, 31], [591, "Scotch aluminium ", 100, 56], [592, "Niveau laser", 109, 32], [593, "Mètre laser", 109, 32], [594, "Taraud UNC", 6, 17], [596, "Micro-foret Ø0 à Ø1", 106, 5], [597, "etau", 99, 25], [598, "Mors Gressel Haut", 99, 25], [599, "Mors schunk", 99, 25], [600, "Mors Lang", 99, 25], [601, "Cliquets americains", 107, 31], [602, "Tournevis à choc", 108, 8], [603, "Colles", 100, 34], [604, "loctite", 100, 34]];
 
-const APP_VERSION="1.6",LS="kardex-v1",EXPORT_DAY="2026-10-29";
+const APP_VERSION="1.6.1",LS="kardex-v1",EXPORT_DAY="2026-10-29";
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const nc=ch=>ch.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
@@ -1078,7 +1077,9 @@ function renderSettings(el){
     </div>
     <div id="svPanel"></div>
     ${phPanel()}
-    <div class="acts"><button class="btn" type="button" data-act="rz">Remettre le compteur à zéro</button><button class="btn bad" type="button" data-act="reset">Remettre le fichier d'origine</button></div>
+    <div class="acts"><button class="btn" type="button" data-act="rz">Remettre le compteur à zéro</button></div>
+    <p class="note"><b>Remettre le compteur à zéro</b> : efface seulement le classement « les plus utilisés » (rangs #, 🔥, nombre d'ouvertures). Articles, étages et photos ne bougent pas.</p>
+    <p class="note">Il faut un 2e toucher pour confirmer.</p>
   </div>`;
   Sauvegarde.panneau($("svPanel"));
 }
@@ -1193,7 +1194,6 @@ document.addEventListener("click",e=>{
   if(act==="sw"){const k=b.dataset.k;st.params[k]=!st.params[k];save();render();return}
   if(act==="nb"){st.params.nbTop=+b.dataset.n;save();render();return}
   if(act==="rz"){if(b.dataset.sure){st.uses={floors:{},arts:{}};log("compteur","Compteur remis à zéro","");save();render();toast("Compteur à zéro")}else{b.dataset.sure=1;b.textContent="Sûr ? Re-toucher"}return}
-  if(act==="reset"){if(b.dataset.sure){if(Sauvegarde.remplacer(toData(fresh()),"remise du fichier d'origine")){toast("Fichier d'origine remis")}}else{b.dataset.sure=1;b.textContent="Sûr ? Une copie est gardée. Re-toucher."}return}
 });
 document.addEventListener("submit",e=>{e.preventDefault();if(e.target.id==="fEdit"&&ED){if(e.target.closest(".sl"))carEdit=null;submitEdit(e.target)}if(e.target.id==="fLot")submitLot()});
 document.addEventListener("input",e=>{if(e.target.id==="animS"){st.params.animS=+e.target.value;$("animSv").textContent=e.target.value+" s";save();return}
@@ -1652,9 +1652,9 @@ const backNeed=()=>!!(kbOpen()||document.querySelector(".cr,.vw,.mv,.tc")||panel
 function railHtml(){
   const marks=[...new Set(PH.map(p=>p.floor))].map(f=>`<i class="pm" style="top:${(f-1)/59*100}%"></i>`).join("");
   const labs=[1,10,20,30,40,50,60].map(f=>`<span style="top:${(f-1)/59*100}%">${f}</span>`).join("");
-  return `<div class="rail" id="rail" role="slider" aria-label="Roulette des étages" aria-valuemin="1" aria-valuemax="60" aria-valuenow="${carF}" tabindex="0"><div class="rin">${labs}${marks}<b class="rth" id="rth">${nx(carF)}</b></div></div>`;
+  return `<div class="rail" id="rail" role="slider" aria-label="Roulette des étages" aria-valuemin="1" aria-valuemax="60" aria-valuenow="${carF}" tabindex="0"><div class="rin">${labs}${marks}<b class="rth" id="rth" aria-hidden="true"></b></div></div>`;
 }
-function railSync(){const t=$("rth");if(!t)return;t.style.top=(carF-1)/59*100+"%";const el=t.querySelector(".nx");if(el){if(+el.dataset.nx!==carF)nxSet(el,carF)}else t.innerHTML=nx(carF);$("rail").setAttribute("aria-valuenow",carF);bubPos()}
+function railSync(){const t=$("rth");if(!t)return;t.style.top=(carF-1)/59*100+"%";$("rail").setAttribute("aria-valuenow",carF);bubPos()}
 // la bulle (grand chiffre) se place toujours à la hauteur du curseur (petit chiffre), pour qu'ils restent alignés
 function bubPos(){const b=$("rbub"),r=document.querySelector("#rail .rin");if(!b||!r||b.hidden)return;const q=r.getBoundingClientRect();b.style.top=(q.top+(carF-1)/59*q.height)+"px"}
 function bubNum(b,f){const el=b.querySelector("b .nx");if(el){if(+el.dataset.nx!==f)nxSet(el,f)}else b.querySelector("b").innerHTML=nx(f)}
