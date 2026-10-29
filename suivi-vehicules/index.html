@@ -877,6 +877,24 @@ html[data-magic="on"] .liq .lq{transform:rotate(calc(var(--gx,0) * -12deg))}
 .phares{animation:phares 2.6s ease}
 @keyframes phares{0%,100%{filter:none}20%,60%{filter:brightness(1.6)}40%,80%{filter:brightness(.8)}}
 .btoy{position:fixed;z-index:79;pointer-events:none;font-size:42px;line-height:1}
+.ph-wrap{margin-top:14px}
+.ph-strip{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.ph-thumb{width:64px;height:64px;border-radius:12px;overflow:hidden;padding:0;border:1px solid var(--line);background:var(--navy-2);cursor:pointer}
+.ph-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.ph-add{display:flex;align-items:center;gap:6px;padding:8px 12px;border:1px dashed var(--line);border-radius:12px;color:var(--fg-2);cursor:pointer;font-size:14px}
+.ph-card{display:grid;gap:10px;margin-bottom:12px}
+.ph-titre{font-weight:700}
+.ph-note{font-size:13px;color:var(--fg-3)}
+.ph-acts{display:flex;gap:10px}
+.ph-acts>*{flex:1}
+#phView{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px;box-sizing:border-box}
+#phView[hidden]{display:none}
+#phImg{max-width:100%;max-height:78vh;border-radius:10px;object-fit:contain}
+#phView .ph-acts{width:100%;max-width:420px}
+.ph-ann{position:fixed;inset:0;z-index:210;background:rgba(0,0,0,.94);display:flex;flex-direction:column;justify-content:center;gap:10px;padding:14px;box-sizing:border-box}
+.ph-ann canvas{display:block;width:100%;height:auto;max-height:68vh;touch-action:none;background:#111;border-radius:10px}
+.ph-ann .ph-acts{flex-wrap:wrap}
+.ph-ann .ph-acts>*{flex:1 1 40%}
 @media (prefers-reduced-motion:reduce){ .nope,.dodge,.wheelie,.tilt,.yawn,.bumpL,.bumpR,.shy,.nap,.stretch,.flip,.sulk,.shiver,.phares{animation:none} }
 </style>
 </head>
@@ -1015,6 +1033,7 @@ html[data-magic="on"] .liq .lq{transform:rotate(calc(var(--gx,0) * -12deg))}
     <div class="card"><div class="field"><label>Saisie des chiffres</label><div class="seg" id="sPad"><button type="button" data-p="on"><span class="ico" style="--ic:#F5A623"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M216 48v160a8 8 0 0 1-8 8H48a8 8 0 0 1-8-8V48a8 8 0 0 1 8-8h160a8 8 0 0 1 8 8" opacity=".2"/><path d="M208 32H48a16 16 0 0 0-16 16v160a16 16 0 0 0 16 16h160a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16m0 176H48V48h160zM140 80v96a8 8 0 0 1-16 0V95l-11.56 7.71a8 8 0 1 1-8.88-13.32l24-16A8 8 0 0 1 140 80"/></svg></span> Pavé de l'app</button><button type="button" data-p="off"><span class="ico" style="--ic:#6FD3DC"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M192 56v144H64V56Z" opacity=".2"/><path d="M176 16H80a24 24 0 0 0-24 24v176a24 24 0 0 0 24 24h96a24 24 0 0 0 24-24V40a24 24 0 0 0-24-24M72 64h112v128H72Zm8-32h96a8 8 0 0 1 8 8v8H72v-8a8 8 0 0 1 8-8m96 192H80a8 8 0 0 1-8-8v-8h112v8a8 8 0 0 1-8 8"/></svg></span> Clavier du tél.</button></div></div></div>
     <div class="h2">Sauvegarde</div>
     <div id="svBox"></div>
+    <div id="phBox"></div>
     <button class="btn" type="button" id="btnImport"><span class="ico" style="--ic:#E8C062"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M208 88h-56V32Z" opacity=".2"/><path d="m213.66 82.34l-56-56A8 8 0 0 0 152 24H56a16 16 0 0 0-16 16v176a16 16 0 0 0 16 16h144a16 16 0 0 0 16-16V88a8 8 0 0 0-2.34-5.66M160 51.31L188.69 80H160ZM200 216H56V40h88v48a8 8 0 0 0 8 8h48zm-42.34-77.66a8 8 0 0 1-11.32 11.32L136 139.31V184a8 8 0 0 1-16 0v-44.69l-10.34 10.35a8 8 0 0 1-11.32-11.32l24-24a8 8 0 0 1 11.32 0Z"/></svg></span> Importer un ancien fichier</button>
     <input type="file" id="fileImport" accept=".txt,.json,.xlsx,.xls,text/plain,application/json" hidden>
     <div class="cap">Ancien fichier = une sauvegarde d'avant la v1.5 (<span style="font-family:var(--f-num)">Vehicules_sauvegarde_AAAA-MM-JJ.txt</span>) ou ton fichier <span style="font-family:var(--f-num)">Vehicules.xlsx</span> d'origine. Tes données actuelles sont d'abord gardées dans « Copies avant import ».</div>
@@ -1124,7 +1143,12 @@ html[data-magic="on"] .liq .lq{transform:rotate(calc(var(--gx,0) * -12deg))}
       <button class="btn primary" type="button" id="eAdd" style="margin-top:14px">Enregistrer</button>
       <button class="btn danger del" type="button" id="eDel" hidden>Supprimer cette ligne</button>
     </div>
+    <div id="shPh" class="ph-wrap"></div>
   </div>
+</div>
+<div id="phView" hidden>
+  <img id="phImg" alt="Photo en pleine qualité">
+  <div class="ph-acts"><button class="btn" type="button" id="phClose">Fermer</button><button class="btn" type="button" id="phAnn">✏️ Annoter</button><button class="btn danger" type="button" id="phDel">Supprimer cette photo</button></div>
 </div>
 <div class="kpad" id="kpad" hidden>
   <div class="kp-top"><span id="kp-lbl"></span><b id="kp-val"></b></div>
@@ -1348,7 +1372,7 @@ const THEME = { // v1.8 : même fond foncé pour tous, un accent par véhicule
   k:{txt:"#B3B8C2",grid:"rgba(255,255,255,.06)",tipBg:"#20242B",tipFg:"#EEF0F4",tipBd:"#E5484D",track:"#262A32",needle:"#EEF0F4",muted:"#8B92A0",bad:"#FF9F43",warn:"#F5D04C",acc:"#E5484D",fg:"#EEF0F4"}};
 let MODE=0; try{ const m=+localStorage.getItem("sv-mode"); if(m>0) MODE=m; }catch(e){}
 let T=THEME.k;
-const APP_VERSION="3.5.1";
+const APP_VERSION="3.5.2";
 const KEY="suivi-vehicules-v1";
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}}, lsSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 let STATE={fills:[],tyres:[],ent:[],rates:{},range:[925,350],tank:[60,20],buy:[3500,10000],fixed:[{},{}],trip:null};
@@ -2299,16 +2323,136 @@ function fillEnt(pre){ const e=ENTEDIT;
 function openEnt(e,pre){ EDIT=null; ENTEDIT=e||null; sv=e?e.v:MODE;
   $("#vpick").innerHTML=V.map((x,i)=>`<button type="button" style="--c:${x.c}" aria-pressed="${i===sv}" data-i="${i}">${icon(i)}${esc(x.n)}</button>`).join("");
   $("#vpick").querySelectorAll("button").forEach(b=>b.onclick=()=>{ sv=+b.dataset.i; $("#vpick").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b)); });
-  fillEnt(pre); setShM("e"); applyPad(); $("#scrim").classList.add("on"); $("#sheet").classList.add("on"); }
+  fillEnt(pre); setShM("e"); applyPad(); $("#scrim").classList.add("on"); $("#sheet").classList.add("on"); phShow(); }
 $("#eAdd").onclick=()=>{ const F=eKind==="F"; const t=$("#eDesc").value.trim()||(F?FXN[eFk]:""); if(!t){ toast("Écris ce qui a été fait."); return; }
   const m=nv($("#eAmt")), km=nv($("#eKm")), x={d:$("#eDate").value||null,v:sv,t,m:isNaN(m)?null:m,k:eKind};
   if(F){ const y=parseInt($("#eYear").value,10); if(!(y>=1980&&y<=2100)){ toast("Mets l'année (ex. 2026)."); return; }
     x.d=ENTEDIT&&ENTEDIT.d&&+ENTEDIT.d.slice(0,4)===y?ENTEDIT.d:`${y}-01-01`; }
   if(F){ if(!(x.m>0)){ toast("Mets le montant de l'année."); return; } x.fk=eFk; } else if(ENTEDIT) delete ENTEDIT.fk;
   if(!isNaN(km)&&km>0) x.km=Math.round(km); else x.km=null;
-  if(ENTEDIT) Object.assign(ENTEDIT,x); else STATE.ent.push({id:uid(),...x});
+  if(ENTEDIT) Object.assign(ENTEDIT,x); else STATE.ent.push({id:phTake(),...x});
   const was=!!ENTEDIT; persist(); closeSheet(); views[curView](); toast(was?"✓ Ligne modifiée":F?`✓ ${FXN[eFk]} ${x.d.slice(0,4)} noté : ${fmt(x.m)} CHF`:eKind==="S"?"✓ Fourniture notée":"✓ Entretien noté"); };
-$("#eDel").onclick=()=>confirmTap($("#eDel"),"Toucher encore pour supprimer",()=>{ const id=ENTEDIT&&ENTEDIT.id; STATE.ent=STATE.ent.filter(x=>x.id!==id); persist(); closeSheet(); views[curView](); toast("Ligne supprimée"); });
+$("#eDel").onclick=()=>confirmTap($("#eDel"),"Toucher encore pour supprimer",()=>{ const id=ENTEDIT&&ENTEDIT.id; phDelRef(id); STATE.ent=STATE.ent.filter(x=>x.id!==id); persist(); closeSheet(); views[curView](); toast("Ligne supprimée"); });
+
+// ---------- 📷 photos des pleins, entretiens et frais : pleine qualité dans le téléphone (IndexedDB), sauvegarde à part en .zip ----------
+const PHDB="sv-photos", PHU=new Map(); let PHREF=null, PHVIEW=null;
+const phIdb=()=>new Promise((ok,ko)=>{const r=indexedDB.open(PHDB,1);r.onupgradeneeded=()=>{r.result.createObjectStore("photos",{keyPath:"id"}).createIndex("ref","ref")};r.onsuccess=()=>ok(r.result);r.onerror=()=>ko(r.error)});
+async function phDo(mode,fn){const db=await phIdb();return new Promise((ok,ko)=>{const tx=db.transaction("photos",mode),r=fn(tx.objectStore("photos"));tx.oncomplete=()=>{db.close();ok(r&&r.result)};tx.onerror=()=>{db.close();ko(tx.error)}})}
+const php2=n=>String(n).padStart(2,"0");
+// la photo se rattache à l'entrée en cours ; pour une nouvelle entrée, l'identifiant est celui qu'elle prendra à l'enregistrement
+const phCur=()=>ENTEDIT?ENTEDIT.id:EDIT?EDIT.id:PHREF;
+const phTake=()=>{const id=PHREF||uid();PHREF=null;return id};
+async function phList(ref){return ref?((await phDo("readonly",s=>s.index("ref").getAll(ref)))||[]):[]}
+async function phPrev(f){try{const bm=await createImageBitmap(f,{imageOrientation:"from-image"}),k=Math.min(1,800/Math.max(bm.width,bm.height)),c=document.createElement("canvas");c.width=Math.round(bm.width*k);c.height=Math.round(bm.height*k);c.getContext("2d").drawImage(bm,0,0,c.width,c.height);bm.close&&bm.close();return (await new Promise(r=>c.toBlob(r,"image/jpeg",.82)))||f}catch(e){return f}}
+async function phAdd(files,ref){
+  ref=ref||phCur()||(PHREF=uid());let n=0;
+  for(const f of files){if(!f.type.startsWith("image/"))continue;
+    const prev=await phPrev(f);
+    try{await phDo("readwrite",s=>s.put({id:uid(),ref,t:new Date().toISOString(),name:f.name,type:f.type,blob:f,prev}));n++}
+    catch(e){toast("Mémoire pleine : photo non gardée");break}}
+  if(n){toast(`📷 ${n} photo${n>1?"s":""} ajoutée${n>1?"s":""}`);phShow();phPanel();notesPhotos()}
+}
+function phRevoke(){PHU.forEach(u=>URL.revokeObjectURL(u));PHU.clear()}
+async function phShow(){
+  const box=$("#shPh");if(!box)return;
+  const l=await phList(phCur());phRevoke();
+  for(const p of l)PHU.set(p.id,URL.createObjectURL(p.prev));
+  box.innerHTML=`<div class="ph-strip">${l.map((p,i)=>`<button class="ph-thumb" type="button" data-ph="${p.id}" aria-label="Photo ${i+1}, agrandir"><img src="${PHU.get(p.id)}" alt=""></button>`).join("")}<label class="ph-add"><input type="file" accept="image/*" multiple hidden id="phIn"><span>📷</span>${l.length?"Ajouter":"Ajouter une photo"}</label></div>`;
+}
+async function phView(id){const p=await phDo("readonly",s=>s.get(id));if(!p)return;if(PHVIEW)URL.revokeObjectURL(PHVIEW);PHVIEW=URL.createObjectURL(p.blob);$("#phImg").src=PHVIEW;$("#phView").dataset.id=id;$("#phView").hidden=false}
+function phClose(){$("#phView").hidden=true;$("#phImg").removeAttribute("src");if(PHVIEW){URL.revokeObjectURL(PHVIEW);PHVIEW=null}}
+async function phDel(id){await phDo("readwrite",s=>s.delete(id));phClose();phShow();phPanel();notesPhotos();toast("Photo supprimée")}
+async function phDelRef(ref){if(!ref)return;const l=await phList(ref);if(l.length)await phDo("readwrite",s=>{l.forEach(p=>s.delete(p.id))})}
+// annulation d'une nouvelle entrée : ses photos ne sont pas gardées
+function phDrop(){if(PHREF){phDelRef(PHREF);PHREF=null}phRevoke()}
+// annoter : texte posé au toucher (si une phrase est tapée) ou trait au doigt ; l'original est gardé, la copie annotée s'ajoute
+async function phAnnotate(id){
+  const p=await phDo("readonly",s=>s.get(id));if(!p)return;
+  const img=new Image();img.src=URL.createObjectURL(p.blob);await img.decode();
+  const w=document.createElement("div");w.className="ph-ann";
+  w.innerHTML=`<canvas></canvas><input class="txt" type="text" maxlength="60" placeholder="Texte : tape-le puis touche la photo (vide = trait au doigt)" aria-label="Texte à poser"><div class="ph-acts"><button class="btn" type="button" data-a="undo">↶ Annuler le dernier</button><button class="btn" type="button" data-a="cancel">Fermer</button><button class="btn primary" type="button" data-a="save">Enregistrer une copie</button></div>`;
+  document.body.appendChild(w);
+  const cv=w.querySelector("canvas"),g=cv.getContext("2d"),k=Math.min(1,1600/img.naturalWidth);
+  cv.width=Math.round(img.naturalWidth*k);cv.height=Math.round(img.naturalHeight*k);
+  const ops=[];let cur=null;
+  const draw=()=>{g.drawImage(img,0,0,cv.width,cv.height);ops.forEach(o=>{
+    if(o.t==="line"){g.strokeStyle="#E5484D";g.lineWidth=Math.max(4,cv.width/120);g.lineCap="round";g.lineJoin="round";g.beginPath();o.pts.forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));g.stroke()}
+    else{g.font=`bold ${Math.round(cv.width/22)}px sans-serif`;g.lineWidth=Math.max(3,cv.width/300);g.strokeStyle="#fff";g.fillStyle="#E5484D";g.strokeText(o.s,o.x,o.y);g.fillText(o.s,o.x,o.y)}})};
+  const pos=e=>{const r=cv.getBoundingClientRect();return [(e.clientX-r.left)*cv.width/r.width,(e.clientY-r.top)*cv.height/r.height]};
+  const txt=w.querySelector("input");
+  cv.onpointerdown=e=>{const s=txt.value.trim(),q=pos(e);if(s){ops.push({t:"text",x:q[0],y:q[1],s});txt.value="";draw();return}cur={t:"line",pts:[q]};ops.push(cur);cv.setPointerCapture(e.pointerId)};
+  cv.onpointermove=e=>{if(cur){cur.pts.push(pos(e));draw()}};
+  cv.onpointerup=cv.onpointercancel=()=>{cur=null};
+  const close=()=>{URL.revokeObjectURL(img.src);w.remove()};
+  w.querySelector('[data-a="cancel"]').onclick=close;
+  w.querySelector('[data-a="undo"]').onclick=()=>{ops.pop();draw()};
+  w.querySelector('[data-a="save"]').onclick=()=>cv.toBlob(async b=>{
+    if(!b){toast("Enregistrement impossible");return}
+    const prev=await phPrev(b);
+    await phDo("readwrite",s=>s.put({id:uid(),ref:p.ref,t:new Date().toISOString(),name:"annotée "+(p.name||"photo"),type:"image/jpeg",blob:b,prev,annote:true}));
+    close();phClose();phShow();phPanel();notesPhotos();toast("✏️ Copie annotée gardée, l'original aussi")},"image/jpeg",.92);
+  draw();
+}
+$("#phClose").onclick=phClose;
+$("#phAnn").onclick=()=>phAnnotate($("#phView").dataset.id);
+$("#phView").onclick=e=>{if(e.target.id==="phView")phClose()};
+$("#phDel").onclick=()=>confirmTap($("#phDel"),"Toucher encore pour supprimer la photo",()=>phDel($("#phView").dataset.id));
+document.addEventListener("click",e=>{const t=e.target.closest(".ph-thumb[data-ph]");if(t)phView(t.dataset.ph)});
+document.addEventListener("change",e=>{
+  if(e.target.id==="phIn"&&e.target.files.length){phAdd([...e.target.files]);e.target.value=""}
+  if(e.target.classList.contains("nph-in")&&e.target.files.length){const files=[...e.target.files];e.target.value="";phAdd(files,e.target.dataset.ref||(NEWREF=uid()))}
+  if(e.target.id==="phImp"&&e.target.files[0]){phImport(e.target.files[0]);e.target.value=""}});
+
+// sauvegarde des photos : un .zip à part (photos telles quelles + liste), rien n'est effacé à l'import
+const PHCRC=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+const phCrc=u=>{let c=0xFFFFFFFF;for(let i=0;i<u.length;i++)c=PHCRC[(c^u[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0};
+function phZip(files){ // sans compression (les JPEG le sont déjà)
+  const enc=new TextEncoder(),parts=[],cd=[];let off=0;const d=new Date(),dt=((d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()>>1)),dd=(((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate());
+  for(const f of files){const nm=enc.encode(f.name),crc=phCrc(f.data),h=new DataView(new ArrayBuffer(30));
+    [[0,0x04034b50,4],[4,20,2],[6,0,2],[8,0,2],[10,dt,2],[12,dd,2],[14,crc,4],[18,f.data.length,4],[22,f.data.length,4],[26,nm.length,2],[28,0,2]].forEach(([o,v,n])=>n===4?h.setUint32(o,v,true):h.setUint16(o,v,true));
+    parts.push(h.buffer,nm,f.data);
+    const c=new DataView(new ArrayBuffer(46));
+    [[0,0x02014b50,4],[4,20,2],[6,20,2],[8,0,2],[10,0,2],[12,dt,2],[14,dd,2],[16,crc,4],[20,f.data.length,4],[24,f.data.length,4],[28,nm.length,2],[30,0,2],[32,0,2],[34,0,2],[36,0,2],[38,0,4],[42,off,4]].forEach(([o,v,n])=>n===4?c.setUint32(o,v,true):c.setUint16(o,v,true));
+    cd.push(c.buffer,nm);off+=30+nm.length+f.data.length}
+  const cdSize=cd.reduce((t,b)=>t+(b.byteLength??b.length),0),e=new DataView(new ArrayBuffer(22));
+  [[0,0x06054b50,4],[8,files.length,2],[10,files.length,2],[12,cdSize,4],[16,off,4]].forEach(([o,v,n])=>n===4?e.setUint32(o,v,true):e.setUint16(o,v,true));
+  return new Blob([...parts,...cd,e.buffer],{type:"application/zip"});
+}
+function phUnzip(buf){const v=new DataView(buf),out={};let p=0;const dec=new TextDecoder();
+  while(p+30<=buf.byteLength&&v.getUint32(p,true)===0x04034b50){const m=v.getUint16(p+8,true),sz=v.getUint32(p+18,true),nl=v.getUint16(p+26,true),xl=v.getUint16(p+28,true);
+    const name=dec.decode(new Uint8Array(buf,p+30,nl)),s=p+30+nl+xl;if(m!==0)throw new Error("zip compressé : pas une sauvegarde de photos");out[name]=new Uint8Array(buf,s,sz);p=s+sz}
+  return out}
+async function phExport(){
+  const l=(await phDo("readonly",s=>s.getAll()))||[];
+  if(!l.length){toast("Aucune photo à sauvegarder");return}
+  const files=[],list=[];
+  for(const p of l){const ext=(p.type.split("/")[1]||"jpg").replace("jpeg","jpg"),fichier=`photos/${p.id}.${ext}`;
+    files.push({name:fichier,data:new Uint8Array(await p.blob.arrayBuffer())});list.push({id:p.id,ref:p.ref,date:p.t,nom:p.name,type:p.type,fichier})}
+  files.unshift({name:"suivi-photos.json",data:new TextEncoder().encode(JSON.stringify({format:"suivi-vehicules-photos",version:1,date:new Date().toISOString(),photos:list},null,1))});
+  const d=new Date(),nom=`Suivi-photos_${d.getFullYear()}-${php2(d.getMonth()+1)}-${php2(d.getDate())}_${php2(d.getHours())}h${php2(d.getMinutes())}.zip`;
+  const f=new File([phZip(files)],nom,{type:"application/zip"});
+  try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:nom});toast("Photos envoyées : "+nom);return}}catch(e){if(e&&e.name==="AbortError"){toast("Sauvegarde annulée");return}}
+  const a=document.createElement("a");a.href=URL.createObjectURL(f);a.download=nom;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),60000);toast("Photos : "+nom);
+}
+async function phImport(file){
+  let z;try{z=phUnzip(await file.arrayBuffer())}catch(e){toast("Import impossible : "+e.message);return}
+  let man;try{man=JSON.parse(new TextDecoder().decode(z["suivi-photos.json"]))}catch(e){toast("Import impossible : ce n'est pas une sauvegarde de photos Suivi");return}
+  const have=new Set((await phDo("readonly",s=>s.getAllKeys()))||[]);
+  let n=0,deja=0;
+  for(const p of man.photos||[]){if(have.has(p.id)){deja++;continue}const u=z[p.fichier];if(!u)continue;
+    const blob=new Blob([u],{type:p.type||"image/jpeg"}),prev=await phPrev(blob);
+    try{await phDo("readwrite",s=>s.put({id:p.id,ref:p.ref,t:p.date,name:p.nom,type:p.type,blob,prev}));n++}catch(e){toast("Mémoire pleine : import arrêté");break}}
+  toast(`📷 ${n} photo${n>1?"s":""} ajoutée${n>1?"s":""}${deja?`, ${deja} déjà là`:""}`);phPanel();
+}
+async function phPanel(){
+  const box=$("#phBox");if(!box)return;
+  const l=(await phDo("readonly",s=>s.getAll()))||[], mo=l.reduce((t,p)=>t+p.blob.size,0)/1048576;
+  box.innerHTML=`<div class="card ph-card"><div class="ph-titre">📷 Photos des pleins, entretiens et frais</div>
+    <div class="ph-note">${l.length} photo${l.length>1?"s":""} · ${mo.toFixed(1)} Mo, en pleine qualité dans ce téléphone. Sauvegarde à part (fichier .zip).</div>
+    <div class="ph-acts"><button class="btn primary" type="button" id="phExp">💾 Sauvegarder les photos</button><label class="btn" style="text-align:center">📂 Importer des photos<input type="file" accept=".zip,application/zip" hidden id="phImp"></label></div>
+    <div class="ph-note">L'import ajoute seulement les photos qui manquent : rien n'est effacé.</div></div>`;
+  $("#phExp").onclick=phExport;
+}
 
 // glisser une ligne du Journal vers la gauche = la supprimer (elle se déchire), avec « Annuler » pendant 6 s
 function undoToast(txt,undo){ const u=$("#undo"); u.querySelector("span").textContent=txt; $("#toast").classList.remove("on"); u.classList.add("on"); clearTimeout(u._t);
@@ -2511,12 +2655,25 @@ function renderBmw(){
   applyPad();
 }
 // ---------- notes libres par véhicule (pressions, références, choses à retenir)
+// photos des notes : même stockage, rattachées à la note ; une nouvelle note prend son identifiant à l'enregistrement
+let NEWREF=null; const NPU=new Map();
+const nTake=()=>{const id=NEWREF||uid();NEWREF=null;return id};
+function noteDrop(){if(NEWREF){phDelRef(NEWREF);NEWREF=null}}
+async function notesPhotos(){
+  NPU.forEach(u=>URL.revokeObjectURL(u));NPU.clear();
+  for(const box of document.querySelectorAll("#vehBody [data-nph]")){
+    const ref=box.dataset.nph==="new"?NEWREF:box.dataset.nph, l=await phList(ref);
+    l.forEach(p=>NPU.set(p.id,URL.createObjectURL(p.prev)));
+    box.innerHTML=`<div class="ph-strip">${l.map((p,i)=>`<button class="ph-thumb" type="button" data-ph="${p.id}" aria-label="Photo ${i+1}, agrandir"><img src="${NPU.get(p.id)}" alt=""></button>`).join("")}<label class="ph-add"><input type="file" accept="image/*" multiple hidden class="nph-in" data-ref="${ref||""}"><span>📷</span>${l.length?"Ajouter":"Ajouter une photo"}</label></div>`;
+  }
+}
 let nEdit=null, nQ="";
 const isoNow=()=>{ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; };
 function renderNotes(){ const v=MODE, o=vx(v), B=$("#vehBody");
   const L=o.notes.slice().sort((a,b)=>(!!b.pin-!!a.pin)||String(b.d).localeCompare(String(a.d)));
   const form=n=>`<div class="card nform"><input id="nT" class="txt" type="text" maxlength="80" placeholder="Titre (ex. Pressions des pneus)" aria-label="Titre" value="${esc(n.t||"")}">
     <textarea id="nX" rows="7" maxlength="4000" placeholder="Ta note…" aria-label="Texte de la note">${esc(n.x||"")}</textarea>
+    <div class="nph" data-nph="${n.id||"new"}"></div>
     <div style="display:flex;gap:8px"><button type="button" class="btn primary" id="nSave" style="flex:2">${ic("seal-check")} Enregistrer</button><button type="button" class="btn" id="nCancel" style="flex:1">Annuler</button></div></div>`;
   let h=`<div class="nbar"><button type="button" class="btn primary" id="nAdd">${ic("plus-circle")} Nouvelle note</button>${o.notes.length>3?`<input id="nQ" class="txt" type="search" placeholder="Chercher…" aria-label="Chercher dans les notes" value="${esc(nQ)}">`:""}</div>`;
   if(nEdit==="new") h+=form({});
@@ -2525,16 +2682,17 @@ function renderNotes(){ const v=MODE, o=vx(v), B=$("#vehBody");
       <button type="button" data-pin="${n.id}" aria-pressed="${!!n.pin}" aria-label="${n.pin?"Détacher":"Épingler en haut"}">${ic("push-pin",n.pin?"#F5D04C":"var(--fg-3)")}</button>
       <button type="button" data-ned="${n.id}" aria-label="Modifier">${ic("pencil-simple","var(--fg-3)")}</button>
       <button type="button" data-ndel="${n.id}" aria-label="Supprimer">${ic("trash","var(--fg-3)")}</button></span></div>
-      ${n.x?`<div class="ntx">${esc(n.x)}</div>`:""}<small class="muted">${n.d?dfr(n.d):""}</small></div>`; });
+      ${n.x?`<div class="ntx">${esc(n.x)}</div>`:""}<div class="nph" data-nph="${n.id}"></div><small class="muted">${n.d?dfr(n.d):""}</small></div>`; });
   B.innerHTML=h+`<div class="cap">${ic("info")} Notes de ${esc(V[v].nl||V[v].n)} seulement, gardées dans la sauvegarde Drive.</div>`;
+  notesPhotos();
   const filt=()=>{ const q=nQ.trim().toLowerCase(); B.querySelectorAll(".note").forEach(c=>{ c.hidden=!!q&&!c.innerText.toLowerCase().includes(q); }); };
   const q=$("#nQ"); if(q){ q.oninput=()=>{ nQ=q.value; filt(); }; filt(); }
   $("#nAdd").onclick=()=>{ nEdit="new"; renderNotes(); const t=$("#nT"); if(t){ pgShow(t.closest(".nform")); t.focus(); } };
   const s=$("#nSave"); if(s) s.onclick=()=>{ const t=$("#nT").value.trim().slice(0,80), x=$("#nX").value.replace(/\s+$/,"").slice(0,4000);
     if(!t&&!x){ toast("La note est vide."); return; }
-    if(nEdit==="new") o.notes.push({id:uid(),d:isoNow(),t,x,pin:false}); else { const n=o.notes.find(y=>y.id===nEdit); if(n) Object.assign(n,{t,x,d:isoNow()}); }
+    if(nEdit==="new") o.notes.push({id:nTake(),d:isoNow(),t,x,pin:false}); else { const n=o.notes.find(y=>y.id===nEdit); if(n) Object.assign(n,{t,x,d:isoNow()}); }
     nEdit=null; persist(); renderNotes(); toast("✓ Note enregistrée"); };
-  const c=$("#nCancel"); if(c) c.onclick=()=>{ nEdit=null; renderNotes(); };
+  const c=$("#nCancel"); if(c) c.onclick=()=>{ nEdit=null; noteDrop(); renderNotes(); };
   B.querySelectorAll("[data-pin]").forEach(b=>b.onclick=()=>{ const n=o.notes.find(y=>y.id===b.dataset.pin); if(!n) return; n.pin=!n.pin; persist(); renderNotes(); toast(n.pin?"📌 Épinglée en haut":"Note détachée"); });
   B.querySelectorAll("[data-ned]").forEach(b=>b.onclick=()=>{ nEdit=b.dataset.ned; renderNotes(); const t=$("#nX"); if(t) t.focus(); });
   B.querySelectorAll("[data-ndel]").forEach(b=>b.onclick=()=>{ const k=o.notes.findIndex(y=>y.id===b.dataset.ndel); if(k<0) return; const [n]=o.notes.splice(k,1); persist(); renderNotes();
@@ -2718,6 +2876,7 @@ function delVeh(k){ if(V.length<2) return;
 function renderMore(){
   renderAff(); renderVehList(); renderVehForm();
   Sauvegarde.panneau($("#svBox"));
+  phPanel();
   $("#abN").textContent=fills.length; $("#abV").textContent="v"+APP_VERSION+" · quoi de neuf ?"; $("#abV").onclick=openNews;
   $("#btnNews").innerHTML=`${ic("newspaper")} Quoi de neuf dans la v${APP_VERSION}`; $("#btnNews").onclick=openNews;
   $("#btnWipe").onclick=()=>confirmTap($("#btnWipe"),"Toucher encore pour TOUT effacer (une copie est gardée dans « Copies avant import »)",()=>{
@@ -2728,6 +2887,7 @@ function renderMore(){
 
 // ---------- Quoi de neuf : la version en grand, une carte par version ; s'ouvre une fois après chaque mise à jour
 const CHANGELOG=[
+  ["3.5.2","29.10.2026","Photos et nouvelle icône",["Photos des pleins, entretiens et frais : une ou plusieurs photos par entrée, en pleine qualité, à agrandir d'un toucher","Paramètres : sauvegarde des photos à part (.zip), import qui n'efface rien","Nouvelle icône Trajet : trait doré sur fond vert anglais"]],
   ["3.5.1","27.10.2026","Page vivante plus calme",["Un petit quelque chose toutes les 8 à 11 s au lieu de 5","Les farces qui restent arrivent après 20 s sans toucher","Le changement d'onglet tout seul seulement après 1 minute sans toucher"]],
   ["3.5","27.10.2026","Rattrapage et app vivante",["Plein : les km sont facultatifs et un km plus bas que le dernier est accepté (rattrapage), avec un nouveau choix « Je ne sais plus » à côté de complet et partiel","Entretien en deux : « Garage / mécanique » et « Fournitures et divers », chacun sa couleur dans le budget (le frais fixe devient « Parking / box »)","Frais fixes : une ligne par poste et par année, le cadre du haut « En cours » se calcule tout seul","Coût & trajet en sous-onglets (Budget, À prévoir, Coût au km, Trajet)","Plus de pages coupées : les gros blocs se coupent entre deux lignes","Graphiques par année à partir de l'année d'achat","Tuiles un peu plus grandes, écrou de la barre remonté","App vivante : le liquide des réservoirs penche avec le téléphone, et quand tu regardes sans toucher, un graphique se redessine, un chiffre saute ou une ligne frétille","35 bêtises : le chiffre têtu, le bouton + qui s'esquive, la tuile pas d'accord, le klaxon, la météo… Réglage dans Paramètres → Bêtises (Aucune, 1, 3, 5 par jour ou Fête). Elles prennent leur temps, et un toucher les arrête","Page vivante : sans toucher l'écran, toutes les 5 s il se passe quelque chose. Parfois des farces restent (faux chiffres, drôles d'étiquettes) ou l'app change d'onglet toute seule : un toucher et tout se remet en place avec un « Ah non, pardon ! »","Coût & trajet : un seul bouton avec ses 4 petites icônes, chaque toucher passe au sous-onglet suivant"]],
   ["3.4","27.10.2026","Onglet véhicule",["Chaque véhicule a les mêmes onglets au même endroit : Couples de serrage, Comparatif, Pneus et Notes (le Kangoo aussi, ses listes démarrent vides)","Nouvel onglet Notes : notes libres en texte (pressions des pneus, références, choses à retenir), épinglables en haut, avec recherche, gardées dans la sauvegarde Drive","Couples de serrage : plus de page vide, le tableau se coupe ligne par ligne d'une page à l'autre","Fiche technique retirée : réservoir, autonomie, prix et date d'achat se règlent une seule fois dans Paramètres → Véhicules","Mise à jour plus rapide : l'app vérifie s'il y a une nouvelle version quand tu la rouvres"]],
@@ -3063,11 +3223,12 @@ function openSheet(fresh,edit){
   live();
   ENTEDIT=null; setShM("p");
   $("#scrim").classList.add("on"); $("#sheet").classList.add("on");
+  phShow();
 }
 function sheetUnits(){ const f=hasFuel(sv), u=U(sv); $("#shPlein").classList.toggle("nofuel",!f);
   $("#lbL").textContent=u.vol==="kWh"?"kWh":"Litres"; $("#fL").placeholder="0.00"; $("#lC").nextElementSibling.textContent=u.c100+" km"; $("#lPL").nextElementSibling.textContent="CHF / "+u.vol;
   $("#slide").querySelector(".track").textContent=f?"Glisse pour enregistrer":"Glisse pour noter le compteur"; }
-function closeSheet(){ if(kpTarget) closePad(); $("#scrim").classList.remove("on"); $("#sheet").classList.remove("on"); EDIT=null; ENTEDIT=null; }
+function closeSheet(){ if(kpTarget) closePad(); $("#scrim").classList.remove("on"); $("#sheet").classList.remove("on"); EDIT=null; ENTEDIT=null; phDrop(); }
 // taux € → CHF (BCE, via frankfurter)
 async function fetchRate(d){
   if(STATE.rates[d]) return STATE.rates[d];
@@ -3085,7 +3246,7 @@ async function loadRate(){
 }
 $("#fR").addEventListener("input",()=>{ rateManual=true; });
 $("#fDate").addEventListener("change",()=>{ if(sCur==="EUR"){ rateManual=false; loadRate(); } });
-$("#btnDel").onclick=()=>{ if(!EDIT) return; confirmTap($("#btnDel"),"Toucher encore pour supprimer ce plein",()=>{ const id=EDIT.id; fills.splice(fills.findIndex(f=>f.id===id),1); persist(); A=analyse(); closeSheet(); views[curView](); toast("Plein supprimé"); }); };
+$("#btnDel").onclick=()=>{ if(!EDIT) return; confirmTap($("#btnDel"),"Toucher encore pour supprimer ce plein",()=>{ const id=EDIT.id; phDelRef(id); fills.splice(fills.findIndex(f=>f.id===id),1); persist(); A=analyse(); closeSheet(); views[curView](); toast("Plein supprimé"); }); };
 $("#fab").onclick=()=>openSheet(true); $("#close").onclick=closeSheet; $("#scrim").onclick=closeSheet;
 $("#fCur").querySelectorAll("button").forEach(b=>b.onclick=()=>setCur(b.dataset.c));
 const fTypeOf=()=>sVague?"?":sFull?"1":"0";
@@ -3148,7 +3309,7 @@ function save(){
   }
   const prevBest=Math.min(...A.per[sv].filter(f=>f.conso!=null).map(f=>f.conso)), lastKm=lastOf(sv)?lastOf(sv).km:0;
   let verdict=""; try{ const pr=predict(sv); if(pr&&pr.due!=null&&sFull){ const e=day($("#fDate").value)-pr.due; verdict=Math.abs(e)<=2?` · 🧠 L'IA avait prévu le ${dshort(pr.due)} : 🎯 dans le mille !`:Math.abs(e)<=pr.win?` · 🧠 Prévu le ${dshort(pr.due)} : à ${Math.abs(e)} j près 👍`:` · 🧠 Prévu le ${dshort(pr.due)} : raté de ${Math.abs(e)} j 😅`; } }catch(_){}
-  const nf={id:uid(),d:$("#fDate").value,v:sv,km:r.km||null,L:r.L,P:r.P,eur:r.eur,rate:r.rate,full:r.kmOnly?false:sFull,ctry:sCtry,st:r.kmOnly?null:curStation(),opts:r.kmOnly?{}:{...sOpts}}; if(r.kmOnly) nf.kmOnly=true; if(sVague&&!r.kmOnly) nf.vague=true; fills.push(nf);
+  const nf={id:phTake(),d:$("#fDate").value,v:sv,km:r.km||null,L:r.L,P:r.P,eur:r.eur,rate:r.rate,full:r.kmOnly?false:sFull,ctry:sCtry,st:r.kmOnly?null:curStation(),opts:r.kmOnly?{}:{...sOpts}}; if(r.kmOnly) nf.kmOnly=true; if(sVague&&!r.kmOnly) nf.vague=true; fills.push(nf);
   if(r.rate) STATE.lastRate=r.rate;
   persist(); ORACLE_CACHE={}; A=analyse(); closeSheet(); go(curView==="more"?"home":curView);
   const bornes=lastKm&&r.km>lastKm&&Math.floor(r.km/5000)>Math.floor(lastKm/5000)?` · 🎉 ${fmt(Math.floor(r.km/5000)*5000)} km franchis !`:"";
