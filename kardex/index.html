@@ -957,7 +957,7 @@ function renderKx(){
   $("kx").innerHTML=h;
   fpModal();
   $("kxHint").textContent=lots?"un clic = tout le plateau dans le lot":"#1 = le plus utilisé · un clic ouvre, un clic ferme";
-  const usedCats=[...new Set(all().map(a=>a.c))];
+  const usedCats=[...new Set(all().map(a=>a.c))].sort((x,y)=>CAT_ORD.indexOf(x)-CAT_ORD.indexOf(y));
   $("legend").innerHTML=usedCats.map(c=>`<span style="--c:${cat[c].color}"><i></i>${esc(cat[c].name)}</span>`).join("");
 }
 
