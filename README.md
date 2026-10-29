@@ -9,6 +9,7 @@ Petites apps (PWA) d'Adi, publiées avec GitHub Pages :
 | Porte-outils CNC | `porte-outils/` | https://jarvis1290.github.io/outils/porte-outils/ |
 | Suivi Véhicules | `suivi-vehicules/` | https://jarvis1290.github.io/outils/suivi-vehicules/ |
 | Calcul Atelier | `calcul-atelier/` | https://jarvis1290.github.io/outils/calcul-atelier/ |
+| Kardex | `kardex/` | https://jarvis1290.github.io/outils/kardex/ |
 
 ## Rangement
 
