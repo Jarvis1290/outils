@@ -746,6 +746,8 @@ nav.tabs .in>button[aria-current="page"]{background:transparent!important;box-sh
 .bkpi small{display:block;font-size:11px;color:var(--fg-3)}
 .bkpi b{display:block;font-family:var(--f-num);font-size:clamp(15px,4.6vw,21px);font-weight:700;color:var(--volt-hi);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bkpi span{display:block;font-size:10.5px;color:var(--fg-2);line-height:1.25}
+.btr{font-family:var(--f-num);font-weight:700;font-size:.92em;white-space:nowrap}.btr.up{color:var(--bad)}.btr.dn{color:var(--ok)}.btr.eq{color:var(--fg-3)}
+.liq .btr{color:#fff;background:#0008;padding:1px 7px;border-radius:9px;margin-left:4px}
 .bline{font-size:12.5px;color:var(--fg-2);margin-top:10px;line-height:1.45}
 .byr{display:flex;gap:8px 18px;flex-wrap:wrap;margin-top:10px;font-size:13.5px}
 .byr small{display:block;font-size:11px;color:var(--fg-3)}
@@ -1374,7 +1376,7 @@ const THEME = { // v1.8 : même fond foncé pour tous, un accent par véhicule
   k:{txt:"#B3B8C2",grid:"rgba(255,255,255,.06)",tipBg:"#20242B",tipFg:"#EEF0F4",tipBd:"#E5484D",track:"#262A32",needle:"#EEF0F4",muted:"#8B92A0",bad:"#FF9F43",warn:"#F5D04C",acc:"#E5484D",fg:"#EEF0F4"}};
 let MODE=0; try{ const m=+localStorage.getItem("sv-mode"); if(m>0) MODE=m; }catch(e){}
 let T=THEME.k;
-const APP_VERSION="3.5.3";
+const APP_VERSION="3.5.4";
 const KEY="suivi-vehicules-v1";
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}}, lsSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 let STATE={fills:[],tyres:[],ent:[],rates:{},range:[925,350],tank:[60,20],buy:[3500,10000],fixed:[{},{}],trip:null};
@@ -2078,22 +2080,24 @@ function renderBudget(){
   if(!B){ box.hidden=false; pc.hidden=tc.hidden=true;
     box.innerHTML=`<div class="bhd"><div class="hd2">${ic("piggy-bank","#FF7AA8")} Budget</div>${tog}</div><div class="muted">Il faut au moins un mois et demi de pleins ou de frais notés pour calculer un budget.</div>`; budBind(); return; }
   box.hidden=pc.hidden=tc.hidden=false;
-  const f=B.avgVar>0?B.curVar/B.avgVar:0, col=f>=1?T.bad:f>=.85?T.warn:all?"#4FA8FF":V[MODE].c, now=mKey(TODAY);
+  const now=mKey(TODAY), cm=B.months[B.months.length-1], dm=new Date(+now.slice(0,4),+now.slice(5),0).getDate(), dd=+dOf(TODAY).slice(8,10);
+  const exp=B.m12*dd/dm, f=exp>0?cm.t/exp:0, col=f>1.05?T.bad:f>=.95?T.warn:"#3DD39B", mois=MOISL[+now.slice(5)-1];
+  const arr=(r,lab)=>{ const d=r-1; return Math.abs(d)<.05?`<span class="btr eq">≈ ${lab||"pareil"}</span>`:`<span class="btr ${d>0?"up":"dn"}">${d>0?"▲ +":"▼ −"}${fmt(Math.abs(d)*100)} %</span>`; };
   const mx=Math.max(1,...B.months.map(m=>m.t)), avgH=Math.min(100,B.m12/mx*100);
   if(!B.months.some(m=>m.k===budSel)) budSel=null;
   const bars=B.months.map(m=>`<button type="button" class="bb${m.cur?" cur":""}" data-k="${m.k}" aria-pressed="${m.k===budSel}" aria-label="${mName(m.k)} : ${fmt(m.t)} CHF"><span class="bs">${BCAT.map(c=>m[c[0]]>0?`<i style="height:${(m[c[0]]/mx*100).toFixed(1)}%;background:${c[3]}"></i>`:"").reverse().join("")}</span><small>${["janv","févr","mars","avr","mai","juin","juil","août","sept","oct","nov","déc"][+m.k.slice(5)-1]}</small></button>`).join("");
   box.innerHTML=`<div class="bhd"><div class="hd2">${ic("piggy-bank","#FF7AA8")} Budget · ${who}</div>${tog}</div>
-    ${liquid(Math.min(1,f),col,"bar",`<span><span>${MOISL[+now.slice(5)-1]} : ${f>=1?"au-dessus de ta moyenne":f>=.85?"proche de ta moyenne":"sous ta moyenne"}</span><b>${fmt(B.curVar)} CHF</b></span>`)}
-    <div class="bnote">${fmt(B.curVar)} CHF = pleins, garage, fournitures et pneus ${(m=>/^[aeiou]/.test(m)?"d'"+m:"de "+m)(MOISL[+now.slice(5)-1].toLowerCase())} jusqu'ici. Ta moyenne pour les mêmes dépenses : <b>${fmt(B.avgVar)} CHF par mois</b> (${B.full.length} mois d'avant). Sans les frais fixes.</div>
-    <div class="bkpi"><div><small>Par mois</small><b class="num">${fmt(B.m12)}</b><span>CHF · ${B.d12>=360?"sur 12 mois":"depuis le début"}</span></div>
-      <div><small>Par an</small><b class="num">${fmt(B.y12)}</b><span>CHF · rythme actuel</span></div>
+    ${liquid(Math.min(1,B.m12>0?cm.t/B.m12:0),col,"bar",`<span><span>${mois} jusqu'ici ${exp>0?arr(f,"comme d'habitude"):""}</span><b>${fmt(cm.t)} CHF</b></span>`)}
+    <div class="bnote">${exp>0?`À cette date (${dd} ${mois.toLowerCase()}), un mois normal en est à <b>${fmt(exp)} CHF</b>. ${f>1.05?"Tu dépenses plus que d'habitude.":f<.95?"Tu dépenses moins que d'habitude.":"Tu es dans la normale."}`:""}</div>
+    <div class="bkpi"><div><small>Un mois normal</small><b class="num">${fmt(B.m12)}</b><span>CHF · ${B.d12>=360?"moyenne 12 mois":"depuis le début"}</span></div>
+      <div><small>Une année</small><b class="num">${fmt(B.y12)}</b><span>CHF · à ce rythme</span></div>
       <div><small>Au total</small><b class="num">${fmt(B.tot)}</b><span>CHF${B.buy>0?" · achat compris":""}</span></div></div>
-    <div class="bline">${ic("sparkle","#A58CFF")} Moyenne sur tout l'historique (${fmt(B.allD/MJ)} mois) : <b>${fmt(B.allM)} CHF / mois</b>${Math.abs(B.allM/B.m12-1)>.05?` <span class="muted">(${B.allM>B.m12?"tu dépenses moins qu'avant":"tu dépenses plus qu'avant"})</span>`:""}</div>
-    <div class="byr"><div><small>${dOf(TODAY).slice(0,4)} jusqu'ici</small><b>${fmt(B.ytd.t)} CHF</b></div><div><small>Fin d'année (estimé)</small><b>≈ ${fmt(B.proj)} CHF</b></div>${B.hasPrev?`<div><small>${+dOf(TODAY).slice(0,4)-1} en tout</small><b>${fmt(B.prevYear.t)} CHF</b></div>`:""}</div>
-    <div class="bch" style="--avgf:${(avgH/100).toFixed(3)}"><div class="bavg"><span>moy. ${fmt(B.m12)}</span></div>${bars}</div>
+    <div class="bline">${ic("sparkle","#A58CFF")} Avant, depuis le début (${fmt(B.allD/MJ)} mois) : <b>${fmt(B.allM)} CHF</b> par mois. ${Math.abs(B.m12/B.allM-1)<.05?"Comme aujourd'hui.":`Aujourd'hui ${arr(B.m12/B.allM)} : tu dépenses ${B.m12>B.allM?"plus":"moins"} qu'avant.`}</div>
+    <div class="byr"><div><small>${dOf(TODAY).slice(0,4)} jusqu'ici</small><b>${fmt(B.ytd.t)} CHF</b>${B.hasPrev&&B.prevSame.t>0?` ${arr(B.ytd.t/B.prevSame.t)}<small>vs ${+dOf(TODAY).slice(0,4)-1} à la même date</small>`:""}</div><div><small>Fin d'année (prévu)</small><b>≈ ${fmt(B.proj)} CHF</b></div>${B.hasPrev?`<div><small>${+dOf(TODAY).slice(0,4)-1} en tout</small><b>${fmt(B.prevYear.t)} CHF</b></div>`:""}</div>
+    <div class="bch" style="--avgf:${(avgH/100).toFixed(3)}"><div class="bavg"><span>mois normal ${fmt(B.m12)}</span></div>${bars}</div>
     <div class="bdet" id="budDet"></div>
     <div class="bsplit">${BCAT.filter(c=>B.l12[c[0]]>0||!B.l12.t).map(c=>{ const x=B.l12[c[0]], p=B.l12.t>0?x/B.l12.t:0; return `<div class="prow" style="--pc:${c[3]}"><span class="dot"></span><span>${ic(c[1],c[3])} ${c[2]}</span><span class="v">${fmt(x*365/B.d12)} CHF / an<small>${fmt(p*100)} % · ${fmt(x/B.d12*MJ)} CHF / mois</small></span></div>`; }).join("")}</div>
-    <div class="cap">Tout ce que tu as noté : pleins, entretien, pneus, et frais fixes annuels répartis sur l'année. « Par mois » et « Par an » = rythme des 12 derniers mois. Touche une barre pour le détail du mois.</div>`;
+    <div class="cap">Partout le même compte : pleins, garage, fournitures, pneus et frais fixes (assurance, taxe… répartis jour par jour). « Un mois normal » = moyenne des 12 derniers mois, c'est aussi la ligne pointillée. ▲ rouge = plus cher, ▼ vert = moins cher. Touche une barre pour le détail du mois.</div>`;
   // ---- à prévoir
   const items=vs.flatMap(planItems).sort((a,b)=>a.d-b.d), fuelD=vs.reduce((t,v)=>t+spendIn(v,Math.max(B.st,TODAY+1-365),TODAY+1).carb,0)/B.d12;
   const inH=h=>items.filter(x=>!x.info&&x.m>0&&x.d<TODAY+h).reduce((t,x)=>t+x.m,0)+fuelD*h, big12=items.filter(x=>!x.info&&x.m>0).reduce((t,x)=>t+x.m,0);
@@ -2891,6 +2895,7 @@ function renderMore(){
 
 // ---------- Quoi de neuf : la version en grand, une carte par version ; s'ouvre une fois après chaque mise à jour
 const CHANGELOG=[
+  ["3.5.4","29.10.2026","Budget limpide",["Budget : partout le même compte, frais fixes compris","Le mois en cours comparé à un mois normal à la même date, avec une flèche ▲ ▼","« Un mois normal » = le même chiffre que la ligne pointillée du graphique","Flèches aussi pour l'année et pour « avant »"]],
   ["3.5.3","29.10.2026","Budget plus clair",["Budget : le bandeau du mois dit ce qui est compté et d'où vient la moyenne","Bon à savoir sur son propre écran","Barre d'icônes : la dernière icône n'est plus coupée en bas"]],
   ["3.5.2","29.10.2026","Photos et nouvelle icône",["Photos des pleins, entretiens et frais : une ou plusieurs photos par entrée, en pleine qualité, à agrandir d'un toucher","Paramètres : sauvegarde des photos à part (.zip), import qui n'efface rien","Nouvelle icône Trajet : trait doré sur fond vert anglais"]],
   ["3.5.1","27.10.2026","Page vivante plus calme",["Un petit quelque chose toutes les 8 à 11 s au lieu de 5","Les farces qui restent arrivent après 20 s sans toucher","Le changement d'onglet tout seul seulement après 1 minute sans toucher"]],
