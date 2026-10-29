@@ -399,6 +399,26 @@ body.kbopen .toast{bottom:auto;top:calc(16px + env(safe-area-inset-top,0px))}
 .b3d{position:absolute;right:6px;bottom:6px;font:800 11px/1 var(--f-mono);background:var(--acc);color:var(--on-acc);border-radius:6px;padding:3px 6px;font-style:normal}
 .phb,.thumbs button{position:relative}
 .tirb{font-size:12.5px;padding:6px 10px}
+/* v1.4 : tiroir vidéo */
+.spd{position:absolute;left:12px;bottom:14px;display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.65);border-radius:10px;padding:6px 10px;font-size:12px}
+.spd span{color:#B3B8C2}.spd div{width:90px;height:8px;border-radius:4px;background:#2A2F38;overflow:hidden}.spd i{display:block;height:100%;width:0;background:#3DD39B;transition:width .12s}
+.spd b{min-width:70px}.spd.s1 i{background:var(--acc)}.spd.s2 i{background:#FF8A8D}.spd.s2 b{color:#FF8A8D}
+.tvt{position:absolute;right:12px;bottom:14px;width:130px;background:rgba(0,0,0,.65);border-radius:10px;padding:6px 10px;font:700 12px var(--f-mono);text-align:center}
+.tvt i{display:block;height:4px;border-radius:2px;background:#FF5B5B;width:0;margin-bottom:4px}
+.recb{width:70px;height:70px;border-radius:50%;border:4px solid #fff;background:radial-gradient(circle,#FF4D4D 0 46%,transparent 47%);cursor:pointer;flex:none}
+.recb.on{background:radial-gradient(circle,transparent 0 0);position:relative}
+.recb.on::after{content:"";position:absolute;inset:20px;border-radius:5px;background:#FF4D4D}
+.tch{right:12px}
+.vv .mvz{box-shadow:0 30px 60px rgba(0,0,0,.7);border-radius:6px;overflow:hidden}
+.vv .mvz .fb{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;pointer-events:none}
+.vv .mvz .fb.on{animation:fbin .26s forwards}@keyframes fbin{to{opacity:1}}
+.vpos{position:absolute;left:24px;right:24px;bottom:8px;height:4px;border-radius:2px;background:rgba(255,255,255,.15)}
+.mvs{position:relative}
+.vpos i{position:absolute;top:-4px;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:var(--acc);transition:left .08s}
+.vth{display:flex;gap:6px;overflow-x:auto;padding:6px max(12px,env(safe-area-inset-left,0px)) 2px;scrollbar-width:none}
+.vth::-webkit-scrollbar{display:none}
+.vth button{flex:none;width:62px;height:46px;border-radius:8px;overflow:hidden;padding:0;border:2px solid transparent;background:#1F232A;cursor:pointer}
+.vth button.on{border-color:var(--acc)}.vth img{width:100%;height:100%;object-fit:cover;display:block}
 </style>
 </head>
 <body>
@@ -662,7 +682,7 @@ const Sauvegarde = (() => {
 const CATS=[[1, "Divers", "#db0fca"], [2, "Stock de Fraise", "#DDD9C3"], [4, "Tournage", "#DBEEF4"], [6, "Taraud & Alésoirs", "#E6E0EC"], [10, "Outils rotatifs", "#B7DEE8"], [13, "VIS/RONDELLES Inox", "#00B0F0"], [14, "VIS/RONDELLES Acier", "#58B600"], [15, "Visseries (bois/Torx/etc…)", "#FFFF00"], [99, "Fraiseuses", "#0C4DE4"], [100, "Consommable de montage", "#9F0EE1"], [101, "Machine à Batterie", "#09DC2C"], [102, "Machine 220V", "#3A8830"], [103, "Levage", "#08f7e7"], [105, "Pneumatique", "#3EB3D0"], [106, "Percages/Foret", "#8662ea"], [107, "Cliquets", "#ff0080"], [108, "Outils à mains", "#00FA79"], [109, "Metrologie d'atelier", "#E4F21C"]];
 const ARTS=[[119, "Laboratoire", 1, 1], [415, "M6", 13, 39], [416, "M6", 14, 49], [417, "Loupe", 1, 32], [418, "Fraises Inox", 2, 2], [419, "Fraises à Rayon", 2, 2], [420, "Fraise en \"T\"", 2, 2], [421, "Fraises Aluminium", 2, 3], [422, "Chargeur Batteries", 102, 24], [423, "M5", 14, 48], [424, "Matériel de Tournage", 4, 14], [425, "Plaquettes", 4, 6], [426, "M10", 14, 51], [427, "M12", 14, 52], [428, "M14", 14, 52], [429, "M16", 14, 28], [430, "M24", 14, 28], [431, "M8", 14, 50], [433, "Rondelles M8", 14, 53], [434, "M4", 14, 47], [435, "M3", 14, 46], [436, "M1 à M2.5", 14, 45], [437, "Plateau magnétique", 99, 15], [438, "Matériel fraiseuses", 99, 15], [439, "Equerre de fraisage", 99, 36], [440, "M5", 13, 37], [441, "M8", 13, 40], [442, "M10", 13, 41], [443, "M4", 13, 38], [444, "M4 Poulets", 13, 38], [445, "Péteuse", 105, 11], [446, "Outils pneumatiques", 105, 11], [447, "Reserve scotch", 100, 25], [448, "DMU 50", 99, 25], [449, "M12", 13, 42], [450, "M14", 13, 42], [451, "Fils ressort Inox", 13, 42], [452, "Billes INOX", 13, 42], [453, "Goupilles Inox", 100, 42], [454, "Ressorts Inox", 100, 42], [455, "M2 à M3", 13, 29], [456, "NEF 400", 4, 54], [457, "Tasseau FP4", 99, 54], [458, "Dremel® 12V", 101, 20], [459, "Dremel 220V😂", 102, 20], [460, "Thermogun", 102, 20], [462, "Crayon électrique", 102, 20], [463, "Fer à souder", 102, 24], [464, "Rivet pop", 100, 33], [465, "Tubtara", 100, 33], [466, "Tarauds M2 à M10", 6, 21], [467, "Queues de cochon🐷", 6, 21], [468, "Scotch doubles face", 100, 56], [469, "Mini-Grip", 100, 56], [470, "Rubalise", 100, 56], [471, "Elastique", 100, 56], [472, "Clinquant", 100, 58], [473, "Cuivre Béryllium", 100, 58], [474, "O-ring", 100, 30], [475, "Brides métalliques", 100, 30], [476, "Joints", 100, 30], [477, "Span-Set® ", 103, 27], [478, "Torx", 15, 44], [479, "Vis à bois", 15, 44], [480, "Clous", 15, 44], [482, "M7", 15, 26], [483, "Goupilles Acier", 15, 55], [484, "Rivets", 15, 55], [485, "Bouterolle", 15, 55], [486, "cordes", 100, 56], [487, "Ficelles", 100, 56], [488, "Visseuses Makita", 101, 13], [489, "Meuleuse", 101, 13], [490, "Scie sabre", 102, 13], [491, "Perforateur + Aspir.", 101, 13], [492, "Sauteuse", 101, 13], [493, "Talkie-Walkie", 101, 24], [494, "Vis Amercaines", 15, 26], [495, "Spécial", 15, 26], [496, "Niveau à bulle", 109, 32], [498, "Mètre à ruban", 109, 32], [499, "Chevillière", 109, 32], [500, "Fil à plomb", 109, 32], [501, "Règle 1000mm", 109, 32], [502, "Règle 1500mm", 109, 32], [503, "Camera-Thermo", 109, 32], [504, "Mèches laiton", 106, 23], [505, "Mèche longue", 106, 23], [506, "Métrique fin", 6, 17], [507, "Tarauds spéciaux", 6, 17], [508, "Tarauds", 6, 17], [509, "Alesoirs:...", 6, 22], [510, "Fraise pivots/Stock", 106, 22], [511, "Mèches à centrer", 106, 22], [512, "Vérins", 103, 27], [513, "Anneau de levage", 103, 27], [514, "Patins", 103, 27], [515, "Cordes", 103, 27], [516, "Levage palonnier", 103, 16], [517, "Patins Vert", 103, 16], [518, "Grandes sangles Span", 103, 16], [519, "Mèche NC", 106, 5], [520, "Courte de Ø1 à Ø10", 106, 5], [521, "Long de Ø1 à Ø13", 106, 4], [522, "Cles à Cliquets", 107, 7], [523, " Cles à œil", 107, 7], [524, "Cles à fourche", 107, 7], [525, "Cles dynamométriques", 107, 8], [526, "Douilles 3/4", 107, 8], [527, "Soldes de Vis", 15, 57], [528, "Rondelles ressort", 15, 57], [529, "Bellevilles", 15, 57], [530, "Seeger", 15, 57], [531, "Insert métrique", 15, 57], [532, "Pistolet silicone", 1, 31], [534, "Lève panneau", 103, 31], [535, "Fraise scie", 2, 18], [536, "Fraise Modulaire", 2, 18], [537, "Fraise Rayon", 2, 18], [538, "Fraise de forme", 2, 18], [539, "Fraise surfacer", 2, 18], [540, "Fraise Bricolage", 2, 60], [541, "Fraise scies", 2, 10], [542, "Helicoil", 100, 24], [543, "Brides électro", 100, 24], [544, "Camera Snake ", 109, 32], [545, "Seringue 500ml", 1, 59], [546, "Visseuse Placo DEWAL", 101, 13], [547, "Fein", 1, 12], [548, "Agrafeuse", 1, 12], [549, " Grignoteuse Bosch®", 1, 12], [550, "Emporte-pièces ", 1, 12], [551, "Chalumeau", 1, 12], [552, "Coupe sangle", 1, 34], [553, "Extracteur", 1, 34], [554, "Sandow", 1, 34], [555, "Arraches à billes", 1, 34], [556, "Fraise à étage", 2, 10], [557, "Fraise cloche", 2, 10], [558, "Fraise 3 tailles", 2, 10], [559, "Rodoirs", 1, 10], [560, "Tournevis", 108, 19], [561, "Clés à fourche", 108, 19], [562, "Imbus", 108, 19], [563, "Antigel", 1, 19], [564, "Pierres&limes💎", 108, 19], [565, "Ciseaux", 1, 19], [566, "Pince Monseigneur", 108, 59], [567, "Talurit", 108, 59], [568, "Pince pour cables", 108, 59], [569, "Ventouse de levage", 1, 59], [570, "Grande Hilti®", 102, 35], [571, "Hilti:accesoires", 102, 35], [572, "Tampons perceuse Hil", 102, 43], [573, " Perforateur Hitachi", 102, 9], [574, "Perceuses 220V", 102, 9], [575, "Mèche à Béton", 1, 9], [577, "Perceuse angulaire", 102, 9], [578, "Tampon chimique", 1, 9], [579, "Tête à aléser", 99, 15], [580, "Brut posage", 99, 36], [581, "Tire-fils", 1, 32], [582, "Makita", 102, 9], [583, "Multimètres ", 109, 32], [584, "Mèche pour pneu", 1, 16], [585, "Marteau pneumatique ", 105, 11], [586, "Meuleuse à air", 105, 11], [587, "Pistolet AVEX", 1, 11], [588, "Dynafile", 1, 11], [589, "Edalco", 4, 14], [590, "Pistolet SIKA", 105, 31], [591, "Scotch aluminium ", 100, 56], [592, "Niveau laser", 109, 32], [593, "Mètre laser", 109, 32], [594, "Taraud UNC", 6, 17], [596, "Micro-foret Ø0 à Ø1", 106, 5], [597, "etau", 99, 25], [598, "Mors Gressel Haut", 99, 25], [599, "Mors schunk", 99, 25], [600, "Mors Lang", 99, 25], [601, "Cliquets americains", 107, 31], [602, "Tournevis à choc", 108, 8], [603, "Colles", 100, 34], [604, "loctite", 100, 34]];
 
-const APP_VERSION="1.3",LS="kardex-v1",EXPORT_DAY="2026-10-29";
+const APP_VERSION="1.4",LS="kardex-v1",EXPORT_DAY="2026-10-29";
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const nc=ch=>ch.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
@@ -970,7 +990,7 @@ document.addEventListener("click",e=>{
   if(act==="pickfloor"){const f=+b.dataset.f,it=byFloor(f);if(!lots)setLots(true);it.forEach(a=>sel.add(a.id));openF=null;render();toast(`Étage ${f} : ${it.length} article${it.length>1?"s":""} dans le lot`);return}
   if(act==="phview"){phView(b.dataset.id);return}
   if(act==="phexp"){phExport();return}
-  if(act==="tir"){if(ED)tirMake(+b.dataset.f);return}
+  if(act==="tir"){if(ED)tvMake(+b.dataset.f);return}
   if(act==="phpick"){carF=+b.dataset.f;carPick[carF]=b.dataset.id;render();return}
   if(act==="carprev"){carGo(-1);return}
   if(act==="carnext"){carGo(1);return}
@@ -1014,7 +1034,7 @@ function toast(t,ms=2400,withUndo=false){document.querySelectorAll(".toast").for
 const PHDB="kardex-photos";let PH=[];const phUrl=new Map();
 function idb(){return new Promise((ok,ko)=>{const r=indexedDB.open(PHDB,1);r.onupgradeneeded=()=>r.result.createObjectStore("photos",{keyPath:"id"});r.onsuccess=()=>ok(r.result);r.onerror=()=>ko(r.error)})}
 async function idbDo(mode,fn){const db=await idb();return new Promise((ok,ko)=>{const tx=db.transaction("photos",mode);const s=tx.objectStore("photos");const r=fn(s);tx.oncomplete=()=>ok(r&&r.result);tx.onerror=()=>ko(tx.error)})}
-async function phLoad(){try{const l=await idbDo("readonly",s=>s.getAll());PH=(l||[]).map(p=>({id:p.id,floor:p.floor,t:p.t,size:p.blob.size,part:p.part||null,mos:!!p.mos})).sort((a,b)=>a.t.localeCompare(b.t))}catch(e){PH=[]}render()}
+async function phLoad(){try{const l=await idbDo("readonly",s=>s.getAll());PH=(l||[]).map(p=>({id:p.id,floor:p.floor,t:p.t,size:p.blob.size,part:p.part||null,mos:!!p.mos,vid:!!p.vid,sc:!!p.sc})).sort((a,b)=>a.t.localeCompare(b.t))}catch(e){PH=[]}render()}
 const phOf=f=>PH.filter(p=>p.floor===f&&!p.part);
 async function phGet(id){return idbDo("readonly",s=>s.get(id))}
 async function phSrc(id,orig){const k=id+(orig?":o":":p");if(phUrl.has(k))return phUrl.get(k);const p=await phGet(id);if(!p)return "";const u=URL.createObjectURL(orig?p.blob:(p.prev||p.blob));phUrl.set(k,u);return u}
@@ -1037,8 +1057,8 @@ async function phDel(id){const p=PH.find(x=>x.id===id);if(!p)return;await idbDo(
   log("photo","Photo supprimée",`Étage ${p.floor}`);save();render()}
 function phStrip(f){
   const l=phOf(f);
-  return `<div class="phs">${l.map((p,i)=>`<button class="phb" type="button" data-act="phview" data-id="${p.id}" aria-label="${p.mos?"Tiroir 3D":"Photo "+(i+1)} de l'étage ${f}"><img data-ph="${p.id}" alt="">${p.mos?'<i class="b3d">3D</i>':""}</button>`).join("")}
-    ${ED?`<button class="phadd" type="button" data-act="tir" data-f="${f}"><span>🧩</span>Tiroir 3D</button>`:""}
+  return `<div class="phs">${l.map((p,i)=>`<button class="phb" type="button" data-act="phview" data-id="${p.id}" aria-label="${p.mos?"Tiroir 3D":"Photo "+(i+1)} de l'étage ${f}"><img data-ph="${p.id}" alt="">${p.mos?'<i class="b3d">3D</i>':p.vid?'<i class="b3d">🎬</i>':""}</button>`).join("")}
+    ${ED?`<button class="phadd" type="button" data-act="tir" data-f="${f}"><span>🎬</span>Tiroir vidéo</button>`:""}
     ${ED?`<label class="phadd"><input type="file" accept="image/*" multiple data-phf="${f}" hidden><span>📷</span>${l.length?"Ajouter":"Ajouter une photo"}</label>`:""}</div>`;
 }
 async function phHydrate(){for(const img of document.querySelectorAll("img[data-ph]:not([src])")){img.src=await phSrc(img.dataset.ph,false)}}
@@ -1046,8 +1066,8 @@ document.addEventListener("change",e=>{const i=e.target.closest("input[data-phf]
 
 /* visionneuse : un clic ferme, double-clic ou pincer pour zoomer, glisser pour se déplacer */
 function phView(id){
-  const p=PH.find(x=>x.id===id);if(!p)return;if(p.mos){mosView(id);return}
-  const list=p.part?PH.filter(x=>x.part===p.part):phOf(p.floor);let idx=list.findIndex(x=>x.id===id);const sub=!!p.part;
+  const p=PH.find(x=>x.id===id);if(!p)return;if(p.mos){mosView(id);return}if(p.vid){vidView(id);return}
+  const list=p.part?PH.filter(x=>x.part===p.part&&!x.sc):phOf(p.floor);let idx=list.findIndex(x=>x.id===id);const sub=!!p.part;
   const v=document.createElement("div");v.className="vw";v.innerHTML=`<div class="stage"><img alt=""></div>
     <div class="vbar"><b></b><span class="grow"></span>${list.length>1?'<button class="btn" type="button" data-v="prev">‹</button><button class="btn" type="button" data-v="next">›</button>':""}${ED&&!sub?'<button class="btn" type="button" data-v="crop">✂️ Recadrer</button><button class="btn bad" type="button" data-v="del">Supprimer</button>':""}</div>
     <p class="vhint">Un clic ferme · double-clic ou deux doigts pour zoomer</p>`;
@@ -1090,12 +1110,12 @@ function carSlide(f){
   const l=phOf(f),it=byFloor(f),cur=l.find(p=>p.id===carPick[f])||l[l.length-1];
   const n={};it.forEach(a=>n[a.c]=(n[a.c]||0)+1);
   const segs=Object.entries(n).sort((a,b)=>b[1]-a[1]).map(([c,k])=>`<i style="--c:${cat[c].color};--w:${k}"></i>`).join("");
-  const strip=l.length>1||(ED&&l.length)?`<div class="thumbs under">${l.map(p=>`<button type="button" class="${p===cur?"on":""}" data-act="phpick" data-f="${f}" data-id="${p.id}" aria-label="Photo"><img data-ph="${p.id}" alt="">${p.mos?'<i class="b3d">3D</i>':""}</button>`).join("")}<label class="tadd ed" aria-label="Ajouter une photo"><input type="file" accept="image/*" multiple data-phf="${f}" hidden>+</label></div>`:"";
+  const strip=l.length>1||(ED&&l.length)?`<div class="thumbs under">${l.map(p=>`<button type="button" class="${p===cur?"on":""}" data-act="phpick" data-f="${f}" data-id="${p.id}" aria-label="Photo"><img data-ph="${p.id}" alt="">${p.mos?'<i class="b3d">3D</i>':p.vid?'<i class="b3d">🎬</i>':""}</button>`).join("")}<label class="tadd ed" aria-label="Ajouter une photo"><input type="file" accept="image/*" multiple data-phf="${f}" hidden>+</label></div>`:"";
   return `<div class="sl" data-f="${f}"><div class="pv">
-    ${cur?`<button class="big" type="button" data-act="phview" data-id="${cur.id}" aria-label="Zoom sur la photo de l'étage ${f}"><img data-ph="${cur.id}" data-orig="${cur.id}" alt=""><b>${f}</b>${cur.mos?'<i class="b3d">3D · toucher</i>':""}</button>`
+    ${cur?`<button class="big" type="button" data-act="phview" data-id="${cur.id}" aria-label="Zoom sur la photo de l'étage ${f}"><img data-ph="${cur.id}" data-orig="${cur.id}" alt=""><b>${f}</b>${cur.mos?'<i class="b3d">3D · toucher</i>':cur.vid?'<i class="b3d">🎬 toucher pour glisser</i>':""}</button>`
       :ED?`<label class="big none"><input type="file" accept="image/*" multiple data-phf="${f}" hidden><span>📷<br>Ajouter une photo</span><b>${f}</b></label>`:`<div class="big none"><span>📷<br>Pas encore de photo</span><b>${f}</b></div>`}${strip}</div>
     <div class="side">
-      <div class="sh"><b>Étage ${f}</b><span>${it.length} article${it.length>1?"s":""} · rang #${RANK[f]}</span><button class="btn ed tirb" type="button" data-act="tir" data-f="${f}">🧩 Tiroir 3D</button></div>
+      <div class="sh"><b>Étage ${f}</b><span>${it.length} article${it.length>1?"s":""} · rang #${RANK[f]}</span><button class="btn ed tirb" type="button" data-act="tir" data-f="${f}">🎬 Tiroir vidéo</button></div>
       ${segs?`<span class="seg">${segs}</span>`:""}
       <ul class="cl">${it.map(a=>`<li style="--c:${cat[a.c].color}"><i></i><span>${esc(a.name.trim())}</span><em>${esc(cat[a.c].name)}${a.sub?" › "+esc(a.sub):""}</em></li>`).join("")||'<li class="e">Plateau vide</li>'}</ul>
     </div></div>`;
@@ -1142,7 +1162,7 @@ async function phExport(){
   toast("Préparation des photos…",8000);
   const files=[],list=[];
   for(const m of PH){const p=await phGet(m.id);const ext=(p.type.split("/")[1]||"jpg").replace("jpeg","jpg");const file=`photos/etage-${p2(p.floor)}_${p.id}.${ext}`;
-    files.push({name:file,data:new Uint8Array(await p.blob.arrayBuffer())});list.push({id:p.id,etage:p.floor,date:p.t,nom:p.name,type:p.type,fichier:file,...(p.part?{tiroir:p.part}:{}),...(p.mos?{mos:p.mos}:{})})}
+    files.push({name:file,data:new Uint8Array(await p.blob.arrayBuffer())});list.push({id:p.id,etage:p.floor,date:p.t,nom:p.name,type:p.type,fichier:file,...(p.part?{tiroir:p.part}:{}),...(p.mos?{mos:p.mos}:{}),...(p.vid?{vid:p.vid}:{}),...(p.sc?{sc:1}:{})})}
   files.unshift({name:"kardex-photos.json",data:new TextEncoder().encode(JSON.stringify({format:"kardex-photos",version:1,date:now(),photos:list},null,1))});
   const d=new Date(),nom=`Kardex-photos_${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}_${p2(d.getHours())}h${p2(d.getMinutes())}.zip`;
   const f=new File([zip(files)],nom,{type:"application/zip"});
@@ -1155,7 +1175,7 @@ async function phImport(file){
   let n=0,deja=0;
   for(const p of man.photos||[]){if(PH.some(x=>x.id===p.id)){deja++;continue}const u=z[p.fichier];if(!u||!(p.etage>=1&&p.etage<=60))continue;
     const blob=new Blob([u],{type:p.type||"image/jpeg"}),prev=await makePrev(blob);
-    try{await idbDo("readwrite",s=>s.put({id:p.id,floor:p.etage,t:p.date,name:p.nom,type:p.type,blob,prev,...(p.tiroir?{part:p.tiroir}:{}),...(p.mos?{mos:p.mos}:{})}));PH.push({id:p.id,floor:p.etage,t:p.date,size:blob.size,part:p.tiroir||null,mos:!!p.mos});n++}catch(e){toast("Mémoire pleine : import arrêté");break}}
+    try{await idbDo("readwrite",s=>s.put({id:p.id,floor:p.etage,t:p.date,name:p.nom,type:p.type,blob,prev,...(p.tiroir?{part:p.tiroir}:{}),...(p.mos?{mos:p.mos}:{}),...(p.vid?{vid:p.vid}:{}),...(p.sc?{sc:1}:{})}));PH.push({id:p.id,floor:p.etage,t:p.date,size:blob.size,part:p.tiroir||null,mos:!!p.mos,vid:!!p.vid,sc:!!p.sc});n++}catch(e){toast("Mémoire pleine : import arrêté");break}}
   log("photo",`Import de photos : ${n} ajoutée${n>1?"s":""}`,`${deja} déjà là · ${file.name}`);save();render();toast(`📷 ${n} photo${n>1?"s":""} ajoutée${n>1?"s":""}${deja?`, ${deja} déjà là`:""}`);
 }
 function phPanel(){const mo=PH.reduce((t,p)=>t+p.size,0)/1048576;
@@ -1450,161 +1470,174 @@ function railSetup(){
 }
 
 
-/* ---------- 🧩 tiroir 3D : prise guidée automatique → raccord auto → vue en relief ---------- */
-const TIR_OV=.33; // recouvrement voulu entre deux photos (un tiers)
-const TIR_SIZES=[["Petit",1,2],["Moyen",2,2],["Grand",2,3],["Très grand",3,3]];
+/* ---------- 🎬 tiroir vidéo : on filme le tiroir → l'app garde les images les plus nettes → on glisse le doigt pour avancer dedans ---------- */
+const TV_MAX=15,TV_SCRUB=48,TV_SHARP=12,TV_SCRUB_W=1600;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
-// 1) prise guidée : grille, niveau, déclenchement tout seul quand le téléphone est immobile, bord de la photo d'avant en transparence
-function tirCapture(f){return new Promise(done=>{
+// 1) filmer, guidé : bulle (à plat), jauge de vitesse (l'image bouge trop vite ?), 4K si possible, lampe, arrêt tout seul à 15 s
+function tvCapture(f){return new Promise(done=>{
   const v=document.createElement("div");v.className="tc";
-  v.innerHTML=`<div class="tcs"><b>🧩 Tiroir 3D · étage ${f}</b><p>Prends le tiroir <b>de près</b>, téléphone bien à plat au-dessus, objectif normal (x1, pas grand angle). La photo part toute seule quand tu ne bouges plus.</p>
-    <div class="tcz">${TIR_SIZES.map(([n,r,c],i)=>`<button type="button" class="btn" data-z="${i}"><span class="mini" style="--r:${r};--c:${c}">${"<i></i>".repeat(r*c)}</span><b>${n}</b><small>${r*c} photos</small></button>`).join("")}</div>
+  v.innerHTML=`<div class="tcs"><b>🎬 Tiroir vidéo · étage ${f}</b><p>Filme le tiroir <b>lentement</b>, téléphone à plat au-dessus, d'un bout à l'autre (5 à 15 s). L'app garde ensuite les images les plus nettes.</p>
+    <button class="btn pri" type="button" data-t="cam">🎬 Filmer</button>
+    <label class="btn" style="text-align:center"><input type="file" accept="video/*" hidden>📂 Vidéo de la galerie</label>
     <div class="acts"><button class="btn" type="button" data-t="no">Annuler</button></div></div>`;
   document.body.appendChild(v);document.body.style.overflow="hidden";
-  let stream=null,track=null,ic=null,rows=0,cols=0,shots=[],ori=null,hist=[],stillT=0,armed=true,moveSeen=false,lastShot=0,busy=false,raf=0,torch=false;
-  const onOri=e=>{if(e.beta==null)return;ori={b:e.beta,g:e.gamma,t:performance.now()};hist.push(ori);while(hist.length&&ori.t-hist[0].t>700)hist.shift()};
-  const onMot=e=>{const a=e.acceleration;if(a&&a.x!=null&&Math.hypot(a.x,a.y,a.z)>.9)moveSeen=true};
-  const close=r=>{cancelAnimationFrame(raf);removeEventListener("deviceorientation",onOri);removeEventListener("devicemotion",onMot);if(stream)stream.getTracks().forEach(t=>t.stop());v.remove();document.body.style.overflow="";done(r)};
+  let stream=null,track=null,rec=null,chunks=[],t0=0,raf=0,ori=null,torch=false,prevG=null,lastS=0,speed=0,timer=0;
+  const onOri=e=>{if(e.beta!=null)ori={b:e.beta,g:e.gamma,t:performance.now()}};
+  const close=r=>{cancelAnimationFrame(raf);clearTimeout(timer);removeEventListener("deviceorientation",onOri);if(rec&&rec.state!=="inactive")try{rec.onstop=null;rec.stop()}catch(e){}
+    if(stream)stream.getTracks().forEach(t=>t.stop());v.remove();document.body.style.overflow="";done(r)};
   v._close=()=>close(null);
-  const cell=k=>({r:Math.floor(k/cols),c:k%cols});
-  // sans appareil photo dans l'app (refusé, absent) : on prend des photos déjà faites, dans l'ordre de la grille
-  function pick(){v.innerHTML=`<div class="tcs"><b>📷 Appareil photo indisponible</b><p>Choisis tes ${rows*cols} photos déjà prises, dans l'ordre : de gauche à droite, rangée par rangée.</p>
-      <label class="btn pri" style="text-align:center"><input type="file" accept="image/*" multiple hidden>Choisir les photos</label><div class="acts"><button class="btn" type="button" data-t="no">Annuler</button></div></div>`;
-    v.querySelector("input").onchange=async e=>{const fs=[...e.target.files].filter(f=>f.type.startsWith("image/")).sort((a,b)=>a.lastModified-b.lastModified||a.name.localeCompare(b.name)).slice(0,rows*cols);
-      if(fs.length<2){toast("Il faut au moins 2 photos");return}
-      for(const f of fs){try{shots.push({blob:f,bm:await createImageBitmap(f,{imageOrientation:"from-image"})})}catch(x){}}
-      if(shots.length<2){toast("Photos illisibles");return}
-      if(shots.length<rows*cols&&cols>1&&shots.length<=cols)rows=1;const s2=shots.slice();shots=[];close({rows,cols,shots:s2})}}
-  async function start(){
-    v.innerHTML=`<div class="tcv"><video playsinline muted autoplay></video><canvas class="ghost"></canvas>
-      <div class="lvl"><i></i></div><svg class="ring" viewBox="0 0 100 100"><circle cx="50" cy="50" r="44"/></svg>
-      <div class="tcmap" style="--c:${cols}">${"<i></i>".repeat(rows*cols)}</div><div class="tch"></div></div>
+  v.querySelector("input").onchange=e=>{const file=e.target.files[0];if(file)close({blob:file,dur:null})};
+  async function cam(){
+    v.innerHTML=`<div class="tcv"><video playsinline muted autoplay></video><div class="lvl"><i></i></div>
+      <div class="tch">Appuie sur ⏺ puis avance <b>lentement</b> au-dessus du tiroir</div>
+      <div class="spd"><span>vitesse</span><div><i></i></div><b>—</b></div><div class="tvt"><i></i><b>0:00 / 0:${TV_MAX}</b></div></div>
       <div class="tcb"><button class="btn" type="button" data-t="no">Annuler</button><button class="btn" type="button" data-t="torch" hidden>💡</button><span class="grow"></span>
-      <button class="shut" type="button" data-t="shot" aria-label="Prendre la photo"></button><span class="grow"></span><button class="btn pri" type="button" data-t="ok" disabled>Raccorder</button></div>`;
-    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){pick();return}
-    try{stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:"environment"},width:{ideal:3840},height:{ideal:2160}}})}
-    catch(e){pick();return}
+      <button class="recb" type="button" data-t="rec" aria-label="Filmer"></button><span class="grow"></span><span style="width:84px"></span></div>`;
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||!window.MediaRecorder){nocam();return}
+    try{stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:"environment"},width:{ideal:3840},height:{ideal:2160},frameRate:{ideal:30}}})}catch(e){nocam();return}
     track=stream.getVideoTracks()[0];const vid=v.querySelector("video");vid.srcObject=stream;
-    try{ic=window.ImageCapture?new ImageCapture(track):null}catch(e){ic=null}
     try{const cap=track.getCapabilities?track.getCapabilities():{};if(cap.torch)v.querySelector('[data-t="torch"]').hidden=false;
       if(cap.zoom&&cap.zoom.min<=1&&cap.zoom.max>=1)track.applyConstraints({advanced:[{zoom:1}]}).catch(()=>{})}catch(e){}
-    addEventListener("deviceorientation",onOri);addEventListener("devicemotion",onMot);
-    await new Promise(r=>vid.readyState>=2?r():vid.onloadeddata=r);loop();
+    addEventListener("deviceorientation",onOri);await new Promise(r=>vid.readyState>=2?r():vid.onloadeddata=r);loop();
   }
-  // où la vidéo est affichée (object-fit:contain) : le bord fantôme est posé exactement dessus
-  function box(){const vid=v.querySelector("video"),r=vid.getBoundingClientRect(),k=Math.min(r.width/vid.videoWidth,r.height/vid.videoHeight);
-    const w=vid.videoWidth*k,h=vid.videoHeight*k;return {x:r.left+(r.width-w)/2,y:r.top+(r.height-h)/2,w,h}}
-  function ghost(){const g=v.querySelector(".ghost"),k=shots.length;if(!g)return;const b=box(),pr=v.querySelector(".tcv").getBoundingClientRect();
-    Object.assign(g.style,{left:b.x-pr.left+"px",top:b.y-pr.top+"px",width:b.w+"px",height:b.h+"px"});g.width=Math.round(b.w);g.height=Math.round(b.h);
-    const x=g.getContext("2d");x.clearRect(0,0,g.width,g.height);if(!k||k>=rows*cols)return;
-    const {r,c}=cell(k),src=c>0?shots[k-1]:shots[k-cols];if(!src)return;const bm=src.bm;
-    if(c>0)x.drawImage(bm,bm.width*(1-TIR_OV),0,bm.width*TIR_OV,bm.height,0,0,g.width*TIR_OV,g.height);
-    else x.drawImage(bm,0,bm.height*(1-TIR_OV),bm.width,bm.height*TIR_OV,0,0,g.width,g.height*TIR_OV);
-    x.strokeStyle="#F5A524";x.lineWidth=3;x.setLineDash([10,8]);x.beginPath();
-    if(c>0){x.moveTo(g.width*TIR_OV,0);x.lineTo(g.width*TIR_OV,g.height)}else{x.moveTo(0,g.height*TIR_OV);x.lineTo(g.width,g.height*TIR_OV)}x.stroke()}
-  function hint(){const k=shots.length,h=v.querySelector(".tch");if(!h)return;
-    v.querySelectorAll(".tcmap i").forEach((e,i)=>{e.className=i<k?"done":i===k?"now":""});
-    if(k>=rows*cols){h.innerHTML="✓ Toutes les photos sont prises · <b>Raccorder</b>";return}
-    if(!k){h.innerHTML="Place le <b>coin en haut à gauche</b> du tiroir";return}
-    const {c}=cell(k);h.innerHTML=c>0?"➡️ Décale-toi à <b>droite</b> : aligne le bord orange":"⬇️ Descends d'une rangée, <b>à gauche</b> : aligne le bord orange"}
-  async function shoot(){if(busy||shots.length>=rows*cols)return;busy=true;
-    const vid=v.querySelector("video");v.querySelector(".tcv").classList.add("flash");setTimeout(()=>v.querySelector(".tcv")?.classList.remove("flash"),220);
+  function nocam(){v.innerHTML=`<div class="tcs"><b>📷 Appareil photo indisponible</b><p>Filme le tiroir avec l'appareil photo du téléphone, puis choisis la vidéo ici.</p>
+    <label class="btn pri" style="text-align:center"><input type="file" accept="video/*" hidden>📂 Choisir la vidéo</label><div class="acts"><button class="btn" type="button" data-t="no">Annuler</button></div></div>`;
+    v.querySelector("input").onchange=e=>{const file=e.target.files[0];if(file)close({blob:file,dur:null})}}
+  // vitesse : on compare deux petites images de suite ; trop de changement = flou de bougé
+  const sc=document.createElement("canvas");sc.width=64;sc.height=36;const sx=sc.getContext("2d",{willReadFrequently:true});
+  function loop(){raf=requestAnimationFrame(loop);const vid=v.querySelector("video"),now=performance.now();if(!vid)return;
+    const lv=v.querySelector(".lvl"),live=ori&&now-ori.t<1000;lv.hidden=!live;
+    if(live){lv.querySelector("i").style.transform=`translate(${Math.max(-25,Math.min(25,ori.g))*1.6}px,${Math.max(-25,Math.min(25,ori.b))*1.6}px)`;lv.classList.toggle("ok",Math.abs(ori.b)<8&&Math.abs(ori.g)<8)}
+    if(now-lastS>120&&vid.videoWidth){lastS=now;sx.drawImage(vid,0,0,64,36);const d=sx.getImageData(0,0,64,36).data,g=new Float32Array(64*36);for(let i=0;i<g.length;i++)g[i]=d[i*4+1];
+      if(prevG){let s=0;for(let i=0;i<g.length;i++)s+=Math.abs(g[i]-prevG[i]);speed=speed*.6+(s/g.length)*.4}prevG=g;
+      const sp=v.querySelector(".spd"),lvl=speed<6?0:speed<13?1:2;sp.className="spd s"+lvl;sp.querySelector("i").style.width=Math.min(100,speed/20*100)+"%";sp.querySelector("b").textContent=["bien","un peu vite","trop vite"][lvl]}
+    if(rec&&rec.state==="recording"){const t=(now-t0)/1000;v.querySelector(".tvt i").style.width=Math.min(100,t/TV_MAX*100)+"%";v.querySelector(".tvt b").textContent=`0:${p2(Math.floor(t))} / 0:${TV_MAX}`}}
+  function startRec(){const types=["video/mp4;codecs=avc1","video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm","video/mp4"];
+    const mimeType=types.find(t=>MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(t))||"";
+    try{rec=new MediaRecorder(stream,{...(mimeType?{mimeType}:{}),videoBitsPerSecond:16e6})}catch(e){rec=new MediaRecorder(stream)}
+    chunks=[];rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
+    rec.onstop=()=>{const dur=(performance.now()-t0)/1000;close({blob:new Blob(chunks,{type:rec.mimeType||mimeType||"video/webm"}),dur})};
+    rec.start(500);t0=performance.now();v.querySelector(".recb").classList.add("on");v.querySelector(".tch").innerHTML="Avance <b>lentement</b> · touche ⏹ à la fin";
     if(navigator.vibrate)try{navigator.vibrate(30)}catch(e){}
-    let blob=null;
-    if(ic)try{blob=await ic.takePhoto()}catch(e){blob=null}
-    if(!blob){const c=document.createElement("canvas");c.width=vid.videoWidth;c.height=vid.videoHeight;c.getContext("2d").drawImage(vid,0,0);blob=await new Promise(r=>c.toBlob(r,"image/jpeg",.95))}
-    let bm;try{bm=await createImageBitmap(blob,{imageOrientation:"from-image"})}catch(e){busy=false;return}
-    shots.push({blob,bm});lastShot=performance.now();armed=false;moveSeen=false;stillT=0;busy=false;
-    v.querySelector('[data-t="ok"]').disabled=shots.length<2;ghost();hint();
-    if(shots.length>=rows*cols)setTimeout(()=>v.querySelector('[data-t="ok"]')?.click(),600)}
-  function loop(){
-    raf=requestAnimationFrame(loop);const now=performance.now(),lv=v.querySelector(".lvl i"),ring=v.querySelector(".ring");if(!lv)return;
-    const live=ori&&now-ori.t<1000;v.classList.toggle("nogyro",!live);
-    if(!live){ring.style.setProperty("--p",0);return}
-    const b=Math.max(-25,Math.min(25,ori.b)),g=Math.max(-25,Math.min(25,ori.g));lv.style.transform=`translate(${g*1.6}px,${b*1.6}px)`;
-    const flat=Math.abs(ori.b)<7&&Math.abs(ori.g)<7;let rb=0,rg=0;if(hist.length>1){const bs=hist.map(h=>h.b),gs=hist.map(h=>h.g);rb=Math.max(...bs)-Math.min(...bs);rg=Math.max(...gs)-Math.min(...gs)}
-    const still=rb<1.4&&rg<1.4;v.querySelector(".lvl").classList.toggle("ok",flat);
-    if(!armed&&(moveSeen||now-lastShot>2600))armed=true;
-    if(armed&&flat&&still&&!busy&&shots.length<rows*cols){stillT=stillT||now;const p=Math.min(1,(now-stillT)/900);ring.style.setProperty("--p",p);if(p>=1){stillT=0;shoot()}}
-    else{stillT=0;ring.style.setProperty("--p",0)}}
-  v.addEventListener("click",async e=>{const z=e.target.closest("[data-z]");if(z){[,rows,cols]=TIR_SIZES[+z.dataset.z];start();return}
-    const b=e.target.closest("[data-t]");if(!b)return;const t=b.dataset.t;
+    timer=setTimeout(()=>{if(rec.state==="recording")rec.stop()},TV_MAX*1000)}
+  v.addEventListener("click",async e=>{const b=e.target.closest("[data-t]");if(!b)return;const t=b.dataset.t;
     if(t==="no")return close(null);
-    if(t==="shot")return shoot();
+    if(t==="cam")return cam();
     if(t==="torch"){torch=!torch;try{await track.applyConstraints({advanced:[{torch}]});b.classList.toggle("pri",torch)}catch(x){}return}
-    if(t==="ok"){if(shots.length<2)return;const r=rows,c=cols,s=shots.slice();shots=[];close({rows:r,cols:c,shots:s})}});
-  addEventListener("resize",()=>{if(v.isConnected&&rows)ghost()});
-  const ro=new MutationObserver(()=>{if(v.querySelector(".tch")){ro.disconnect();setTimeout(()=>{ghost();hint()},50)}});ro.observe(v,{childList:true});
+    if(t==="rec"){if(!rec||rec.state==="inactive"){startRec()}else if((performance.now()-t0)>1500){clearTimeout(timer);rec.stop()}}});
 })}
 
-// 2) raccord auto : on cherche le meilleur décalage dans la zone commune (corrélation sur une image réduite), sinon la position du guide
-function grayOf(bm,W){const H=Math.round(bm.height*W/bm.width),c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(bm,0,0,W,H);
-  const d=x.getImageData(0,0,W,H).data,g=new Float32Array(W*H);for(let i=0;i<W*H;i++)g[i]=.299*d[i*4]+.587*d[i*4+1]+.114*d[i*4+2];return {g,W,H}}
-function ncc(A,B,dx,dy,st){ // B posé en (dx,dy) par rapport à A
-  const x0=Math.max(0,dx),y0=Math.max(0,dy),x1=Math.min(A.W,dx+B.W),y1=Math.min(A.H,dy+B.H);
-  if((x1-x0)*(y1-y0)<A.W*A.H*.08)return {s:-1};
-  let n=0,sa=0,sb=0,saa=0,sbb=0,sab=0;
-  for(let y=y0;y<y1;y+=st)for(let x=x0;x<x1;x+=st){const a=A.g[y*A.W+x],b=B.g[(y-dy)*B.W+(x-dx)];n++;sa+=a;sb+=b;saa+=a*a;sbb+=b*b;sab+=a*b}
-  const va=saa-sa*sa/n,vb=sbb-sb*sb/n;if(va<1e-3*n||vb<1e-3*n)return {s:-1};
-  return {s:(sab-sa*sb/n)/Math.sqrt(va*vb),ma:sa/n,mb:sb/n}}
-function tirPair(A,B,horiz){ // A, B : versions réduites ; renvoie le décalage de B dans A
-  const ex=horiz?Math.round(A.W*(1-TIR_OV)):0,ey=horiz?0:Math.round(A.H*(1-TIR_OV));
-  const rx=Math.round(A.W*(horiz?.24:.14)),ry=Math.round(A.H*(horiz?.14:.24));
-  let best={s:-2,dx:ex,dy:ey};
-  for(let dy=ey-ry;dy<=ey+ry;dy+=2)for(let dx=ex-rx;dx<=ex+rx;dx+=2){const r=ncc(A,B,dx,dy,3);if(r.s>best.s)best={...r,dx,dy}}
-  const c={...best};for(let dy=c.dy-2;dy<=c.dy+2;dy++)for(let dx=c.dx-2;dx<=c.dx+2;dx++){const r=ncc(A,B,dx,dy,1);if(r.s>best.s)best={...r,dx,dy}}
-  const ok=best.s>=.5;return ok?{dx:best.dx,dy:best.dy,ok,s:best.s,gain:best.mb>1?best.ma/best.mb:1}:{dx:ex,dy:ey,ok,s:best.s,gain:1}}
-async function tirStitch(cap,onStep){
-  const {rows,cols,shots}=cap,n=shots.length,SW=360;
-  const sm=shots.map(s=>grayOf(s.bm,SW));const k=shots[0].bm.width/SW;
-  const pos=new Array(n),gain=new Array(n).fill(1),okList=[];pos[0]={x:0,y:0};
-  for(let i=1;i<n;i++){const r=Math.floor(i/cols),c=i%cols,j=c>0?i-1:i-cols;if(j<0||j>=n){pos[i]={x:c*sm[0].W*(1-TIR_OV),y:r*sm[0].H*(1-TIR_OV)};continue}
-    onStep&&onStep(i,n);await sleep(16);
-    const p=tirPair(sm[j],sm[i],c>0);pos[i]={x:pos[j].x+p.dx,y:pos[j].y+p.dy};gain[i]=Math.max(.75,Math.min(1.33,gain[j]*p.gain));okList.push(p.ok)}
-  // taille finale : pleine résolution tant que le téléphone suit (max 5000 px de côté, 20 Mpx)
-  const fx=pos.map(p=>p.x*k),fy=pos.map(p=>p.y*k),bw=shots[0].bm.width,bh=shots[0].bm.height;
-  const minX=Math.min(...fx),minY=Math.min(...fy),W0=Math.max(...fx)+bw-minX,H0=Math.max(...fy)+bh-minY;
-  const sc=Math.min(1,5000/Math.max(W0,H0),Math.sqrt(20e6/(W0*H0)));
-  const W=Math.round(W0*sc),H=Math.round(H0*sc),out=document.createElement("canvas");out.width=W;out.height=H;const o=out.getContext("2d");o.fillStyle="#000";o.fillRect(0,0,W,H);
-  const parts=[];
-  for(let i=0;i<n;i++){const c=i%cols,r=Math.floor(i/cols),w=bw*sc,h=bh*sc,x=(fx[i]-minX)*sc,y=(fy[i]-minY)*sc;
-    const t=document.createElement("canvas");t.width=Math.round(w);t.height=Math.round(h);const tx=t.getContext("2d");
-    tx.filter=gain[i]!==1?`brightness(${gain[i].toFixed(3)})`:"none";tx.drawImage(shots[i].bm,0,0,t.width,t.height);tx.filter="none";
-    // bords adoucis là où une photo d'avant recouvre (fondu sur la zone commune)
-    tx.globalCompositeOperation="destination-in";
-    if(c>0){const L=x+0,prevR=(fx[i-1]-minX)*sc+w,ov=Math.max(8,Math.min(w*.5,prevR-L));const gr=tx.createLinearGradient(0,0,ov,0);gr.addColorStop(0,"rgba(0,0,0,0)");gr.addColorStop(1,"#000");tx.fillStyle=gr;tx.fillRect(0,0,t.width,t.height)}
-    if(r>0){const T=y,prevB=(fy[i-cols]-minY)*sc+h,ov=Math.max(8,Math.min(h*.5,prevB-T));const gr=tx.createLinearGradient(0,0,0,ov);gr.addColorStop(0,"rgba(0,0,0,0)");gr.addColorStop(1,"#000");tx.fillStyle=gr;tx.fillRect(0,0,t.width,t.height)}
-    o.drawImage(t,Math.round(x),Math.round(y));parts.push({x:x/W,y:y/H,w:w/W,h:h/H})}
-  const blob=await new Promise(r=>out.toBlob(r,"image/jpeg",.92));
-  return {blob,W,H,parts,ok:okList.every(Boolean),nOk:okList.filter(Boolean).length,nPairs:okList.length}}
+// 2) tri : on parcourt la vidéo, on mesure la netteté de chaque image, on garde les meilleures (48 pour glisser, dont 12 en pleine résolution)
+function sharpness(x,w,h){const d=x.getImageData(0,0,w,h).data;let s=0,s2=0,n=0;
+  for(let y=1;y<h-1;y++)for(let i=1;i<w-1;i++){const k=(y*w+i)*4,g=d[k+1],l=4*g-d[k-3]-d[k+5]-d[k-w*4+1]-d[k+w*4+1];s+=l;s2+=l*l;n++}
+  return s2/n-(s/n)**2}
+async function tvFrames(src,onStep){
+  const url=URL.createObjectURL(src.blob),vid=document.createElement("video");vid.muted=true;vid.playsInline=true;vid.preload="auto";vid.src=url;
+  const on=(ev,ms=4000)=>new Promise(r=>{let t;const f=()=>{clearTimeout(t);vid.removeEventListener(ev,f);r(true)};vid.addEventListener(ev,f);t=setTimeout(()=>{vid.removeEventListener(ev,f);r(false)},ms)});
+  try{
+    if(vid.readyState<1&&!(await on("loadedmetadata",8000)))throw new Error("vidéo illisible");
+    let dur=vid.duration;
+    if(!isFinite(dur)||!dur){vid.currentTime=1e7;await on("durationchange",3000);dur=isFinite(vid.duration)&&vid.duration?vid.duration:src.dur||0;vid.currentTime=0;await on("seeked",3000)}
+    if(!dur)throw new Error("durée inconnue");
+    const seek=async t=>{vid.currentTime=Math.max(0,Math.min(dur-.05,t));await on("seeked",4000)};
+    const W=vid.videoWidth,H=vid.videoHeight;if(!W)throw new Error("vidéo illisible");
+    const sw=240,shh=Math.round(H*sw/W),c=document.createElement("canvas");c.width=sw;c.height=shh;const cx=c.getContext("2d",{willReadFrequently:true});
+    const kS=Math.min(1,TV_SCRUB_W/W),SW=Math.round(W*kS),SH=Math.round(H*kS);
+    const enc=(w,h,q)=>{const o=document.createElement("canvas");o.width=w;o.height=h;o.getContext("2d").drawImage(vid,0,0,w,h);return new Promise(r=>o.toBlob(r,"image/jpeg",q))};
+    const best=Array.from({length:TV_SCRUB},()=>({t:-1,s:-1,p:null}));
+    const consider=t=>{const b=Math.min(TV_SCRUB-1,Math.floor(t/dur*TV_SCRUB));cx.drawImage(vid,0,0,sw,shh);const s=sharpness(cx,sw,shh);
+      if(s>best[b].s){best[b]={t,s,p:enc(SW,SH,.82)}}};
+    if("requestVideoFrameCallback" in HTMLVideoElement.prototype){
+      // une seule lecture (en accéléré) : chaque image est notée, la plus nette de chaque tranche est gardée
+      await new Promise(async res=>{let stop=false;const end=()=>{if(!stop){stop=true;res()}};vid.onended=end;
+        const cb=(now,meta)=>{if(stop)return;consider(meta.mediaTime);onStep&&onStep(Math.min(1,meta.mediaTime/dur)*.8,"Recherche des images nettes");vid.requestVideoFrameCallback(cb)};
+        vid.requestVideoFrameCallback(cb);vid.playbackRate=2;
+        try{await vid.play()}catch(e){end()}
+        setTimeout(end,(dur/2+8)*1000)});
+      vid.pause();
+    }
+    // tranches oubliées (ou navigateur sans suivi d'images) : on va les chercher une par une
+    for(let k=0;k<TV_SCRUB;k++)if(best[k].s<0){await seek((k+.5)/TV_SCRUB*dur);consider(vid.currentTime);onStep&&onStep(.8+k/TV_SCRUB*.1,"Recherche des images nettes")}
+    const sharpIdx=[];const per=TV_SCRUB/TV_SHARP;for(let k=0;k<TV_SHARP;k++){let b=-1,bs=-1;for(let j=Math.round(k*per);j<Math.round((k+1)*per);j++)if(best[j].s>bs){bs=best[j].s;b=j}sharpIdx.push(b)}
+    const frames=[];
+    for(let k=0;k<TV_SCRUB;k++){const full=sharpIdx.includes(k);let blob;
+      if(full&&kS<1){await seek(best[k].t);blob=await enc(W,H,.93)}else blob=await best[k].p;
+      frames.push({t:best[k].t,s:best[k].s,blob,full});onStep&&onStep(.9+k/TV_SCRUB*.1,"Préparation des images")}
+    return {frames,W,H,dur}}
+  finally{vid.pause();vid.removeAttribute("src");vid.load();URL.revokeObjectURL(url)}}
 
-// 3) enregistrer : l'image raccordée + chaque photo d'origine (pour la voir nette au toucher)
-async function tirSave(f,cap,st3){
-  const mid="m"+Date.now().toString(36)+Math.random().toString(36).slice(2,5),t=now(),parts=[];
-  for(let i=0;i<cap.shots.length;i++){const s=cap.shots[i],id=mid+"-"+i;
-    await idbDo("readwrite",x=>x.put({id,floor:f,t,name:`tiroir-${i+1}.jpg`,type:s.blob.type||"image/jpeg",blob:s.blob,prev:null,part:mid}));
-    PH.push({id,floor:f,t,size:s.blob.size,part:mid});parts.push({id,...st3.parts[i]})}
-  const prev=await makePrev(st3.blob);
-  await idbDo("readwrite",x=>x.put({id:mid,floor:f,t,name:"tiroir-3d.jpg",type:"image/jpeg",blob:st3.blob,prev,mos:{rows:cap.rows,cols:cap.cols,parts,ok:st3.ok}}));
-  PH.push({id:mid,floor:f,t,size:st3.blob.size,mos:true});return mid}
-async function tirMake(f){
-  if(!ED)return;const cap=await tirCapture(f);if(!cap)return;
-  const v=document.createElement("div");v.className="tc tcr";v.innerHTML=`<div class="tcs"><b>🧩 Raccord en cours…</b><p id="tcp">Analyse des photos</p><div class="bar"><i id="tcbar"></i></div></div>`;
+// 3) enregistrer : chaque image est une photo cachée (sauvegardée dans le .zip comme les autres) ; l'image la plus nette sert de couverture
+async function tvSave(f,res){
+  const vid="v"+Date.now().toString(36)+Math.random().toString(36).slice(2,5),t=now(),list=[];
+  for(let k=0;k<res.frames.length;k++){const fr=res.frames[k],id=vid+"-"+k;
+    await idbDo("readwrite",x=>x.put({id,floor:f,t,name:`tiroir-video-${k+1}.jpg`,type:"image/jpeg",blob:fr.blob,prev:null,part:vid,...(fr.full?{}:{sc:1})}));
+    PH.push({id,floor:f,t,size:fr.blob.size,part:vid,sc:!fr.full});list.push({id,t:+fr.t.toFixed(2),full:fr.full})}
+  const best=res.frames.filter(x=>x.full).sort((a,b)=>b.s-a.s)[0]||res.frames[0];const prev=await makePrev(best.blob);
+  await idbDo("readwrite",x=>x.put({id:vid,floor:f,t,name:"tiroir-video.jpg",type:"image/jpeg",blob:best.blob,prev,vid:{dur:res.dur,frames:list}}));
+  PH.push({id:vid,floor:f,t,size:best.blob.size,vid:true});return vid}
+async function tvMake(f){
+  if(!ED)return;const src=await tvCapture(f);if(!src)return;
+  const v=document.createElement("div");v.className="tc tcr";v.innerHTML=`<div class="tcs"><b>🎬 Tri des images…</b><p id="tcp">Lecture de la vidéo</p><div class="bar"><i id="tcbar"></i></div></div>`;
   document.body.appendChild(v);document.body.style.overflow="hidden";
-  let res;try{res=await tirStitch(cap,(i,n)=>{$("tcp").textContent=`Raccord ${i} / ${n-1}`;$("tcbar").style.width=i/(n-1)*100+"%"})}
-  catch(e){v.remove();document.body.style.overflow="";toast("Raccord impossible : "+e.message,5000);return}
-  const url=URL.createObjectURL(res.blob);
-  v.innerHTML=`<div class="tcs wide"><b>${res.ok?"✓ Raccord réussi":"⚠️ Raccord en partie au guide"}</b>
-    <p>${res.ok?`Les ${cap.shots.length} photos sont soudées.`:`${res.nOk} raccord${res.nOk>1?"s":""} sur ${res.nPairs} trouvé${res.nOk>1?"s":""} ; le reste suit la grille du guide. Tu peux garder ou recommencer.`}</p>
-    <img src="${url}" alt="Aperçu du tiroir raccordé"><div class="acts"><button class="btn" type="button" data-t="no">Annuler</button><button class="btn" type="button" data-t="again">Recommencer</button><button class="btn pri grow" type="button" data-t="keep">Garder</button></div></div>`;
+  let res;try{res=await tvFrames(src,(p,m)=>{$("tcp").textContent=m;$("tcbar").style.width=p*100+"%"})}
+  catch(e){v.remove();document.body.style.overflow="";toast("Vidéo illisible : "+e.message,5000);return}
+  const best=res.frames.filter(x=>x.full).sort((a,b)=>b.s-a.s)[0],url=URL.createObjectURL(best.blob),mo=res.frames.reduce((t,x)=>t+x.blob.size,0)/1048576;
+  v.innerHTML=`<div class="tcs wide"><b>✓ ${res.frames.length} images gardées</b><p>dont ${TV_SHARP} en pleine qualité (${res.W}×${res.H}) · ${mo.toFixed(1)} Mo. Voici la plus nette :</p>
+    <img src="${url}" alt="Image la plus nette du tiroir"><div class="acts"><button class="btn" type="button" data-t="no">Annuler</button><button class="btn" type="button" data-t="again">Refilmer</button><button class="btn pri grow" type="button" data-t="keep">Garder</button></div></div>`;
   v._close=()=>v.querySelector('[data-t="no"]').click();
-  v.addEventListener("click",async e=>{const b=e.target.closest("[data-t]");if(!b)return;const t=b.dataset.t;
-    URL.revokeObjectURL(url);v.remove();document.body.style.overflow="";cap.shots.forEach(s=>s.bm.close&&s.bm.close());
-    if(t==="again"){tirMake(f);return}
-    if(t==="keep"){try{const id=await tirSave(f,cap,res);carPick[f]=id;log("photo","Tiroir 3D ajouté",`Étage ${f} · ${cap.shots.length} photos${res.ok?"":" · raccord au guide"}`);save();render();toast("🧩 Tiroir 3D gardé")}
-      catch(x){toast("Mémoire pleine : tiroir non gardé")}}})}
+  v.addEventListener("click",async e=>{const b=e.target.closest("[data-t]");if(!b)return;const t=b.dataset.t;URL.revokeObjectURL(url);v.remove();document.body.style.overflow="";
+    if(t==="again"){tvMake(f);return}
+    if(t==="keep"){try{const id=await tvSave(f,res);carPick[f]=id;log("photo","Tiroir vidéo ajouté",`Étage ${f} · ${res.frames.length} images`);save();render();toast("🎬 Tiroir vidéo gardé")}catch(x){toast("Mémoire pleine : tiroir non gardé")}}})}
 
+// 4) la vue : glisser = avancer dans le tiroir ; au lâcher, l'image nette la plus proche ; deux doigts = zoom ; léger relief avec le téléphone
+async function vidView(id){
+  const p=await phGet(id);if(!p||!p.vid)return;const fr=p.vid.frames,n=fr.length,sharp=fr.map((x,i)=>x.full?i:-1).filter(i=>i>=0);
+  const v=document.createElement("div");v.className="mv vv";
+  v.innerHTML=`<div class="mvs"><div class="mvt"><div class="mvz"><img class="fa" alt="Tiroir de l'étage ${p.floor}"><img class="fb" alt=""></div></div><div class="vpos"><i></i></div></div>
+    <div class="vth">${sharp.map(i=>`<button type="button" data-k="${i}"><img alt=""></button>`).join("")}</div>
+    <div class="vbar"><b>🎬 Étage ${p.floor} · tiroir vidéo</b><span class="grow"></span>${ED?'<button class="btn bad" type="button" data-v="del">Supprimer</button>':""}</div>
+    <p class="vhint">Glisse le doigt pour avancer · deux doigts pour zoomer · un toucher ferme</p>`;
+  document.body.appendChild(v);document.body.style.overflow="hidden";
+  const stage=v.querySelector(".mvs"),tilt=v.querySelector(".mvt"),zm=v.querySelector(".mvz"),fa=v.querySelector(".fa"),fb=v.querySelector(".fb");
+  const urls=await Promise.all(fr.map(x=>phSrc(x.id,true)));
+  urls.forEach(u=>{const i=new Image();i.src=u});// préchargement : le glissé reste fluide
+  v.querySelectorAll(".vth button").forEach(b=>b.querySelector("img").src=urls[+b.dataset.k]);
+  let idx=sharp[0]??0,s=1,x=0,y=0,tx=0,ty=0,cx=0,cy=0,raf=0;
+  const show=(k,soft)=>{idx=Math.max(0,Math.min(n-1,k));if(soft){fb.src=urls[idx];fb.classList.remove("on");void fb.offsetWidth;fb.classList.add("on");setTimeout(()=>{fa.src=urls[idx];fb.classList.remove("on")},260)}else fa.src=urls[idx];
+    v.querySelector(".vpos i").style.left=idx/(n-1||1)*100+"%";v.querySelectorAll(".vth button").forEach(b=>b.classList.toggle("on",+b.dataset.k===idx))};
+  const snap=()=>{const j=sharp.reduce((a,b)=>Math.abs(b-idx)<Math.abs(a-idx)?b:a,sharp[0]);if(j!==idx)show(j,true)};
+  show(idx);
+  const apply=()=>{zm.style.transform=`translate(${x}px,${y}px) scale(${s})`};
+  const onOri=e=>{if(e.beta==null)return;tx=Math.max(-6,Math.min(6,(e.beta-35)*.25));ty=Math.max(-6,Math.min(6,e.gamma*.25))};
+  addEventListener("deviceorientation",onOri);
+  const tick=()=>{raf=requestAnimationFrame(tick);cx+=(tx-cx)*.12;cy+=(ty-cy)*.12;tilt.style.transform=`rotateX(${cx.toFixed(2)}deg) rotateY(${cy.toFixed(2)}deg)`};tick();
+  const close=()=>{cancelAnimationFrame(raf);removeEventListener("deviceorientation",onOri);v.remove();document.body.style.overflow=""};v._close=close;
+  v.querySelector(".vth").onclick=e=>{const b=e.target.closest("[data-k]");if(b){s=1;x=y=0;apply();show(+b.dataset.k,true)}};
+  v.querySelector(".vbar").onclick=async e=>{const b=e.target.closest("[data-v]");if(!b)return;
+    if(b.dataset.v==="del"){if(b.dataset.sure){await tirDel(id);close()}else{b.dataset.sure=1;b.textContent="Sûr ? Re-toucher"}}};
+  const pts=new Map();let start=null,pinch=null,moved=false,lastTap=0,tapT=null;
+  stage.addEventListener("pointerdown",e=>{stage.setPointerCapture(e.pointerId);pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pts.size===1){start={x:e.clientX,y:e.clientY,ox:x,oy:y,i:idx,t:Date.now()};moved=false}
+    if(pts.size===2){const [a,b]=[...pts.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y),s,ox:x,oy:y};moved=true;snap()}});
+  stage.addEventListener("pointermove",e=>{if(!pts.has(e.pointerId))return;pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pinch&&pts.size===2){const [a,b]=[...pts.values()];const ns=Math.min(8,Math.max(1,pinch.s*Math.hypot(a.x-b.x,a.y-b.y)/pinch.d));x=pinch.ox*ns/pinch.s;y=pinch.oy*ns/pinch.s;s=ns;if(s===1)x=y=0;apply();return}
+    if(start&&pts.size===1){const dx=e.clientX-start.x,dy=e.clientY-start.y;if(Math.hypot(dx,dy)>8)moved=true;if(!moved)return;
+      if(s>1){x=start.ox+dx;y=start.oy+dy;apply();return}
+      const r=stage.getBoundingClientRect(),d=Math.abs(dx)>=Math.abs(dy)?-dx/r.width:-dy/r.height;const k=Math.round(start.i+d*n*1.1);if(k!==idx)show(k)}});
+  const up=e=>{pts.delete(e.pointerId);if(pts.size<2)pinch=null;
+    if(pts.size===0&&start){
+      if(moved&&s===1)snap();
+      else if(!moved&&Date.now()-start.t<350){const t=Date.now();
+        if(t-lastTap<300){clearTimeout(tapT);lastTap=0;if(s>1){s=1;x=y=0}else{snap();s=2.5}zm.style.transition="transform .2s";apply();setTimeout(()=>zm.style.transition="",220)}
+        else{lastTap=t;tapT=setTimeout(close,300)}}}
+    if(pts.size===0)start=null};
+  stage.addEventListener("pointerup",up);stage.addEventListener("pointercancel",up);
+  stage.addEventListener("wheel",e=>{e.preventDefault();if(e.ctrlKey||s>1){s=Math.min(8,Math.max(1,s*(e.deltaY<0?1.2:1/1.2)));if(s===1)x=y=0;apply()}else{show(idx+(e.deltaY>0?1:-1));clearTimeout(tapT);tapT=setTimeout(snap,250)}},{passive:false});
+  addEventListener("keydown",function k(e){if(!v.isConnected){removeEventListener("keydown",k);return}if(e.key==="ArrowRight"){show(idx+1)}if(e.key==="ArrowLeft"){show(idx-1)}});
+}
+
+/* anciens tiroirs 3D raccordés (v1.3) : on peut encore les voir et les supprimer */
 // 4) vue en relief : le tiroir s'incline avec le téléphone ; deux doigts = zoom ; toucher une zone = la photo d'origine, nette
 async function mosView(id){
   const p=await phGet(id);if(!p||!p.mos)return;const parts=p.mos.parts||[];
@@ -1644,7 +1677,7 @@ async function mosView(id){
 async function tirDel(mid){const ids=PH.filter(p=>p.id===mid||p.part===mid).map(p=>p.id);
   await idbDo("readwrite",s=>{ids.forEach(i=>s.delete(i))});
   ids.forEach(i=>["o","p"].forEach(k=>{const u=phUrl.get(i+":"+k);if(u)URL.revokeObjectURL(u);phUrl.delete(i+":"+k)}));
-  const f=PH.find(p=>p.id===mid)?.floor;PH=PH.filter(p=>!ids.includes(p.id));log("photo","Tiroir 3D supprimé",`Étage ${f}`);save();render()}
+  const f=PH.find(p=>p.id===mid)?.floor;PH=PH.filter(p=>!ids.includes(p.id));log("photo","Tiroir supprimé",`Étage ${f}`);save();render()}
 
 const toData=s=>({articles:s.arts,compteurs:s.uses,journal:s.journal,parametres:s.params,prochainId:s.next});
 /* ---------- 💾 sauvegarde Drive commune (bloc SAUVEGARDE ATELIER v2), paramètres compris ---------- */
