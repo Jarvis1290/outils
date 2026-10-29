@@ -297,8 +297,6 @@ body.t-tiles .app{max-width:900px}
 #kxSec h2 small{flex:1;min-width:0}
 .kxsort{flex:none}
 .ccount{display:none}
-.kx.open{grid-auto-rows:auto}
-.kx.open .tr{min-height:58px}
 .kxsort button{font-size:11.5px;padding:4px 10px}
 /* suggestion de plateau */
 .sgs,.sgrow{display:flex;gap:6px;flex-wrap:wrap;align-items:stretch}
@@ -431,6 +429,34 @@ body.kbopen .toast{bottom:auto;top:calc(16px + env(safe-area-inset-top,0px))}
 .cl li.eda.on{outline:2px solid var(--acc)}
 .cl .cform{background:var(--card);border:1px solid var(--acc);border-radius:12px;padding:10px}
 .cadd{align-self:flex-start}
+/* v1.5 : numéro centré, fenêtre d'étage centrée, # étiquettes, thèmes, remplissage */
+.tr{justify-content:flex-end}
+.tr{container-type:size}
+.tr .n{position:absolute;inset:9px 0 10px;display:grid;place-items:center;place-content:center;pointer-events:none}
+.tr .n b{font-size:clamp(13px,min(60cqh,42cqw),46px);letter-spacing:-.03em}
+@container (max-height:44px){.tr .n{inset:3px auto auto 11px;place-content:start}.tr .n b{font-size:13px}}
+.tr .fil{position:absolute;left:3px;top:4px;bottom:13px;width:4px;border-radius:2px;background:var(--card-2);overflow:hidden}
+.tr .fil::after{content:"";position:absolute;left:0;right:0;bottom:0;height:var(--p);background:var(--fc)}
+.fpm{position:fixed;left:0;right:0;top:0;bottom:var(--kbh,0px);z-index:45;background:rgba(8,10,14,.6);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:16px;animation:fpIn .16s ease}
+.fpm>.fp{width:100%;max-width:560px;min-width:0;max-height:min(84vh,100%);overflow:auto;overscroll-behavior:contain;box-shadow:0 24px 70px rgba(0,0,0,.65);animation:fpPop .2s cubic-bezier(.2,.9,.3,1.2)}
+.fpm .ph.tap{cursor:pointer}
+.fpm .ph .big{font:800 30px/1 var(--f-mono);color:var(--acc-hi);margin-right:4px}
+body.fpon{overflow:hidden}
+@keyframes fpIn{from{opacity:0}}
+@keyframes fpPop{from{transform:scale(.92);opacity:0}}
+.fill{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.fill>span{font-size:12px;font-weight:700;color:var(--fg-3);margin-right:2px}
+.fill button{border:1px solid var(--line);background:var(--card-2);color:var(--fg);border-radius:9px;padding:6px 9px;font:700 12px var(--f-mono);cursor:pointer}
+.fill button[aria-pressed="true"]{background:var(--fc);border-color:var(--fc);color:#111}
+.fill .gauge{flex:1;min-width:90px;height:10px;border-radius:5px;background:var(--card-2);overflow:hidden}
+.fill .gauge i{display:block;height:100%;width:var(--p);background:var(--fc);border-radius:5px}
+.fill em{font:700 12px var(--f-mono);font-style:normal;color:var(--fg-2)}
+.htg{display:inline-block;font-size:11px;font-weight:700;color:var(--acc-hi);background:var(--acc-soft);border-radius:6px;padding:1px 6px;margin-left:5px;cursor:pointer}
+.htg:active{transform:scale(.94)}
+.cth{flex:none;align-self:center;font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--fg-3);padding:0 2px 0 8px;white-space:nowrap}
+.cth:first-of-type{padding-left:2px}
+.tgs{display:flex;gap:5px;flex-wrap:wrap;margin-top:-4px}
+.tgs button{border:1px dashed var(--acc);background:var(--acc-soft);color:var(--acc-hi);border-radius:8px;padding:4px 8px;font-size:12px;font-weight:700;cursor:pointer}
 </style>
 </head>
 <body>
@@ -479,7 +505,7 @@ body.kbopen .toast{bottom:auto;top:calc(16px + env(safe-area-inset-top,0px))}
   </section>
 
   <section id="kxSec" hidden>
-    <h2>Les 60 plateaux <small id="kxHint">#1 = le plus utilisé · un clic ouvre, un clic ferme</small><span class="seg3 kxsort" id="kxSort"><button type="button" data-act="tri" data-v="etage">Étage</button><button type="button" data-act="tri" data-v="rang">Rang</button></span></h2>
+    <h2>Les 60 plateaux <small id="kxHint">#1 = le plus utilisé · un clic ouvre, un clic ferme</small><span class="seg3 kxsort" id="kxSort"><button type="button" data-act="tri" data-v="etage">Étage</button><button type="button" data-act="tri" data-v="rang">Rang</button><button type="button" data-act="tri" data-v="place" title="Les tiroirs les plus vides d'abord">Place</button></span></h2>
     <div class="kx" id="kx"></div>
     <div class="legend" id="legend"></div>
   </section>
@@ -694,7 +720,7 @@ const Sauvegarde = (() => {
 const CATS=[[1, "Divers", "#db0fca"], [2, "Stock de Fraise", "#DDD9C3"], [4, "Tournage", "#DBEEF4"], [6, "Taraud & Alésoirs", "#E6E0EC"], [10, "Outils rotatifs", "#B7DEE8"], [13, "VIS/RONDELLES Inox", "#00B0F0"], [14, "VIS/RONDELLES Acier", "#58B600"], [15, "Visseries (bois/Torx/etc…)", "#FFFF00"], [99, "Fraiseuses", "#0C4DE4"], [100, "Consommable de montage", "#9F0EE1"], [101, "Machine à Batterie", "#09DC2C"], [102, "Machine 220V", "#3A8830"], [103, "Levage", "#08f7e7"], [105, "Pneumatique", "#3EB3D0"], [106, "Percages/Foret", "#8662ea"], [107, "Cliquets", "#ff0080"], [108, "Outils à mains", "#00FA79"], [109, "Metrologie d'atelier", "#E4F21C"]];
 const ARTS=[[119, "Laboratoire", 1, 1], [415, "M6", 13, 39], [416, "M6", 14, 49], [417, "Loupe", 1, 32], [418, "Fraises Inox", 2, 2], [419, "Fraises à Rayon", 2, 2], [420, "Fraise en \"T\"", 2, 2], [421, "Fraises Aluminium", 2, 3], [422, "Chargeur Batteries", 102, 24], [423, "M5", 14, 48], [424, "Matériel de Tournage", 4, 14], [425, "Plaquettes", 4, 6], [426, "M10", 14, 51], [427, "M12", 14, 52], [428, "M14", 14, 52], [429, "M16", 14, 28], [430, "M24", 14, 28], [431, "M8", 14, 50], [433, "Rondelles M8", 14, 53], [434, "M4", 14, 47], [435, "M3", 14, 46], [436, "M1 à M2.5", 14, 45], [437, "Plateau magnétique", 99, 15], [438, "Matériel fraiseuses", 99, 15], [439, "Equerre de fraisage", 99, 36], [440, "M5", 13, 37], [441, "M8", 13, 40], [442, "M10", 13, 41], [443, "M4", 13, 38], [444, "M4 Poulets", 13, 38], [445, "Péteuse", 105, 11], [446, "Outils pneumatiques", 105, 11], [447, "Reserve scotch", 100, 25], [448, "DMU 50", 99, 25], [449, "M12", 13, 42], [450, "M14", 13, 42], [451, "Fils ressort Inox", 13, 42], [452, "Billes INOX", 13, 42], [453, "Goupilles Inox", 100, 42], [454, "Ressorts Inox", 100, 42], [455, "M2 à M3", 13, 29], [456, "NEF 400", 4, 54], [457, "Tasseau FP4", 99, 54], [458, "Dremel® 12V", 101, 20], [459, "Dremel 220V😂", 102, 20], [460, "Thermogun", 102, 20], [462, "Crayon électrique", 102, 20], [463, "Fer à souder", 102, 24], [464, "Rivet pop", 100, 33], [465, "Tubtara", 100, 33], [466, "Tarauds M2 à M10", 6, 21], [467, "Queues de cochon🐷", 6, 21], [468, "Scotch doubles face", 100, 56], [469, "Mini-Grip", 100, 56], [470, "Rubalise", 100, 56], [471, "Elastique", 100, 56], [472, "Clinquant", 100, 58], [473, "Cuivre Béryllium", 100, 58], [474, "O-ring", 100, 30], [475, "Brides métalliques", 100, 30], [476, "Joints", 100, 30], [477, "Span-Set® ", 103, 27], [478, "Torx", 15, 44], [479, "Vis à bois", 15, 44], [480, "Clous", 15, 44], [482, "M7", 15, 26], [483, "Goupilles Acier", 15, 55], [484, "Rivets", 15, 55], [485, "Bouterolle", 15, 55], [486, "cordes", 100, 56], [487, "Ficelles", 100, 56], [488, "Visseuses Makita", 101, 13], [489, "Meuleuse", 101, 13], [490, "Scie sabre", 102, 13], [491, "Perforateur + Aspir.", 101, 13], [492, "Sauteuse", 101, 13], [493, "Talkie-Walkie", 101, 24], [494, "Vis Amercaines", 15, 26], [495, "Spécial", 15, 26], [496, "Niveau à bulle", 109, 32], [498, "Mètre à ruban", 109, 32], [499, "Chevillière", 109, 32], [500, "Fil à plomb", 109, 32], [501, "Règle 1000mm", 109, 32], [502, "Règle 1500mm", 109, 32], [503, "Camera-Thermo", 109, 32], [504, "Mèches laiton", 106, 23], [505, "Mèche longue", 106, 23], [506, "Métrique fin", 6, 17], [507, "Tarauds spéciaux", 6, 17], [508, "Tarauds", 6, 17], [509, "Alesoirs:...", 6, 22], [510, "Fraise pivots/Stock", 106, 22], [511, "Mèches à centrer", 106, 22], [512, "Vérins", 103, 27], [513, "Anneau de levage", 103, 27], [514, "Patins", 103, 27], [515, "Cordes", 103, 27], [516, "Levage palonnier", 103, 16], [517, "Patins Vert", 103, 16], [518, "Grandes sangles Span", 103, 16], [519, "Mèche NC", 106, 5], [520, "Courte de Ø1 à Ø10", 106, 5], [521, "Long de Ø1 à Ø13", 106, 4], [522, "Cles à Cliquets", 107, 7], [523, " Cles à œil", 107, 7], [524, "Cles à fourche", 107, 7], [525, "Cles dynamométriques", 107, 8], [526, "Douilles 3/4", 107, 8], [527, "Soldes de Vis", 15, 57], [528, "Rondelles ressort", 15, 57], [529, "Bellevilles", 15, 57], [530, "Seeger", 15, 57], [531, "Insert métrique", 15, 57], [532, "Pistolet silicone", 1, 31], [534, "Lève panneau", 103, 31], [535, "Fraise scie", 2, 18], [536, "Fraise Modulaire", 2, 18], [537, "Fraise Rayon", 2, 18], [538, "Fraise de forme", 2, 18], [539, "Fraise surfacer", 2, 18], [540, "Fraise Bricolage", 2, 60], [541, "Fraise scies", 2, 10], [542, "Helicoil", 100, 24], [543, "Brides électro", 100, 24], [544, "Camera Snake ", 109, 32], [545, "Seringue 500ml", 1, 59], [546, "Visseuse Placo DEWAL", 101, 13], [547, "Fein", 1, 12], [548, "Agrafeuse", 1, 12], [549, " Grignoteuse Bosch®", 1, 12], [550, "Emporte-pièces ", 1, 12], [551, "Chalumeau", 1, 12], [552, "Coupe sangle", 1, 34], [553, "Extracteur", 1, 34], [554, "Sandow", 1, 34], [555, "Arraches à billes", 1, 34], [556, "Fraise à étage", 2, 10], [557, "Fraise cloche", 2, 10], [558, "Fraise 3 tailles", 2, 10], [559, "Rodoirs", 1, 10], [560, "Tournevis", 108, 19], [561, "Clés à fourche", 108, 19], [562, "Imbus", 108, 19], [563, "Antigel", 1, 19], [564, "Pierres&limes💎", 108, 19], [565, "Ciseaux", 1, 19], [566, "Pince Monseigneur", 108, 59], [567, "Talurit", 108, 59], [568, "Pince pour cables", 108, 59], [569, "Ventouse de levage", 1, 59], [570, "Grande Hilti®", 102, 35], [571, "Hilti:accesoires", 102, 35], [572, "Tampons perceuse Hil", 102, 43], [573, " Perforateur Hitachi", 102, 9], [574, "Perceuses 220V", 102, 9], [575, "Mèche à Béton", 1, 9], [577, "Perceuse angulaire", 102, 9], [578, "Tampon chimique", 1, 9], [579, "Tête à aléser", 99, 15], [580, "Brut posage", 99, 36], [581, "Tire-fils", 1, 32], [582, "Makita", 102, 9], [583, "Multimètres ", 109, 32], [584, "Mèche pour pneu", 1, 16], [585, "Marteau pneumatique ", 105, 11], [586, "Meuleuse à air", 105, 11], [587, "Pistolet AVEX", 1, 11], [588, "Dynafile", 1, 11], [589, "Edalco", 4, 14], [590, "Pistolet SIKA", 105, 31], [591, "Scotch aluminium ", 100, 56], [592, "Niveau laser", 109, 32], [593, "Mètre laser", 109, 32], [594, "Taraud UNC", 6, 17], [596, "Micro-foret Ø0 à Ø1", 106, 5], [597, "etau", 99, 25], [598, "Mors Gressel Haut", 99, 25], [599, "Mors schunk", 99, 25], [600, "Mors Lang", 99, 25], [601, "Cliquets americains", 107, 31], [602, "Tournevis à choc", 108, 8], [603, "Colles", 100, 34], [604, "loctite", 100, 34]];
 
-const APP_VERSION="1.4",LS="kardex-v1",EXPORT_DAY="2026-10-29";
+const APP_VERSION="1.5",LS="kardex-v1",EXPORT_DAY="2026-10-29";
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const nc=ch=>ch.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
@@ -707,19 +733,37 @@ const IC_CHEV='<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="current
 
 /* ---------- données ---------- */
 const cat={};CATS.forEach(([id,name,color])=>cat[id]={id,name:name.trim(),color});
+// catégories rangées par thème, puis de A à Z dans chaque thème (les noms ne changent pas)
+const THEMES=[["⚙️","Usinage",[99,10,106,2,6,4]],["🔩","Visserie",[14,13,15]],["🔧","Outillage & machines",[107,102,101,109,108,105]],["📦","Atelier & divers",[100,1,103]]];
+const THEME_GROUPS=(()=>{const seen=new Set(),g=THEMES.map(([e,n,ids])=>({e,n,ids:ids.filter(id=>cat[id]&&!seen.has(id)&&seen.add(id))}));
+  const rest=CATS.map(([id])=>id).filter(id=>!seen.has(id));if(rest.length)g[g.length-1].ids.push(...rest);
+  g.forEach(x=>x.ids.sort((a,b)=>cat[a].name.localeCompare(cat[b].name,"fr",{sensitivity:"base"})));return g})();
+const CAT_ORD=THEME_GROUPS.flatMap(g=>g.ids);
+// # étiquettes : plusieurs par article (remplacent la sous-catégorie unique)
+const tg=a=>a.tags||[];
+const tagsParse=v=>{const o=[],k=new Set();String(v||"").split("#").forEach(x=>{x=x.trim().replace(/\s+/g," ").slice(0,30);const n=norm(x);if(n&&!k.has(n)){k.add(n);o.push(x)}});return o.slice(0,8)};
+const tagsStr=l=>l.map(t=>"#"+t).join(" ");
+const tagHas=(a,t)=>tg(a).some(x=>norm(x)===norm(t));
+function migrate(s){Object.values(s.arts||{}).forEach(a=>{if(!Array.isArray(a.tags))a.tags=a.sub?[a.sub]:[];delete a.sub});if(!s.fill||typeof s.fill!=="object")s.fill={};return s}
+// remplissage du tiroir : 0, 25, 50, 75 ou 100 %
+const FILL=[0,25,50,75,100],FILL_LAB={0:"Vide",25:"25 %",50:"50 %",75:"75 %",100:"Plein"};
+const fillOf=f=>st.fill&&st.fill[f]!=null?st.fill[f]:null;
+const fillCol=v=>v>=100?"#F0605D":v>=75?"#F59A3C":v>=50?"#F5C842":v>=25?"#9BD45A":"#4CC38A";
 const PARAMS0={tolerante:true,nbTop:6,compter:true,relock:15,pin:"",emo:"",tri:"etage",clavier:true};
 function fresh(){
-  const a={};ARTS.forEach(([id,name,c,floor])=>a[id]={id,name,c,floor,sub:"",added:EXPORT_DAY+"T12:00:00",mod:null,hist:[{t:EXPORT_DAY+"T12:00:00",k:"import",w:"Importé du Kardex",d:`Étage ${floor} · ${cat[c].name}`}]});
-  return {arts:a,uses:{floors:{},arts:{}},journal:[],next:100000,undo:null,params:{...PARAMS0}};
+  const a={};ARTS.forEach(([id,name,c,floor])=>a[id]={id,name,c,floor,tags:[],added:EXPORT_DAY+"T12:00:00",mod:null,hist:[{t:EXPORT_DAY+"T12:00:00",k:"import",w:"Importé du Kardex",d:`Étage ${floor} · ${cat[c].name}`}]});
+  return {arts:a,uses:{floors:{},arts:{}},journal:[],next:100000,undo:null,fill:{},params:{...PARAMS0}};
 }
 let st=fresh();
 try{const s=JSON.parse(localStorage.getItem(LS)||"null");if(s&&s.arts)st=s}catch(e){}
-st.params={...PARAMS0,...(st.params||{})};
+st.params={...PARAMS0,...(st.params||{})};migrate(st);
 const P=()=>st.params;
 const save=()=>{VOC=null;try{localStorage.setItem(LS,JSON.stringify(st))}catch(e){}};
 const all=()=>Object.values(st.arts);
 const byFloor=f=>all().filter(a=>a.floor===f);
-const subsOf=c=>[...new Set(all().filter(a=>a.c===c&&a.sub).map(a=>a.sub))].sort((x,y)=>x.localeCompare(y,"fr"));
+// les # utilisés (d'une catégorie, ou tous), les plus fréquents d'abord
+const subsOf=c=>{const m=new Map();all().forEach(a=>{if(c==null||a.c===c)tg(a).forEach(t=>{const n=norm(t),o=m.get(n)||{t,k:0};o.k++;m.set(n,o)})});
+  return [...m.values()].sort((x,y)=>y.k-x.k||x.t.localeCompare(y.t,"fr")).map(o=>o.t)};
 const fUse=f=>st.uses.floors[f]||0;
 
 /* ---------- recherche intelligente ---------- */
@@ -749,7 +793,7 @@ function search(raw){
   for(const a of all()){
     if(floor!==null&&a.floor!==floor)continue;
     if(!toks.length){res.push({a,s:5,fz:false});continue}
-    const hn=words(a.name),ho=words(cat[a.c].name+" "+a.sub);let s=0,ok=true,fz=false;
+    const hn=words(a.name),ho=words(cat[a.c].name+" "+tg(a).join(" "));let s=0,ok=true,fz=false;
     for(const t of toks){const vn=wordScore(t,hn),vo=wordScore(t,ho);const v=Math.max(vn?vn+.6:0,vo);if(!v){ok=false;break}if(Math.max(vn,vo)===1)fz=true;s+=v}
     if(ok)res.push({a,s,fz});
   }
@@ -772,21 +816,23 @@ let fcat=null,fsub=null,lots=false,openA=null,editA=null,openF=null,panel=null;c
 
 function chips(){
   $("chips").innerHTML=`<button class="chip" type="button" aria-pressed="${fcat===null}" data-c="">Tout</button>`+
-    CATS.map(([id])=>{const c=cat[id];return `<button class="chip" type="button" style="--c:${c.color}" aria-pressed="${fcat===id}" data-c="${id}"><i></i>${esc(c.name)}</button>`}).join("");
-  $("subchips").hidden=fcat===null;
-  if(fcat!==null){const c=cat[fcat].color,subs=subsOf(fcat);
-    $("subchips").innerHTML=`<button class="chip" type="button" style="--c:${c}" aria-pressed="${fsub===null}" data-s="">Toutes</button>`+
-      subs.map(s=>`<button class="chip" type="button" style="--c:${c}" aria-pressed="${fsub===s}" data-s="${esc(s)}">${esc(s)}</button>`).join("")+
-      `<button class="chip" type="button" style="--c:${c}" aria-pressed="${fsub===""}" data-s="__none">Sans sous-catégorie</button>`}
+    THEME_GROUPS.map(g=>`<span class="cth">${g.e} ${esc(g.n)}</span>`+g.ids.map(id=>{const c=cat[id];return `<button class="chip" type="button" style="--c:${c.color}" aria-pressed="${fcat===id}" data-c="${id}"><i></i>${esc(c.name)}</button>`}).join("")).join("");
+  $("subchips").hidden=fcat===null&&fsub===null;
+  if(fcat!==null||fsub!==null){const c=fcat!==null?cat[fcat].color:"var(--acc)",subs=subsOf(fcat);
+    if(fsub&&!subs.some(t=>norm(t)===norm(fsub)))subs.unshift(fsub);
+    $("subchips").innerHTML=`<button class="chip" type="button" style="--c:${c}" aria-pressed="${fsub===null}" data-s="">Tous les #</button>`+
+      subs.map(s=>`<button class="chip" type="button" style="--c:${c}" aria-pressed="${fsub!==null&&fsub!==""&&norm(fsub)===norm(s)}" data-s="${esc(s)}">#${esc(s)}</button>`).join("")+
+      `<button class="chip" type="button" style="--c:${c}" aria-pressed="${fsub===""}" data-s="__none">Sans #</button>`}
 }
 $("chips").onclick=e=>{const b=e.target.closest(".chip");if(!b)return;fcat=b.dataset.c?+b.dataset.c:null;fsub=null;chips();render()};
 $("subchips").onclick=e=>{const b=e.target.closest(".chip");if(!b)return;const s=b.dataset.s;fsub=s===""?null:s==="__none"?"":s;chips();render()};
 
+const tagHtml=a=>tg(a).map(t=>`<span class="htg" data-act="tagf" data-t="${esc(t)}" title="Voir les articles #${esc(t)}">#${esc(t)}</span>`).join("");
 function itemHtml(a,toks=[]){
   const c=cat[a.c],open=!lots&&openA===a.id,u=st.uses.arts[a.id]||0;
   let h=`<div class="item${open?" open":""}${sel.has(a.id)?" sel":""}" style="--c:${c.color}" data-a="${a.id}">
     <button class="row" type="button" data-act="art" aria-expanded="${open}">${lots?'<span class="ck"></span>':""}<span class="fl"><small>étage</small>${a.floor}</span>
-    <span class="t"><b>${hl(a.name.trim(),toks)}</b><span class="cat"><i></i>${esc(c.name)}${a.sub?` <span class="s">› ${esc(a.sub)}</span>`:""}</span></span>${fUse(a.floor)?`<span class="hot" title="Étage utilisé ${fUse(a.floor)} fois">🔥${fUse(a.floor)}</span>`:""}${lots?"":IC_CHEV}</button>`;
+    <span class="t"><b>${hl(a.name.trim(),toks)}</b><span class="cat"><i></i>${esc(c.name)}${tagHtml(a)}</span></span>${fUse(a.floor)?`<span class="hot" title="Étage utilisé ${fUse(a.floor)} fois">🔥${fUse(a.floor)}</span>`:""}${lots?"":IC_CHEV}</button>`;
   if(open){
     const others=byFloor(a.floor).filter(x=>x.id!==a.id);
     h+=`<div class="det">
@@ -800,32 +846,55 @@ function itemHtml(a,toks=[]){
   return h+"</div>";
 }
 function histHtml(l){return l.length?`<ul class="hist">${l.map(h=>`<li><time>${fdt(h.t)}</time><span class="w"><span class="tag">${esc(h.k)}</span>${esc(h.w)}</span><span class="d">${esc(h.d||"")}</span></li>`).join("")}</ul>`:'<p class="note">Rien pour l’instant.</p>'}
-const catOptions=s=>CATS.map(([id])=>`<option value="${id}"${id===s?" selected":""}>${esc(cat[id].name)}</option>`).join("");
-const subList=c=>`<datalist id="dl-sub">${subsOf(c).map(s=>`<option value="${esc(s)}">`).join("")}</datalist>`;
+const catOptions=s=>THEME_GROUPS.map(g=>`<optgroup label="${g.e} ${esc(g.n)}">${g.ids.map(id=>`<option value="${id}"${id===s?" selected":""}>${esc(cat[id].name)}</option>`).join("")}</optgroup>`).join("");
+// # proposés sous le champ (ceux de la catégorie d'abord), un toucher les ajoute
+const tagCtx=v=>{const end=/\s$/.test(v)||!v.trim(),m=v.match(/#([^#]*)$/);return {part:end||!m?"":norm(m[1]),done:tagsParse(end||!m?v:v.slice(0,m.index)).map(norm)}};
+const tagCands=(v,c,n)=>{const {part,done}=tagCtx(v);return [...new Set([...(c!=null?subsOf(c):[]),...subsOf(null)])].filter(t=>!done.includes(norm(t))&&(!part||(norm(t).startsWith(part)&&norm(t)!==part))).slice(0,n)};
+function tagRow(inp,row,c){const i=$(inp),el=$(row);if(!i||!el)return;
+  el.innerHTML=tagCands(i.value,c,8).map(t=>`<button type="button" data-act="tagadd" data-in="${inp}" data-t="${esc(t)}">#${esc(t)}</button>`).join("")}
+function tagPut(i,t){const v=i.value,end=/\s$/.test(v),m=v.match(/#([^#]*)$/);let base=v;
+  if(!end&&m&&norm(t).startsWith(norm(m[1])))base=v.slice(0,m.index);
+  else if(!end&&!m&&v.trim()&&norm(t).startsWith(norm(v)))base="";
+  if(tagsParse(base).some(x=>norm(x)===norm(t)))return;
+  i.value=(base.trim()?base.trim()+" ":"")+"#"+t+" ";i.dispatchEvent(new Event("input",{bubbles:true}))}
 function formHtml(a){
-  const isNew=!a;a=a||{name:addPre?addPre.name:"",floor:addPre?addPre.f:openF?openF.f:1,c:fcat??1,sub:""};addPre=null;
+  const isNew=!a;a=a||{name:addPre?addPre.name:"",floor:addPre?addPre.f:openF?openF.f:1,c:fcat??1,tags:fsub?[fsub]:[]};addPre=null;
   return `<form class="form" id="fEdit" data-new="${isNew?1:0}">
     <label for="eName">Nom<input id="eName" required maxlength="60" value="${esc(a.name)}" placeholder="ex. Vis M6 inox"></label>
     <div class="two"><label for="eFloor">Étage<input id="eFloor" type="number" inputmode="numeric" min="1" max="60" required value="${a.floor}"></label>
     <label for="eCat">Catégorie<select id="eCat">${catOptions(a.c)}</select></label></div>
     <div class="sgrow" id="eSg"></div>
-    <label for="eSub">Sous-catégorie (facultatif, pour affiner)<input id="eSub" list="dl-sub" maxlength="40" value="${esc(a.sub)}" placeholder="ex. Tête fraisée"></label>${subList(a.c)}
+    <label for="eSub"># Étiquettes (facultatif, plusieurs possibles)<input id="eSub" maxlength="200" autocomplete="off" value="${esc(tg(a).length?tagsStr(tg(a))+" ":"")}" placeholder="#Tête fraisée #M6"></label><div class="tgs" id="eTags"></div>
     <div class="acts"><button class="btn pri grow" type="submit">${isNew?"Ajouter":"Enregistrer"}</button>${isNew?"":'<button class="btn bad" type="button" data-act="del">Supprimer</button>'}</div>
     <p class="msg" id="eMsg"></p></form>`;
 }
 
-function floorPanel(f){
+function fillHtml(f){const v=fillOf(f);
+  if(ED)return `<div class="fill"><span>Remplissage</span>${FILL.map(x=>`<button type="button" data-act="fill" data-f="${f}" data-v="${x}" aria-pressed="${v===x}" style="--fc:${fillCol(x)}">${FILL_LAB[x]}</button>`).join("")}</div>`;
+  return `<div class="fill"><span>Remplissage</span>${v==null?'<em>pas encore noté</em>':`<span class="gauge" style="--p:${Math.max(v,3)}%;--fc:${fillCol(v)}"><i></i></span><em>${FILL_LAB[v]}</em>`}</div>`}
+function floorPanel(f,modal){
   const items=byFloor(f);
-  return `<div class="panel fp"><div class="ph"><b>Étage ${f}</b><span>${items.length} article${items.length>1?"s":""} · ouvert ${fUse(f)} fois</span></div>
+  return `<div class="panel fp">${modal?`<div class="ph tap" data-act="floor" data-w="kx" data-f="${f}" role="button" aria-label="Fermer l'étage ${f}"><b><span class="big">${f}</span>Étage</b>`:`<div class="ph"><b>Étage ${f}</b>`}<span>${items.length} article${items.length>1?"s":""} · ouvert ${fUse(f)} fois${modal?" · toucher ici ou à côté pour fermer":""}</span></div>
+    ${fillHtml(f)}
     ${phStrip(f)}
     <div class="list">${items.map(a=>itemHtml(a)).join("")||'<p class="note">Plateau vide.</p>'}</div>
     ${items.length&&ED?`<div class="acts"><button class="btn grow" type="button" data-act="pickfloor" data-f="${f}">☑ Sélectionner tout l'étage (lot)</button></div>`:""}</div>`;
 }
 
+// fenêtre de l'étage ouverte depuis les tuiles : centrée sur l'écran ; un toucher sur la tuile l'ouvre, à côté ou sur son titre la referme
+function fpModal(){let m=$("fpm");const on=tab==="tiles"&&!lots&&openF&&openF.where==="kx";
+  if(!on){if(m)m.remove();document.body.classList.remove("fpon");return}
+  const keep=m&&m.dataset.f===String(openF.f)?m.querySelector(".fp")?.scrollTop||0:0;
+  if(!m){m=document.createElement("div");m.id="fpm";m.className="fpm";document.body.appendChild(m);
+    m.addEventListener("click",e=>{if(e.target===m){openF=null;openA=null;editA=null;render()}})}
+  m.dataset.f=openF.f;m.innerHTML=floorPanel(openF.f,true);document.body.classList.add("fpon");
+  const p=m.querySelector(".fp");if(p)p.scrollTop=keep;
+}
+
 /* ---------- rendu ---------- */
 function render(){
   const raw=$("q").value,q=norm(raw);$("clr").hidden=!raw;
-  const active=!!q||fcat!==null||lots;
+  const active=!!q||fcat!==null||fsub!==null||lots;
   $("cnt").textContent=`${all().length} articles`;
   $("bandeau").innerHTML=Sauvegarde.bandeau();
   renderPanel();
@@ -839,7 +908,7 @@ function render(){
   if(tab==="photos"){$("pg").innerHTML=carHtml();carSetup()}else $("pg").innerHTML="";
   if(active&&S){
     let {res,fuzzy,toks}=q?search(raw):{res:all().map(a=>({a,s:0})),fuzzy:false,toks:[]};
-    res=res.filter(({a})=>(fcat===null||a.c===fcat)&&(fsub===null||a.sub===fsub));
+    res=res.filter(({a})=>(fcat===null||a.c===fcat)&&(fsub===null||(fsub===""?!tg(a).length:tagHas(a,fsub))));
     // les étages les plus utilisés d'abord, puis la pertinence
     res.sort((x,y)=>fUse(y.a.floor)-fUse(x.a.floor)||y.s-x.s||(st.uses.arts[y.a.id]||0)-(st.uses.arts[x.a.id]||0)||x.a.floor-y.a.floor);
     $("resTitle").textContent=res.length?`${res.length} article${res.length>1?"s":""} · étages les plus utilisés d'abord`:"Rien trouvé";
@@ -848,7 +917,7 @@ function render(){
     $("res").innerHTML=res.length?res.map(({a})=>itemHtml(a,toks)).join(""):`<p class="note">Aucun article pour « ${esc(raw.trim())} ». Essaie un bout du nom ou un numéro d'étage, ou ajoute-le avec +.</p>`;
   }
   $("sgSec").hidden=!S||lots;
-  if(S)renderTop();if(S&&!lots)renderSg();if(tab==="tiles")renderKx();if($("eSg"))sgForm();
+  if(S)renderTop();if(S&&!lots)renderSg();if(tab==="tiles")renderKx();else fpModal();if($("eSg"))sgForm();if($("eTags"))tagRow("eSub","eTags",+$("eCat").value);
   fitScreen();
   $("nSel").textContent=`${sel.size} sélectionné${sel.size>1?"s":""}`;
   $("lotFloor").disabled=$("lotCat").disabled=!sel.size;
@@ -863,7 +932,7 @@ function fitScreen(){requestAnimationFrame(()=>{
   const tb=$("tabs").getBoundingClientRect().height,el=tab==="tiles"?$("kx"):tab==="photos"?$("car"):null;if(!el)return;
   const top=el.getBoundingClientRect().top+scrollY;
   if(tab==="tiles"){const land=innerWidth>innerHeight;el.style.setProperty("--cols",land?10:6);
-    el.style.setProperty("--kxH",openF&&openF.where==="kx"?"auto":Math.max(170,innerHeight-top-tb-10)+"px")}
+    el.style.setProperty("--kxH",Math.max(170,innerHeight-top-tb-10)+"px")}
   else el.style.setProperty("--carH",Math.max(200,innerHeight-top-tb-10)+"px");
 })}
 addEventListener("resize",()=>{if(tab!=="search")fitScreen()});
@@ -876,18 +945,17 @@ function renderTop(){
 }
 function renderKx(){
   const cols=innerWidth>innerHeight?10:6;let h="";
-  const order=P().tri==="rang"?byRank():[...Array(60).keys()].map(i=>i+1);
-  const oi=openF&&openF.where==="kx"?order.indexOf(openF.f):-1,rowEnd=oi<0?-1:order[Math.min(59,Math.ceil((oi+1)/cols)*cols-1)];
+  const fl=[...Array(60).keys()].map(i=>i+1),fv=f=>fillOf(f)==null?999:fillOf(f);
+  const order=P().tri==="rang"?byRank():P().tri==="place"?fl.sort((a,b)=>fv(a)-fv(b)||a-b):fl;
   document.querySelectorAll("#kxSort [data-v]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===(P().tri||"etage")));
-  $("kx").classList.toggle("open",oi>=0);
   for(const f of order){
     const it=byFloor(f),n={};it.forEach(a=>n[a.c]=(n[a.c]||0)+1);
     const segs=Object.entries(n).sort((a,b)=>b[1]-a[1]).map(([c,k])=>`<i style="--c:${cat[c].color};--w:${k}" title="${esc(cat[c].name)} : ${k}"></i>`).join("");
     const pick=lots&&it.length&&it.every(a=>sel.has(a.id));
-    h+=`<button class="tr${it.length?"":" empty"}${fUse(f)?" used":""}${pick?" pick":""}" type="button" data-act="floor" data-w="kx" data-f="${f}" aria-expanded="${openF&&openF.where==="kx"&&openF.f===f}" aria-label="Étage ${f}, ${it.length} articles"><span class="rk${RANK[f]<=3?" t3":RANK[f]<=10?" t10":""}" title="Rang d'utilisation">#${RANK[f]}</span><span class="n"><b>${f}</b><span class="cnt">${it.length||""}</span></span><span class="seg">${segs}</span></button>`;
-    if(f===rowEnd)h+=floorPanel(openF.f);
+    h+=`<button class="tr${it.length?"":" empty"}${fUse(f)?" used":""}${pick?" pick":""}" type="button" data-act="floor" data-w="kx" data-f="${f}" aria-expanded="${openF&&openF.where==="kx"&&openF.f===f}" aria-label="Étage ${f}, ${it.length} articles${fillOf(f)!=null?", rempli à "+fillOf(f)+" %":""}">${fillOf(f)!=null?`<span class="fil" style="--p:${fillOf(f)}%;--fc:${fillCol(fillOf(f))}"></span>`:""}<span class="rk${RANK[f]<=3?" t3":RANK[f]<=10?" t10":""}" title="Rang d'utilisation">#${RANK[f]}</span><span class="n"><b>${f}</b><span class="cnt">${it.length||""}</span></span><span class="seg">${segs}</span></button>`;
   }
   $("kx").innerHTML=h;
+  fpModal();
   $("kxHint").textContent=lots?"un clic = tout le plateau dans le lot":"#1 = le plus utilisé · un clic ouvre, un clic ferme";
   const usedCats=[...new Set(all().map(a=>a.c))];
   $("legend").innerHTML=usedCats.map(c=>`<span style="--c:${cat[c].color}"><i></i>${esc(cat[c].name)}</span>`).join("");
@@ -928,18 +996,18 @@ function renderSettings(el){
 }
 
 /* ---------- modifs : sauvegarde avant, journal, annuler ---------- */
-function diff(a,n){const r=[];if(a.name!==n.name)r.push(`Nom : ${a.name.trim()} → ${n.name.trim()}`);if(a.floor!==n.floor)r.push(`Étage ${a.floor} → ${n.floor}`);if(a.c!==n.c)r.push(`${cat[a.c].name} → ${cat[n.c].name}`);if((a.sub||"")!==(n.sub||""))r.push(`Sous-cat. : ${a.sub||"—"} → ${n.sub||"—"}`);return r}
+function diff(a,n){const r=[];if(a.name!==n.name)r.push(`Nom : ${a.name.trim()} → ${n.name.trim()}`);if(a.floor!==n.floor)r.push(`Étage ${a.floor} → ${n.floor}`);if(a.c!==n.c)r.push(`${cat[a.c].name} → ${cat[n.c].name}`);const ta=tagsStr(tg(a)),tb=tagsStr(tg(n));if(ta!==tb)r.push(`# : ${ta||"—"} → ${tb||"—"}`);return r}
 function touch(a,k,w,d){a.mod=now();a.hist.push({t:a.mod,k,w,d})}
 function log(k,w,d){st.journal.push({t:now(),k,w,d})}
 function snapshot(ids,label){st.undo={label,t:now(),items:ids.map(id=>JSON.parse(JSON.stringify(st.arts[id])))}}
-function undo(){if(!st.undo)return;const u=st.undo;u.items.forEach(x=>st.arts[x.id]=x);log("annul",`Annulé : ${u.label}`,`${u.items.length} article${u.items.length>1?"s":""} remis comme avant`);st.undo=null;save();render();toast("Annulé ↩")}
+function undo(){if(!st.undo)return;const u=st.undo;u.items.forEach(x=>st.arts[x.id]=x);migrate(st);log("annul",`Annulé : ${u.label}`,`${u.items.length} article${u.items.length>1?"s":""} remis comme avant`);st.undo=null;save();render();toast("Annulé ↩")}
 
 function submitEdit(form){
   const isNew=form.dataset.new==="1",a=isNew?null:st.arts[editA];
-  const n={name:$("eName").value,floor:Math.round(+$("eFloor").value),c:+$("eCat").value,sub:$("eSub").value.trim()};
+  const n={name:$("eName").value,floor:Math.round(+$("eFloor").value),c:+$("eCat").value,tags:tagsParse($("eSub").value)};
   if(!n.name.trim()){$("eMsg").textContent="Il faut un nom.";return}
   if(!(n.floor>=1&&n.floor<=60)){$("eMsg").textContent="L'étage va de 1 à 60.";return}
-  if(isNew){const id=st.next++,t=now();st.arts[id]={id,...n,added:t,mod:null,hist:[{t,k:"ajout",w:"Ajouté à la main",d:`Étage ${n.floor} · ${cat[n.c].name}${n.sub?" › "+n.sub:""}`}]};
+  if(isNew){const id=st.next++,t=now();st.arts[id]={id,...n,added:t,mod:null,hist:[{t,k:"ajout",w:"Ajouté à la main",d:`Étage ${n.floor} · ${cat[n.c].name}${n.tags.length?" "+tagsStr(n.tags):""}`}]};
     log("ajout",`${n.name.trim()} ajouté`,`Étage ${n.floor} · ${cat[n.c].name}`);save();panel=null;openA=id;render();toast("Article ajouté ✓");return}
   const ch=diff(a,n);editA=null;if(!ch.length){render();return}
   snapshot([a.id],`modif de ${a.name.trim()}`);Object.assign(a,n);touch(a,"modif","Modifié",ch.join(" · "));log("modif",`${a.name.trim()} modifié`,ch.join(" · "));save();render();toast("Enregistré ✓",4000,true);
@@ -956,19 +1024,21 @@ function renderLot(el,kind){
     <form class="form" id="fLot">
     ${kind==="floor"?`<label for="lFloor">Nouvel étage (1 à 60)<input id="lFloor" type="number" inputmode="numeric" min="1" max="60" required placeholder="ex. 12"></label>`:
      `<label for="lCat">Nouvelle catégorie<select id="lCat"><option value="">(garder la catégorie)</option>${catOptions(-1)}</select></label>
-      <label for="lSub">Sous-catégorie<input id="lSub" list="dl-sub" maxlength="40" placeholder="vide = aucune · ex. Tête fraisée"></label>${subList(items[0].c)}`}
+      <label for="lSub"># à ajouter (facultatif)<input id="lSub" maxlength="200" autocomplete="off" placeholder="#Tête fraisée #M6"></label><div class="tgs" id="lTags"></div>`}
     <h3>Aperçu</h3><div class="prev" id="lPrev"></div>
     <div class="acts"><button class="btn pri grow" type="submit" id="lGo" disabled>Confirmer</button></div>
     <p class="note">Une sauvegarde est faite avant ; tu peux annuler juste après.</p></form></div>`;
   if(keep){if(keep.f!=null&&$("lFloor"))$("lFloor").value=keep.f;if(keep.c!=null&&$("lCat"))$("lCat").value=keep.c;if(keep.s!=null&&$("lSub"))$("lSub").value=keep.s}
+  if($("lTags"))tagRow("lSub","lTags",$("lCat").value?+$("lCat").value:items[0].c);
   lotPreview();
 }
 function lotTarget(a){if(panel==="lotFloor"){const f=Math.round(+$("lFloor").value);return f>=1&&f<=60?{...a,floor:f}:null}
-  return {...a,c:$("lCat").value?+$("lCat").value:a.c,sub:$("lSub").value.trim()}}
+  const add=tagsParse($("lSub").value),tags=[...tg(a)];add.forEach(t=>{if(!tags.some(x=>norm(x)===norm(t)))tags.push(t)});
+  return {...a,c:$("lCat").value?+$("lCat").value:a.c,tags}}
 function lotPreview(){
   const items=[...sel].map(id=>st.arts[id]).filter(Boolean);let n=0;
   $("lPrev").innerHTML=items.map(a=>{const t=lotTarget(a);const d=t?diff(a,t):[];if(d.length)n++;
-    return `<div><span>${esc(a.name.trim())}</span><em>${!t?`étage ${a.floor}`:!d.length?"inchangé":panel==="lotFloor"?`${a.floor} → <b>${t.floor}</b>`:`${esc(cat[a.c].name)}${a.sub?" › "+esc(a.sub):""} → <b>${esc(cat[t.c].name)}${t.sub?" › "+esc(t.sub):""}</b>`}</em></div>`}).join("");
+    return `<div><span>${esc(a.name.trim())}</span><em>${!t?`étage ${a.floor}`:!d.length?"inchangé":panel==="lotFloor"?`${a.floor} → <b>${t.floor}</b>`:`${esc(cat[a.c].name)}${tg(a).length?" "+esc(tagsStr(tg(a))):""} → <b>${esc(cat[t.c].name)}${tg(t).length?" "+esc(tagsStr(tg(t))):""}</b>`}</em></div>`}).join("");
   $("lGo").disabled=!n;$("lGo").textContent=n?`Confirmer (${n} changement${n>1?"s":""})`:"Rien à changer";
 }
 function submitLot(){
@@ -976,9 +1046,9 @@ function submitLot(){
   const plan=[...sel].map(id=>st.arts[id]).filter(Boolean).map(a=>({a,t:lotTarget(a)})).filter(x=>x.t&&diff(x.a,x.t).length);
   if(!plan.length)return;
   snapshot(plan.map(x=>x.a.id),`lot de ${plan.length} (${kind==="floor"?"étage":"catégorie"})`);
-  plan.forEach(({a,t})=>{const d=diff(a,t).join(" · ");a.floor=t.floor;a.c=t.c;a.sub=t.sub;touch(a,"lot","Modifié par lot",d)});
-  const okN=plan.filter(({a,t})=>a.floor===t.floor&&a.c===t.c&&a.sub===t.sub).length;
-  const t0=plan[0].t,what=kind==="floor"?`→ étage ${t0.floor}`:`→ ${cat[t0.c].name}${t0.sub?" › "+t0.sub:""}`;
+  plan.forEach(({a,t})=>{const d=diff(a,t).join(" · ");a.floor=t.floor;a.c=t.c;a.tags=[...t.tags];touch(a,"lot","Modifié par lot",d)});
+  const okN=plan.filter(({a,t})=>a.floor===t.floor&&a.c===t.c&&tagsStr(a.tags)===tagsStr(t.tags)).length;
+  const t0=plan[0].t,addT=tagsParse($("lSub")?$("lSub").value:""),what=kind==="floor"?`→ étage ${t0.floor}`:`→ ${cat[t0.c].name}${addT.length?" + "+tagsStr(addT):""}`;
   log("lot",`Lot de ${plan.length} article${plan.length>1?"s":""} ${what}`,plan.map(x=>x.a.name.trim()).join(", "));
   save();sel.clear();panel=null;render();toast(`✓ ${okN}/${plan.length} vérifiés`,6000,true);
 }
@@ -1015,6 +1085,13 @@ document.addEventListener("click",e=>{
   if(act==="didu"){$("q").value=b.dataset.v;render();return}
   if(act==="undo"){undo();return}
   if(act==="tri"){st.params.tri=b.dataset.v;openF=null;save();render();return}
+  if(act==="fill"){if(!ED)return;const f=+b.dataset.f,v=+b.dataset.v;st.fill=st.fill||{};const old=fillOf(f);
+    if(old===v)delete st.fill[f];else st.fill[f]=v;
+    log("place",`Étage ${f} : remplissage ${old===v?"effacé":FILL_LAB[v]}`,old!=null&&old!==v?`avant : ${FILL_LAB[old]}`:"");save();render();return}
+  if(act==="tagf"){e.stopPropagation();fsub=b.dataset.t;fcat=null;openA=null;editA=null;openF=null;carEdit=null;panel=null;
+    if(lots)setLots(false);if(tab!=="search"){tab="search";try{localStorage.setItem("kardex-onglet",tab)}catch(x){}}
+    $("q").value="";chips();render();scrollTo(0,0);toast(`#${b.dataset.t}`);return}
+  if(act==="tagadd"){const i=$(b.dataset.in);if(i){tagPut(i,b.dataset.t);if(KB.inp===i)kbSugg()}return}
   if(act==="sgset"){const i=$("eFloor");if(i){i.value=b.dataset.f;i.dispatchEvent(new Event("input",{bubbles:true}))}return}
   if(act==="sgopen"){const f=+b.dataset.f;openF=openF&&openF.f===f&&openF.where==="sg"?null:{f,where:"sg"};openA=null;editA=null;render();return}
   if(act==="sgadd"){if(!ED)return;addPre={name:$("q").value.trim(),f:+b.dataset.f};openF=null;panel=null;togglePanel("add");return}
@@ -1026,8 +1103,9 @@ document.addEventListener("click",e=>{
   if(act==="reset"){if(b.dataset.sure){if(Sauvegarde.remplacer(toData(fresh()),"remise du fichier d'origine")){toast("Fichier d'origine remis")}}else{b.dataset.sure=1;b.textContent="Sûr ? Une copie est gardée. Re-toucher."}return}
 });
 document.addEventListener("submit",e=>{e.preventDefault();if(e.target.id==="fEdit"&&ED){if(e.target.closest(".sl"))carEdit=null;submitEdit(e.target)}if(e.target.id==="fLot")submitLot()});
-document.addEventListener("input",e=>{if(e.target.closest("#fLot"))lotPreview();if(["eName","eSub"].includes(e.target.id))sgForm()});
-document.addEventListener("change",e=>{if(e.target.id==="eCat"){e.target.dataset.touched=1;const d=$("dl-sub");if(d)d.outerHTML=subList(+e.target.value);sgForm()}if(e.target.id==="lCat"){const d=$("dl-sub");if(d&&e.target.value)d.outerHTML=subList(+e.target.value);lotPreview()}});
+document.addEventListener("input",e=>{if(e.target.closest("#fLot"))lotPreview();if(["eName","eSub"].includes(e.target.id))sgForm();
+  if(e.target.id==="eSub")tagRow("eSub","eTags",+$("eCat").value);if(e.target.id==="lSub")tagRow("lSub","lTags",$("lCat").value?+$("lCat").value:null)});
+document.addEventListener("change",e=>{if(e.target.id==="eCat"){e.target.dataset.touched=1;tagRow("eSub","eTags",+e.target.value);sgForm()}if(e.target.id==="lCat"){tagRow("lSub","lTags",e.target.value?+e.target.value:null);lotPreview()}});
 $("bSet").onclick=()=>{if(ED)togglePanel("set")};
 $("bJournal").onclick=()=>togglePanel("journal");
 $("bAdd").onclick=()=>{if(ED)togglePanel("add")};
@@ -1134,9 +1212,9 @@ function carSlide(f){
       :ED?`<label class="big none"><input type="file" accept="image/*" multiple data-phf="${f}" hidden><span>📷<br>Ajouter une photo</span><b>${f}</b></label>`:`<div class="big none"><span>📷<br>Pas encore de photo</span><b>${f}</b></div>`}${strip}
     ${ED&&cur?`<div class="pact">${cur.mos||cur.vid?"":`<button type="button" data-act="pcrop" data-id="${cur.id}" aria-label="Recadrer">✂️</button>`}${l.length>1?`<button type="button" class="${cur.id===couv?"on":""}" data-act="pfirst" data-f="${f}" data-id="${cur.id}" aria-label="Mettre en premier">⭐</button>`:""}<button type="button" data-act="pdel" data-id="${cur.id}" aria-label="Supprimer la photo">🗑️</button></div>`:""}</div>
     <div class="side">
-      <div class="sh"><b>Étage ${f}</b><span>${it.length} article${it.length>1?"s":""} · rang #${RANK[f]}</span><button class="btn ed tirb" type="button" data-act="tir" data-f="${f}">🎬 Tiroir vidéo</button></div>
+      <div class="sh"><b>Étage ${f}</b><span>${it.length} article${it.length>1?"s":""} · rang #${RANK[f]}${fillOf(f)!=null?` · ${fillOf(f)===0?"vide":fillOf(f)===100?"plein":fillOf(f)+" %"}`:""}</span><button class="btn ed tirb" type="button" data-act="tir" data-f="${f}">🎬 Tiroir vidéo</button></div>
       ${segs?`<span class="seg">${segs}</span>`:""}
-      <ul class="cl">${it.map(a=>{const on=ED&&carEdit&&carEdit.id===a.id;return `<li class="${ED?"eda":""}${on?" on":""}" style="--c:${cat[a.c].color}" ${ED?`data-act="cedit" data-a="${a.id}" role="button" tabindex="0"`:""}><i></i><span>${esc(a.name.trim())}</span><em>${esc(cat[a.c].name)}${a.sub?" › "+esc(a.sub):""}</em></li>${on?`<li class="cform">${formHtml(a)}</li>`:""}`}).join("")||'<li class="e">Plateau vide</li>'}
+      <ul class="cl">${it.map(a=>{const on=ED&&carEdit&&carEdit.id===a.id;return `<li class="${ED?"eda":""}${on?" on":""}" style="--c:${cat[a.c].color}" ${ED?`data-act="cedit" data-a="${a.id}" role="button" tabindex="0"`:""}><i></i><span>${esc(a.name.trim())}</span><em>${esc(cat[a.c].name)}${tg(a).length?" "+esc(tagsStr(tg(a))):""}</em></li>${on?`<li class="cform">${formHtml(a)}</li>`:""}`}).join("")||'<li class="e">Plateau vide</li>'}
       ${ED&&carEdit&&carEdit.id==="new"&&carEdit.f===f?`<li class="cform">${(addPre={name:"",f},formHtml(null))}</li>`:""}</ul>
       ${ED&&!(carEdit&&carEdit.id==="new"&&carEdit.f===f)?`<button class="btn cadd" type="button" data-act="cnew" data-f="${f}">＋ Article ici</button>`:""}
     </div></div>`;
@@ -1322,11 +1400,11 @@ function suggest(name,c,sub,n=3){
   all().forEach(a=>{nb[a.floor]=(nb[a.floor]||0)+1});
   if(norm(name||"").length>=2){const r=search(name).res.slice(0,8);r.forEach(({a})=>sim[a.floor]=(sim[a.floor]||0)+1);
     if(guess===null&&r.length){const t={};r.forEach(({a})=>t[a.c]=(t[a.c]||0)+1);guess=+Object.entries(t).sort((x,y)=>y[1]-x[1])[0][0]}}
-  if(guess!==null)all().forEach(a=>{if(a.c===guess){cc[a.floor]=(cc[a.floor]||0)+1;if(sub&&a.sub===sub)ss[a.floor]=(ss[a.floor]||0)+1}});
+  if(guess!==null)all().forEach(a=>{if(a.c===guess){cc[a.floor]=(cc[a.floor]||0)+1;if(sub&&sub.length&&sub.some(t=>tagHas(a,t)))ss[a.floor]=(ss[a.floor]||0)+1}});
   const avg=all().length/60,out=[];
   for(let f=1;f<=60;f++){const k=nb[f]||0,why=[];let s=0;
     if(sim[f]){s+=sim[f]*4;why.push(`${sim[f]} article${sim[f]>1?"s":""} pareil${sim[f]>1?"s":""}`)}
-    if(ss[f]){s+=ss[f]*3;why.push(`même sous-cat.`)}
+    if(ss[f]){s+=ss[f]*3;why.push(`même #`)}
     if(cc[f]){s+=Math.min(cc[f],4)*2;if(!sim[f])why.push(`${cc[f]} ${esc(cat[guess].name)}`)}
     const room=k===0?1.5:k<=avg?1:-(k-avg)*.6;s+=room;if(k===0)why.push("plateau vide");else if(k<=avg&&!why.length)why.push("de la place");
     const u=(61-RANK[f])/60*1.5;s+=u;if(RANK[f]<=10)why.push(`rang #${RANK[f]}`);
@@ -1335,7 +1413,7 @@ function suggest(name,c,sub,n=3){
 }
 const sgChips=(l,act)=>l.map(x=>`<button class="sg" type="button" data-act="${act}" data-f="${x.f}"><b>${x.f}</b><span>${x.why}</span></button>`).join("");
 function sgForm(){const el=$("eSg");if(!el)return;const e=$("eCat"),c=e&&(e.dataset.touched||$("fEdit").dataset.new!=="1")?+e.value:null;
-  el.innerHTML=`<span class="sgl">💡 Suggestion</span>`+sgChips(suggest($("eName").value,c,$("eSub").value.trim()).list,"sgset")}
+  el.innerHTML=`<span class="sgl">💡 Suggestion</span>`+sgChips(suggest($("eName").value,c,tagsParse($("eSub").value)).list,"sgset")}
 let addPre=null;
 function renderSg(){
   const raw=$("q").value.trim(),r=suggest(raw,fcat,null);
@@ -1348,7 +1426,7 @@ function renderSg(){
 }
 
 /* ---------- ⌨️ clavier Kardex : QWERTZ + chiffres, mots proposés au fur et à mesure (au lieu du clavier Android) ---------- */
-const KB_ROWS={abc:[["1","2","3","4","5","6","7","8","9","0"],["q","w","e","r","t","z","u","i","o","p","è"],["a","s","d","f","g","h","j","k","l","é","à"],["⇧","y","x","c","v","b","n","m","-",".","⌫"],["#+=",",","␣","/","↵"]],
+const KB_ROWS={abc:[["1","2","3","4","5","6","7","8","9","0"],["q","w","e","r","t","z","u","i","o","p","è"],["a","s","d","f","g","h","j","k","l","é","à"],["⇧","y","x","c","v","b","n","m","-",".","⌫"],["#+=","#",",","␣","/","↵"]],
   sym:[["1","2","3","4","5","6","7","8","9","0"],["Ø","°","×","+","(",")","\"","'","&","%"],["ä","ö","ü","ç","ê","â","ô","î","ù","#"],["@","*",":",";","!","?","=","_","²","⌫"],["abc",",","␣","/","↵"]],
   num:[["1","2","3"],["4","5","6"],["7","8","9"],["⌫","0","↵"]]};
 let KB={el:null,inp:null,layer:"abc",shift:false};
@@ -1363,22 +1441,22 @@ var VOC=null;const vocab=()=>{if(VOC)return VOC;const m=new Map(),next=new Map()
   const add=(w,k)=>{const n=norm(w);if(n.length<2)return;const o=m.get(n)||{w,n,k:0};o.k+=k;m.set(n,o)};
   all().forEach(a=>{const ws=a.name.trim().split(/\s+/);const k=1+(st.uses.arts[a.id]||0)/3;ws.forEach(w=>add(w,k));
     ws.forEach((w,i)=>{if(ws[i+1]){const p=norm(w);const s=next.get(p)||new Map();s.set(ws[i+1],(s.get(ws[i+1])||0)+1);next.set(p,s)}});
-    if(a.sub)a.sub.split(/\s+/).forEach(w=>add(w,.5))});
+    tg(a).forEach(t=>t.split(/\s+/).forEach(w=>add(w,.5)))});
   CATS.forEach(([id])=>cat[id].name.split(/\s+/).forEach(w=>add(w,.3)));
   return VOC={words:[...m.values()],next}};
 function kbWord(){const i=KB.inp,v=i.value,p=i.selectionStart??v.length,b=v.slice(0,p);const m=b.match(/(\S*)$/);const before=b.slice(0,b.length-m[1].length).trim().split(/\s+/);return {part:m[1],prev:before[before.length-1]||""}}
 function kbSugg(){
   const i=KB.inp,bar=KB.el.querySelector(".kbs");if(!i)return;let h="";
   if(i.id==="eFloor"||i.id==="lFloor"){
-    if(i.id==="eFloor")h=suggest($("eName").value,$("eCat").dataset.touched||$("fEdit").dataset.new!=="1"?+$("eCat").value:null,$("eSub").value.trim(),4).list.map(x=>`<button type="button" data-kv="${x.f}" data-mode="set">💡 ${x.f}</button>`).join("");
+    if(i.id==="eFloor")h=suggest($("eName").value,$("eCat").dataset.touched||$("fEdit").dataset.new!=="1"?+$("eCat").value:null,tagsParse($("eSub").value),4).list.map(x=>`<button type="button" data-kv="${x.f}" data-mode="set">💡 ${x.f}</button>`).join("");
   }else if(i.dataset.im!=="numeric"){
     const {part,prev}=kbWord(),p=norm(part),V=vocab();let l=[];
     if(i.id==="eSub"||i.id==="lSub"){const c=i.id==="eSub"?+$("eCat").value:($("lCat").value?+$("lCat").value:null);
-      l=(c!==null?subsOf(c):[]).filter(s=>norm(s).startsWith(norm(i.value))&&norm(s)!==norm(i.value)).slice(0,4).map(s=>({w:s,full:1}))}
+      l=tagCands(i.value,c,4).map(t=>({w:t,tag:1}))}
     if(!l.length&&p){l=V.words.filter(o=>o.n.startsWith(p)&&o.n!==p).sort((a,b)=>b.k-a.k||a.n.length-b.n.length).slice(0,4);
       if(!l.length&&p.length>=3)l=V.words.filter(o=>lev(p,o.n.slice(0,p.length+1),1)<=1&&o.n!==p).sort((a,b)=>b.k-a.k).slice(0,3)}
     else if(!l.length&&prev){const s=V.next.get(norm(prev));if(s)l=[...s.entries()].sort((a,b)=>b[1]-a[1]).slice(0,4).map(([w])=>({w}))}
-    h=l.map(o=>`<button type="button" data-kv="${esc(o.w)}" data-mode="${o.full?"full":"word"}">${esc(o.w)}</button>`).join("");
+    h=l.map(o=>`<button type="button" data-kv="${esc(o.w)}" data-mode="${o.tag?"tag":o.full?"full":"word"}">${o.tag?"#":""}${esc(o.w)}</button>`).join("");
     if(i.id==="q"&&norm(i.value)){const seen=new Set(),fl=[];for(const el of document.querySelectorAll("#res .item")){const a=st.arts[+el.dataset.a];if(a&&!seen.has(a.floor)){seen.add(a.floor);fl.push(a)}if(fl.length>=2)break}
       h=fl.map(a=>`<button type="button" class="kfl" data-kv="${a.id}" data-mode="art">ét. <b>${a.floor}</b> ${esc(a.name.trim())}</button>`).join("")+h}
   }
@@ -1396,9 +1474,10 @@ function kbShow(i){
     KB.el.addEventListener("click",kbClick);addEventListener("resize",()=>KB.inp&&kbPad())}
   KB.inp=i;KB.layer="abc";KB.shift=false;KB.el.hidden=false;document.body.classList.add("kbopen");kbDraw();kbSugg();kbPad();
 }
-function kbPad(){requestAnimationFrame(()=>{const h=KB.el.offsetHeight;document.body.style.paddingBottom=h+"px";
+function kbPad(){requestAnimationFrame(()=>{const h=KB.el.offsetHeight;document.body.style.paddingBottom=h+"px";document.documentElement.style.setProperty("--kbh",h+"px");
+  if(KB.inp&&KB.inp.closest(".fpm")){setTimeout(()=>KB.inp&&KB.inp.scrollIntoView({block:"nearest"}),30);return}
   const r=KB.inp&&KB.inp.getBoundingClientRect();if(r&&r.bottom>innerHeight-h-8)scrollBy({top:r.bottom-(innerHeight-h-16),behavior:"smooth"})})}
-function kbHide(){if(!KB.el||KB.el.hidden)return;KB.el.hidden=true;KB.inp=null;document.body.classList.remove("kbopen");document.body.style.paddingBottom=""}
+function kbHide(){if(!KB.el||KB.el.hidden)return;KB.el.hidden=true;KB.inp=null;document.body.classList.remove("kbopen");document.body.style.paddingBottom="";document.documentElement.style.removeProperty("--kbh")}
 const kbOpen=()=>KB.el&&!KB.el.hidden;
 function kbPut(i,txt,del=0,replace=null){
   const v=i.value;let s=i.selectionStart,e=i.selectionEnd;const sel=s!==null&&i.type!=="number";if(!sel){s=e=v.length}
@@ -1417,6 +1496,7 @@ function kbClick(e){
     if(m==="art"){kbHide();i.blur();const row=document.querySelector(`#res .item[data-a="${v}"] .row`);if(row){row.click();row.scrollIntoView({block:"center"})}return}
     if(m==="set"){i.value=v;i.dispatchEvent(new Event("input",{bubbles:true}));return}
     if(m==="full"){i.value=v;i.dispatchEvent(new Event("input",{bubbles:true}));kbSugg();return}
+    if(m==="tag"){tagPut(i,v);kbSugg();return}
     kbPut(i,v+" ",0,kbWord().part.length);kbSugg();return}
   const b=e.target.closest("[data-k]");if(!b)return;const k=b.dataset.k;
   if(navigator.vibrate)try{navigator.vibrate(4)}catch(x){}
@@ -1436,34 +1516,40 @@ document.addEventListener("focusin",e=>{const i=e.target;if(kbOn()&&kbOk(i)){if(
 document.addEventListener("focusout",()=>setTimeout(()=>{if(!kbOk(document.activeElement))kbHide()},60));
 document.addEventListener("input",e=>{if(KB.inp===e.target)setTimeout(kbSugg,0)});
 
-/* ---------- ⬅️ bouton retour : ferme ce qui est ouvert, revient à la recherche, ne quitte jamais l'app ---------- */
-function backStep(){
-  if(kbOpen()){const i=KB.inp;kbHide();i&&i.blur();return}
-  const cr=document.querySelector(".cr [data-c='no']");if(cr){cr.click();return}
-  const vw=document.querySelector(".vw");if(vw){vw.remove();document.body.style.overflow="";return}
-  const mv=document.querySelector(".mv");if(mv&&mv._close){mv._close();return}
-  const tc=document.querySelector(".tc");if(tc){if(tc._close)tc._close();return}
-  if(panel){panel=null;panel2=null;render();return}
-  if(carEdit){carEdit=null;editA=null;render();return}
-  if(editA!==null){editA=null;render();return}
-  if(openA!==null||openF){openA=null;openF=null;render();return}
-  if(lots){setLots(false);return}
-  if(tab==="search"&&($("q").value||fcat!==null)){$("q").value="";fcat=null;fsub=null;chips();render();return}
-  if(tab!=="search"){tab="search";try{localStorage.setItem("kardex-onglet",tab)}catch(e){}render();scrollTo(0,0);return}
-  toast("Kardex reste ouvert · bouton d'accueil pour sortir");
+/* ---------- ⬅️ bouton retour : ferme ce qui est ouvert, revient à Recherche, puis double appui pour quitter (comme Suivi Véhicules) ---------- */
+function backStep(){ // true si quelque chose a été fermé ; false = on est à l'accueil de Recherche
+  if(kbOpen()){const i=KB.inp;kbHide();i&&i.blur();return true}
+  const cr=document.querySelector(".cr [data-c='no']");if(cr){cr.click();return true}
+  const vw=document.querySelector(".vw");if(vw){vw.remove();document.body.style.overflow="";return true}
+  const mv=document.querySelector(".mv");if(mv&&mv._close){mv._close();return true}
+  const tc=document.querySelector(".tc");if(tc){if(tc._close)tc._close();return true}
+  if(panel){panel=null;panel2=null;render();return true}
+  if(carEdit){carEdit=null;editA=null;render();return true}
+  if(editA!==null){editA=null;render();return true}
+  if(openA!==null||openF){openA=null;openF=null;render();return true}
+  if(lots){setLots(false);return true}
+  if(tab==="search"&&($("q").value||fcat!==null||fsub!==null)){$("q").value="";fcat=null;fsub=null;chips();render();return true}
+  if(tab!=="search"){tab="search";try{localStorage.setItem("kardex-onglet",tab)}catch(e){}render();scrollTo(0,0);return true}
+  return false;
 }
+const backNeed=()=>!!(kbOpen()||document.querySelector(".cr,.vw,.mv,.tc")||panel||carEdit||editA!==null||openA!==null||openF||lots||tab!=="search"||$("q").value||fcat!==null||fsub!==null);
 // Chrome saute une entrée d'historique posée sans vrai geste (pour un doigt, le geste ne compte qu'au relevé) :
-// la garde se pose donc au relevé du doigt / au clic / à une touche, jamais au chargement ni après un Retour.
-// En plus, quand Chrome le permet, un CloseWatcher prend le Retour sans toucher à l'historique.
+// la garde se pose donc au relevé du doigt / au clic / à une touche. Quand Chrome le permet, un CloseWatcher
+// prend le Retour tant que quelque chose est ouvert ; à l'accueil il n'y en a plus : 1er Retour = message, 2e = quitter.
 (function(){const armed=()=>history.state&&history.state.kx===1;
   try{if(!history.state||history.state.kx==null)history.replaceState({kx:0},"")}catch(e){}
-  let cw=null;
-  const cwSync=()=>{if(typeof CloseWatcher!=="function"||cw)return;try{cw=new CloseWatcher();cw.onclose=()=>{cw=null;backStep();setTimeout(cwSync,0)}}catch(e){cw=null}};
+  let cw=null,quitT=null;
+  const cwSync=()=>{if(typeof CloseWatcher!=="function")return;
+    if(backNeed()&&!cw){try{cw=new CloseWatcher();cw.onclose=()=>{cw=null;backStep();cwSync()}}catch(e){cw=null}}
+    else if(!backNeed()&&cw){const w=cw;cw=null;try{w.destroy()}catch(e){}}};
   const gest=e=>{if(e.type==="keydown"&&e.key==="Escape")return;
     if(e.type!=="pointerup"||e.pointerType!=="mouse"){if(!armed())try{history.pushState({kx:1},"")}catch(x){}}
     setTimeout(cwSync,60)};
   ["pointerup","touchend","click","keydown"].forEach(t=>addEventListener(t,gest,true));
-  addEventListener("popstate",()=>backStep());
+  addEventListener("popstate",()=>{if(quitT){clearTimeout(quitT);quitT=null}
+    if(backStep()){try{history.pushState({kx:1},"")}catch(x){}cwSync();return}
+    toast("Appuie encore sur Retour pour quitter");quitT=setTimeout(()=>{quitT=null},2500)});
+  setInterval(cwSync,700); // une fenêtre fermée autrement (bouton, toucher) libère son CloseWatcher
 })();
 
 /* ---------- 🎡 roulette 1-60 sur le bord de l'onglet Photos : glisser = défiler, vite = avance rapide, toucher = sauter ---------- */
@@ -1701,12 +1787,12 @@ async function tirDel(mid){const ids=PH.filter(p=>p.id===mid||p.part===mid).map(
   ids.forEach(i=>["o","p"].forEach(k=>{const u=phUrl.get(i+":"+k);if(u)URL.revokeObjectURL(u);phUrl.delete(i+":"+k)}));
   const f=PH.find(p=>p.id===mid)?.floor;PH=PH.filter(p=>!ids.includes(p.id));log("photo","Tiroir supprimé",`Étage ${f}`);save();render()}
 
-const toData=s=>({articles:s.arts,compteurs:s.uses,journal:s.journal,parametres:s.params,prochainId:s.next});
+const toData=s=>({articles:s.arts,compteurs:s.uses,journal:s.journal,parametres:s.params,remplissage:s.fill||{},prochainId:s.next});
 /* ---------- 💾 sauvegarde Drive commune (bloc SAUVEGARDE ATELIER v2), paramètres compris ---------- */
 Sauvegarde.init({
   app:"Kardex",nom:"Kardex",cle:LS,version:APP_VERSION,
   lire:()=>toData(st),
-  ecrire:d=>{st={arts:d.articles,uses:d.compteurs||{floors:{},arts:{}},journal:d.journal||[],next:d.prochainId||100000,undo:null,params:{...PARAMS0,...(d.parametres||{})}};save();openA=editA=openF=null;render()},
+  ecrire:d=>{st={arts:d.articles,uses:d.compteurs||{floors:{},arts:{}},journal:d.journal||[],next:d.prochainId||100000,undo:null,fill:d.remplissage||{},params:{...PARAMS0,...(d.parametres||{})}};migrate(st);save();openA=editA=openF=null;render()},
   resume:d=>{const n=Object.keys(d.articles||{}).length,m=Object.values(d.articles||{}).filter(a=>a.mod).length;return `${n} articles, ${m} modifié${m>1?"s":""}, ${(d.journal||[]).length} ligne${(d.journal||[]).length>1?"s":""} de journal`},
   valider:d=>!d||typeof d.articles!=="object"||!Object.keys(d.articles).length?"pas d'articles dans ce fichier":null,
   vide:d=>!(d.journal||[]).length
