@@ -10,7 +10,7 @@
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&family=Saira+Stencil+One&display=swap">
 <style>
 /* Kardex v3 : simple et fonctionnel. La recherche est l'élément principal ; une colonne ; un clic ouvre, un clic ferme. */
 :root{
@@ -498,6 +498,27 @@ body.fpon{overflow:hidden}
 .setr{display:flex;align-items:center;gap:10px;width:100%}
 .setr input{flex:1;accent-color:var(--acc)}
 .setr b{font:800 14px var(--f-mono);color:var(--acc-hi);min-width:38px;text-align:right}
+/* v1.7 : roulette des Photos = tambour alu gravé (ou molette moletée seule), tourne à l'infini */
+.carw{grid-template-columns:minmax(0,1fr) 54px}
+.whl{position:relative;border-radius:14px;overflow:hidden;touch-action:none;user-select:none;cursor:ns-resize;background:#8d939c;box-shadow:inset 0 0 0 1px rgba(255,255,255,.18),0 6px 18px rgba(0,0,0,.5);outline-offset:2px}
+.whl .knurl{position:absolute;inset:0;background:repeating-linear-gradient(180deg,#5d636c 0 2px,#c9ced5 2px 3px,#9aa0a8 3px 5px,#6b7179 5px 6px);background-size:100% 6px}
+.whl .knurl::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 5px,rgba(0,0,0,.12) 5px 6px)}
+.whl .shade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.85) 0%,rgba(0,0,0,.35) 18%,rgba(255,255,255,.08) 45%,rgba(255,255,255,.14) 50%,rgba(255,255,255,.06) 55%,rgba(0,0,0,.35) 82%,rgba(0,0,0,.85) 100%),linear-gradient(90deg,rgba(0,0,0,.35),transparent 30%,transparent 70%,rgba(0,0,0,.35))}
+.whl .notch{position:absolute;right:-1px;top:50%;width:0;height:0;margin-top:-7px;border:7px solid transparent;border-right-color:var(--acc)}
+.drum{position:absolute;inset:0;perspective:1600px;overflow:hidden;background:#3a3e44}
+.drum .rg{position:absolute;left:9px;right:9px;top:50%;height:0;transform-style:preserve-3d}
+.drum .lb{position:absolute;left:0;right:0;top:calc(var(--lh) / -2);height:calc(var(--lh) + .6px);display:grid;place-items:center;backface-visibility:hidden;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 1px,rgba(0,0,0,.05) 1px 2px,transparent 2px 3px),linear-gradient(90deg,#9ea4ac,#d7dbe0 35%,#e9ecef 50%,#cfd3d8 65%,#979da5)}
+.drum .lb b{font:700 17px/1 'Saira Stencil One',var(--f-mono);letter-spacing:.02em;color:#4a4f56;text-shadow:0 1px 0 rgba(255,255,255,.75),0 -1px 0 rgba(0,0,0,.55),0 0 1px rgba(0,0,0,.35);-webkit-text-stroke:.3px rgba(0,0,0,.35)}
+.drum .lb::before,.drum .lb::after{content:"";position:absolute;top:0;height:1px;width:6px;background:rgba(0,0,0,.45);box-shadow:0 1px 0 rgba(255,255,255,.55)}
+.drum .lb::before{left:2px}.drum .lb::after{right:2px}
+.drum .lb.cur b{color:#E8920F;text-shadow:0 1px 0 rgba(255,255,255,.6),0 -1px 0 rgba(0,0,0,.65),0 0 2px rgba(0,0,0,.4)}
+.drum .lb.ph b::after{content:"";position:absolute;margin:-1px 0 0 3px;width:4px;height:4px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 1px rgba(0,0,0,.4)}
+.drum .edge{position:absolute;top:0;bottom:0;width:9px;background:repeating-linear-gradient(180deg,#4d535b 0 1.5px,#d5d9de 1.5px 2.5px,#8a9098 2.5px 4px),linear-gradient(90deg,#666,#bbb);background-size:100% 4px,100% 100%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
+.drum .edge.l{left:0;border-right:1px solid rgba(0,0,0,.5)}.drum .edge.r{right:0;border-left:1px solid rgba(0,0,0,.5)}
+.drum .spec{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,transparent 30%,rgba(255,255,255,.18) 44%,rgba(255,255,255,.05) 50%,transparent 60%)}
+.drum .idx{position:absolute;left:9px;right:9px;top:50%;height:calc(var(--lh) + 4px);transform:translateY(-50%);pointer-events:none;border-top:1px solid rgba(0,0,0,.35);border-bottom:1px solid rgba(0,0,0,.35);box-shadow:0 0 0 1px rgba(255,255,255,.12),inset 0 0 6px rgba(232,146,15,.25)}
+.sl .big>b{display:none}
 </style>
 </head>
 <body>
@@ -761,7 +782,7 @@ const Sauvegarde = (() => {
 const CATS=[[1, "Divers", "#db0fca"], [2, "Stock de Fraise", "#DDD9C3"], [4, "Tournage", "#DBEEF4"], [6, "Taraud & Alésoirs", "#E6E0EC"], [10, "Outils rotatifs", "#B7DEE8"], [13, "VIS/RONDELLES Inox", "#00B0F0"], [14, "VIS/RONDELLES Acier", "#58B600"], [15, "Visseries (bois/Torx/etc…)", "#FFFF00"], [99, "Fraiseuses", "#0C4DE4"], [100, "Consommable de montage", "#9F0EE1"], [101, "Machine à Batterie", "#09DC2C"], [102, "Machine 220V", "#3A8830"], [103, "Levage", "#08f7e7"], [105, "Pneumatique", "#3EB3D0"], [106, "Percages/Foret", "#8662ea"], [107, "Cliquets", "#ff0080"], [108, "Outils à mains", "#00FA79"], [109, "Metrologie d'atelier", "#E4F21C"]];
 const ARTS=[[119, "Laboratoire", 1, 1], [415, "M6", 13, 39], [416, "M6", 14, 49], [417, "Loupe", 1, 32], [418, "Fraises Inox", 2, 2], [419, "Fraises à Rayon", 2, 2], [420, "Fraise en \"T\"", 2, 2], [421, "Fraises Aluminium", 2, 3], [422, "Chargeur Batteries", 102, 24], [423, "M5", 14, 48], [424, "Matériel de Tournage", 4, 14], [425, "Plaquettes", 4, 6], [426, "M10", 14, 51], [427, "M12", 14, 52], [428, "M14", 14, 52], [429, "M16", 14, 28], [430, "M24", 14, 28], [431, "M8", 14, 50], [433, "Rondelles M8", 14, 53], [434, "M4", 14, 47], [435, "M3", 14, 46], [436, "M1 à M2.5", 14, 45], [437, "Plateau magnétique", 99, 15], [438, "Matériel fraiseuses", 99, 15], [439, "Equerre de fraisage", 99, 36], [440, "M5", 13, 37], [441, "M8", 13, 40], [442, "M10", 13, 41], [443, "M4", 13, 38], [444, "M4 Poulets", 13, 38], [445, "Péteuse", 105, 11], [446, "Outils pneumatiques", 105, 11], [447, "Reserve scotch", 100, 25], [448, "DMU 50", 99, 25], [449, "M12", 13, 42], [450, "M14", 13, 42], [451, "Fils ressort Inox", 13, 42], [452, "Billes INOX", 13, 42], [453, "Goupilles Inox", 100, 42], [454, "Ressorts Inox", 100, 42], [455, "M2 à M3", 13, 29], [456, "NEF 400", 4, 54], [457, "Tasseau FP4", 99, 54], [458, "Dremel® 12V", 101, 20], [459, "Dremel 220V😂", 102, 20], [460, "Thermogun", 102, 20], [462, "Crayon électrique", 102, 20], [463, "Fer à souder", 102, 24], [464, "Rivet pop", 100, 33], [465, "Tubtara", 100, 33], [466, "Tarauds M2 à M10", 6, 21], [467, "Queues de cochon🐷", 6, 21], [468, "Scotch doubles face", 100, 56], [469, "Mini-Grip", 100, 56], [470, "Rubalise", 100, 56], [471, "Elastique", 100, 56], [472, "Clinquant", 100, 58], [473, "Cuivre Béryllium", 100, 58], [474, "O-ring", 100, 30], [475, "Brides métalliques", 100, 30], [476, "Joints", 100, 30], [477, "Span-Set® ", 103, 27], [478, "Torx", 15, 44], [479, "Vis à bois", 15, 44], [480, "Clous", 15, 44], [482, "M7", 15, 26], [483, "Goupilles Acier", 15, 55], [484, "Rivets", 15, 55], [485, "Bouterolle", 15, 55], [486, "cordes", 100, 56], [487, "Ficelles", 100, 56], [488, "Visseuses Makita", 101, 13], [489, "Meuleuse", 101, 13], [490, "Scie sabre", 102, 13], [491, "Perforateur + Aspir.", 101, 13], [492, "Sauteuse", 101, 13], [493, "Talkie-Walkie", 101, 24], [494, "Vis Amercaines", 15, 26], [495, "Spécial", 15, 26], [496, "Niveau à bulle", 109, 32], [498, "Mètre à ruban", 109, 32], [499, "Chevillière", 109, 32], [500, "Fil à plomb", 109, 32], [501, "Règle 1000mm", 109, 32], [502, "Règle 1500mm", 109, 32], [503, "Camera-Thermo", 109, 32], [504, "Mèches laiton", 106, 23], [505, "Mèche longue", 106, 23], [506, "Métrique fin", 6, 17], [507, "Tarauds spéciaux", 6, 17], [508, "Tarauds", 6, 17], [509, "Alesoirs:...", 6, 22], [510, "Fraise pivots/Stock", 106, 22], [511, "Mèches à centrer", 106, 22], [512, "Vérins", 103, 27], [513, "Anneau de levage", 103, 27], [514, "Patins", 103, 27], [515, "Cordes", 103, 27], [516, "Levage palonnier", 103, 16], [517, "Patins Vert", 103, 16], [518, "Grandes sangles Span", 103, 16], [519, "Mèche NC", 106, 5], [520, "Courte de Ø1 à Ø10", 106, 5], [521, "Long de Ø1 à Ø13", 106, 4], [522, "Cles à Cliquets", 107, 7], [523, " Cles à œil", 107, 7], [524, "Cles à fourche", 107, 7], [525, "Cles dynamométriques", 107, 8], [526, "Douilles 3/4", 107, 8], [527, "Soldes de Vis", 15, 57], [528, "Rondelles ressort", 15, 57], [529, "Bellevilles", 15, 57], [530, "Seeger", 15, 57], [531, "Insert métrique", 15, 57], [532, "Pistolet silicone", 1, 31], [534, "Lève panneau", 103, 31], [535, "Fraise scie", 2, 18], [536, "Fraise Modulaire", 2, 18], [537, "Fraise Rayon", 2, 18], [538, "Fraise de forme", 2, 18], [539, "Fraise surfacer", 2, 18], [540, "Fraise Bricolage", 2, 60], [541, "Fraise scies", 2, 10], [542, "Helicoil", 100, 24], [543, "Brides électro", 100, 24], [544, "Camera Snake ", 109, 32], [545, "Seringue 500ml", 1, 59], [546, "Visseuse Placo DEWAL", 101, 13], [547, "Fein", 1, 12], [548, "Agrafeuse", 1, 12], [549, " Grignoteuse Bosch®", 1, 12], [550, "Emporte-pièces ", 1, 12], [551, "Chalumeau", 1, 12], [552, "Coupe sangle", 1, 34], [553, "Extracteur", 1, 34], [554, "Sandow", 1, 34], [555, "Arraches à billes", 1, 34], [556, "Fraise à étage", 2, 10], [557, "Fraise cloche", 2, 10], [558, "Fraise 3 tailles", 2, 10], [559, "Rodoirs", 1, 10], [560, "Tournevis", 108, 19], [561, "Clés à fourche", 108, 19], [562, "Imbus", 108, 19], [563, "Antigel", 1, 19], [564, "Pierres&limes💎", 108, 19], [565, "Ciseaux", 1, 19], [566, "Pince Monseigneur", 108, 59], [567, "Talurit", 108, 59], [568, "Pince pour cables", 108, 59], [569, "Ventouse de levage", 1, 59], [570, "Grande Hilti®", 102, 35], [571, "Hilti:accesoires", 102, 35], [572, "Tampons perceuse Hil", 102, 43], [573, " Perforateur Hitachi", 102, 9], [574, "Perceuses 220V", 102, 9], [575, "Mèche à Béton", 1, 9], [577, "Perceuse angulaire", 102, 9], [578, "Tampon chimique", 1, 9], [579, "Tête à aléser", 99, 15], [580, "Brut posage", 99, 36], [581, "Tire-fils", 1, 32], [582, "Makita", 102, 9], [583, "Multimètres ", 109, 32], [584, "Mèche pour pneu", 1, 16], [585, "Marteau pneumatique ", 105, 11], [586, "Meuleuse à air", 105, 11], [587, "Pistolet AVEX", 1, 11], [588, "Dynafile", 1, 11], [589, "Edalco", 4, 14], [590, "Pistolet SIKA", 105, 31], [591, "Scotch aluminium ", 100, 56], [592, "Niveau laser", 109, 32], [593, "Mètre laser", 109, 32], [594, "Taraud UNC", 6, 17], [596, "Micro-foret Ø0 à Ø1", 106, 5], [597, "etau", 99, 25], [598, "Mors Gressel Haut", 99, 25], [599, "Mors schunk", 99, 25], [600, "Mors Lang", 99, 25], [601, "Cliquets americains", 107, 31], [602, "Tournevis à choc", 108, 8], [603, "Colles", 100, 34], [604, "loctite", 100, 34]];
 
-const APP_VERSION="1.6.1",LS="kardex-v1",EXPORT_DAY="2026-10-29";
+const APP_VERSION="1.7",LS="kardex-v1",EXPORT_DAY="2026-10-29";
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const nc=ch=>ch.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
@@ -790,7 +811,7 @@ function migrate(s){Object.values(s.arts||{}).forEach(a=>{if(!Array.isArray(a.ta
 const FILL=[0,25,50,75,100],FILL_LAB={0:"Vide",25:"25 %",50:"50 %",75:"75 %",100:"Plein"};
 const fillOf=f=>st.fill&&st.fill[f]!=null?st.fill[f]:null;
 const fillCol=v=>v>=100?"#F0605D":v>=75?"#F59A3C":v>=50?"#F5C842":v>=25?"#9BD45A":"#4CC38A";
-const PARAMS0={tolerante:true,nbTop:6,compter:true,relock:15,pin:"",emo:"",tri:"etage",clavier:true,chif:"aff",anim:true,animS:10,clac:true};
+const PARAMS0={tolerante:true,nbTop:6,compter:true,relock:15,pin:"",emo:"",tri:"etage",clavier:true,chif:"aff",anim:true,animS:10,clac:true,roue:"tambour"};
 function fresh(){
   const a={};ARTS.forEach(([id,name,c,floor])=>a[id]={id,name,c,floor,tags:[],added:EXPORT_DAY+"T12:00:00",mod:null,hist:[{t:EXPORT_DAY+"T12:00:00",k:"import",w:"Importé du Kardex",d:`Étage ${floor} · ${cat[c].name}`}]});
   return {arts:a,uses:{floors:{},arts:{}},journal:[],next:100000,undo:null,fill:{},params:{...PARAMS0}};
@@ -1070,7 +1091,8 @@ function renderSettings(el){
     <div class="set"><div class="l"><b>Chiffres</b><span>Style des numéros d'étage, partout dans l'app</span></div><div class="seg3"><button type="button" data-act="chif" data-v="aff" aria-pressed="${nxSty()==="aff"}">Afficheur</button><button type="button" data-act="chif" data-v="pave" aria-pressed="${nxSty()==="pave"}">Pavés</button></div></div>
     ${sw("anim","Animation des tuiles","À l'arrivée sur Tuiles, les numéros défilent de 0 jusqu'à leur étage")}
     <div class="set"><div class="l"><b>Durée de l'animation</b><span>Temps pour arriver au 60 (les petits numéros s'arrêtent avant)</span><div class="setr"><input type="range" id="animS" min="5" max="20" step="1" value="${+p.animS||10}" aria-label="Durée de l'animation en secondes"><b id="animSv">${+p.animS||10} s</b></div></div><button class="btn" type="button" data-act="kxtry">▶ Essayer</button></div>
-    ${sw("clac","Son « clac »","Petit bruit de volet quand les chiffres tournent")}
+    ${sw("clac","Son « clac »","Petit bruit de volet quand les chiffres tournent, et cran de la roulette")}
+    <div class="set"><div class="l"><b>Roulette des photos</b><span>Sur le bord de l'onglet Photos</span></div><div class="seg3"><button type="button" data-act="roue" data-v="tambour" aria-pressed="${P().roue!=="molette"}">Tambour gravé</button><button type="button" data-act="roue" data-v="molette" aria-pressed="${P().roue==="molette"}">Molette seule</button></div></div>
     <div class="set"><div class="l"><b>Retour au mode utilisation</b><span>Après combien de minutes sans rien toucher</span></div><div class="seg3">${[[5,"5"],[15,"15"],[60,"60"],[0,"jamais"]].map(([n,l])=>`<button type="button" data-act="rl" data-n="${n}" aria-pressed="${p.relock===n}">${l}</button>`).join("")}</div></div>
     <div class="set"><div class="l"><b>Code d'édition</b><span>3 images à toucher pour passer en mode édition</span></div><button class="btn" type="button" data-act="chpin">Changer le code</button></div>
     <div class="set"><div class="l"><b>Étages en tête</b><span>Combien d'étages les plus utilisés à l'accueil</span></div><div class="seg3">${[3,6,9].map(n=>`<button type="button" data-act="nb" data-n="${n}" aria-pressed="${p.nbTop===n}">${n}</button>`).join("")}</div></div>
@@ -1175,6 +1197,7 @@ document.addEventListener("click",e=>{
   if(act==="undo"){undo();return}
   if(act==="tri"){st.params.tri=b.dataset.v;openF=null;save();render();return}
   if(act==="chif"){st.params.chif=b.dataset.v;save();render();return}
+  if(act==="roue"){st.params.roue=b.dataset.v;save();render();return}
   if(act==="kxtry"){st.params.anim=true;save();panel=null;openF=null;tab="tiles";try{localStorage.setItem("kardex-onglet",tab)}catch(x){}kxAnimStart();render();scrollTo(0,0);return}
   if(act==="fill"){if(!ED)return;const f=+b.dataset.f,v=+b.dataset.v;st.fill=st.fill||{};const old=fillOf(f);
     if(old===v)delete st.fill[f];else st.fill[f]=v;
@@ -1325,7 +1348,7 @@ function carHtml(){
 function carSetup(){
   const c=$("car");if(!c)return;
   c.scrollLeft=(carF-1)*c.clientWidth;carOrig();railSetup();
-  let tm;c.addEventListener("scroll",()=>{clearTimeout(tm);tm=setTimeout(()=>{if(!c.isConnected)return;const nf=Math.round(c.scrollLeft/c.clientWidth)+1;if(nf!==carF){carF=nf;carFlap(nf);clac()}$("ccount").textContent=`Étage ${carF} / 60`;railSync();carOrig()},90)},{passive:true});
+  let tm;c.addEventListener("scroll",()=>{clearTimeout(tm);tm=setTimeout(()=>{if(!c.isConnected)return;const nf=Math.round(c.scrollLeft/c.clientWidth)+1;if(nf!==carF){carF=nf;railSync()}$("ccount").textContent=`Étage ${carF} / 60`;carOrig()},90)},{passive:true});
 }
 // la photo d'origine (pleine qualité) pour l'étage affiché et ses voisins
 async function carOrig(){for(const f of [carF,carF-1,carF+1]){const img=document.querySelector(`.sl[data-f="${f}"] img[data-orig]`);if(img&&!img.dataset.done){img.dataset.done=1;img.src=await phSrc(img.dataset.orig,true)}}}
@@ -1648,35 +1671,44 @@ const backNeed=()=>!!(kbOpen()||document.querySelector(".cr,.vw,.mv,.tc")||panel
   setInterval(cwSync,700); // une fenêtre fermée autrement (bouton, toucher) libère son CloseWatcher
 })();
 
-/* ---------- 🎡 roulette 1-60 sur le bord de l'onglet Photos : glisser = défiler, vite = avance rapide, toucher = sauter ---------- */
+/* ---------- 🎡 roulette des Photos : tambour alu aux chiffres gravés (ou molette moletée seule), tourne à l'infini ----------
+   La surface suit le doigt (vers le haut = étages suivants), un cran + « clac » à chaque étage, élan puis arrêt pile sur un étage.
+   Après 60 on revient à 1. La photo change en même temps que le cran. */
+const WSTEP=22,wrap60=n=>((n-1)%60+60)%60+1;
+let wP=1,wVel=0,wDrag=null,wRaf=0;
 function railHtml(){
-  const marks=[...new Set(PH.map(p=>p.floor))].map(f=>`<i class="pm" style="top:${(f-1)/59*100}%"></i>`).join("");
-  const labs=[1,10,20,30,40,50,60].map(f=>`<span style="top:${(f-1)/59*100}%">${f}</span>`).join("");
-  return `<div class="rail" id="rail" role="slider" aria-label="Roulette des étages" aria-valuemin="1" aria-valuemax="60" aria-valuenow="${carF}" tabindex="0"><div class="rin">${labs}${marks}<b class="rth" id="rth" aria-hidden="true"></b></div></div>`;
+  if(wrap60(Math.round(wP))!==carF)wP=carF;
+  const drum=P().roue!=="molette";
+  return `<div class="whl" id="rail" role="slider" aria-label="Roulette des étages" aria-valuemin="1" aria-valuemax="60" aria-valuenow="${carF}" tabindex="0">${drum?`<div class="drum"><div class="rg"></div><i class="idx"></i><i class="edge l"></i><i class="edge r"></i><i class="spec"></i></div>`:`<div class="knurl"></div>`}<div class="shade"></div><i class="notch"></i></div>`;
 }
-function railSync(){const t=$("rth");if(!t)return;t.style.top=(carF-1)/59*100+"%";$("rail").setAttribute("aria-valuenow",carF);bubPos()}
-// la bulle (grand chiffre) se place toujours à la hauteur du curseur (petit chiffre), pour qu'ils restent alignés
-function bubPos(){const b=$("rbub"),r=document.querySelector("#rail .rin");if(!b||!r||b.hidden)return;const q=r.getBoundingClientRect();b.style.top=(q.top+(carF-1)/59*q.height)+"px"}
-function bubNum(b,f){const el=b.querySelector("b .nx");if(el){if(+el.dataset.nx!==f)nxSet(el,f)}else b.querySelector("b").innerHTML=nx(f)}
-function carFlap(f){const el=document.querySelector(`.sl[data-f="${f}"] .big b .nx`);if(el)[...el.children].forEach(nxFlap)}
-function railJump(f){f=Math.min(60,Math.max(1,f));if(f===carF)return;carF=f;const c=$("car");if(c)c.scrollLeft=(f-1)*c.clientWidth;
-  $("ccount").textContent=`Étage ${f} / 60`;railSync();carFlap(f);clac();const bb=$("rbub");if(bb){bubNum(bb,f);const n=byFloor(f).length;bb.querySelector(":scope>span").textContent=`${n} article${n>1?"s":""}${phOf(f).length?" · 📷":""}`}
-  if(navigator.vibrate)try{navigator.vibrate(3)}catch(x){}}
+function wBuild(){const r=$("rail"),rg=r&&r.querySelector(".rg");if(!rg)return;const H=r.clientHeight;if(!H)return;const Rr=H*.6;
+  rg.dataset.r=Rr;r.querySelector(".drum").style.setProperty("--lh",(2*Rr*Math.tan(Math.PI/60)+.5)+"px");const ph=new Set(PH.map(p=>p.floor));
+  rg.innerHTML=[...Array(60).keys()].map(i=>`<div class="lb${ph.has(i+1)?" ph":""}" data-v="${i+1}" style="transform:rotateX(${-i*6}deg) translateZ(${Rr}px)"><b>${i+1}</b></div>`).join("")}
+function wDraw(){const r=$("rail");if(!r)return;const f=wrap60(Math.round(wP));
+  if(f!==carF){carF=f;const c=$("car");if(c)c.scrollLeft=(f-1)*c.clientWidth;$("ccount").textContent=`Étage ${f} / 60`;r.setAttribute("aria-valuenow",f);clac();if(navigator.vibrate)try{navigator.vibrate(4)}catch(x){}}
+  const k=r.querySelector(".knurl");if(k)k.style.backgroundPosition=`0 ${(-wP*WSTEP)%6}px`;
+  const rg=r.querySelector(".rg");if(rg){if(!rg.firstChild)wBuild();rg.style.transform=`translateZ(-${+rg.dataset.r||0}px) rotateX(${(wP-1)*6}deg)`;
+    const c=rg.querySelector(".lb.cur");if(!c||+c.dataset.v!==f){if(c)c.classList.remove("cur");const n=rg.querySelector(`[data-v="${f}"]`);if(n)n.classList.add("cur")}}}
+function wLoop(){if(wDrag){wRaf=0;return}
+  if(Math.abs(wVel)>.0008){wP+=wVel*16;wVel*=.94;wDraw();wRaf=requestAnimationFrame(wLoop);return}
+  const t=Math.round(wP),d=t-wP;if(Math.abs(d)<.004){wP=t;wDraw();wRaf=0;carOrig();return}
+  wP+=d*.28;wDraw();wRaf=requestAnimationFrame(wLoop)}
+const wGo=()=>{if(!wRaf)wRaf=requestAnimationFrame(wLoop)};
+// la photo a changé autrement (glisser la photo, flèches) : la roulette tourne jusqu'au bon étage, par le plus court chemin
+function railSync(){if(!$("rail"))return;const cur=wrap60(Math.round(wP));if(cur===carF){wDraw();return}
+  let d=carF-cur;if(d>30)d-=60;if(d<-30)d+=60;wP=Math.round(wP)+d-(d>0?.6:-.6);wVel=0;$("rail").setAttribute("aria-valuenow",carF);wGo()}
+function railJump(f){f=wrap60(f);let d=f-wrap60(Math.round(wP));if(d>30)d-=60;if(d<-30)d+=60;wP=Math.round(wP)+d;wVel=0;wDraw()}
 function railSetup(){
-  const r=$("rail");if(!r)return;railSync();let d=null;
-  const bub=y=>{let b=$("rbub");if(!b){b=document.createElement("div");b.id="rbub";b.className="rbub";b.innerHTML="<b></b><span></span>";document.body.appendChild(b)}
-    b.hidden=false;bubNum(b,carF);bubPos();const n=byFloor(carF).length;b.querySelector(":scope>span").textContent=`${n} article${n>1?"s":""}${phOf(carF).length?" · 📷":""}`};
-  r.addEventListener("pointerdown",e=>{e.preventDefault();r.setPointerCapture(e.pointerId);d={y:e.clientY,y0:e.clientY,t:performance.now(),acc:0,moved:false};bub(e.clientY)});
-  r.addEventListener("pointermove",e=>{if(!d)return;const t=performance.now(),dy=e.clientY-d.y,dt=Math.max(8,t-d.t),v=Math.abs(dy)/dt;
-    if(Math.abs(e.clientY-d.y0)>6)d.moved=true;if(!d.moved)return;
-    const gain=1+Math.min(4,v*2.5);d.acc+=dy*gain/13;const w=Math.trunc(d.acc);if(w){d.acc-=w;railJump(carF+w)}
-    d.y=e.clientY;d.t=t;bub(e.clientY)});
-  const up=e=>{if(!d)return;if(!d.moved){const rc=r.querySelector(".rin").getBoundingClientRect();railJump(Math.round((e.clientY-rc.top)/rc.height*59)+1);bub(e.clientY)}
-    d=null;carOrig();setTimeout(()=>{const b=$("rbub");if(b&&!d)b.hidden=true},700)};
+  const r=$("rail");if(!r)return;requestAnimationFrame(()=>{wBuild();wDraw()});
+  r.addEventListener("pointerdown",e=>{e.preventDefault();r.setPointerCapture(e.pointerId);cancelAnimationFrame(wRaf);wRaf=0;wDrag={y:e.clientY,t:performance.now(),v:0};wVel=0});
+  r.addEventListener("pointermove",e=>{if(!wDrag)return;const t=performance.now(),dy=e.clientY-wDrag.y,dt=Math.max(6,t-wDrag.t),sp=Math.abs(dy)/dt;
+    const np=wP-dy/WSTEP*(1+Math.min(3,sp*1.2));wDrag.v=wDrag.v*.6+((np-wP)/dt)*.4;wP=np;wDrag.y=e.clientY;wDrag.t=t;wDraw()});
+  const up=()=>{if(!wDrag)return;wVel=Math.max(-.08,Math.min(.08,wDrag.v));if(performance.now()-wDrag.t>90)wVel=0;wDrag=null;wGo()};
   r.addEventListener("pointerup",up);r.addEventListener("pointercancel",up);
-  r.addEventListener("keydown",e=>{if(e.key==="ArrowDown"){railJump(carF+1);e.preventDefault()}if(e.key==="ArrowUp"){railJump(carF-1);e.preventDefault()}});
+  r.addEventListener("keydown",e=>{if(e.key==="ArrowDown"||e.key==="ArrowUp"){wP+=e.key==="ArrowDown"?1:-1;wVel=0;wDraw();carOrig();e.preventDefault()}});
 }
-
+addEventListener("resize",()=>{if($("rail"))requestAnimationFrame(()=>{wBuild();wDraw()})});
+function carFlap(){}
 
 /* ---------- 🎬 tiroir vidéo : on filme le tiroir → l'app garde les images les plus nettes → on glisse le doigt pour avancer dedans ---------- */
 const TV_MAX=15,TV_SCRUB=48,TV_SHARP=12,TV_SCRUB_W=1600;
