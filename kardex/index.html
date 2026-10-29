@@ -457,6 +457,16 @@ body.fpon{overflow:hidden}
 .cth:first-of-type{padding-left:2px}
 .tgs{display:flex;gap:5px;flex-wrap:wrap;margin-top:-4px}
 .tgs button{border:1px dashed var(--acc);background:var(--acc-soft);color:var(--acc-hi);border-radius:8px;padding:4px 8px;font-size:12px;font-weight:700;cursor:pointer}
+.catb{display:flex;align-items:center;gap:8px;width:100%;font:600 15px var(--f-body);color:var(--fg);background:var(--ink);border:1px solid var(--line);border-left:5px solid var(--c);border-radius:11px;padding:10px 10px 10px 9px;cursor:pointer;text-align:left;min-width:0}
+.catb i,.catl button i{flex:none;width:12px;height:12px;border-radius:50%;background:var(--c);box-shadow:0 0 0 1px rgba(255,255,255,.15)}
+.catb svg{width:16px;height:16px;margin-left:auto;flex:none;color:var(--fg-3)}
+.catb[aria-expanded="true"]{border-color:var(--acc);border-left-color:var(--c)}
+.catl{display:flex;flex-direction:column;gap:8px;border:1px solid var(--line);border-radius:12px;padding:8px;background:var(--ink)}
+.catl .cg{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.catl .cg .cth{width:100%;padding:2px 2px 0}
+.catl button{display:flex;align-items:center;gap:6px;border:1px solid color-mix(in srgb,var(--c,var(--line)) 55%,var(--line));background:color-mix(in srgb,var(--c,var(--card)) 14%,var(--card));color:var(--fg);border-radius:9px;padding:7px 10px;font:600 13px var(--f-body);cursor:pointer}
+.catl button[aria-pressed="true"]{border-color:var(--c,var(--acc));box-shadow:0 0 0 2px var(--c,var(--acc)) inset}
+.catl .kp{align-self:flex-start}
 </style>
 </head>
 <body>
@@ -846,7 +856,12 @@ function itemHtml(a,toks=[]){
   return h+"</div>";
 }
 function histHtml(l){return l.length?`<ul class="hist">${l.map(h=>`<li><time>${fdt(h.t)}</time><span class="w"><span class="tag">${esc(h.k)}</span>${esc(h.w)}</span><span class="d">${esc(h.d||"")}</span></li>`).join("")}</ul>`:'<p class="note">Rien pour l’instant.</p>'}
-const catOptions=s=>THEME_GROUPS.map(g=>`<optgroup label="${g.e} ${esc(g.n)}">${g.ids.map(id=>`<option value="${id}"${id===s?" selected":""}>${esc(cat[id].name)}</option>`).join("")}</optgroup>`).join("");
+// choix de catégorie en couleurs (une liste déroulante Android ne montre pas les couleurs)
+const catBtnIn=(id,c,keep)=>c&&cat[c]?`<i></i>${esc(cat[c].name)}`:`<i></i>${keep?"(garder la catégorie)":"Choisir"}`;
+function catPicker(id,c,keep){return `<input type="hidden" id="${id}" value="${c&&cat[c]?c:""}"><button type="button" class="catb" id="${id}B" data-act="catpick" data-in="${id}" aria-expanded="false" style="--c:${c&&cat[c]?cat[c].color:"var(--line)"}">${catBtnIn(id,c,keep)}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></button>`}
+function catList(id,c,keep){return `<div class="catl" id="${id}L" data-keep="${keep?1:""}" hidden>${keep?`<button type="button" class="kp" data-act="catset" data-in="${id}" data-c="" aria-pressed="${!c}">(garder la catégorie)</button>`:""}${THEME_GROUPS.map(g=>`<div class="cg"><span class="cth">${g.e} ${esc(g.n)}</span>${g.ids.map(x=>`<button type="button" data-act="catset" data-in="${id}" data-c="${x}" style="--c:${cat[x].color}" aria-pressed="${x===c}"><i></i>${esc(cat[x].name)}</button>`).join("")}</div>`).join("")}</div>`}
+function catSync(id){const i=$(id),b=$(id+"B"),l=$(id+"L");if(!i||!b)return;const c=+i.value||null;b.style.setProperty("--c",c?cat[c].color:"var(--line)");
+  b.innerHTML=catBtnIn(id,c,l&&l.dataset.keep)+b.querySelector("svg").outerHTML;if(l)l.querySelectorAll("[data-c]").forEach(x=>x.setAttribute("aria-pressed",String((+x.dataset.c||null)===c)))}
 // # proposés sous le champ (ceux de la catégorie d'abord), un toucher les ajoute
 const tagCtx=v=>{const end=/\s$/.test(v)||!v.trim(),m=v.match(/#([^#]*)$/);return {part:end||!m?"":norm(m[1]),done:tagsParse(end||!m?v:v.slice(0,m.index)).map(norm)}};
 const tagCands=(v,c,n)=>{const {part,done}=tagCtx(v);return [...new Set([...(c!=null?subsOf(c):[]),...subsOf(null)])].filter(t=>!done.includes(norm(t))&&(!part||(norm(t).startsWith(part)&&norm(t)!==part))).slice(0,n)};
@@ -862,7 +877,7 @@ function formHtml(a){
   return `<form class="form" id="fEdit" data-new="${isNew?1:0}">
     <label for="eName">Nom<input id="eName" required maxlength="60" value="${esc(a.name)}" placeholder="ex. Vis M6 inox"></label>
     <div class="two"><label for="eFloor">Étage<input id="eFloor" type="number" inputmode="numeric" min="1" max="60" required value="${a.floor}"></label>
-    <label for="eCat">Catégorie<select id="eCat">${catOptions(a.c)}</select></label></div>
+    <label>Catégorie${catPicker("eCat",a.c)}</label></div>${catList("eCat",a.c)}
     <div class="sgrow" id="eSg"></div>
     <label for="eSub"># Étiquettes (facultatif, plusieurs possibles)<input id="eSub" maxlength="200" autocomplete="off" value="${esc(tg(a).length?tagsStr(tg(a))+" ":"")}" placeholder="#Tête fraisée #M6"></label><div class="tgs" id="eTags"></div>
     <div class="acts"><button class="btn pri grow" type="submit">${isNew?"Ajouter":"Enregistrer"}</button>${isNew?"":'<button class="btn bad" type="button" data-act="del">Supprimer</button>'}</div>
@@ -1023,12 +1038,12 @@ function renderLot(el,kind){
   el.innerHTML=`<div class="panel"><div class="ph"><b>${kind==="floor"?"Changer d'étage":"Changer de catégorie"}</b><span>lot de ${items.length} article${items.length>1?"s":""}</span></div>
     <form class="form" id="fLot">
     ${kind==="floor"?`<label for="lFloor">Nouvel étage (1 à 60)<input id="lFloor" type="number" inputmode="numeric" min="1" max="60" required placeholder="ex. 12"></label>`:
-     `<label for="lCat">Nouvelle catégorie<select id="lCat"><option value="">(garder la catégorie)</option>${catOptions(-1)}</select></label>
+     `<label>Nouvelle catégorie${catPicker("lCat",null,1)}</label>${catList("lCat",null,1)}
       <label for="lSub"># à ajouter (facultatif)<input id="lSub" maxlength="200" autocomplete="off" placeholder="#Tête fraisée #M6"></label><div class="tgs" id="lTags"></div>`}
     <h3>Aperçu</h3><div class="prev" id="lPrev"></div>
     <div class="acts"><button class="btn pri grow" type="submit" id="lGo" disabled>Confirmer</button></div>
     <p class="note">Une sauvegarde est faite avant ; tu peux annuler juste après.</p></form></div>`;
-  if(keep){if(keep.f!=null&&$("lFloor"))$("lFloor").value=keep.f;if(keep.c!=null&&$("lCat"))$("lCat").value=keep.c;if(keep.s!=null&&$("lSub"))$("lSub").value=keep.s}
+  if(keep){if(keep.f!=null&&$("lFloor"))$("lFloor").value=keep.f;if(keep.c!=null&&$("lCat")){$("lCat").value=keep.c;catSync("lCat")}if(keep.s!=null&&$("lSub"))$("lSub").value=keep.s}
   if($("lTags"))tagRow("lSub","lTags",$("lCat").value?+$("lCat").value:items[0].c);
   lotPreview();
 }
@@ -1091,6 +1106,9 @@ document.addEventListener("click",e=>{
   if(act==="tagf"){e.stopPropagation();fsub=b.dataset.t;fcat=null;openA=null;editA=null;openF=null;carEdit=null;panel=null;
     if(lots)setLots(false);if(tab!=="search"){tab="search";try{localStorage.setItem("kardex-onglet",tab)}catch(x){}}
     $("q").value="";chips();render();scrollTo(0,0);toast(`#${b.dataset.t}`);return}
+  if(act==="catpick"){const l=$(b.dataset.in+"L");if(l){l.hidden=!l.hidden;b.setAttribute("aria-expanded",String(!l.hidden));if(!l.hidden)l.scrollIntoView({block:"nearest",behavior:"smooth"})}return}
+  if(act==="catset"){const id=b.dataset.in,i=$(id);if(!i)return;i.value=b.dataset.c;catSync(id);const l=$(id+"L");if(l)l.hidden=true;const bb=$(id+"B");if(bb)bb.setAttribute("aria-expanded","false");
+    i.dispatchEvent(new Event("change",{bubbles:true}));return}
   if(act==="tagadd"){const i=$(b.dataset.in);if(i){tagPut(i,b.dataset.t);if(KB.inp===i)kbSugg()}return}
   if(act==="sgset"){const i=$("eFloor");if(i){i.value=b.dataset.f;i.dispatchEvent(new Event("input",{bubbles:true}))}return}
   if(act==="sgopen"){const f=+b.dataset.f;openF=openF&&openF.f===f&&openF.where==="sg"?null:{f,where:"sg"};openA=null;editA=null;render();return}
