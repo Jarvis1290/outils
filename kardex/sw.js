@@ -1,5 +1,5 @@
 // Kardex — fonctionnement hors ligne
-const CACHE = "kardex-v1.1";
+const CACHE = "kardex-v1.2";
 const CORE = ["./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)));
