@@ -419,6 +419,18 @@ body.kbopen .toast{bottom:auto;top:calc(16px + env(safe-area-inset-top,0px))}
 .vth::-webkit-scrollbar{display:none}
 .vth button{flex:none;width:62px;height:46px;border-radius:8px;overflow:hidden;padding:0;border:2px solid transparent;background:#1F232A;cursor:pointer}
 .vth button.on{border-color:var(--acc)}.vth img{width:100%;height:100%;object-fit:cover;display:block}
+/* v1.4 : éditer depuis l'onglet Photos */
+.sl .pv{position:relative}
+.pact{position:absolute;right:8px;top:8px;display:flex;gap:6px;z-index:2}
+.pact button{border:1px solid rgba(255,255,255,.18);background:rgba(14,16,20,.82);color:#EEF0F4;border-radius:10px;min-width:42px;height:38px;font-size:17px;cursor:pointer;padding:0 8px;font-weight:700}
+.pact button.on{background:var(--acc);color:var(--on-acc);border-color:var(--acc)}
+.pact button.sure{background:#FF8A8D;color:#14110A;font-size:12.5px}
+.cl li.eda{cursor:pointer;grid-template-columns:auto 1fr auto}
+.cl li.eda span{grid-column:2;grid-row:1}.cl li.eda em{grid-column:2;grid-row:2}
+.cl li.eda::after{content:"✏️";grid-column:3;grid-row:1/span 2;font-size:13px;opacity:.7}
+.cl li.eda.on{outline:2px solid var(--acc)}
+.cl .cform{background:var(--card);border:1px solid var(--acc);border-radius:12px;padding:10px}
+.cadd{align-self:flex-start}
 </style>
 </head>
 <body>
@@ -982,7 +994,7 @@ document.addEventListener("click",e=>{
     else{openA=id;editA=null;const a=st.arts[id];if(P().compter){st.uses.floors[a.floor]=fUse(a.floor)+1;st.uses.arts[id]=(st.uses.arts[id]||0)+1;save()}}
     render();return}
   if(act==="edit"){if(!ED)return;panel=null;const id=+b.closest(".item").dataset.a;editA=editA===id?null:id;render();return}
-  if(act==="del"){if(b.dataset.sure){const a=st.arts[editA];snapshot([a.id],`suppression de ${a.name.trim()}`);delete st.arts[a.id];log("suppr",`${a.name.trim()} supprimé`,`était à l'étage ${a.floor}`);save();openA=editA=null;render();toast("Supprimé",5000,true)}
+  if(act==="del"){if(b.dataset.sure){const a=st.arts[editA];snapshot([a.id],`suppression de ${a.name.trim()}`);delete st.arts[a.id];log("suppr",`${a.name.trim()} supprimé`,`était à l'étage ${a.floor}`);save();openA=editA=null;carEdit=null;render();toast("Supprimé",5000,true)}
     else{b.dataset.sure=1;b.textContent="Sûr ? Re-toucher pour supprimer"}return}
   if(act==="floor"){const f=+b.dataset.f,w=b.dataset.w;
     if(lots&&w==="kx"){const it=byFloor(f),allIn=it.length&&it.every(a=>sel.has(a.id));it.forEach(a=>allIn?sel.delete(a.id):sel.add(a.id));render();return}
@@ -991,6 +1003,12 @@ document.addEventListener("click",e=>{
   if(act==="phview"){phView(b.dataset.id);return}
   if(act==="phexp"){phExport();return}
   if(act==="tir"){if(ED)tvMake(+b.dataset.f);return}
+  if(act==="cedit"){if(!ED)return;const id=+b.dataset.a;carEdit=carEdit&&carEdit.id===id?null:{id};editA=carEdit?id:null;panel=null;render();return}
+  if(act==="cnew"){if(!ED)return;carEdit={id:"new",f:+b.dataset.f};editA=null;render();setTimeout(()=>{const i=document.querySelector(`.sl[data-f="${b.dataset.f}"] #eName`);i&&i.focus()},60);return}
+  if(act==="pcrop"){if(ED)phCrop(b.dataset.id);return}
+  if(act==="pfirst"){if(!ED)return;const f=+b.dataset.f;st.params.couv={...(P().couv||{}),[f]:b.dataset.id};delete carPick[f];save();render();toast("⭐ Photo mise en premier");return}
+  if(act==="pdel"){if(!ED)return;if(!b.dataset.sure){b.dataset.sure=1;b.classList.add("sure");b.textContent="Sûr ?";setTimeout(()=>{if(b.isConnected){delete b.dataset.sure;b.classList.remove("sure");b.textContent="🗑️"}},3000);return}
+    const p=PH.find(x=>x.id===b.dataset.id);if(!p)return;if(p.mos||p.vid)tirDel(p.id);else phDel(p.id);toast("Photo supprimée");return}
   if(act==="phpick"){carF=+b.dataset.f;carPick[carF]=b.dataset.id;render();return}
   if(act==="carprev"){carGo(-1);return}
   if(act==="carnext"){carGo(1);return}
@@ -1007,7 +1025,7 @@ document.addEventListener("click",e=>{
   if(act==="rz"){if(b.dataset.sure){st.uses={floors:{},arts:{}};log("compteur","Compteur remis à zéro","");save();render();toast("Compteur à zéro")}else{b.dataset.sure=1;b.textContent="Sûr ? Re-toucher"}return}
   if(act==="reset"){if(b.dataset.sure){if(Sauvegarde.remplacer(toData(fresh()),"remise du fichier d'origine")){toast("Fichier d'origine remis")}}else{b.dataset.sure=1;b.textContent="Sûr ? Une copie est gardée. Re-toucher."}return}
 });
-document.addEventListener("submit",e=>{e.preventDefault();if(e.target.id==="fEdit"&&ED)submitEdit(e.target);if(e.target.id==="fLot")submitLot()});
+document.addEventListener("submit",e=>{e.preventDefault();if(e.target.id==="fEdit"&&ED){if(e.target.closest(".sl"))carEdit=null;submitEdit(e.target)}if(e.target.id==="fLot")submitLot()});
 document.addEventListener("input",e=>{if(e.target.closest("#fLot"))lotPreview();if(["eName","eSub"].includes(e.target.id))sgForm()});
 document.addEventListener("change",e=>{if(e.target.id==="eCat"){e.target.dataset.touched=1;const d=$("dl-sub");if(d)d.outerHTML=subList(+e.target.value);sgForm()}if(e.target.id==="lCat"){const d=$("dl-sub");if(d&&e.target.value)d.outerHTML=subList(+e.target.value);lotPreview()}});
 $("bSet").onclick=()=>{if(ED)togglePanel("set")};
@@ -1016,7 +1034,7 @@ $("bAdd").onclick=()=>{if(ED)togglePanel("add")};
 $("bLots").onclick=()=>{if(ED||lots)setLots(!lots)};
 let tab="search";try{const v=localStorage.getItem("kardex-onglet");if(["search","tiles","photos"].includes(v))tab=v}catch(e){}
 $("tabs").onclick=e=>{const b=e.target.closest("[data-tab]");if(!b)return;const nt=b.dataset.tab;
-  if(nt==="photos"&&openF)carF=openF.f;tab=nt;openF=null;openA=null;editA=null;if(panel&&panel!=="journal"&&panel!=="pin"&&panel!=="set")panel=null;
+  if(nt==="photos"&&openF)carF=openF.f;carEdit=null;tab=nt;openF=null;openA=null;editA=null;if(panel&&panel!=="journal"&&panel!=="pin"&&panel!=="set")panel=null;
   try{localStorage.setItem("kardex-onglet",tab)}catch(e){}render();scrollTo(0,0)};
 $("lotFloor").onclick=()=>togglePanel("lotFloor");
 $("lotCat").onclick=()=>togglePanel("lotCat");
@@ -1104,20 +1122,23 @@ function phView(id){
 
 
 /* swipe par étage : en paysage ou sur grand écran, le mode photo montre un étage par écran */
-let carF=null;const carPick={};
+let carF=null,carEdit=null;const carPick={};
 const carOn=()=>tab==="photos";
 function carSlide(f){
-  const l=phOf(f),it=byFloor(f),cur=l.find(p=>p.id===carPick[f])||l[l.length-1];
+  const couv=(P().couv||{})[f],l=phOf(f),it=byFloor(f),cur=l.find(p=>p.id===carPick[f])||l.find(p=>p.id===couv)||l[l.length-1];
   const n={};it.forEach(a=>n[a.c]=(n[a.c]||0)+1);
   const segs=Object.entries(n).sort((a,b)=>b[1]-a[1]).map(([c,k])=>`<i style="--c:${cat[c].color};--w:${k}"></i>`).join("");
   const strip=l.length>1||(ED&&l.length)?`<div class="thumbs under">${l.map(p=>`<button type="button" class="${p===cur?"on":""}" data-act="phpick" data-f="${f}" data-id="${p.id}" aria-label="Photo"><img data-ph="${p.id}" alt="">${p.mos?'<i class="b3d">3D</i>':p.vid?'<i class="b3d">🎬</i>':""}</button>`).join("")}<label class="tadd ed" aria-label="Ajouter une photo"><input type="file" accept="image/*" multiple data-phf="${f}" hidden>+</label></div>`:"";
   return `<div class="sl" data-f="${f}"><div class="pv">
     ${cur?`<button class="big" type="button" data-act="phview" data-id="${cur.id}" aria-label="Zoom sur la photo de l'étage ${f}"><img data-ph="${cur.id}" data-orig="${cur.id}" alt=""><b>${f}</b>${cur.mos?'<i class="b3d">3D · toucher</i>':cur.vid?'<i class="b3d">🎬 toucher pour glisser</i>':""}</button>`
-      :ED?`<label class="big none"><input type="file" accept="image/*" multiple data-phf="${f}" hidden><span>📷<br>Ajouter une photo</span><b>${f}</b></label>`:`<div class="big none"><span>📷<br>Pas encore de photo</span><b>${f}</b></div>`}${strip}</div>
+      :ED?`<label class="big none"><input type="file" accept="image/*" multiple data-phf="${f}" hidden><span>📷<br>Ajouter une photo</span><b>${f}</b></label>`:`<div class="big none"><span>📷<br>Pas encore de photo</span><b>${f}</b></div>`}${strip}
+    ${ED&&cur?`<div class="pact">${cur.mos||cur.vid?"":`<button type="button" data-act="pcrop" data-id="${cur.id}" aria-label="Recadrer">✂️</button>`}${l.length>1?`<button type="button" class="${cur.id===couv?"on":""}" data-act="pfirst" data-f="${f}" data-id="${cur.id}" aria-label="Mettre en premier">⭐</button>`:""}<button type="button" data-act="pdel" data-id="${cur.id}" aria-label="Supprimer la photo">🗑️</button></div>`:""}</div>
     <div class="side">
       <div class="sh"><b>Étage ${f}</b><span>${it.length} article${it.length>1?"s":""} · rang #${RANK[f]}</span><button class="btn ed tirb" type="button" data-act="tir" data-f="${f}">🎬 Tiroir vidéo</button></div>
       ${segs?`<span class="seg">${segs}</span>`:""}
-      <ul class="cl">${it.map(a=>`<li style="--c:${cat[a.c].color}"><i></i><span>${esc(a.name.trim())}</span><em>${esc(cat[a.c].name)}${a.sub?" › "+esc(a.sub):""}</em></li>`).join("")||'<li class="e">Plateau vide</li>'}</ul>
+      <ul class="cl">${it.map(a=>{const on=ED&&carEdit&&carEdit.id===a.id;return `<li class="${ED?"eda":""}${on?" on":""}" style="--c:${cat[a.c].color}" ${ED?`data-act="cedit" data-a="${a.id}" role="button" tabindex="0"`:""}><i></i><span>${esc(a.name.trim())}</span><em>${esc(cat[a.c].name)}${a.sub?" › "+esc(a.sub):""}</em></li>${on?`<li class="cform">${formHtml(a)}</li>`:""}`}).join("")||'<li class="e">Plateau vide</li>'}
+      ${ED&&carEdit&&carEdit.id==="new"&&carEdit.f===f?`<li class="cform">${(addPre={name:"",f},formHtml(null))}</li>`:""}</ul>
+      ${ED&&!(carEdit&&carEdit.id==="new"&&carEdit.f===f)?`<button class="btn cadd" type="button" data-act="cnew" data-f="${f}">＋ Article ici</button>`:""}
     </div></div>`;
 }
 function carHtml(){
@@ -1251,7 +1272,7 @@ const LOCK_PANELS=["add","set","lotFloor","lotCat"];
 async function pinHash(code){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode("kardex:"+code));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
 function setEdit(on){
   ED=on;document.body.classList.toggle("edit",on);
-  if(!on){if(lots)setLots(false);editA=null;if(LOCK_PANELS.includes(panel)||panel==="pin")panel=null}
+  if(!on){if(lots)setLots(false);editA=null;carEdit=null;if(LOCK_PANELS.includes(panel)||panel==="pin")panel=null}
   else if(panel==="pin")panel=null;
   lastAct=Date.now();render();
 }
@@ -1423,6 +1444,7 @@ function backStep(){
   const mv=document.querySelector(".mv");if(mv&&mv._close){mv._close();return}
   const tc=document.querySelector(".tc");if(tc){if(tc._close)tc._close();return}
   if(panel){panel=null;panel2=null;render();return}
+  if(carEdit){carEdit=null;editA=null;render();return}
   if(editA!==null){editA=null;render();return}
   if(openA!==null||openF){openA=null;openF=null;render();return}
   if(lots){setLots(false);return}
