@@ -201,10 +201,8 @@ h3{margin:0;font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;color
 .phsave .sv-titre{font-weight:700;font-size:18px}
 
 /* swipe par étage (paysage / grand écran) */
-body.carmode header.hd{position:static}
-body.carmode .app{max-width:1400px}
 .carw{position:relative}
-.car{display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;height:calc(100dvh - 24px);min-height:260px;border:1px solid var(--line);border-radius:16px;background:var(--card);overscroll-behavior-x:contain}
+.car{display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;min-height:260px;border:1px solid var(--line);border-radius:16px;background:var(--card);overscroll-behavior-x:contain}
 .car::-webkit-scrollbar{display:none}
 .sl{flex:0 0 100%;scroll-snap-align:start;scroll-snap-stop:always;display:grid;grid-template-columns:minmax(0,1.7fr) minmax(220px,1fr);min-width:0;height:100%}
 .sl .big{position:relative;border:0;padding:0;margin:0;background:#000;display:grid;place-items:center;overflow:hidden;cursor:zoom-in;min-width:0;min-height:0}
@@ -233,6 +231,67 @@ body.carmode .app{max-width:1400px}
 .nav.prev{left:8px}
 .nav.next{right:calc(8px + max(220px, 37%))}
 .ccount{position:absolute;left:12px;bottom:12px;font:700 12.5px var(--f-mono);background:rgba(14,16,20,.82);border-radius:8px;padding:5px 9px;z-index:2}
+
+/* deux modes : ce qui modifie n'apparaît qu'en édition */
+body:not(.edit) .ed{display:none!important}
+#bLock{border-color:var(--line)}
+#bLock[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:var(--on-acc)}
+#bLock[aria-expanded="true"]{border-color:var(--acc);color:var(--acc-hi)}
+.shake{animation:shk .45s}
+@keyframes shk{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.vw .vbar .btn{white-space:nowrap}
+/* recadrage */
+.cr{position:fixed;inset:0;z-index:90;background:#000;display:flex;flex-direction:column;color:#EEF0F4}
+.cstage{position:relative;flex:1;min-height:0;margin:14px max(14px,env(safe-area-inset-right,0px)) 8px max(14px,env(safe-area-inset-left,0px));overflow:hidden;touch-action:none}
+.cstage canvas{position:absolute;display:block}
+.cstage .box{position:absolute;box-sizing:border-box;border:2px solid var(--acc);box-shadow:0 0 0 9999px rgba(0,0,0,.6);cursor:move;touch-action:none;
+  background-image:linear-gradient(rgba(255,255,255,.35) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.35) 1px,transparent 1px);background-size:33.33% 33.33%;background-position:-1px -1px}
+.cstage .h{position:absolute;width:26px;height:26px;border:4px solid var(--acc-hi);box-sizing:border-box}
+.cstage .h.tl{left:-5px;top:-5px;border-right:0;border-bottom:0;cursor:nwse-resize}
+.cstage .h.tr{right:-5px;top:-5px;border-left:0;border-bottom:0;cursor:nesw-resize}
+.cstage .h.bl{left:-5px;bottom:-5px;border-right:0;border-top:0;cursor:nesw-resize}
+.cstage .h.br{right:-5px;bottom:-5px;border-left:0;border-top:0;cursor:nwse-resize}
+.cbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px max(14px,env(safe-area-inset-right,0px)) 6px max(14px,env(safe-area-inset-left,0px))}
+.cbar:last-child{padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+.cbar .seg3{border-color:#2A2F38}
+.cbar .seg3 button{color:#B3B8C2}
+
+/* onglets */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:34;display:flex;justify-content:center;gap:4px;background:var(--card);border-top:1px solid var(--line);padding:6px max(10px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-left,0px))}
+.tabs button{flex:1;max-width:200px;display:flex;flex-direction:column;align-items:center;gap:2px;border:0;background:none;color:var(--fg-3);font-size:11.5px;font-weight:700;padding:6px 4px;border-radius:12px;cursor:pointer}
+.tabs button span{font-size:20px;line-height:1}
+.tabs button[aria-current="page"]{color:var(--acc-hi);background:var(--acc-soft)}
+.app{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+.lotbar{bottom:calc(62px + env(safe-area-inset-bottom,0px))}
+body:not(.t-search) .search,body:not(.t-search) .chips{display:none!important}
+body:not(.t-search) header.hd{position:static}
+body.t-photos .app{max-width:1400px}
+body.t-tiles .app{max-width:900px}
+/* 60 tuiles sur un écran, rang d'utilisation dans le coin */
+.kx{grid-template-columns:repeat(var(--cols,6),minmax(0,1fr));grid-auto-rows:minmax(0,1fr);height:var(--kxH,auto);gap:5px}
+.kx .fp{grid-row:auto}
+.tr{padding:5px 6px;gap:3px;justify-content:space-between;overflow:hidden;min-height:0}
+.tr .n b{font-size:clamp(13px,2.2vh,19px)}
+.tr .rk{position:absolute;top:3px;right:4px;font:700 9.5px/1 var(--f-mono);color:var(--fg-3)}
+.tr .rk.t3{color:var(--on-acc);background:var(--acc);border-radius:5px;padding:2px 4px;top:2px;right:2px}
+.tr .rk.t10{color:var(--acc-hi)}
+.tr .n .cnt{display:none}
+.tr .cnt{font:600 10px var(--f-mono);color:var(--fg-3)}
+.tr .seg{height:7px;flex:none}
+.tr.used::after{display:none}
+.tp .rk{font:700 10.5px var(--f-mono);color:var(--on-acc);background:var(--acc);border-radius:5px;padding:1px 5px}
+/* swipe photos : aussi en portrait (photo en haut, contenu en bas) */
+.car{height:var(--carH,70vh)}
+.sl{grid-template-columns:1fr;grid-template-rows:minmax(0,58%) minmax(0,42%)}
+.sl .side{border-left:0;border-top:1px solid var(--line)}
+.nav{top:29%}
+.nav.next{right:8px}
+@media (orientation:landscape),(min-width:900px){
+  .sl{grid-template-columns:minmax(0,1.7fr) minmax(220px,1fr);grid-template-rows:1fr}
+  .sl .side{border-left:1px solid var(--line);border-top:0}
+  .nav{top:50%}
+  .nav.next{right:calc(8px + max(220px, 37%))}
+}
 </style>
 </head>
 <body>
@@ -241,11 +300,11 @@ body.carmode .app{max-width:1400px}
     <div class="bar">
       <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#14110A" stroke-width="2" stroke-linecap="round"><rect x="4.5" y="2.5" width="15" height="19" rx="2.5"/><path d="M4.5 8.5h15M4.5 14.5h15M10 5.5h4M10 11.5h4M10 17.5h4"/></svg></div>
       <div class="name">Kardex<small id="cnt"></small></div>
-      <button class="ib" id="bPh" type="button" aria-pressed="false" aria-label="Recherche par photos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6H8l1.5-2h5L16 6h1.5A2.5 2.5 0 0 1 20 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 17.5z"/><circle cx="12" cy="13" r="3.5"/></svg><span class="tx">Photos</span></button>
-      <button class="ib" id="bLots" type="button" aria-pressed="false" aria-label="Sélection par lots"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><path d="m14.5 17 2 2 3.5-4"/></svg><span class="tx">Lots</span></button>
-      <button class="ib" id="bAdd" type="button" aria-expanded="false" aria-label="Ajouter un article"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+      <button class="ib" id="bLock" type="button" aria-pressed="false"><svg class="lk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9.5" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><svg class="un" hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9.5" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.7-1.5"/></svg><span class="tx">Utilisation</span></button>
+      <button class="ib ed" id="bLots" type="button" aria-pressed="false" aria-label="Sélection par lots"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><path d="m14.5 17 2 2 3.5-4"/></svg><span class="tx">Lots</span></button>
+      <button class="ib ed" id="bAdd" type="button" aria-expanded="false" aria-label="Ajouter un article"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
       <button class="ib" id="bJournal" type="button" aria-expanded="false" aria-label="Journal des modifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></button>
-      <button class="ib" id="bSet" type="button" aria-expanded="false" aria-label="Paramètres"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+      <button class="ib ed" id="bSet" type="button" aria-expanded="false" aria-label="Paramètres"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
     </div>
     <label class="search" for="q">
       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.6-4.6"/></svg>
@@ -266,8 +325,7 @@ body.carmode .app{max-width:1400px}
   </section>
 
   <section id="phSec" hidden>
-    <h2>📷 Les plateaux en photos <small id="phHint">un clic ouvre, un clic ferme</small></h2>
-    <div class="pg" id="pg"></div>
+    <div id="pg"></div>
   </section>
 
   <section id="topSec">
@@ -275,12 +333,18 @@ body.carmode .app{max-width:1400px}
     <div class="tops" id="tops"></div>
   </section>
 
-  <section id="kxSec">
-    <h2>Les 60 plateaux <small id="kxHint">un clic ouvre, un clic ferme</small></h2>
+  <section id="kxSec" hidden>
+    <h2>Les 60 plateaux <small id="kxHint">#1 = le plus utilisé · un clic ouvre, un clic ferme</small></h2>
     <div class="kx" id="kx"></div>
     <div class="legend" id="legend"></div>
   </section>
 </div>
+
+<nav class="tabs" id="tabs" aria-label="Onglets">
+  <button type="button" data-tab="search"><span>🔍</span>Recherche</button>
+  <button type="button" data-tab="tiles"><span>🗂️</span>Tuiles</button>
+  <button type="button" data-tab="photos"><span>📷</span>Photos</button>
+</nav>
 
 <div class="lotbar" id="lotbar" hidden>
   <div class="in">
@@ -485,7 +549,7 @@ const Sauvegarde = (() => {
 const CATS=[[1, "Divers", "#db0fca"], [2, "Stock de Fraise", "#DDD9C3"], [4, "Tournage", "#DBEEF4"], [6, "Taraud & Alésoirs", "#E6E0EC"], [10, "Outils rotatifs", "#B7DEE8"], [13, "VIS/RONDELLES Inox", "#00B0F0"], [14, "VIS/RONDELLES Acier", "#58B600"], [15, "Visseries (bois/Torx/etc…)", "#FFFF00"], [99, "Fraiseuses", "#0C4DE4"], [100, "Consommable de montage", "#9F0EE1"], [101, "Machine à Batterie", "#09DC2C"], [102, "Machine 220V", "#3A8830"], [103, "Levage", "#08f7e7"], [105, "Pneumatique", "#3EB3D0"], [106, "Percages/Foret", "#8662ea"], [107, "Cliquets", "#ff0080"], [108, "Outils à mains", "#00FA79"], [109, "Metrologie d'atelier", "#E4F21C"]];
 const ARTS=[[119, "Laboratoire", 1, 1], [415, "M6", 13, 39], [416, "M6", 14, 49], [417, "Loupe", 1, 32], [418, "Fraises Inox", 2, 2], [419, "Fraises à Rayon", 2, 2], [420, "Fraise en \"T\"", 2, 2], [421, "Fraises Aluminium", 2, 3], [422, "Chargeur Batteries", 102, 24], [423, "M5", 14, 48], [424, "Matériel de Tournage", 4, 14], [425, "Plaquettes", 4, 6], [426, "M10", 14, 51], [427, "M12", 14, 52], [428, "M14", 14, 52], [429, "M16", 14, 28], [430, "M24", 14, 28], [431, "M8", 14, 50], [433, "Rondelles M8", 14, 53], [434, "M4", 14, 47], [435, "M3", 14, 46], [436, "M1 à M2.5", 14, 45], [437, "Plateau magnétique", 99, 15], [438, "Matériel fraiseuses", 99, 15], [439, "Equerre de fraisage", 99, 36], [440, "M5", 13, 37], [441, "M8", 13, 40], [442, "M10", 13, 41], [443, "M4", 13, 38], [444, "M4 Poulets", 13, 38], [445, "Péteuse", 105, 11], [446, "Outils pneumatiques", 105, 11], [447, "Reserve scotch", 100, 25], [448, "DMU 50", 99, 25], [449, "M12", 13, 42], [450, "M14", 13, 42], [451, "Fils ressort Inox", 13, 42], [452, "Billes INOX", 13, 42], [453, "Goupilles Inox", 100, 42], [454, "Ressorts Inox", 100, 42], [455, "M2 à M3", 13, 29], [456, "NEF 400", 4, 54], [457, "Tasseau FP4", 99, 54], [458, "Dremel® 12V", 101, 20], [459, "Dremel 220V😂", 102, 20], [460, "Thermogun", 102, 20], [462, "Crayon électrique", 102, 20], [463, "Fer à souder", 102, 24], [464, "Rivet pop", 100, 33], [465, "Tubtara", 100, 33], [466, "Tarauds M2 à M10", 6, 21], [467, "Queues de cochon🐷", 6, 21], [468, "Scotch doubles face", 100, 56], [469, "Mini-Grip", 100, 56], [470, "Rubalise", 100, 56], [471, "Elastique", 100, 56], [472, "Clinquant", 100, 58], [473, "Cuivre Béryllium", 100, 58], [474, "O-ring", 100, 30], [475, "Brides métalliques", 100, 30], [476, "Joints", 100, 30], [477, "Span-Set® ", 103, 27], [478, "Torx", 15, 44], [479, "Vis à bois", 15, 44], [480, "Clous", 15, 44], [482, "M7", 15, 26], [483, "Goupilles Acier", 15, 55], [484, "Rivets", 15, 55], [485, "Bouterolle", 15, 55], [486, "cordes", 100, 56], [487, "Ficelles", 100, 56], [488, "Visseuses Makita", 101, 13], [489, "Meuleuse", 101, 13], [490, "Scie sabre", 102, 13], [491, "Perforateur + Aspir.", 101, 13], [492, "Sauteuse", 101, 13], [493, "Talkie-Walkie", 101, 24], [494, "Vis Amercaines", 15, 26], [495, "Spécial", 15, 26], [496, "Niveau à bulle", 109, 32], [498, "Mètre à ruban", 109, 32], [499, "Chevillière", 109, 32], [500, "Fil à plomb", 109, 32], [501, "Règle 1000mm", 109, 32], [502, "Règle 1500mm", 109, 32], [503, "Camera-Thermo", 109, 32], [504, "Mèches laiton", 106, 23], [505, "Mèche longue", 106, 23], [506, "Métrique fin", 6, 17], [507, "Tarauds spéciaux", 6, 17], [508, "Tarauds", 6, 17], [509, "Alesoirs:...", 6, 22], [510, "Fraise pivots/Stock", 106, 22], [511, "Mèches à centrer", 106, 22], [512, "Vérins", 103, 27], [513, "Anneau de levage", 103, 27], [514, "Patins", 103, 27], [515, "Cordes", 103, 27], [516, "Levage palonnier", 103, 16], [517, "Patins Vert", 103, 16], [518, "Grandes sangles Span", 103, 16], [519, "Mèche NC", 106, 5], [520, "Courte de Ø1 à Ø10", 106, 5], [521, "Long de Ø1 à Ø13", 106, 4], [522, "Cles à Cliquets", 107, 7], [523, " Cles à œil", 107, 7], [524, "Cles à fourche", 107, 7], [525, "Cles dynamométriques", 107, 8], [526, "Douilles 3/4", 107, 8], [527, "Soldes de Vis", 15, 57], [528, "Rondelles ressort", 15, 57], [529, "Bellevilles", 15, 57], [530, "Seeger", 15, 57], [531, "Insert métrique", 15, 57], [532, "Pistolet silicone", 1, 31], [534, "Lève panneau", 103, 31], [535, "Fraise scie", 2, 18], [536, "Fraise Modulaire", 2, 18], [537, "Fraise Rayon", 2, 18], [538, "Fraise de forme", 2, 18], [539, "Fraise surfacer", 2, 18], [540, "Fraise Bricolage", 2, 60], [541, "Fraise scies", 2, 10], [542, "Helicoil", 100, 24], [543, "Brides électro", 100, 24], [544, "Camera Snake ", 109, 32], [545, "Seringue 500ml", 1, 59], [546, "Visseuse Placo DEWAL", 101, 13], [547, "Fein", 1, 12], [548, "Agrafeuse", 1, 12], [549, " Grignoteuse Bosch®", 1, 12], [550, "Emporte-pièces ", 1, 12], [551, "Chalumeau", 1, 12], [552, "Coupe sangle", 1, 34], [553, "Extracteur", 1, 34], [554, "Sandow", 1, 34], [555, "Arraches à billes", 1, 34], [556, "Fraise à étage", 2, 10], [557, "Fraise cloche", 2, 10], [558, "Fraise 3 tailles", 2, 10], [559, "Rodoirs", 1, 10], [560, "Tournevis", 108, 19], [561, "Clés à fourche", 108, 19], [562, "Imbus", 108, 19], [563, "Antigel", 1, 19], [564, "Pierres&limes💎", 108, 19], [565, "Ciseaux", 1, 19], [566, "Pince Monseigneur", 108, 59], [567, "Talurit", 108, 59], [568, "Pince pour cables", 108, 59], [569, "Ventouse de levage", 1, 59], [570, "Grande Hilti®", 102, 35], [571, "Hilti:accesoires", 102, 35], [572, "Tampons perceuse Hil", 102, 43], [573, " Perforateur Hitachi", 102, 9], [574, "Perceuses 220V", 102, 9], [575, "Mèche à Béton", 1, 9], [577, "Perceuse angulaire", 102, 9], [578, "Tampon chimique", 1, 9], [579, "Tête à aléser", 99, 15], [580, "Brut posage", 99, 36], [581, "Tire-fils", 1, 32], [582, "Makita", 102, 9], [583, "Multimètres ", 109, 32], [584, "Mèche pour pneu", 1, 16], [585, "Marteau pneumatique ", 105, 11], [586, "Meuleuse à air", 105, 11], [587, "Pistolet AVEX", 1, 11], [588, "Dynafile", 1, 11], [589, "Edalco", 4, 14], [590, "Pistolet SIKA", 105, 31], [591, "Scotch aluminium ", 100, 56], [592, "Niveau laser", 109, 32], [593, "Mètre laser", 109, 32], [594, "Taraud UNC", 6, 17], [596, "Micro-foret Ø0 à Ø1", 106, 5], [597, "etau", 99, 25], [598, "Mors Gressel Haut", 99, 25], [599, "Mors schunk", 99, 25], [600, "Mors Lang", 99, 25], [601, "Cliquets americains", 107, 31], [602, "Tournevis à choc", 108, 8], [603, "Colles", 100, 34], [604, "loctite", 100, 34]];
 
-const APP_VERSION="1.0",LS="kardex-v1",EXPORT_DAY="2026-10-29";
+const APP_VERSION="1.1",LS="kardex-v1",EXPORT_DAY="2026-10-29";
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const nc=ch=>ch.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
@@ -498,7 +562,7 @@ const IC_CHEV='<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="current
 
 /* ---------- données ---------- */
 const cat={};CATS.forEach(([id,name,color])=>cat[id]={id,name:name.trim(),color});
-const PARAMS0={tolerante:true,nbTop:6,plateaux:true,compter:true};
+const PARAMS0={tolerante:true,nbTop:6,compter:true,relock:15,pin:""};
 function fresh(){
   const a={};ARTS.forEach(([id,name,c,floor])=>a[id]={id,name,c,floor,sub:"",added:EXPORT_DAY+"T12:00:00",mod:null,hist:[{t:EXPORT_DAY+"T12:00:00",k:"import",w:"Importé du Kardex",d:`Étage ${floor} · ${cat[c].name}`}]});
   return {arts:a,uses:{floors:{},arts:{}},journal:[],next:100000,undo:null,params:{...PARAMS0}};
@@ -584,8 +648,8 @@ function itemHtml(a,toks=[]){
       <div class="pills"><span><b>Ajouté</b>${fd(a.added)}</span><span><b>Modifié</b>${a.mod?fd(a.mod):"jamais"}</span><span><b>Ouvert</b>${u} fois</span></div>
       ${phOf(a.floor).length?phStrip(a.floor):""}
       ${others.length?`<div class="same">${others.map(x=>`<span style="--c:${cat[x.c].color}"><i></i>${esc(x.name.trim())}</span>`).join("")}</div>`:""}
-      <div class="acts"><button class="btn${editA===a.id?"":" pri"} grow" type="button" data-act="edit" aria-expanded="${editA===a.id}">✏️ Modifier</button></div>
-      ${editA===a.id?formHtml(a):`<h3>Historique</h3>${histHtml([...a.hist].reverse())}`}
+      ${ED?`<div class="acts"><button class="btn${editA===a.id?"":" pri"} grow" type="button" data-act="edit" aria-expanded="${editA===a.id}">✏️ Modifier</button></div>`:""}
+      ${ED&&editA===a.id?formHtml(a):`<h3>Historique</h3>${histHtml([...a.hist].reverse())}`}
     </div>`;
   }
   return h+"</div>";
@@ -609,7 +673,7 @@ function floorPanel(f){
   return `<div class="panel fp"><div class="ph"><b>Étage ${f}</b><span>${items.length} article${items.length>1?"s":""} · ouvert ${fUse(f)} fois</span></div>
     ${phStrip(f)}
     <div class="list">${items.map(a=>itemHtml(a)).join("")||'<p class="note">Plateau vide.</p>'}</div>
-    ${items.length?`<div class="acts"><button class="btn grow" type="button" data-act="pickfloor" data-f="${f}">☑ Sélectionner tout l'étage (lot)</button></div>`:""}</div>`;
+    ${items.length&&ED?`<div class="acts"><button class="btn grow" type="button" data-act="pickfloor" data-f="${f}">☑ Sélectionner tout l'étage (lot)</button></div>`:""}</div>`;
 }
 
 /* ---------- rendu ---------- */
@@ -620,12 +684,14 @@ function render(){
   $("bandeau").innerHTML=Sauvegarde.bandeau();
   renderPanel();
   $("resSec").hidden=!active;$("sugg").hidden=true;
-  $("topSec").hidden=!!q||phMode;
-  $("kxSec").hidden=!!q||!P().plateaux||phMode;
-  $("phSec").hidden=!!q||!phMode;$("bPh").setAttribute("aria-pressed",phMode);
-  const car=carOn();document.body.classList.toggle("carmode",car);
-  if(phMode&&!q){$("pg").className=car?"":"pg";$("pg").innerHTML=car?carHtml():phGrid();if(car)carSetup();$("phHint").textContent=car?"glisse ou flèches ← → pour changer d'étage":"un clic ouvre, un clic ferme"}
-  if(active){
+  const S=tab==="search";
+  ["search","tiles","photos"].forEach(x=>document.body.classList.toggle("t-"+x,tab===x));
+  document.querySelectorAll("#tabs [data-tab]").forEach(b=>b.dataset.tab===tab?b.setAttribute("aria-current","page"):b.removeAttribute("aria-current"));
+  lockBtn();rankCalc();
+  $("resSec").hidden=!S||!active;$("topSec").hidden=!S||!!q;
+  $("kxSec").hidden=tab!=="tiles";$("phSec").hidden=tab!=="photos";
+  if(tab==="photos"){$("pg").innerHTML=carHtml();carSetup()}else $("pg").innerHTML="";
+  if(active&&S){
     let {res,fuzzy,toks}=q?search(raw):{res:all().map(a=>({a,s:0})),fuzzy:false,toks:[]};
     res=res.filter(({a})=>(fcat===null||a.c===fcat)&&(fsub===null||a.sub===fsub));
     // les étages les plus utilisés d'abord, puis la pertinence
@@ -635,31 +701,43 @@ function render(){
     if(!res.length&&q){const c=closest(raw);if(c){$("sugg").hidden=false;$("sugg").innerHTML=`Tu voulais dire <button type="button" data-act="didu" data-v="${esc(c)}">${esc(c)}</button> ?`}}
     $("res").innerHTML=res.length?res.map(({a})=>itemHtml(a,toks)).join(""):`<p class="note">Aucun article pour « ${esc(raw.trim())} ». Essaie un bout du nom ou un numéro d'étage, ou ajoute-le avec +.</p>`;
   }
-  renderTop();renderKx();
+  if(S)renderTop();if(tab==="tiles")renderKx();
+  fitScreen();
   $("nSel").textContent=`${sel.size} sélectionné${sel.size>1?"s":""}`;
   $("lotFloor").disabled=$("lotCat").disabled=!sel.size;
   phHydrate();
 }
+let RANK={};
+function rankCalc(){const fl=[...Array(60).keys()].map(i=>i+1);const nb={};all().forEach(a=>nb[a.floor]=(nb[a.floor]||0)+1);
+  fl.sort((a,b)=>fUse(b)-fUse(a)||(nb[b]||0)-(nb[a]||0)||a-b);RANK={};fl.forEach((f,i)=>RANK[f]=i+1)}
+const byRank=()=>Object.keys(RANK).map(Number).sort((a,b)=>RANK[a]-RANK[b]);
+// les 60 tuiles et le swipe tiennent sur un écran
+function fitScreen(){requestAnimationFrame(()=>{
+  const tb=$("tabs").getBoundingClientRect().height,el=tab==="tiles"?$("kx"):tab==="photos"?$("car"):null;if(!el)return;
+  const top=el.getBoundingClientRect().top+scrollY;
+  if(tab==="tiles"){const land=innerWidth>innerHeight;el.style.setProperty("--cols",land?10:6);
+    el.style.setProperty("--kxH",openF&&openF.where==="kx"?"auto":Math.max(170,innerHeight-top-tb-10)+"px")}
+  else el.style.setProperty("--carH",Math.max(200,innerHeight-top-tb-10)+"px");
+})}
+addEventListener("resize",()=>{if(tab!=="search")fitScreen()});
 function renderTop(){
-  const n=P().nbTop,used=Object.keys(st.uses.floors).map(Number).filter(f=>fUse(f)>0).sort((a,b)=>fUse(b)-fUse(a)||a-b);
-  let rows;
-  if(used.length){rows=used.slice(0,n);$("topSrc").textContent="selon ce que tu ouvres"}
-  else{rows=[...Array(60).keys()].map(i=>i+1).sort((a,b)=>byFloor(b).length-byFloor(a).length||a-b).slice(0,n);$("topSrc").textContent="pour l'instant : les plus remplis"}
-  let h=rows.map(f=>{const it=byFloor(f);return `<button class="tp" type="button" data-act="floor" data-w="top" data-f="${f}" aria-expanded="${openF&&openF.where==="top"&&openF.f===f}"><span class="n"><b>${f}</b><span>${used.length?"🔥"+fUse(f):it.length+" art."}</span></span><span class="w">${esc(it.map(a=>a.name.trim()).join(", ")||"vide")}</span></button>`}).join("");
+  const n=P().nbTop,used=Object.keys(st.uses.floors).some(f=>fUse(+f)>0);
+  const rows=byRank().slice(0,n);$("topSrc").textContent=used?"selon ce que tu ouvres":"pour l'instant : les plus remplis";
+  let h=rows.map(f=>{const it=byFloor(f);return `<button class="tp" type="button" data-act="floor" data-w="top" data-f="${f}" aria-expanded="${openF&&openF.where==="top"&&openF.f===f}"><span class="n"><b>${f}</b><span class="rk">#${RANK[f]}</span></span><span class="w">${esc(it.map(a=>a.name.trim()).join(", ")||"vide")}</span></button>`}).join("");
   if(openF&&openF.where==="top")h+=floorPanel(openF.f);
   $("tops").innerHTML=h;
 }
 function renderKx(){
-  let h="";const rowEnd=openF&&openF.where==="kx"?Math.ceil(openF.f/6)*6:-1;
+  const cols=innerWidth>innerHeight?10:6;let h="";const rowEnd=openF&&openF.where==="kx"?Math.min(60,Math.ceil(openF.f/cols)*cols):-1;
   for(let f=1;f<=60;f++){
     const it=byFloor(f),n={};it.forEach(a=>n[a.c]=(n[a.c]||0)+1);
     const segs=Object.entries(n).sort((a,b)=>b[1]-a[1]).map(([c,k])=>`<i style="--c:${cat[c].color};--w:${k}" title="${esc(cat[c].name)} : ${k}"></i>`).join("");
     const pick=lots&&it.length&&it.every(a=>sel.has(a.id));
-    h+=`<button class="tr${it.length?"":" empty"}${fUse(f)?" used":""}${pick?" pick":""}" type="button" data-act="floor" data-w="kx" data-f="${f}" aria-expanded="${openF&&openF.where==="kx"&&openF.f===f}" aria-label="Étage ${f}, ${it.length} articles"><span class="n"><b>${f}</b><span>${it.length||""}</span></span><span class="seg">${segs}</span></button>`;
+    h+=`<button class="tr${it.length?"":" empty"}${fUse(f)?" used":""}${pick?" pick":""}" type="button" data-act="floor" data-w="kx" data-f="${f}" aria-expanded="${openF&&openF.where==="kx"&&openF.f===f}" aria-label="Étage ${f}, ${it.length} articles"><span class="rk${RANK[f]<=3?" t3":RANK[f]<=10?" t10":""}" title="Rang d'utilisation">#${RANK[f]}</span><span class="n"><b>${f}</b><span class="cnt">${it.length||""}</span></span><span class="seg">${segs}</span></button>`;
     if(f===rowEnd)h+=floorPanel(openF.f);
   }
   $("kx").innerHTML=h;
-  $("kxHint").textContent=lots?"un clic = tout le plateau dans le lot":"un clic ouvre, un clic ferme";
+  $("kxHint").textContent=lots?"un clic = tout le plateau dans le lot":"#1 = le plus utilisé · un clic ouvre, un clic ferme";
   const usedCats=[...new Set(all().map(a=>a.c))];
   $("legend").innerHTML=usedCats.map(c=>`<span style="--c:${cat[c].color}"><i></i>${esc(cat[c].name)}</span>`).join("");
 }
@@ -673,10 +751,11 @@ function renderPanel(){
   if(!panel){el.innerHTML="";return}
   if(panel==="add"){el.innerHTML=`<div class="panel"><div class="ph"><b>Nouvel article</b><span>ajouté avec la date du jour</span></div>${formHtml(null)}</div>`;return}
   if(panel==="journal"){el.innerHTML=`<div class="panel"><div class="ph"><b>Journal</b><span>ajouts, modifs, lots</span></div>
-      ${st.undo?`<div class="acts"><button class="btn grow" type="button" data-act="undo">↩ Annuler : ${esc(st.undo.label)}</button></div>`:""}
+      ${st.undo&&ED?`<div class="acts"><button class="btn grow" type="button" data-act="undo">↩ Annuler : ${esc(st.undo.label)}</button></div>`:""}
       ${histHtml([...st.journal].reverse())}
       <p class="note">Import du fichier Kardex : ${fd(EXPORT_DAY)} · ${ARTS.length} articles.</p></div>`;return}
   if(panel==="set"){renderSettings(el);return}
+  if(panel==="pin"){el.innerHTML=pinHtml();return}
   if(panel==="lotFloor"||panel==="lotCat")renderLot(el,panel==="lotFloor"?"floor":"cat");
 }
 function renderSettings(el){
@@ -685,7 +764,8 @@ function renderSettings(el){
     <div>
     ${sw("tolerante","Recherche tolérante","Trouve aussi les noms avec une faute de frappe")}
     ${sw("compter","Compter les étages utilisés","+1 à l'étage à chaque article ouvert")}
-    ${sw("plateaux","Afficher les 60 plateaux","Sur l'écran d'accueil")}
+    <div class="set"><div class="l"><b>Retour au mode utilisation</b><span>Après combien de minutes sans rien toucher</span></div><div class="seg3">${[[5,"5"],[15,"15"],[60,"60"],[0,"jamais"]].map(([n,l])=>`<button type="button" data-act="rl" data-n="${n}" aria-pressed="${p.relock===n}">${l}</button>`).join("")}</div></div>
+    <div class="set"><div class="l"><b>Code d'édition</b><span>Pour passer en mode édition</span></div><button class="btn" type="button" data-act="chpin">Changer le code</button></div>
     <div class="set"><div class="l"><b>Étages en tête</b><span>Combien d'étages les plus utilisés à l'accueil</span></div><div class="seg3">${[3,6,9].map(n=>`<button type="button" data-act="nb" data-n="${n}" aria-pressed="${p.nbTop===n}">${n}</button>`).join("")}</div></div>
     </div>
     <div id="svPanel"></div>
@@ -761,7 +841,7 @@ document.addEventListener("click",e=>{
     if(openA===id){openA=null;editA=null}
     else{openA=id;editA=null;const a=st.arts[id];if(P().compter){st.uses.floors[a.floor]=fUse(a.floor)+1;st.uses.arts[id]=(st.uses.arts[id]||0)+1;save()}}
     render();return}
-  if(act==="edit"){panel=null;const id=+b.closest(".item").dataset.a;editA=editA===id?null:id;render();return}
+  if(act==="edit"){if(!ED)return;panel=null;const id=+b.closest(".item").dataset.a;editA=editA===id?null:id;render();return}
   if(act==="del"){if(b.dataset.sure){const a=st.arts[editA];snapshot([a.id],`suppression de ${a.name.trim()}`);delete st.arts[a.id];log("suppr",`${a.name.trim()} supprimé`,`était à l'étage ${a.floor}`);save();openA=editA=null;render();toast("Supprimé",5000,true)}
     else{b.dataset.sure=1;b.textContent="Sûr ? Re-toucher pour supprimer"}return}
   if(act==="floor"){const f=+b.dataset.f,w=b.dataset.w;
@@ -775,19 +855,24 @@ document.addEventListener("click",e=>{
   if(act==="carnext"){carGo(1);return}
   if(act==="didu"){$("q").value=b.dataset.v;render();return}
   if(act==="undo"){undo();return}
+  if(act==="rl"){st.params.relock=+b.dataset.n;save();render();return}
+  if(act==="chpin"){panel2="chpin";panel="pin";render();setTimeout(()=>$("pin1")&&$("pin1").focus(),50);return}
   if(act==="sw"){const k=b.dataset.k;st.params[k]=!st.params[k];save();render();return}
   if(act==="nb"){st.params.nbTop=+b.dataset.n;save();render();return}
   if(act==="rz"){if(b.dataset.sure){st.uses={floors:{},arts:{}};log("compteur","Compteur remis à zéro","");save();render();toast("Compteur à zéro")}else{b.dataset.sure=1;b.textContent="Sûr ? Re-toucher"}return}
   if(act==="reset"){if(b.dataset.sure){if(Sauvegarde.remplacer(toData(fresh()),"remise du fichier d'origine")){toast("Fichier d'origine remis")}}else{b.dataset.sure=1;b.textContent="Sûr ? Une copie est gardée. Re-toucher."}return}
 });
-document.addEventListener("submit",e=>{e.preventDefault();if(e.target.id==="fEdit")submitEdit(e.target);if(e.target.id==="fLot")submitLot()});
+document.addEventListener("submit",e=>{e.preventDefault();if(e.target.id==="fPin")submitPin(e.target);if(e.target.id==="fEdit"&&ED)submitEdit(e.target);if(e.target.id==="fLot")submitLot()});
 document.addEventListener("input",e=>{if(e.target.closest("#fLot"))lotPreview()});
 document.addEventListener("change",e=>{if(e.target.id==="eCat"){const d=$("dl-sub");if(d)d.outerHTML=subList(+e.target.value)}if(e.target.id==="lCat"){const d=$("dl-sub");if(d&&e.target.value)d.outerHTML=subList(+e.target.value);lotPreview()}});
-$("bSet").onclick=()=>togglePanel("set");
+$("bSet").onclick=()=>{if(ED)togglePanel("set")};
 $("bJournal").onclick=()=>togglePanel("journal");
-$("bAdd").onclick=()=>togglePanel("add");
-$("bLots").onclick=()=>setLots(!lots);
-$("bPh").onclick=()=>{phMode=!phMode;carF=openF?openF.f:carF;openF=null;openA=null;editA=null;render();if(carOn())$("phSec").scrollIntoView({block:"start"})};
+$("bAdd").onclick=()=>{if(ED)togglePanel("add")};
+$("bLots").onclick=()=>{if(ED||lots)setLots(!lots)};
+let tab="search";try{const v=localStorage.getItem("kardex-onglet");if(["search","tiles","photos"].includes(v))tab=v}catch(e){}
+$("tabs").onclick=e=>{const b=e.target.closest("[data-tab]");if(!b)return;const nt=b.dataset.tab;
+  if(nt==="photos"&&openF)carF=openF.f;tab=nt;openF=null;openA=null;editA=null;if(panel&&panel!=="journal"&&panel!=="pin"&&panel!=="set")panel=null;
+  try{localStorage.setItem("kardex-onglet",tab)}catch(e){}render();scrollTo(0,0)};
 $("lotFloor").onclick=()=>togglePanel("lotFloor");
 $("lotCat").onclick=()=>togglePanel("lotCat");
 $("lotNone").onclick=()=>{sel.clear();render()};
@@ -801,7 +886,7 @@ function toast(t,ms=2400,withUndo=false){document.querySelectorAll(".toast").for
   document.body.appendChild(d);setTimeout(()=>d.remove(),ms)}
 
 /* ---------- 📷 photos des étages : pleine qualité, dans le téléphone (IndexedDB), sauvegarde à part en .zip ---------- */
-const PHDB="kardex-photos";let PH=[];const phUrl=new Map();let phMode=false;
+const PHDB="kardex-photos";let PH=[];const phUrl=new Map();
 function idb(){return new Promise((ok,ko)=>{const r=indexedDB.open(PHDB,1);r.onupgradeneeded=()=>r.result.createObjectStore("photos",{keyPath:"id"});r.onsuccess=()=>ok(r.result);r.onerror=()=>ko(r.error)})}
 async function idbDo(mode,fn){const db=await idb();return new Promise((ok,ko)=>{const tx=db.transaction("photos",mode);const s=tx.objectStore("photos");const r=fn(s);tx.oncomplete=()=>ok(r&&r.result);tx.onerror=()=>ko(tx.error)})}
 async function phLoad(){try{const l=await idbDo("readonly",s=>s.getAll());PH=(l||[]).map(p=>({id:p.id,floor:p.floor,t:p.t,size:p.blob.size})).sort((a,b)=>a.t.localeCompare(b.t))}catch(e){PH=[]}render()}
@@ -815,9 +900,10 @@ async function makePrev(blob){
     return await new Promise(r=>c.toBlob(r,"image/jpeg",.82))}catch(e){return blob}}
 async function phAdd(f,files){
   let n=0;for(const file of files){if(!file.type.startsWith("image/"))continue;
-    const id=Date.now().toString(36)+Math.random().toString(36).slice(2,6),t=now();
-    const prev=await makePrev(file);
-    try{await idbDo("readwrite",s=>s.put({id,floor:f,t,name:file.name,type:file.type,blob:file,prev}));PH.push({id,floor:f,t,size:file.size});n++}
+    const r=await cropEditor(file,{adding:true});if(!r)continue;
+    const blob=r==="keep"?file:r,id=Date.now().toString(36)+Math.random().toString(36).slice(2,6),t=now();
+    const prev=await makePrev(blob);
+    try{await idbDo("readwrite",s=>s.put({id,floor:f,t,name:file.name,type:blob.type||file.type,blob,orig:r==="keep"?null:file,prev}));PH.push({id,floor:f,t,size:blob.size});n++}
     catch(e){toast("Mémoire pleine : photo non gardée");break}}
   if(n){log("photo",`${n} photo${n>1?"s":""} ajoutée${n>1?"s":""}`,`Étage ${f}`);save();render();toast(`📷 ${n} photo${n>1?"s":""} ajoutée${n>1?"s":""} à l'étage ${f}`)}
 }
@@ -827,35 +913,27 @@ async function phDel(id){const p=PH.find(x=>x.id===id);if(!p)return;await idbDo(
 function phStrip(f){
   const l=phOf(f);
   return `<div class="phs">${l.map((p,i)=>`<button class="phb" type="button" data-act="phview" data-id="${p.id}" aria-label="Photo ${i+1} de l'étage ${f}, zoom"><img data-ph="${p.id}" alt=""></button>`).join("")}
-    <label class="phadd"><input type="file" accept="image/*" multiple data-phf="${f}" hidden><span>📷</span>${l.length?"Ajouter":"Ajouter une photo"}</label></div>`;
-}
-function phGrid(){
-  let h="";const cols=innerWidth>=560?3:2,rowEnd=openF&&openF.where==="ph"?Math.ceil(openF.f/cols)*cols:-1;
-  for(let f=1;f<=60;f++){const l=phOf(f),it=byFloor(f);
-    h+=`<button class="pc${l.length?"":" none"}" type="button" data-act="floor" data-w="ph" data-f="${f}" aria-expanded="${openF&&openF.where==="ph"&&openF.f===f}">
-      <span class="pi">${l.length?`<img data-ph="${l[l.length-1].id}" alt="">`:"<span>📷</span>"}<b>${f}</b>${l.length>1?`<em>${l.length}</em>`:""}</span>
-      <span class="pw">${esc(it.map(a=>a.name.trim()).join(", ")||"vide")}</span></button>`;
-    if(f===rowEnd||(f===60&&rowEnd>60))h+=floorPanel(openF.f);}
-  return h;
+    ${ED?`<label class="phadd"><input type="file" accept="image/*" multiple data-phf="${f}" hidden><span>📷</span>${l.length?"Ajouter":"Ajouter une photo"}</label>`:""}</div>`;
 }
 async function phHydrate(){for(const img of document.querySelectorAll("img[data-ph]:not([src])")){img.src=await phSrc(img.dataset.ph,false)}}
-document.addEventListener("change",e=>{const i=e.target.closest("input[data-phf]");if(i&&i.files.length){phAdd(+i.dataset.phf,[...i.files]);i.value=""}});
+document.addEventListener("change",e=>{const i=e.target.closest("input[data-phf]");if(i&&i.files.length&&ED){phAdd(+i.dataset.phf,[...i.files]);i.value=""}});
 
 /* visionneuse : un clic ferme, double-clic ou pincer pour zoomer, glisser pour se déplacer */
 function phView(id){
   const p=PH.find(x=>x.id===id);if(!p)return;const list=phOf(p.floor);let idx=list.findIndex(x=>x.id===id);
   const v=document.createElement("div");v.className="vw";v.innerHTML=`<div class="stage"><img alt=""></div>
-    <div class="vbar"><b></b><span class="grow"></span>${list.length>1?'<button class="btn" type="button" data-v="prev">‹</button><button class="btn" type="button" data-v="next">›</button>':""}<button class="btn bad" type="button" data-v="del">Supprimer</button></div>
+    <div class="vbar"><b></b><span class="grow"></span>${list.length>1?'<button class="btn" type="button" data-v="prev">‹</button><button class="btn" type="button" data-v="next">›</button>':""}${ED?'<button class="btn" type="button" data-v="crop">✂️ Recadrer</button><button class="btn bad" type="button" data-v="del">Supprimer</button>':""}</div>
     <p class="vhint">Un clic ferme · double-clic ou deux doigts pour zoomer</p>`;
   document.body.appendChild(v);document.body.style.overflow="hidden";
   const img=v.querySelector("img"),stage=v.querySelector(".stage");let s=1,x=0,y=0;
   const apply=()=>{img.style.transform=`translate(${x}px,${y}px) scale(${s})`};
-  const show=async()=>{s=1;x=y=0;apply();const q=list[idx];v.querySelector("b").textContent=`Étage ${q.floor} · ${idx+1}/${list.length}`;img.src=await phSrc(q.id,true);const d=v.querySelector('[data-v="del"]');d.textContent="Supprimer";delete d.dataset.sure};
+  const show=async()=>{s=1;x=y=0;apply();const q=list[idx];v.querySelector("b").textContent=`Étage ${q.floor} · ${idx+1}/${list.length}`;img.src=await phSrc(q.id,true);const d=v.querySelector('[data-v="del"]');if(d){d.textContent="Supprimer";delete d.dataset.sure}};
   const close=()=>{v.remove();document.body.style.overflow=""};
   show();
   v.querySelector(".vbar").onclick=e=>{const b=e.target.closest("[data-v]");if(!b)return;
     if(b.dataset.v==="prev"){idx=(idx-1+list.length)%list.length;show()}
     if(b.dataset.v==="next"){idx=(idx+1)%list.length;show()}
+    if(b.dataset.v==="crop"){const id=list[idx].id;close();phCrop(id);return}
     if(b.dataset.v==="del"){if(b.dataset.sure){phDel(list[idx].id);close()}else{b.dataset.sure=1;b.textContent="Sûr ? Re-toucher"}}};
   const pts=new Map();let start=null,pinch=null,lastTap=0,tapT=null,moved=false;
   stage.addEventListener("pointerdown",e=>{stage.setPointerCapture(e.pointerId);pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
@@ -879,21 +957,19 @@ function phView(id){
 
 
 /* swipe par étage : en paysage ou sur grand écran, le mode photo montre un étage par écran */
-const wideMQ=matchMedia("(orientation:landscape) and (min-width:600px), (min-width:900px)");
-wideMQ.addEventListener("change",()=>render());
 let carF=null;const carPick={};
-const carOn=()=>phMode&&wideMQ.matches&&!norm($("q").value);
+const carOn=()=>tab==="photos";
 function carSlide(f){
   const l=phOf(f),it=byFloor(f),cur=l.find(p=>p.id===carPick[f])||l[l.length-1];
   const n={};it.forEach(a=>n[a.c]=(n[a.c]||0)+1);
   const segs=Object.entries(n).sort((a,b)=>b[1]-a[1]).map(([c,k])=>`<i style="--c:${cat[c].color};--w:${k}"></i>`).join("");
   return `<div class="sl" data-f="${f}">
     ${cur?`<button class="big" type="button" data-act="phview" data-id="${cur.id}" aria-label="Zoom sur la photo de l'étage ${f}"><img data-ph="${cur.id}" data-orig="${cur.id}" alt=""><b>${f}</b></button>`
-      :`<label class="big none"><input type="file" accept="image/*" multiple data-phf="${f}" hidden><span>📷<br>Ajouter une photo</span><b>${f}</b></label>`}
+      :ED?`<label class="big none"><input type="file" accept="image/*" multiple data-phf="${f}" hidden><span>📷<br>Ajouter une photo</span><b>${f}</b></label>`:`<div class="big none"><span>📷<br>Pas encore de photo</span><b>${f}</b></div>`}
     <div class="side">
-      <div class="sh"><b>Étage ${f}</b><span>${it.length} article${it.length>1?"s":""}${fUse(f)?` · 🔥${fUse(f)}`:""}</span></div>
+      <div class="sh"><b>Étage ${f}</b><span>${it.length} article${it.length>1?"s":""} · rang #${RANK[f]}</span></div>
       ${segs?`<span class="seg">${segs}</span>`:""}
-      ${l.length?`<div class="thumbs">${l.map(p=>`<button type="button" class="${p===cur?"on":""}" data-act="phpick" data-f="${f}" data-id="${p.id}" aria-label="Photo"><img data-ph="${p.id}" alt=""></button>`).join("")}<label class="tadd" aria-label="Ajouter une photo"><input type="file" accept="image/*" multiple data-phf="${f}" hidden>+</label></div>`:""}
+      ${l.length?`<div class="thumbs">${l.map(p=>`<button type="button" class="${p===cur?"on":""}" data-act="phpick" data-f="${f}" data-id="${p.id}" aria-label="Photo"><img data-ph="${p.id}" alt=""></button>`).join("")}<label class="tadd ed" aria-label="Ajouter une photo"><input type="file" accept="image/*" multiple data-phf="${f}" hidden>+</label></div>`:""}
       <ul class="cl">${it.map(a=>`<li style="--c:${cat[a.c].color}"><i></i><span>${esc(a.name.trim())}</span><em>${esc(cat[a.c].name)}${a.sub?" › "+esc(a.sub):""}</em></li>`).join("")||'<li class="e">Plateau vide</li>'}</ul>
     </div></div>`;
 }
@@ -961,6 +1037,105 @@ function phPanel(){const mo=PH.reduce((t,p)=>t+p.size,0)/1048576;
     <div class="acts"><button class="btn pri grow" type="button" data-act="phexp">💾 Sauvegarder les photos</button><label class="btn grow" style="text-align:center">📂 Importer des photos<input type="file" accept=".zip,application/zip" hidden id="phImp"></label></div>
     <div class="note">L'import ajoute seulement les photos qui manquent : rien n'est effacé.</div></div>`}
 document.addEventListener("change",e=>{if(e.target.id==="phImp"&&e.target.files[0]){phImport(e.target.files[0]);e.target.value=""}});
+
+
+/* ---------- ✂️ recadrage photo intégré : cadre libre ou au format, rotation ; la sortie garde la pleine résolution ---------- */
+function cropEditor(blob,opt={}){return new Promise(async done=>{
+  let bm;try{bm=await createImageBitmap(blob,{imageOrientation:"from-image"})}catch(e){toast("Photo illisible");return done(null)}
+  let rot=0,src=bm,ratio=0,crop=null,k=1,ox=0,oy=0;
+  const v=document.createElement("div");v.className="cr";
+  v.innerHTML=`<div class="cstage"><canvas></canvas><div class="box"><i class="h tl" data-h="tl"></i><i class="h tr" data-h="tr"></i><i class="h bl" data-h="bl"></i><i class="h br" data-h="br"></i></div></div>
+    <div class="cbar"><div class="seg3">${[["Libre",0],["4:3",4/3],["3:4",3/4],["16:9",16/9],["1:1",1]].map(([l,r])=>`<button type="button" data-r="${r}" aria-pressed="${r===0}">${l}</button>`).join("")}</div>
+      <button class="btn" type="button" data-c="rot" aria-label="Tourner d'un quart de tour">↻ Tourner</button></div>
+    <div class="cbar"><button class="btn" type="button" data-c="no">Annuler</button>
+      ${opt.adding?'<button class="btn" type="button" data-c="keep">Garder telle quelle</button>':""}${opt.orig?'<button class="btn" type="button" data-c="orig">Photo d’origine</button>':""}
+      <span class="grow"></span><button class="btn pri" type="button" data-c="ok">✂️ Recadrer</button></div>`;
+  document.body.appendChild(v);document.body.style.overflow="hidden";
+  const stage=v.querySelector(".cstage"),cv=v.querySelector("canvas"),box=v.querySelector(".box");
+  const W=()=>src.width,H=()=>src.height;
+  function rotated(){if(!rot)return bm;const c=document.createElement("canvas"),q=rot%2;c.width=q?bm.height:bm.width;c.height=q?bm.width:bm.height;
+    const x=c.getContext("2d");x.translate(c.width/2,c.height/2);x.rotate(rot*Math.PI/2);x.drawImage(bm,-bm.width/2,-bm.height/2);return c}
+  function full(){if(!ratio)return {x:0,y:0,w:W(),h:H()};let w=W(),h=w/ratio;if(h>H()){h=H();w=h*ratio}return {x:(W()-w)/2,y:(H()-h)/2,w,h}}
+  function layout(){const r=stage.getBoundingClientRect();k=Math.min(r.width/W(),r.height/H());const dw=Math.round(W()*k),dh=Math.round(H()*k);
+    cv.width=dw;cv.height=dh;cv.style.width=dw+"px";cv.style.height=dh+"px";ox=(r.width-dw)/2;oy=(r.height-dh)/2;cv.style.left=ox+"px";cv.style.top=oy+"px";
+    cv.getContext("2d").drawImage(src,0,0,dw,dh);draw()}
+  function draw(){Object.assign(box.style,{left:ox+crop.x*k+"px",top:oy+crop.y*k+"px",width:crop.w*k+"px",height:crop.h*k+"px"})}
+  function reset(){src=rotated();crop=full();layout()}
+  reset();const onRs=()=>layout();addEventListener("resize",onRs);
+  let drag=null;const MIN=40;
+  box.addEventListener("pointerdown",e=>{e.preventDefault();box.setPointerCapture(e.pointerId);drag={h:e.target.dataset.h||"move",x:e.clientX,y:e.clientY,c:{...crop}}});
+  box.addEventListener("pointermove",e=>{if(!drag)return;const dx=(e.clientX-drag.x)/k,dy=(e.clientY-drag.y)/k,c={...drag.c},m=MIN/k;
+    if(drag.h==="move"){c.x=Math.min(Math.max(0,c.x+dx),W()-c.w);c.y=Math.min(Math.max(0,c.y+dy),H()-c.h)}
+    else{const L=drag.h.includes("l"),T=drag.h[0]==="t";let x1=c.x,y1=c.y,x2=c.x+c.w,y2=c.y+c.h;
+      if(L)x1=Math.min(Math.max(0,x1+dx),x2-m);else x2=Math.max(Math.min(W(),x2+dx),x1+m);
+      if(T)y1=Math.min(Math.max(0,y1+dy),y2-m);else y2=Math.max(Math.min(H(),y2+dy),y1+m);
+      if(ratio){let w=x2-x1,h=w/ratio;const maxH=T?y2:H()-y1;if(h>maxH){h=maxH;w=h*ratio}if(L)x1=x2-w;else x2=x1+w;if(T)y1=y2-h;else y2=y1+h}
+      Object.assign(c,{x:x1,y:y1,w:x2-x1,h:y2-y1})}
+    crop=c;draw()});
+  const up=()=>drag=null;box.addEventListener("pointerup",up);box.addEventListener("pointercancel",up);
+  const end=r=>{removeEventListener("resize",onRs);v.remove();document.body.style.overflow="";bm.close&&bm.close();done(r)};
+  v.addEventListener("click",async e=>{const r=e.target.closest("[data-r]");
+    if(r){ratio=+r.dataset.r;v.querySelectorAll("[data-r]").forEach(b=>b.setAttribute("aria-pressed",b===r));crop=full();draw();return}
+    const b=e.target.closest("[data-c]");if(!b)return;const c=b.dataset.c;
+    if(c==="rot"){rot=(rot+1)%4;reset();return}
+    if(c==="no")return end(null);
+    if(c==="keep")return end("keep");
+    if(c==="orig")return end("orig");
+    if(c==="ok"){const x=Math.round(crop.x),y=Math.round(crop.y),w=Math.round(crop.w),h=Math.round(crop.h);
+      if(!rot&&x===0&&y===0&&w===W()&&h===H())return end("keep");
+      b.disabled=true;b.textContent="…";
+      const o=document.createElement("canvas");o.width=w;o.height=h;o.getContext("2d").drawImage(src,x,y,w,h,0,0,w,h);
+      end(await new Promise(r=>o.toBlob(r,"image/jpeg",.95)))}});
+})}
+async function phCrop(id){
+  const p=await phGet(id);if(!p)return;
+  const r=await cropEditor(p.blob,{orig:!!p.orig});if(!r||r==="keep")return;
+  const nb=r==="orig"?p.orig:r;
+  const rec={...p,blob:nb,orig:r==="orig"?null:(p.orig||p.blob),prev:await makePrev(nb),type:"image/jpeg"};
+  try{await idbDo("readwrite",s=>s.put(rec))}catch(e){toast("Mémoire pleine : recadrage non gardé");return}
+  ["o","p"].forEach(k=>{const u=phUrl.get(id+":"+k);if(u)URL.revokeObjectURL(u);phUrl.delete(id+":"+k)});
+  const m=PH.find(x=>x.id===id);if(m)m.size=nb.size;
+  log("photo",r==="orig"?"Photo remise d'origine":"Photo recadrée",`Étage ${p.floor}`);save();render();toast(r==="orig"?"Photo d'origine remise":"✂️ Photo recadrée")
+}
+
+/* ---------- 🔒 deux modes : Utilisation (par défaut, rien ne se modifie) et Édition (code) ---------- */
+let ED=false,lastAct=Date.now();
+const LOCK_PANELS=["add","set","lotFloor","lotCat"];
+async function pinHash(code){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode("kardex:"+code));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+function setEdit(on){
+  ED=on;document.body.classList.toggle("edit",on);
+  if(!on){if(lots)setLots(false);editA=null;if(LOCK_PANELS.includes(panel)||panel==="pin")panel=null}
+  else if(panel==="pin")panel=null;
+  lastAct=Date.now();render();
+}
+function pinHtml(){
+  const nouveau=!P().pin||panel2==="chpin";
+  return `<div class="panel"><div class="ph"><b>${nouveau?(P().pin?"Changer le code":"Créer le code d'édition"):"Mode édition"}</b><span>${nouveau?"4 à 8 chiffres":"tape ton code"}</span></div>
+    <form class="form" id="fPin" data-new="${nouveau?1:0}">
+      <label for="pin1">${nouveau?"Nouveau code":"Code"}<input id="pin1" type="password" inputmode="numeric" autocomplete="off" pattern="[0-9]*" maxlength="8" required></label>
+      ${nouveau?'<label for="pin2">Encore une fois<input id="pin2" type="password" inputmode="numeric" autocomplete="off" pattern="[0-9]*" maxlength="8" required></label>':""}
+      <div class="acts"><button class="btn pri grow" type="submit">${nouveau?"Enregistrer le code":"🔓 Passer en édition"}</button></div>
+      <p class="msg" id="pinMsg"></p></form></div>`;
+}
+let panel2=null;
+async function submitPin(form){
+  const a=$("pin1").value.trim();
+  if(form.dataset.new==="1"){const b=$("pin2").value.trim();
+    if(!/^\d{4,8}$/.test(a)){$("pinMsg").textContent="Le code doit avoir 4 à 8 chiffres.";return}
+    if(a!==b){$("pinMsg").textContent="Les deux codes ne sont pas pareils.";return}
+    const had=!!P().pin;st.params.pin=await pinHash(a);log("code",had?"Code d'édition changé":"Code d'édition créé","");save();panel2=null;
+    if(had){panel="set";render();toast("Code changé ✓")}else{setEdit(true);toast("Code créé ✓ · mode édition")}return}
+  if(await pinHash(a)===P().pin){setEdit(true);toast("🔓 Mode édition")}
+  else{$("pinMsg").textContent="Mauvais code.";$("pin1").value="";$("pin1").focus();$("hd").classList.add("shake");setTimeout(()=>$("hd").classList.remove("shake"),500)}
+}
+function lockBtn(){const b=$("bLock");b.setAttribute("aria-pressed",ED);b.setAttribute("aria-expanded",panel==="pin");
+  b.querySelector(".tx").textContent=ED?"Édition":"Utilisation";b.querySelector(".lk").hidden=ED;b.querySelector(".un").hidden=!ED;
+  b.setAttribute("aria-label",ED?"Mode édition : toucher pour revenir au mode utilisation":"Mode utilisation : toucher pour passer en édition")}
+$("bLock").onclick=()=>{if(ED){setEdit(false);toast("🔒 Mode utilisation");return}panel2=null;togglePanel("pin");setTimeout(()=>$("pin1")&&$("pin1").focus(),50)};
+// retour automatique au mode utilisation après un moment sans rien toucher
+["pointerdown","keydown"].forEach(t=>addEventListener(t,()=>lastAct=Date.now(),{passive:true}));
+function relockCheck(){const m=P().relock;if(ED&&m>0&&Date.now()-lastAct>m*60000){setEdit(false);toast("🔒 Retour au mode utilisation")}}
+setInterval(relockCheck,20000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)relockCheck()});
 
 const toData=s=>({articles:s.arts,compteurs:s.uses,journal:s.journal,parametres:s.params,prochainId:s.next});
 /* ---------- 💾 sauvegarde Drive commune (bloc SAUVEGARDE ATELIER v2), paramètres compris ---------- */
