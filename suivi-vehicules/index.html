@@ -891,6 +891,10 @@ html[data-magic="on"] .liq .lq{transform:rotate(calc(var(--gx,0) * -12deg))}
 #phView[hidden]{display:none}
 #phImg{max-width:100%;max-height:78vh;border-radius:10px;object-fit:contain}
 #phView .ph-acts{width:100%;max-width:420px}
+.ph-ann{position:fixed;inset:0;z-index:210;background:rgba(0,0,0,.94);display:flex;flex-direction:column;justify-content:center;gap:10px;padding:14px;box-sizing:border-box}
+.ph-ann canvas{display:block;width:100%;height:auto;max-height:68vh;touch-action:none;background:#111;border-radius:10px}
+.ph-ann .ph-acts{flex-wrap:wrap}
+.ph-ann .ph-acts>*{flex:1 1 40%}
 @media (prefers-reduced-motion:reduce){ .nope,.dodge,.wheelie,.tilt,.yawn,.bumpL,.bumpR,.shy,.nap,.stretch,.flip,.sulk,.shiver,.phares{animation:none} }
 </style>
 </head>
@@ -1144,7 +1148,7 @@ html[data-magic="on"] .liq .lq{transform:rotate(calc(var(--gx,0) * -12deg))}
 </div>
 <div id="phView" hidden>
   <img id="phImg" alt="Photo en pleine qualité">
-  <div class="ph-acts"><button class="btn" type="button" id="phClose">Fermer</button><button class="btn danger" type="button" id="phDel">Supprimer cette photo</button></div>
+  <div class="ph-acts"><button class="btn" type="button" id="phClose">Fermer</button><button class="btn" type="button" id="phAnn">✏️ Annoter</button><button class="btn danger" type="button" id="phDel">Supprimer cette photo</button></div>
 </div>
 <div class="kpad" id="kpad" hidden>
   <div class="kp-top"><span id="kp-lbl"></span><b id="kp-val"></b></div>
@@ -2340,13 +2344,13 @@ const phCur=()=>ENTEDIT?ENTEDIT.id:EDIT?EDIT.id:PHREF;
 const phTake=()=>{const id=PHREF||uid();PHREF=null;return id};
 async function phList(ref){return ref?((await phDo("readonly",s=>s.index("ref").getAll(ref)))||[]):[]}
 async function phPrev(f){try{const bm=await createImageBitmap(f,{imageOrientation:"from-image"}),k=Math.min(1,800/Math.max(bm.width,bm.height)),c=document.createElement("canvas");c.width=Math.round(bm.width*k);c.height=Math.round(bm.height*k);c.getContext("2d").drawImage(bm,0,0,c.width,c.height);bm.close&&bm.close();return (await new Promise(r=>c.toBlob(r,"image/jpeg",.82)))||f}catch(e){return f}}
-async function phAdd(files){
-  const ref=phCur()||(PHREF=uid());let n=0;
+async function phAdd(files,ref){
+  ref=ref||phCur()||(PHREF=uid());let n=0;
   for(const f of files){if(!f.type.startsWith("image/"))continue;
     const prev=await phPrev(f);
     try{await phDo("readwrite",s=>s.put({id:uid(),ref,t:new Date().toISOString(),name:f.name,type:f.type,blob:f,prev}));n++}
     catch(e){toast("Mémoire pleine : photo non gardée");break}}
-  if(n){toast(`📷 ${n} photo${n>1?"s":""} ajoutée${n>1?"s":""}`);phShow();phPanel()}
+  if(n){toast(`📷 ${n} photo${n>1?"s":""} ajoutée${n>1?"s":""}`);phShow();phPanel();notesPhotos()}
 }
 function phRevoke(){PHU.forEach(u=>URL.revokeObjectURL(u));PHU.clear()}
 async function phShow(){
@@ -2357,16 +2361,46 @@ async function phShow(){
 }
 async function phView(id){const p=await phDo("readonly",s=>s.get(id));if(!p)return;if(PHVIEW)URL.revokeObjectURL(PHVIEW);PHVIEW=URL.createObjectURL(p.blob);$("#phImg").src=PHVIEW;$("#phView").dataset.id=id;$("#phView").hidden=false}
 function phClose(){$("#phView").hidden=true;$("#phImg").removeAttribute("src");if(PHVIEW){URL.revokeObjectURL(PHVIEW);PHVIEW=null}}
-async function phDel(id){await phDo("readwrite",s=>s.delete(id));phClose();phShow();phPanel();toast("Photo supprimée")}
+async function phDel(id){await phDo("readwrite",s=>s.delete(id));phClose();phShow();phPanel();notesPhotos();toast("Photo supprimée")}
 async function phDelRef(ref){if(!ref)return;const l=await phList(ref);if(l.length)await phDo("readwrite",s=>{l.forEach(p=>s.delete(p.id))})}
 // annulation d'une nouvelle entrée : ses photos ne sont pas gardées
 function phDrop(){if(PHREF){phDelRef(PHREF);PHREF=null}phRevoke()}
+// annoter : texte posé au toucher (si une phrase est tapée) ou trait au doigt ; l'original est gardé, la copie annotée s'ajoute
+async function phAnnotate(id){
+  const p=await phDo("readonly",s=>s.get(id));if(!p)return;
+  const img=new Image();img.src=URL.createObjectURL(p.blob);await img.decode();
+  const w=document.createElement("div");w.className="ph-ann";
+  w.innerHTML=`<canvas></canvas><input class="txt" type="text" maxlength="60" placeholder="Texte : tape-le puis touche la photo (vide = trait au doigt)" aria-label="Texte à poser"><div class="ph-acts"><button class="btn" type="button" data-a="undo">↶ Annuler le dernier</button><button class="btn" type="button" data-a="cancel">Fermer</button><button class="btn primary" type="button" data-a="save">Enregistrer une copie</button></div>`;
+  document.body.appendChild(w);
+  const cv=w.querySelector("canvas"),g=cv.getContext("2d"),k=Math.min(1,1600/img.naturalWidth);
+  cv.width=Math.round(img.naturalWidth*k);cv.height=Math.round(img.naturalHeight*k);
+  const ops=[];let cur=null;
+  const draw=()=>{g.drawImage(img,0,0,cv.width,cv.height);ops.forEach(o=>{
+    if(o.t==="line"){g.strokeStyle="#E5484D";g.lineWidth=Math.max(4,cv.width/120);g.lineCap="round";g.lineJoin="round";g.beginPath();o.pts.forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));g.stroke()}
+    else{g.font=`bold ${Math.round(cv.width/22)}px sans-serif`;g.lineWidth=Math.max(3,cv.width/300);g.strokeStyle="#fff";g.fillStyle="#E5484D";g.strokeText(o.s,o.x,o.y);g.fillText(o.s,o.x,o.y)}})};
+  const pos=e=>{const r=cv.getBoundingClientRect();return [(e.clientX-r.left)*cv.width/r.width,(e.clientY-r.top)*cv.height/r.height]};
+  const txt=w.querySelector("input");
+  cv.onpointerdown=e=>{const s=txt.value.trim(),q=pos(e);if(s){ops.push({t:"text",x:q[0],y:q[1],s});txt.value="";draw();return}cur={t:"line",pts:[q]};ops.push(cur);cv.setPointerCapture(e.pointerId)};
+  cv.onpointermove=e=>{if(cur){cur.pts.push(pos(e));draw()}};
+  cv.onpointerup=cv.onpointercancel=()=>{cur=null};
+  const close=()=>{URL.revokeObjectURL(img.src);w.remove()};
+  w.querySelector('[data-a="cancel"]').onclick=close;
+  w.querySelector('[data-a="undo"]').onclick=()=>{ops.pop();draw()};
+  w.querySelector('[data-a="save"]').onclick=()=>cv.toBlob(async b=>{
+    if(!b){toast("Enregistrement impossible");return}
+    const prev=await phPrev(b);
+    await phDo("readwrite",s=>s.put({id:uid(),ref:p.ref,t:new Date().toISOString(),name:"annotée "+(p.name||"photo"),type:"image/jpeg",blob:b,prev,annote:true}));
+    close();phClose();phShow();phPanel();notesPhotos();toast("✏️ Copie annotée gardée, l'original aussi")},"image/jpeg",.92);
+  draw();
+}
 $("#phClose").onclick=phClose;
+$("#phAnn").onclick=()=>phAnnotate($("#phView").dataset.id);
 $("#phView").onclick=e=>{if(e.target.id==="phView")phClose()};
 $("#phDel").onclick=()=>confirmTap($("#phDel"),"Toucher encore pour supprimer la photo",()=>phDel($("#phView").dataset.id));
 document.addEventListener("click",e=>{const t=e.target.closest(".ph-thumb[data-ph]");if(t)phView(t.dataset.ph)});
 document.addEventListener("change",e=>{
   if(e.target.id==="phIn"&&e.target.files.length){phAdd([...e.target.files]);e.target.value=""}
+  if(e.target.classList.contains("nph-in")&&e.target.files.length){const files=[...e.target.files];e.target.value="";phAdd(files,e.target.dataset.ref||(NEWREF=uid()))}
   if(e.target.id==="phImp"&&e.target.files[0]){phImport(e.target.files[0]);e.target.value=""}});
 
 // sauvegarde des photos : un .zip à part (photos telles quelles + liste), rien n'est effacé à l'import
@@ -2621,12 +2655,25 @@ function renderBmw(){
   applyPad();
 }
 // ---------- notes libres par véhicule (pressions, références, choses à retenir)
+// photos des notes : même stockage, rattachées à la note ; une nouvelle note prend son identifiant à l'enregistrement
+let NEWREF=null; const NPU=new Map();
+const nTake=()=>{const id=NEWREF||uid();NEWREF=null;return id};
+function noteDrop(){if(NEWREF){phDelRef(NEWREF);NEWREF=null}}
+async function notesPhotos(){
+  NPU.forEach(u=>URL.revokeObjectURL(u));NPU.clear();
+  for(const box of document.querySelectorAll("#vehBody [data-nph]")){
+    const ref=box.dataset.nph==="new"?NEWREF:box.dataset.nph, l=await phList(ref);
+    l.forEach(p=>NPU.set(p.id,URL.createObjectURL(p.prev)));
+    box.innerHTML=`<div class="ph-strip">${l.map((p,i)=>`<button class="ph-thumb" type="button" data-ph="${p.id}" aria-label="Photo ${i+1}, agrandir"><img src="${NPU.get(p.id)}" alt=""></button>`).join("")}<label class="ph-add"><input type="file" accept="image/*" multiple hidden class="nph-in" data-ref="${ref||""}"><span>📷</span>${l.length?"Ajouter":"Ajouter une photo"}</label></div>`;
+  }
+}
 let nEdit=null, nQ="";
 const isoNow=()=>{ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; };
 function renderNotes(){ const v=MODE, o=vx(v), B=$("#vehBody");
   const L=o.notes.slice().sort((a,b)=>(!!b.pin-!!a.pin)||String(b.d).localeCompare(String(a.d)));
   const form=n=>`<div class="card nform"><input id="nT" class="txt" type="text" maxlength="80" placeholder="Titre (ex. Pressions des pneus)" aria-label="Titre" value="${esc(n.t||"")}">
     <textarea id="nX" rows="7" maxlength="4000" placeholder="Ta note…" aria-label="Texte de la note">${esc(n.x||"")}</textarea>
+    <div class="nph" data-nph="${n.id||"new"}"></div>
     <div style="display:flex;gap:8px"><button type="button" class="btn primary" id="nSave" style="flex:2">${ic("seal-check")} Enregistrer</button><button type="button" class="btn" id="nCancel" style="flex:1">Annuler</button></div></div>`;
   let h=`<div class="nbar"><button type="button" class="btn primary" id="nAdd">${ic("plus-circle")} Nouvelle note</button>${o.notes.length>3?`<input id="nQ" class="txt" type="search" placeholder="Chercher…" aria-label="Chercher dans les notes" value="${esc(nQ)}">`:""}</div>`;
   if(nEdit==="new") h+=form({});
@@ -2635,16 +2682,17 @@ function renderNotes(){ const v=MODE, o=vx(v), B=$("#vehBody");
       <button type="button" data-pin="${n.id}" aria-pressed="${!!n.pin}" aria-label="${n.pin?"Détacher":"Épingler en haut"}">${ic("push-pin",n.pin?"#F5D04C":"var(--fg-3)")}</button>
       <button type="button" data-ned="${n.id}" aria-label="Modifier">${ic("pencil-simple","var(--fg-3)")}</button>
       <button type="button" data-ndel="${n.id}" aria-label="Supprimer">${ic("trash","var(--fg-3)")}</button></span></div>
-      ${n.x?`<div class="ntx">${esc(n.x)}</div>`:""}<small class="muted">${n.d?dfr(n.d):""}</small></div>`; });
+      ${n.x?`<div class="ntx">${esc(n.x)}</div>`:""}<div class="nph" data-nph="${n.id}"></div><small class="muted">${n.d?dfr(n.d):""}</small></div>`; });
   B.innerHTML=h+`<div class="cap">${ic("info")} Notes de ${esc(V[v].nl||V[v].n)} seulement, gardées dans la sauvegarde Drive.</div>`;
+  notesPhotos();
   const filt=()=>{ const q=nQ.trim().toLowerCase(); B.querySelectorAll(".note").forEach(c=>{ c.hidden=!!q&&!c.innerText.toLowerCase().includes(q); }); };
   const q=$("#nQ"); if(q){ q.oninput=()=>{ nQ=q.value; filt(); }; filt(); }
   $("#nAdd").onclick=()=>{ nEdit="new"; renderNotes(); const t=$("#nT"); if(t){ pgShow(t.closest(".nform")); t.focus(); } };
   const s=$("#nSave"); if(s) s.onclick=()=>{ const t=$("#nT").value.trim().slice(0,80), x=$("#nX").value.replace(/\s+$/,"").slice(0,4000);
     if(!t&&!x){ toast("La note est vide."); return; }
-    if(nEdit==="new") o.notes.push({id:uid(),d:isoNow(),t,x,pin:false}); else { const n=o.notes.find(y=>y.id===nEdit); if(n) Object.assign(n,{t,x,d:isoNow()}); }
+    if(nEdit==="new") o.notes.push({id:nTake(),d:isoNow(),t,x,pin:false}); else { const n=o.notes.find(y=>y.id===nEdit); if(n) Object.assign(n,{t,x,d:isoNow()}); }
     nEdit=null; persist(); renderNotes(); toast("✓ Note enregistrée"); };
-  const c=$("#nCancel"); if(c) c.onclick=()=>{ nEdit=null; renderNotes(); };
+  const c=$("#nCancel"); if(c) c.onclick=()=>{ nEdit=null; noteDrop(); renderNotes(); };
   B.querySelectorAll("[data-pin]").forEach(b=>b.onclick=()=>{ const n=o.notes.find(y=>y.id===b.dataset.pin); if(!n) return; n.pin=!n.pin; persist(); renderNotes(); toast(n.pin?"📌 Épinglée en haut":"Note détachée"); });
   B.querySelectorAll("[data-ned]").forEach(b=>b.onclick=()=>{ nEdit=b.dataset.ned; renderNotes(); const t=$("#nX"); if(t) t.focus(); });
   B.querySelectorAll("[data-ndel]").forEach(b=>b.onclick=()=>{ const k=o.notes.findIndex(y=>y.id===b.dataset.ndel); if(k<0) return; const [n]=o.notes.splice(k,1); persist(); renderNotes();
