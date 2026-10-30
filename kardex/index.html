@@ -280,6 +280,22 @@ body.t-tiles .app{max-width:900px}
 .tr .cnt{font:600 10px var(--f-mono);color:var(--fg-3)}
 .tr .seg{height:7px;flex:none}
 .tr.used::after{display:none}
+.podium{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:8px;align-items:end;margin-bottom:8px}
+.pd{border:1px solid var(--line);background:var(--card);border-radius:14px;padding:10px 8px 9px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;text-align:center;color:var(--fg);border-top:3px solid var(--c,var(--line))}
+.pd .md{font-size:26px;line-height:1}.pd.p1 .md{font-size:34px}
+.pd.p1{padding-top:14px;padding-bottom:14px;background:linear-gradient(180deg,rgba(255,196,0,.13),var(--card) 70%)}
+.pd .nm{font-weight:700;font-size:13px;line-height:1.2;width:100%;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.pd .fx{font:800 15px/1 var(--f-mono);color:var(--acc-hi)}.pd .fx .nx{height:1em}
+.pd .x,.ar .x{font:700 11px var(--f-mono);color:var(--fg-3)}
+.pd.ghost{opacity:.35;cursor:default}
+.arl{display:flex;flex-direction:column;gap:5px}
+.ar{display:grid;grid-template-columns:26px 1fr auto auto;align-items:center;gap:8px;border:1px solid var(--line);background:var(--card);border-radius:11px;padding:7px 10px;cursor:pointer;text-align:left;color:var(--fg);border-left:3px solid var(--c,var(--line))}
+.ar .r{font:800 12px var(--f-mono);color:var(--fg-3)}.ar .nm{font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ar .fx{font:800 14px/1 var(--f-mono);color:var(--acc-hi)}.ar .fx .nx{height:1em}
+.wh{font-size:13px;color:var(--fg-2);margin:12px 0 6px;font-weight:700}
+.wrds{display:flex;flex-wrap:wrap;gap:6px}
+.wd{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:5px 11px;font-size:13px;cursor:pointer;color:var(--fg)}
+.wd small{font:700 10.5px var(--f-mono);color:var(--acc-hi);margin-left:5px}
 .tp .rk{font:700 10.5px var(--f-mono);color:var(--on-acc);background:var(--acc);border-radius:5px;padding:1px 5px}
 /* swipe photos : aussi en portrait (photo en haut, contenu en bas) */
 .car{height:var(--carH,70vh)}
@@ -555,8 +571,15 @@ body.fpon{overflow:hidden}
     <div id="pg"></div>
   </section>
 
+  <section id="artSec" hidden>
+    <h2>🏆 Articles les plus cherchés</h2>
+    <div class="podium" id="podium"></div>
+    <div class="arl" id="arl"></div>
+    <div id="wrdBox" hidden><h3 class="wh">🔎 Les mots les plus tapés</h3><div class="wrds" id="wrds"></div></div>
+  </section>
+
   <section id="topSec">
-    <h2>🔥 Les plus utilisés <small id="topSrc"></small></h2>
+    <h2>🔥 Étages les plus utilisés <small id="topSrc"></small></h2>
     <div class="tops" id="tops"></div>
   </section>
 
@@ -782,7 +805,7 @@ const Sauvegarde = (() => {
 const CATS=[[1, "Divers", "#db0fca"], [2, "Stock de Fraise", "#DDD9C3"], [4, "Tournage", "#DBEEF4"], [6, "Taraud & Alésoirs", "#E6E0EC"], [10, "Outils rotatifs", "#B7DEE8"], [13, "VIS/RONDELLES Inox", "#00B0F0"], [14, "VIS/RONDELLES Acier", "#58B600"], [15, "Visseries (bois/Torx/etc…)", "#FFFF00"], [99, "Fraiseuses", "#0C4DE4"], [100, "Consommable de montage", "#9F0EE1"], [101, "Machine à Batterie", "#09DC2C"], [102, "Machine 220V", "#3A8830"], [103, "Levage", "#08f7e7"], [105, "Pneumatique", "#3EB3D0"], [106, "Percages/Foret", "#8662ea"], [107, "Cliquets", "#ff0080"], [108, "Outils à mains", "#00FA79"], [109, "Metrologie d'atelier", "#E4F21C"]];
 const ARTS=[[119, "Laboratoire", 1, 1], [415, "M6", 13, 39], [416, "M6", 14, 49], [417, "Loupe", 1, 32], [418, "Fraises Inox", 2, 2], [419, "Fraises à Rayon", 2, 2], [420, "Fraise en \"T\"", 2, 2], [421, "Fraises Aluminium", 2, 3], [422, "Chargeur Batteries", 102, 24], [423, "M5", 14, 48], [424, "Matériel de Tournage", 4, 14], [425, "Plaquettes", 4, 6], [426, "M10", 14, 51], [427, "M12", 14, 52], [428, "M14", 14, 52], [429, "M16", 14, 28], [430, "M24", 14, 28], [431, "M8", 14, 50], [433, "Rondelles M8", 14, 53], [434, "M4", 14, 47], [435, "M3", 14, 46], [436, "M1 à M2.5", 14, 45], [437, "Plateau magnétique", 99, 15], [438, "Matériel fraiseuses", 99, 15], [439, "Equerre de fraisage", 99, 36], [440, "M5", 13, 37], [441, "M8", 13, 40], [442, "M10", 13, 41], [443, "M4", 13, 38], [444, "M4 Poulets", 13, 38], [445, "Péteuse", 105, 11], [446, "Outils pneumatiques", 105, 11], [447, "Reserve scotch", 100, 25], [448, "DMU 50", 99, 25], [449, "M12", 13, 42], [450, "M14", 13, 42], [451, "Fils ressort Inox", 13, 42], [452, "Billes INOX", 13, 42], [453, "Goupilles Inox", 100, 42], [454, "Ressorts Inox", 100, 42], [455, "M2 à M3", 13, 29], [456, "NEF 400", 4, 54], [457, "Tasseau FP4", 99, 54], [458, "Dremel® 12V", 101, 20], [459, "Dremel 220V😂", 102, 20], [460, "Thermogun", 102, 20], [462, "Crayon électrique", 102, 20], [463, "Fer à souder", 102, 24], [464, "Rivet pop", 100, 33], [465, "Tubtara", 100, 33], [466, "Tarauds M2 à M10", 6, 21], [467, "Queues de cochon🐷", 6, 21], [468, "Scotch doubles face", 100, 56], [469, "Mini-Grip", 100, 56], [470, "Rubalise", 100, 56], [471, "Elastique", 100, 56], [472, "Clinquant", 100, 58], [473, "Cuivre Béryllium", 100, 58], [474, "O-ring", 100, 30], [475, "Brides métalliques", 100, 30], [476, "Joints", 100, 30], [477, "Span-Set® ", 103, 27], [478, "Torx", 15, 44], [479, "Vis à bois", 15, 44], [480, "Clous", 15, 44], [482, "M7", 15, 26], [483, "Goupilles Acier", 15, 55], [484, "Rivets", 15, 55], [485, "Bouterolle", 15, 55], [486, "cordes", 100, 56], [487, "Ficelles", 100, 56], [488, "Visseuses Makita", 101, 13], [489, "Meuleuse", 101, 13], [490, "Scie sabre", 102, 13], [491, "Perforateur + Aspir.", 101, 13], [492, "Sauteuse", 101, 13], [493, "Talkie-Walkie", 101, 24], [494, "Vis Amercaines", 15, 26], [495, "Spécial", 15, 26], [496, "Niveau à bulle", 109, 32], [498, "Mètre à ruban", 109, 32], [499, "Chevillière", 109, 32], [500, "Fil à plomb", 109, 32], [501, "Règle 1000mm", 109, 32], [502, "Règle 1500mm", 109, 32], [503, "Camera-Thermo", 109, 32], [504, "Mèches laiton", 106, 23], [505, "Mèche longue", 106, 23], [506, "Métrique fin", 6, 17], [507, "Tarauds spéciaux", 6, 17], [508, "Tarauds", 6, 17], [509, "Alesoirs:...", 6, 22], [510, "Fraise pivots/Stock", 106, 22], [511, "Mèches à centrer", 106, 22], [512, "Vérins", 103, 27], [513, "Anneau de levage", 103, 27], [514, "Patins", 103, 27], [515, "Cordes", 103, 27], [516, "Levage palonnier", 103, 16], [517, "Patins Vert", 103, 16], [518, "Grandes sangles Span", 103, 16], [519, "Mèche NC", 106, 5], [520, "Courte de Ø1 à Ø10", 106, 5], [521, "Long de Ø1 à Ø13", 106, 4], [522, "Cles à Cliquets", 107, 7], [523, " Cles à œil", 107, 7], [524, "Cles à fourche", 107, 7], [525, "Cles dynamométriques", 107, 8], [526, "Douilles 3/4", 107, 8], [527, "Soldes de Vis", 15, 57], [528, "Rondelles ressort", 15, 57], [529, "Bellevilles", 15, 57], [530, "Seeger", 15, 57], [531, "Insert métrique", 15, 57], [532, "Pistolet silicone", 1, 31], [534, "Lève panneau", 103, 31], [535, "Fraise scie", 2, 18], [536, "Fraise Modulaire", 2, 18], [537, "Fraise Rayon", 2, 18], [538, "Fraise de forme", 2, 18], [539, "Fraise surfacer", 2, 18], [540, "Fraise Bricolage", 2, 60], [541, "Fraise scies", 2, 10], [542, "Helicoil", 100, 24], [543, "Brides électro", 100, 24], [544, "Camera Snake ", 109, 32], [545, "Seringue 500ml", 1, 59], [546, "Visseuse Placo DEWAL", 101, 13], [547, "Fein", 1, 12], [548, "Agrafeuse", 1, 12], [549, " Grignoteuse Bosch®", 1, 12], [550, "Emporte-pièces ", 1, 12], [551, "Chalumeau", 1, 12], [552, "Coupe sangle", 1, 34], [553, "Extracteur", 1, 34], [554, "Sandow", 1, 34], [555, "Arraches à billes", 1, 34], [556, "Fraise à étage", 2, 10], [557, "Fraise cloche", 2, 10], [558, "Fraise 3 tailles", 2, 10], [559, "Rodoirs", 1, 10], [560, "Tournevis", 108, 19], [561, "Clés à fourche", 108, 19], [562, "Imbus", 108, 19], [563, "Antigel", 1, 19], [564, "Pierres&limes💎", 108, 19], [565, "Ciseaux", 1, 19], [566, "Pince Monseigneur", 108, 59], [567, "Talurit", 108, 59], [568, "Pince pour cables", 108, 59], [569, "Ventouse de levage", 1, 59], [570, "Grande Hilti®", 102, 35], [571, "Hilti:accesoires", 102, 35], [572, "Tampons perceuse Hil", 102, 43], [573, " Perforateur Hitachi", 102, 9], [574, "Perceuses 220V", 102, 9], [575, "Mèche à Béton", 1, 9], [577, "Perceuse angulaire", 102, 9], [578, "Tampon chimique", 1, 9], [579, "Tête à aléser", 99, 15], [580, "Brut posage", 99, 36], [581, "Tire-fils", 1, 32], [582, "Makita", 102, 9], [583, "Multimètres ", 109, 32], [584, "Mèche pour pneu", 1, 16], [585, "Marteau pneumatique ", 105, 11], [586, "Meuleuse à air", 105, 11], [587, "Pistolet AVEX", 1, 11], [588, "Dynafile", 1, 11], [589, "Edalco", 4, 14], [590, "Pistolet SIKA", 105, 31], [591, "Scotch aluminium ", 100, 56], [592, "Niveau laser", 109, 32], [593, "Mètre laser", 109, 32], [594, "Taraud UNC", 6, 17], [596, "Micro-foret Ø0 à Ø1", 106, 5], [597, "etau", 99, 25], [598, "Mors Gressel Haut", 99, 25], [599, "Mors schunk", 99, 25], [600, "Mors Lang", 99, 25], [601, "Cliquets americains", 107, 31], [602, "Tournevis à choc", 108, 8], [603, "Colles", 100, 34], [604, "loctite", 100, 34]];
 
-const APP_VERSION="1.7",LS="kardex-v1",EXPORT_DAY="2026-10-29";
+const APP_VERSION="1.8",LS="kardex-v1",EXPORT_DAY="2026-10-29";
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const nc=ch=>ch.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
@@ -1007,7 +1030,7 @@ function render(){
   ["search","tiles","photos"].forEach(x=>document.body.classList.toggle("t-"+x,tab===x));
   document.querySelectorAll("#tabs [data-tab]").forEach(b=>b.dataset.tab===tab?b.setAttribute("aria-current","page"):b.removeAttribute("aria-current"));
   lockBtn();rankCalc();
-  $("resSec").hidden=!S||!active;$("topSec").hidden=!S||!!q;
+  $("resSec").hidden=!S||!active;$("topSec").hidden=!S||!!q;$("artSec").hidden=!S||!!q||lots||!renderArts();
   $("kxSec").hidden=tab!=="tiles";$("phSec").hidden=tab!=="photos";
   if(tab==="photos"){$("pg").innerHTML=carHtml();carSetup()}else $("pg").innerHTML="";
   if(active&&S){
@@ -1040,6 +1063,26 @@ function fitScreen(){requestAnimationFrame(()=>{
   else el.style.setProperty("--carH",Math.max(200,innerHeight-top-tb-10)+"px");
 })}
 addEventListener("resize",()=>{if(tab!=="search")fitScreen()});
+const WU=()=>st.uses.words||(st.uses.words={});
+// 🏆 podium des articles les plus ouverts + mots les plus tapés
+function renderArts(){
+  const n=P().nbTop,top=all().map(a=>[a,st.uses.arts[a.id]||0]).filter(x=>x[1]>0).sort((x,y)=>y[1]-x[1]||x[0].floor-y[0].floor).slice(0,Math.max(n,3));
+  const ws=Object.entries(WU()).filter(x=>x[1]>0).sort((x,y)=>y[1]-x[1]||x[0].localeCompare(y[0])).slice(0,8);
+  if(!top.length&&!ws.length)return false;
+  const MD=["🥇","🥈","🥉"],fois=k=>`×${k}`;
+  const pd=i=>{const t=top[i];if(!t)return `<div class="pd ghost p${i+1}"><span class="md">${MD[i]}</span><span class="nm">…</span></div>`;const [a,k]=t;
+    return `<button class="pd p${i+1}" type="button" data-act="topart" data-a="${a.id}" style="--c:${cat[a.c].color}" aria-label="${i+1}e : ${esc(a.name.trim())}, étage ${a.floor}, ouvert ${k} fois"><span class="md">${MD[i]}</span><span class="nm">${esc(a.name.trim())}</span><span class="fx">${nx(a.floor)}</span><span class="x">${fois(k)}</span></button>`};
+  $("podium").hidden=!top.length;$("podium").innerHTML=top.length?pd(1)+pd(0)+pd(2):"";
+  $("arl").innerHTML=top.slice(3,n).map(([a,k],i)=>`<button class="ar" type="button" data-act="topart" data-a="${a.id}" style="--c:${cat[a.c].color}"><span class="r">${i+4}</span><span class="nm">${esc(a.name.trim())}</span><span class="fx">${nx(a.floor)}</span><span class="x">${fois(k)}</span></button>`).join("");
+  $("wrdBox").hidden=!ws.length;$("wrds").innerHTML=ws.map(([w,k])=>`<button class="wd" type="button" data-act="didu" data-v="${esc(w)}">${esc(w)}<small>${fois(k)}</small></button>`).join("");
+  return true;
+}
+// mot tapé : compté quand on s'arrête 3 s, qu'on ouvre un article ou qu'on efface ; « M6 » puis « M6 inox » = un seul mot
+let wq=null,wt=null;
+function wCommit(){clearTimeout(wt);wt=null;if(!P().compter)return;
+  const k=$("q").value.trim().replace(/\s+/g," ").toLowerCase();if(k.length<2||k===wq)return;
+  const W=WU();if(wq&&(k.startsWith(wq)||wq.startsWith(k))){W[wq]=(W[wq]||1)-1;if(W[wq]<=0)delete W[wq]}
+  W[k]=(W[k]||0)+1;wq=k;save()}
 function renderTop(){
   const n=P().nbTop,used=Object.keys(st.uses.floors).some(f=>fUse(+f)>0);
   const rows=byRank().slice(0,n);$("topSrc").textContent=used?"selon ce que tu ouvres":"pour l'instant : les plus remplis";
@@ -1086,7 +1129,7 @@ function renderSettings(el){
   el.innerHTML=`<div class="panel"><div class="ph"><b>Paramètres</b><span>Kardex v${APP_VERSION}</span></div>
     <div>
     ${sw("tolerante","Recherche tolérante","Trouve aussi les noms avec une faute de frappe")}
-    ${sw("compter","Compter les étages utilisés","+1 à l'étage à chaque article ouvert")}
+    ${sw("compter","Compter ce que tu utilises","+1 à l'article et à l'étage à chaque article ouvert, et les mots tapés")}
     ${sw("clavier","Clavier Kardex","QWERTZ + chiffres + mots proposés, à la place du clavier Android")}
     <div class="set"><div class="l"><b>Chiffres</b><span>Style des numéros d'étage, partout dans l'app</span></div><div class="seg3"><button type="button" data-act="chif" data-v="aff" aria-pressed="${nxSty()==="aff"}">Afficheur</button><button type="button" data-act="chif" data-v="pave" aria-pressed="${nxSty()==="pave"}">Pavés</button></div></div>
     ${sw("anim","Animation des tuiles","À l'arrivée sur Tuiles, les numéros défilent de 0 jusqu'à leur étage")}
@@ -1100,7 +1143,7 @@ function renderSettings(el){
     <div id="svPanel"></div>
     ${phPanel()}
     <div class="acts"><button class="btn" type="button" data-act="rz">Remettre le compteur à zéro</button></div>
-    <p class="note"><b>Remettre le compteur à zéro</b> : efface seulement le classement « les plus utilisés » (rangs #, 🔥, nombre d'ouvertures). Articles, étages et photos ne bougent pas.</p>
+    <p class="note"><b>Remettre le compteur à zéro</b> : efface seulement les classements (podium des articles, mots tapés, rangs #, 🔥, nombre d'ouvertures). Articles, étages et photos ne bougent pas.</p>
     <p class="note">Il faut un 2e toucher pour confirmer.</p>
   </div>`;
   Sauvegarde.panneau($("svPanel"));
@@ -1172,11 +1215,12 @@ document.addEventListener("click",e=>{
     if(lots){sel.has(id)?sel.delete(id):sel.add(id);render();return}
     panel=null;
     if(openA===id){openA=null;editA=null}
-    else{openA=id;editA=null;const a=st.arts[id];if(P().compter){st.uses.floors[a.floor]=fUse(a.floor)+1;st.uses.arts[id]=(st.uses.arts[id]||0)+1;save()}}
+    else{openA=id;editA=null;const a=st.arts[id];if($("q").value.trim())wCommit();if(P().compter){st.uses.floors[a.floor]=fUse(a.floor)+1;st.uses.arts[id]=(st.uses.arts[id]||0)+1;save()}}
     render();return}
   if(act==="edit"){if(!ED)return;panel=null;const id=+b.closest(".item").dataset.a;editA=editA===id?null:id;render();return}
   if(act==="del"){if(b.dataset.sure){const a=st.arts[editA];snapshot([a.id],`suppression de ${a.name.trim()}`);delete st.arts[a.id];log("suppr",`${a.name.trim()} supprimé`,`était à l'étage ${a.floor}`);save();openA=editA=null;carEdit=null;render();toast("Supprimé",5000,true)}
     else{b.dataset.sure=1;b.textContent="Sûr ? Re-toucher pour supprimer"}return}
+  if(act==="topart"){const a=st.arts[+b.dataset.a];if(!a)return;fcat=null;fsub=null;chips();$("q").value=a.name.trim();wq=$("q").value.toLowerCase();openA=a.id;editA=null;openF=null;panel=null;render();scrollTo(0,0);return}
   if(act==="floor"){const f=+b.dataset.f,w=b.dataset.w;
     if(lots&&w==="kx"){const it=byFloor(f),allIn=it.length&&it.every(a=>sel.has(a.id));it.forEach(a=>allIn?sel.delete(a.id):sel.add(a.id));render();return}
     openF=openF&&openF.f===f&&openF.where===w?null:{f,where:w};openA=null;panel=null;editA=null;render();return}
@@ -1193,7 +1237,7 @@ document.addEventListener("click",e=>{
   if(act==="phpick"){carF=+b.dataset.f;carPick[carF]=b.dataset.id;render();return}
   if(act==="carprev"){carGo(-1);return}
   if(act==="carnext"){carGo(1);return}
-  if(act==="didu"){$("q").value=b.dataset.v;render();return}
+  if(act==="didu"){$("q").value=b.dataset.v;clearTimeout(wt);wq=b.dataset.v.toLowerCase();render();return}
   if(act==="undo"){undo();return}
   if(act==="tri"){st.params.tri=b.dataset.v;openF=null;save();render();return}
   if(act==="chif"){st.params.chif=b.dataset.v;save();render();return}
@@ -1216,7 +1260,7 @@ document.addEventListener("click",e=>{
   if(act==="chpin"){panel2="chpin";emoSeq=[];emoFirst=null;panel="pin";render();return}
   if(act==="sw"){const k=b.dataset.k;st.params[k]=!st.params[k];save();render();return}
   if(act==="nb"){st.params.nbTop=+b.dataset.n;save();render();return}
-  if(act==="rz"){if(b.dataset.sure){st.uses={floors:{},arts:{}};log("compteur","Compteur remis à zéro","");save();render();toast("Compteur à zéro")}else{b.dataset.sure=1;b.textContent="Sûr ? Re-toucher"}return}
+  if(act==="rz"){if(b.dataset.sure){st.uses={floors:{},arts:{},words:{}};wq=null;log("compteur","Compteur remis à zéro","");save();render();toast("Compteur à zéro")}else{b.dataset.sure=1;b.textContent="Sûr ? Re-toucher"}return}
 });
 document.addEventListener("submit",e=>{e.preventDefault();if(e.target.id==="fEdit"&&ED){if(e.target.closest(".sl"))carEdit=null;submitEdit(e.target)}if(e.target.id==="fLot")submitLot()});
 document.addEventListener("input",e=>{if(e.target.id==="animS"){st.params.animS=+e.target.value;$("animSv").textContent=e.target.value+" s";save();return}
@@ -1236,9 +1280,9 @@ $("tabs").onclick=e=>{const b=e.target.closest("[data-tab]");if(!b)return;const 
 $("lotFloor").onclick=()=>togglePanel("lotFloor");
 $("lotCat").onclick=()=>togglePanel("lotCat");
 $("lotNone").onclick=()=>{sel.clear();render()};
-$("q").addEventListener("input",()=>{openA=null;editA=null;openF=null;render()});
-$("q").addEventListener("keydown",e=>{if(e.key==="Enter"&&!lots){const r=document.querySelector("#res .row");if(r){r.click();$("q").blur()}}});
-$("clr").onclick=()=>{$("q").value="";openA=null;render();$("q").focus()};
+$("q").addEventListener("input",()=>{openA=null;editA=null;openF=null;clearTimeout(wt);if($("q").value.trim())wt=setTimeout(wCommit,3000);else wq=null;render()});
+$("q").addEventListener("keydown",e=>{if(e.key==="Enter"&&!lots){wCommit();const r=document.querySelector("#res .row");if(r){r.click();$("q").blur()}}});
+$("clr").onclick=()=>{wCommit();wq=null;$("q").value="";openA=null;render();$("q").focus()};
 addEventListener("scroll",()=>$("hd").classList.toggle("scrolled",scrollY>4),{passive:true});
 
 function toast(t,ms=2400,withUndo=false){document.querySelectorAll(".toast").forEach(x=>x.remove());const d=document.createElement("div");d.className="toast";d.textContent=t;
