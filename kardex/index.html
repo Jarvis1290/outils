@@ -242,7 +242,7 @@ body:not(.edit) .ed{display:none!important}
 @keyframes shk{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
 .vw .vbar .btn{white-space:nowrap}
 /* recadrage */
-.cr{position:fixed;inset:0;z-index:90;background:#000;display:flex;flex-direction:column;color:#EEF0F4}
+.cr{position:fixed;inset:0;z-index:96;background:#000;display:flex;flex-direction:column;color:#EEF0F4}
 .cstage{position:relative;flex:1;min-height:0;margin:14px max(14px,env(safe-area-inset-right,0px)) 8px max(14px,env(safe-area-inset-left,0px));overflow:hidden;touch-action:none}
 .cstage canvas{position:absolute;display:block}
 .cstage .box{position:absolute;box-sizing:border-box;border:2px solid var(--acc);box-shadow:0 0 0 9999px rgba(0,0,0,.6);cursor:move;touch-action:none;
@@ -370,6 +370,10 @@ body.kbopen .toast{bottom:auto;top:calc(16px + env(safe-area-inset-top,0px))}
 .tc{position:fixed;inset:0;z-index:95;background:#000;color:#EEF0F4;display:flex;flex-direction:column}
 .tcs{margin:auto;width:min(560px,100%);box-sizing:border-box;padding:20px 16px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px}
 .tcs.wide{width:min(900px,100%)}
+.nts{background:rgba(0,0,0,.82)}.nts .tcs{max-height:100%;overflow:auto}
+.ntl section{background:#16191E;border:1px solid #2A2F38;border-radius:12px;padding:10px 14px;margin-bottom:8px}
+.ntl h3{margin:0 0 4px;font:800 15px var(--f-mono);color:var(--acc-hi)}.ntl h3 small{color:#8B92A0;font-weight:600;margin-left:6px}
+.ntl ul{margin:0;padding-left:18px;color:#D5D9E0;font-size:14px;line-height:1.5}
 .tcs>b{font-size:19px}.tcs p b{color:var(--acc-hi)}.tcs p{margin:0;color:#B3B8C2;font-size:14px;line-height:1.45}
 .tcs img{width:100%;max-height:55vh;object-fit:contain;border-radius:12px;background:#111}
 .tcz{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -424,6 +428,24 @@ body.kbopen .toast{bottom:auto;top:calc(16px + env(safe-area-inset-top,0px))}
 .recb.on{background:radial-gradient(circle,transparent 0 0);position:relative}
 .recb.on::after{content:"";position:absolute;inset:20px;border-radius:5px;background:#FF4D4D}
 .tch{right:12px}
+.tdur{display:flex;align-items:center;gap:10px;color:#B3B8C2;font-size:14px}.tdur .seg3{border-color:#2A2F38;flex:1}.tdur .seg3 button{color:#B3B8C2}.tdur .seg3 button[aria-pressed="true"]{color:var(--on-acc)}
+.tco{position:absolute;right:12px;top:calc(64px + env(safe-area-inset-top,0px));display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.tco .btn{background:rgba(0,0,0,.65);border-color:#3A404B;color:#EEF0F4}
+.tzm{display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.65);border-radius:10px;padding:6px 10px;font:700 12px var(--f-mono)}.tzm input{width:110px;accent-color:var(--acc)}
+.tcv .spd{bottom:112px}
+.tgd{position:absolute;left:12px;right:12px;bottom:12px;background:rgba(0,0,0,.65);border-radius:12px;padding:6px 10px 4px;display:flex;flex-direction:column;align-items:center}
+.tgd svg{width:100%;max-width:420px;height:auto;display:block;overflow:visible}
+.tgd .dr{fill:rgba(255,255,255,.06);stroke:#8B92A0;stroke-width:2}.tgd .cp{stroke:#4A505C;stroke-width:1.5}
+.tgd .mid{stroke:#FFC24D;stroke-width:2;stroke-dasharray:4 4;transition:stroke-width .2s}
+.tgd.half .mid{stroke-width:6;stroke-dasharray:none;filter:drop-shadow(0 0 6px #FFC24D)}
+.tgd .ph rect{fill:#3DD39B;stroke:#fff;stroke-width:1.5}.tgd .ph circle{fill:#fff}
+.tgd.fast .ph rect{fill:#FF9F43}
+.tgd b{font:700 12px var(--f-mono);margin-top:2px}
+.cdn{position:absolute;inset:0;display:grid;place-items:center;font:800 min(42vw,42vh)/1 var(--f-mono);color:#fff;text-shadow:0 4px 30px rgba(0,0,0,.8);pointer-events:none}
+.cdn.pop{animation:cdp .9s ease-out}@keyframes cdp{from{transform:scale(1.6);opacity:0}25%{opacity:1}to{transform:scale(.9);opacity:.15}}
+.tcsp{width:84px}
+@media (orientation:landscape){.tc.cam{flex-direction:row}.tc.cam .tcb{flex-direction:column;padding:max(12px,env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) 12px 10px;width:96px;box-sizing:border-box}
+  .tc.cam .tcb .tcsp{display:none}.tc.cam .tch{right:12px}.tc.cam .tgd{left:auto;width:min(420px,60%);right:12px}.tc.cam .spd{bottom:14px}}
 .vv .mvz{box-shadow:0 30px 60px rgba(0,0,0,.7);border-radius:6px;overflow:hidden}
 .vv .mvz .fb{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;pointer-events:none}
 .vv .mvz .fb.on{animation:fbin .26s forwards}@keyframes fbin{to{opacity:1}}
@@ -805,7 +827,7 @@ const Sauvegarde = (() => {
 const CATS=[[1, "Divers", "#db0fca"], [2, "Stock de Fraise", "#DDD9C3"], [4, "Tournage", "#DBEEF4"], [6, "Taraud & Alésoirs", "#E6E0EC"], [10, "Outils rotatifs", "#B7DEE8"], [13, "VIS/RONDELLES Inox", "#00B0F0"], [14, "VIS/RONDELLES Acier", "#58B600"], [15, "Visseries (bois/Torx/etc…)", "#FFFF00"], [99, "Fraiseuses", "#0C4DE4"], [100, "Consommable de montage", "#9F0EE1"], [101, "Machine à Batterie", "#09DC2C"], [102, "Machine 220V", "#3A8830"], [103, "Levage", "#08f7e7"], [105, "Pneumatique", "#3EB3D0"], [106, "Percages/Foret", "#8662ea"], [107, "Cliquets", "#ff0080"], [108, "Outils à mains", "#00FA79"], [109, "Metrologie d'atelier", "#E4F21C"]];
 const ARTS=[[119, "Laboratoire", 1, 1], [415, "M6", 13, 39], [416, "M6", 14, 49], [417, "Loupe", 1, 32], [418, "Fraises Inox", 2, 2], [419, "Fraises à Rayon", 2, 2], [420, "Fraise en \"T\"", 2, 2], [421, "Fraises Aluminium", 2, 3], [422, "Chargeur Batteries", 102, 24], [423, "M5", 14, 48], [424, "Matériel de Tournage", 4, 14], [425, "Plaquettes", 4, 6], [426, "M10", 14, 51], [427, "M12", 14, 52], [428, "M14", 14, 52], [429, "M16", 14, 28], [430, "M24", 14, 28], [431, "M8", 14, 50], [433, "Rondelles M8", 14, 53], [434, "M4", 14, 47], [435, "M3", 14, 46], [436, "M1 à M2.5", 14, 45], [437, "Plateau magnétique", 99, 15], [438, "Matériel fraiseuses", 99, 15], [439, "Equerre de fraisage", 99, 36], [440, "M5", 13, 37], [441, "M8", 13, 40], [442, "M10", 13, 41], [443, "M4", 13, 38], [444, "M4 Poulets", 13, 38], [445, "Péteuse", 105, 11], [446, "Outils pneumatiques", 105, 11], [447, "Reserve scotch", 100, 25], [448, "DMU 50", 99, 25], [449, "M12", 13, 42], [450, "M14", 13, 42], [451, "Fils ressort Inox", 13, 42], [452, "Billes INOX", 13, 42], [453, "Goupilles Inox", 100, 42], [454, "Ressorts Inox", 100, 42], [455, "M2 à M3", 13, 29], [456, "NEF 400", 4, 54], [457, "Tasseau FP4", 99, 54], [458, "Dremel® 12V", 101, 20], [459, "Dremel 220V😂", 102, 20], [460, "Thermogun", 102, 20], [462, "Crayon électrique", 102, 20], [463, "Fer à souder", 102, 24], [464, "Rivet pop", 100, 33], [465, "Tubtara", 100, 33], [466, "Tarauds M2 à M10", 6, 21], [467, "Queues de cochon🐷", 6, 21], [468, "Scotch doubles face", 100, 56], [469, "Mini-Grip", 100, 56], [470, "Rubalise", 100, 56], [471, "Elastique", 100, 56], [472, "Clinquant", 100, 58], [473, "Cuivre Béryllium", 100, 58], [474, "O-ring", 100, 30], [475, "Brides métalliques", 100, 30], [476, "Joints", 100, 30], [477, "Span-Set® ", 103, 27], [478, "Torx", 15, 44], [479, "Vis à bois", 15, 44], [480, "Clous", 15, 44], [482, "M7", 15, 26], [483, "Goupilles Acier", 15, 55], [484, "Rivets", 15, 55], [485, "Bouterolle", 15, 55], [486, "cordes", 100, 56], [487, "Ficelles", 100, 56], [488, "Visseuses Makita", 101, 13], [489, "Meuleuse", 101, 13], [490, "Scie sabre", 102, 13], [491, "Perforateur + Aspir.", 101, 13], [492, "Sauteuse", 101, 13], [493, "Talkie-Walkie", 101, 24], [494, "Vis Amercaines", 15, 26], [495, "Spécial", 15, 26], [496, "Niveau à bulle", 109, 32], [498, "Mètre à ruban", 109, 32], [499, "Chevillière", 109, 32], [500, "Fil à plomb", 109, 32], [501, "Règle 1000mm", 109, 32], [502, "Règle 1500mm", 109, 32], [503, "Camera-Thermo", 109, 32], [504, "Mèches laiton", 106, 23], [505, "Mèche longue", 106, 23], [506, "Métrique fin", 6, 17], [507, "Tarauds spéciaux", 6, 17], [508, "Tarauds", 6, 17], [509, "Alesoirs:...", 6, 22], [510, "Fraise pivots/Stock", 106, 22], [511, "Mèches à centrer", 106, 22], [512, "Vérins", 103, 27], [513, "Anneau de levage", 103, 27], [514, "Patins", 103, 27], [515, "Cordes", 103, 27], [516, "Levage palonnier", 103, 16], [517, "Patins Vert", 103, 16], [518, "Grandes sangles Span", 103, 16], [519, "Mèche NC", 106, 5], [520, "Courte de Ø1 à Ø10", 106, 5], [521, "Long de Ø1 à Ø13", 106, 4], [522, "Cles à Cliquets", 107, 7], [523, " Cles à œil", 107, 7], [524, "Cles à fourche", 107, 7], [525, "Cles dynamométriques", 107, 8], [526, "Douilles 3/4", 107, 8], [527, "Soldes de Vis", 15, 57], [528, "Rondelles ressort", 15, 57], [529, "Bellevilles", 15, 57], [530, "Seeger", 15, 57], [531, "Insert métrique", 15, 57], [532, "Pistolet silicone", 1, 31], [534, "Lève panneau", 103, 31], [535, "Fraise scie", 2, 18], [536, "Fraise Modulaire", 2, 18], [537, "Fraise Rayon", 2, 18], [538, "Fraise de forme", 2, 18], [539, "Fraise surfacer", 2, 18], [540, "Fraise Bricolage", 2, 60], [541, "Fraise scies", 2, 10], [542, "Helicoil", 100, 24], [543, "Brides électro", 100, 24], [544, "Camera Snake ", 109, 32], [545, "Seringue 500ml", 1, 59], [546, "Visseuse Placo DEWAL", 101, 13], [547, "Fein", 1, 12], [548, "Agrafeuse", 1, 12], [549, " Grignoteuse Bosch®", 1, 12], [550, "Emporte-pièces ", 1, 12], [551, "Chalumeau", 1, 12], [552, "Coupe sangle", 1, 34], [553, "Extracteur", 1, 34], [554, "Sandow", 1, 34], [555, "Arraches à billes", 1, 34], [556, "Fraise à étage", 2, 10], [557, "Fraise cloche", 2, 10], [558, "Fraise 3 tailles", 2, 10], [559, "Rodoirs", 1, 10], [560, "Tournevis", 108, 19], [561, "Clés à fourche", 108, 19], [562, "Imbus", 108, 19], [563, "Antigel", 1, 19], [564, "Pierres&limes💎", 108, 19], [565, "Ciseaux", 1, 19], [566, "Pince Monseigneur", 108, 59], [567, "Talurit", 108, 59], [568, "Pince pour cables", 108, 59], [569, "Ventouse de levage", 1, 59], [570, "Grande Hilti®", 102, 35], [571, "Hilti:accesoires", 102, 35], [572, "Tampons perceuse Hil", 102, 43], [573, " Perforateur Hitachi", 102, 9], [574, "Perceuses 220V", 102, 9], [575, "Mèche à Béton", 1, 9], [577, "Perceuse angulaire", 102, 9], [578, "Tampon chimique", 1, 9], [579, "Tête à aléser", 99, 15], [580, "Brut posage", 99, 36], [581, "Tire-fils", 1, 32], [582, "Makita", 102, 9], [583, "Multimètres ", 109, 32], [584, "Mèche pour pneu", 1, 16], [585, "Marteau pneumatique ", 105, 11], [586, "Meuleuse à air", 105, 11], [587, "Pistolet AVEX", 1, 11], [588, "Dynafile", 1, 11], [589, "Edalco", 4, 14], [590, "Pistolet SIKA", 105, 31], [591, "Scotch aluminium ", 100, 56], [592, "Niveau laser", 109, 32], [593, "Mètre laser", 109, 32], [594, "Taraud UNC", 6, 17], [596, "Micro-foret Ø0 à Ø1", 106, 5], [597, "etau", 99, 25], [598, "Mors Gressel Haut", 99, 25], [599, "Mors schunk", 99, 25], [600, "Mors Lang", 99, 25], [601, "Cliquets americains", 107, 31], [602, "Tournevis à choc", 108, 8], [603, "Colles", 100, 34], [604, "loctite", 100, 34]];
 
-const APP_VERSION="1.8.1",LS="kardex-v1",EXPORT_DAY="2026-10-29";
+const APP_VERSION="1.9",LS="kardex-v1",EXPORT_DAY="2026-10-29";
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const nc=ch=>ch.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
@@ -834,7 +856,7 @@ function migrate(s){Object.values(s.arts||{}).forEach(a=>{if(!Array.isArray(a.ta
 const FILL=[0,25,50,75,100],FILL_LAB={0:"Vide",25:"25 %",50:"50 %",75:"75 %",100:"Plein"};
 const fillOf=f=>st.fill&&st.fill[f]!=null?st.fill[f]:null;
 const fillCol=v=>v>=100?"#F0605D":v>=75?"#F59A3C":v>=50?"#F5C842":v>=25?"#9BD45A":"#4CC38A";
-const PARAMS0={tolerante:true,nbTop:6,compter:true,relock:15,pin:"",emo:"",tri:"etage",clavier:true,chif:"aff",anim:true,animS:10,clac:true,roue:"tambour"};
+const PARAMS0={tolerante:true,nbTop:6,compter:true,relock:15,pin:"",emo:"",tri:"etage",clavier:true,chif:"aff",anim:true,animS:10,clac:true,roue:"tambour",tvDur:10,tvDev:"",tvZoom:1};
 function fresh(){
   const a={};ARTS.forEach(([id,name,c,floor])=>a[id]={id,name,c,floor,tags:[],added:EXPORT_DAY+"T12:00:00",mod:null,hist:[{t:EXPORT_DAY+"T12:00:00",k:"import",w:"Importé du Kardex",d:`Étage ${floor} · ${cat[c].name}`}]});
   return {arts:a,uses:{floors:{},arts:{}},journal:[],next:100000,undo:null,fill:{},params:{...PARAMS0}};
@@ -1063,6 +1085,30 @@ function fitScreen(){requestAnimationFrame(()=>{
   else el.style.setProperty("--carH",Math.max(200,innerHeight-top-tb-10)+"px");
 })}
 addEventListener("resize",()=>{if(tab!=="search")fitScreen()});
+/* ---------- 📜 notes de version : « Quoi de neuf » une fois après chaque mise à jour + historique dans Paramètres ---------- */
+const NOTES=[
+ ["1.9","30.10.2026",["🎬 Tiroir vidéo : 96 images gardées (24 nettes), plus fluide","⏱️ Décompte 3-2-1, téléphone dessiné à suivre, bip + vibration à mi-temps, durée 8/10/12/15 s","🔭 Choix de l'objectif (normal, grand angle…) et zoom ×1 à ×2, retenus","📱 Film possible en paysage","✂️ Recadrage du tiroir (pieds, fond…), sur toutes les images, refaisable","📜 Ces notes de version"]],
+ ["1.8.1","30.10.2026",["🎡 Tambour des Photos inversé : les chiffres montent vers le haut"]],
+ ["1.8","30.10.2026",["🏆 Podium des articles les plus cherchés","🔎 Mots les plus tapés"]],
+ ["1.7","29.10.2026",["🎡 Tambour gravé qui tourne à l'infini (ou molette seule)","Chiffre du coin de la photo retiré"]],
+ ["1.6","29.10.2026",["🔢 Chiffres en afficheur 7 segments ou en pavés","🚉 Animation panneau de gare sur les tuiles, avec clac"]],
+ ["1.5","29.10.2026",["↩️ Retour : double appui pour quitter","# Plusieurs étiquettes par article","🎨 Catégories par thème, en couleurs","📦 Remplissage des tiroirs (0 à 100 %) et tri « Place »"]],
+ ["1.4","29.10.2026",["🎬 Tiroir vidéo","✏️ Modifier depuis Photos"]],
+ ["1.3","29.10.2026",["🔐 Code d'édition en 3 images","🧩 Tiroir 3D"]],
+ ["1.2","29.10.2026",["🎡 Roulette 1-60","⌨️ Clavier Kardex","💡 Plateau conseillé"]],
+ ["1.1","29.10.2026",["🔒 Modes Utilisation / Édition","✂️ Recadrage des photos","🗂️ Onglets Recherche, Tuiles, Photos"]],
+ ["1.0","29.10.2026",["🚀 Première version : chercher un article → étage et catégorie"]]];
+function notesShow(all){const l=all?NOTES:NOTES.filter(n=>n[0]===APP_VERSION);if(!l.length)return;
+  const v=document.createElement("div");v.className="tc nts";
+  v.innerHTML=`<div class="tcs"><b>${all?"📜 Notes de version":"🎉 Quoi de neuf dans Kardex "+APP_VERSION}</b>
+    <div class="ntl">${l.map(([ver,d,it])=>`<section><h3>v${ver} <small>${d}</small></h3><ul>${it.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></section>`).join("")}</div>
+    <div class="acts"><button class="btn pri grow" type="button">${all?"Fermer":"Super !"}</button></div></div>`;
+  document.body.appendChild(v);document.body.style.overflow="hidden";
+  const close=()=>{v.remove();document.body.style.overflow=""};v._close=close;v.querySelector(".acts button").onclick=close;
+  v.addEventListener("click",e=>{if(e.target===v)close()})}
+(function(){let vu=null;try{vu=localStorage.getItem("kardex-vu")}catch(e){}
+  try{localStorage.setItem("kardex-vu",APP_VERSION)}catch(e){}
+  if(vu!==APP_VERSION&&(vu||localStorage.getItem(LS)))setTimeout(()=>notesShow(false),900)})();
 const WU=()=>st.uses.words||(st.uses.words={});
 // 🏆 podium des articles les plus ouverts + mots les plus tapés
 function renderArts(){
@@ -1142,7 +1188,7 @@ function renderSettings(el){
     </div>
     <div id="svPanel"></div>
     ${phPanel()}
-    <div class="acts"><button class="btn" type="button" data-act="rz">Remettre le compteur à zéro</button></div>
+    <div class="acts"><button class="btn" type="button" data-act="rz">Remettre le compteur à zéro</button><button class="btn" type="button" data-act="notes">📜 Notes de version</button></div>
     <p class="note"><b>Remettre le compteur à zéro</b> : efface seulement les classements (podium des articles, mots tapés, rangs #, 🔥, nombre d'ouvertures). Articles, étages et photos ne bougent pas.</p>
     <p class="note">Il faut un 2e toucher pour confirmer.</p>
   </div>`;
@@ -1260,6 +1306,7 @@ document.addEventListener("click",e=>{
   if(act==="chpin"){panel2="chpin";emoSeq=[];emoFirst=null;panel="pin";render();return}
   if(act==="sw"){const k=b.dataset.k;st.params[k]=!st.params[k];save();render();return}
   if(act==="nb"){st.params.nbTop=+b.dataset.n;save();render();return}
+  if(act==="notes"){notesShow(true);return}
   if(act==="rz"){if(b.dataset.sure){st.uses={floors:{},arts:{},words:{}};wq=null;log("compteur","Compteur remis à zéro","");save();render();toast("Compteur à zéro")}else{b.dataset.sure=1;b.textContent="Sûr ? Re-toucher"}return}
 });
 document.addEventListener("submit",e=>{e.preventDefault();if(e.target.id==="fEdit"&&ED){if(e.target.closest(".sl"))carEdit=null;submitEdit(e.target)}if(e.target.id==="fLot")submitLot()});
@@ -1457,7 +1504,7 @@ function cropEditor(blob,opt={}){return new Promise(async done=>{
     <div class="cbar"><div class="seg3">${[["Libre",0],["4:3",4/3],["3:4",3/4],["16:9",16/9],["1:1",1]].map(([l,r])=>`<button type="button" data-r="${r}" aria-pressed="${r===0}">${l}</button>`).join("")}</div>
       <button class="btn" type="button" data-c="rot" aria-label="Tourner d'un quart de tour">↻ Tourner</button></div>
     <div class="cbar"><button class="btn" type="button" data-c="no">Annuler</button>
-      ${opt.adding?'<button class="btn" type="button" data-c="keep">Garder telle quelle</button>':""}${opt.orig?'<button class="btn" type="button" data-c="orig">Photo d’origine</button>':""}
+      ${opt.adding?'<button class="btn" type="button" data-c="keep">Garder telle quelle</button>':""}${opt.rect&&opt.init?'<button class="btn" type="button" data-c="keep">Tout garder</button>':""}${opt.orig?'<button class="btn" type="button" data-c="orig">Photo d’origine</button>':""}
       <span class="grow"></span><button class="btn pri" type="button" data-c="ok">✂️ Recadrer</button></div>`;
   document.body.appendChild(v);document.body.style.overflow="hidden";
   const stage=v.querySelector(".cstage"),cv=v.querySelector("canvas"),box=v.querySelector(".box");
@@ -1470,7 +1517,8 @@ function cropEditor(blob,opt={}){return new Promise(async done=>{
     cv.getContext("2d").drawImage(src,0,0,dw,dh);draw()}
   function draw(){Object.assign(box.style,{left:ox+crop.x*k+"px",top:oy+crop.y*k+"px",width:crop.w*k+"px",height:crop.h*k+"px"})}
   function reset(){src=rotated();crop=full();layout()}
-  reset();const onRs=()=>layout();addEventListener("resize",onRs);
+  if(opt.rect)v.querySelector('[data-c="rot"]').hidden=true;
+  reset();if(opt.init){const c=opt.init;crop={x:c.x*W(),y:c.y*H(),w:c.w*W(),h:c.h*H()};draw()}const onRs=()=>layout();addEventListener("resize",onRs);
   let drag=null;const MIN=40;
   box.addEventListener("pointerdown",e=>{e.preventDefault();box.setPointerCapture(e.pointerId);drag={h:e.target.dataset.h||"move",x:e.clientX,y:e.clientY,c:{...crop}}});
   box.addEventListener("pointermove",e=>{if(!drag)return;const dx=(e.clientX-drag.x)/k,dy=(e.clientY-drag.y)/k,c={...drag.c},m=MIN/k;
@@ -1492,6 +1540,7 @@ function cropEditor(blob,opt={}){return new Promise(async done=>{
     if(c==="orig")return end("orig");
     if(c==="ok"){const x=Math.round(crop.x),y=Math.round(crop.y),w=Math.round(crop.w),h=Math.round(crop.h);
       if(!rot&&x===0&&y===0&&w===W()&&h===H())return end("keep");
+      if(opt.rect)return end({x:x/W(),y:y/H(),w:w/W(),h:h/H()});
       b.disabled=true;b.textContent="…";
       const o=document.createElement("canvas");o.width=w;o.height=h;o.getContext("2d").drawImage(src,x,y,w,h,0,0,w,h);
       end(await new Promise(r=>o.toBlob(r,"image/jpeg",.95)))}});
@@ -1755,36 +1804,64 @@ addEventListener("resize",()=>{if($("rail"))requestAnimationFrame(()=>{wBuild();
 function carFlap(){}
 
 /* ---------- 🎬 tiroir vidéo : on filme le tiroir → l'app garde les images les plus nettes → on glisse le doigt pour avancer dedans ---------- */
-const TV_MAX=15,TV_SCRUB=48,TV_SHARP=12,TV_SCRUB_W=1600;
+const TV_MAX=15,TV_SCRUB=96,TV_SHARP=24,TV_SCRUB_W=1600,TV_DURS=[8,10,12,15];
+const OVB=typeof CSS!=="undefined"&&CSS.supports&&CSS.supports("object-view-box","inset(1% 1% 1% 1%)");
+const ovb=c=>c?`inset(${(c.y*100).toFixed(2)}% ${((1-c.x-c.w)*100).toFixed(2)}% ${((1-c.y-c.h)*100).toFixed(2)}% ${(c.x*100).toFixed(2)}%)`:"";
+// petit bip (décompte, mi-temps) : son à part, même si le « clac » est coupé
+let TA=null;function bip(f=880,ms=120,vol=.25){try{TA=TA||new (window.AudioContext||window.webkitAudioContext)();if(TA.state!=="running")TA.resume();
+  const t=TA.currentTime,o=TA.createOscillator(),g=TA.createGain();o.type="sine";o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.01);g.gain.exponentialRampToValueAtTime(.001,t+ms/1000);
+  o.connect(g).connect(TA.destination);o.start(t);o.stop(t+ms/1000+.02)}catch(e){}}
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
 // 1) filmer, guidé : bulle (à plat), jauge de vitesse (l'image bouge trop vite ?), 4K si possible, lampe, arrêt tout seul à 15 s
 function tvCapture(f){return new Promise(done=>{
   const v=document.createElement("div");v.className="tc";
-  v.innerHTML=`<div class="tcs"><b>🎬 Tiroir vidéo · étage ${f}</b><p>Filme le tiroir <b>lentement</b>, téléphone à plat au-dessus, d'un bout à l'autre (5 à 15 s). L'app garde ensuite les images les plus nettes.</p>
+  v.innerHTML=`<div class="tcs"><b>🎬 Tiroir vidéo · étage ${f}</b><p>Filme le tiroir <b>lentement</b>, téléphone à plat au-dessus, d'un bout à l'autre. Après 3-2-1, suis le téléphone dessiné en bas : un bip à la moitié du temps = tu dois être au milieu du tiroir.</p>
+    <div class="tdur"><span>Durée</span><div class="seg3">${TV_DURS.map(d=>`<button type="button" data-t="dur" data-d="${d}" aria-pressed="${P().tvDur===d}">${d} s</button>`).join("")}</div></div>
     <button class="btn pri" type="button" data-t="cam">🎬 Filmer</button>
     <label class="btn" style="text-align:center"><input type="file" accept="video/*" hidden>📂 Vidéo de la galerie</label>
     <div class="acts"><button class="btn" type="button" data-t="no">Annuler</button></div></div>`;
   document.body.appendChild(v);document.body.style.overflow="hidden";
-  let stream=null,track=null,rec=null,chunks=[],t0=0,raf=0,ori=null,torch=false,prevG=null,lastS=0,speed=0,timer=0;
+  let stream=null,track=null,rec=null,chunks=[],t0=0,raf=0,ori=null,torch=false,prevG=null,lastS=0,speed=0,timer=0,cams=[],camI=-1,cdn=false,midDone=false;const DUR=()=>P().tvDur||10;
   const onOri=e=>{if(e.beta!=null)ori={b:e.beta,g:e.gamma,t:performance.now()}};
-  const close=r=>{cancelAnimationFrame(raf);clearTimeout(timer);removeEventListener("deviceorientation",onOri);if(rec&&rec.state!=="inactive")try{rec.onstop=null;rec.stop()}catch(e){}
+  const close=r=>{cancelAnimationFrame(raf);clearTimeout(timer);v.classList.remove("cam");removeEventListener("deviceorientation",onOri);if(rec&&rec.state!=="inactive")try{rec.onstop=null;rec.stop()}catch(e){}
     if(stream)stream.getTracks().forEach(t=>t.stop());v.remove();document.body.style.overflow="";done(r)};
   v._close=()=>close(null);
   v.querySelector("input").onchange=e=>{const file=e.target.files[0];if(file)close({blob:file,dur:null})};
   async function cam(){
+    v.classList.add("cam");
     v.innerHTML=`<div class="tcv"><video playsinline muted autoplay></video><div class="lvl"><i></i></div>
-      <div class="tch">Appuie sur ⏺ puis avance <b>lentement</b> au-dessus du tiroir</div>
-      <div class="spd"><span>vitesse</span><div><i></i></div><b>—</b></div><div class="tvt"><i></i><b>0:00 / 0:${TV_MAX}</b></div></div>
+      <div class="tch">Appuie sur ⏺ : décompte 3-2-1, puis suis le téléphone dessiné en bas</div>
+      <div class="tco"><button class="btn" type="button" data-t="lens" hidden>🔭 Objectif</button><label class="tzm" hidden><span>×1</span><input type="range" min="1" max="2" step="0.1" value="1" aria-label="Zoom"></label></div>
+      <div class="spd"><span>vitesse</span><div><i></i></div><b>—</b></div>
+      <div class="tgd"><svg viewBox="0 0 300 64" aria-hidden="true"><rect class="dr" x="6" y="10" width="288" height="44" rx="6"/>
+        ${[1,2,3,4,5,6,7].map(i=>`<line class="cp" x1="${6+i*36}" y1="14" x2="${6+i*36}" y2="50"/>`).join("")}<line class="mid" x1="150" y1="2" x2="150" y2="62"/>
+        <g class="ph" transform="translate(17,0)"><rect x="-11" y="16" width="22" height="34" rx="4"/><circle cx="0" cy="44" r="2"/></g></svg><b>0:00 / 0:${p2(DUR())}</b></div>
+      <div class="cdn" hidden></div></div>
       <div class="tcb"><button class="btn" type="button" data-t="no">Annuler</button><button class="btn" type="button" data-t="torch" hidden>💡</button><span class="grow"></span>
-      <button class="recb" type="button" data-t="rec" aria-label="Filmer"></button><span class="grow"></span><span style="width:84px"></span></div>`;
+      <button class="recb" type="button" data-t="rec" aria-label="Filmer"></button><span class="grow"></span><span class="tcsp"></span></div>`;
     if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||!window.MediaRecorder){nocam();return}
-    try{stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:"environment"},width:{ideal:3840},height:{ideal:2160},frameRate:{ideal:30}}})}catch(e){nocam();return}
-    track=stream.getVideoTracks()[0];const vid=v.querySelector("video");vid.srcObject=stream;
-    try{const cap=track.getCapabilities?track.getCapabilities():{};if(cap.torch)v.querySelector('[data-t="torch"]').hidden=false;
-      if(cap.zoom&&cap.zoom.min<=1&&cap.zoom.max>=1)track.applyConstraints({advanced:[{zoom:1}]}).catch(()=>{})}catch(e){}
-    addEventListener("deviceorientation",onOri);await new Promise(r=>vid.readyState>=2?r():vid.onloadeddata=r);loop();
+    if(!(await openCam(P().tvDev||null))){nocam();return}
+    addEventListener("deviceorientation",onOri);loop();
   }
+  // objectif : on liste les caméras arrière ; le bouton passe de l'une à l'autre (normal, grand angle, zoom…) ; le choix est retenu
+  async function openCam(label){
+    if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;
+    const vc={width:{ideal:3840},height:{ideal:2160},frameRate:{ideal:30}},dev=label&&cams.find(c=>c.label===label);
+    try{stream=await navigator.mediaDevices.getUserMedia({audio:false,video:dev?{...vc,deviceId:{exact:dev.deviceId}}:{...vc,facingMode:{ideal:"environment"}}})}
+    catch(e){if(!label)return false;return openCam(null)}
+    track=stream.getVideoTracks()[0];const vid=v.querySelector("video");vid.srcObject=stream;
+    try{const all=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==="videoinput");
+      const back=all.filter(d=>/back|rear|arri|environment|world/i.test(d.label));cams=back.length?back:all.filter(d=>!/front|avant|user|face/i.test(d.label));
+      const cur=track.getSettings?track.getSettings().deviceId:null;camI=cams.findIndex(c=>c.deviceId===cur);
+      const lb=v.querySelector('[data-t="lens"]');lb.hidden=cams.length<2;lb.textContent=`🔭 Objectif ${camI+1>0?camI+1:1}/${cams.length}`}catch(e){}
+    try{const cap=track.getCapabilities?track.getCapabilities():{},tb=v.querySelector('[data-t="torch"]');tb.hidden=!cap.torch;torch=false;tb.classList.remove("pri");
+      const zl=v.querySelector(".tzm"),zi=zl.querySelector("input");
+      if(cap.zoom&&cap.zoom.max>1){const z0=Math.max(1,cap.zoom.min),zm=Math.min(z0*2,cap.zoom.max);zi.min=z0;zi.max=zm;zi.step=.1;zi.value=Math.min(zm,Math.max(z0,P().tvZoom||1));zl.hidden=false;
+        const az=()=>{track.applyConstraints({advanced:[{zoom:+zi.value}]}).catch(()=>{});zl.querySelector("span").textContent="×"+(+zi.value).toFixed(1)};az();
+        zi.oninput=az;zi.onchange=()=>{st.params.tvZoom=+zi.value;save()}}
+      else{zl.hidden=true;if(cap.zoom&&cap.zoom.min<=1&&cap.zoom.max>=1)track.applyConstraints({advanced:[{zoom:1}]}).catch(()=>{})}}catch(e){}
+    await new Promise(r=>vid.readyState>=2?r():vid.onloadeddata=r);return true}
   function nocam(){v.innerHTML=`<div class="tcs"><b>📷 Appareil photo indisponible</b><p>Filme le tiroir avec l'appareil photo du téléphone, puis choisis la vidéo ici.</p>
     <label class="btn pri" style="text-align:center"><input type="file" accept="video/*" hidden>📂 Choisir la vidéo</label><div class="acts"><button class="btn" type="button" data-t="no">Annuler</button></div></div>`;
     v.querySelector("input").onchange=e=>{const file=e.target.files[0];if(file)close({blob:file,dur:null})}}
@@ -1796,23 +1873,32 @@ function tvCapture(f){return new Promise(done=>{
     if(now-lastS>120&&vid.videoWidth){lastS=now;sx.drawImage(vid,0,0,64,36);const d=sx.getImageData(0,0,64,36).data,g=new Float32Array(64*36);for(let i=0;i<g.length;i++)g[i]=d[i*4+1];
       if(prevG){let s=0;for(let i=0;i<g.length;i++)s+=Math.abs(g[i]-prevG[i]);speed=speed*.6+(s/g.length)*.4}prevG=g;
       const sp=v.querySelector(".spd"),lvl=speed<6?0:speed<13?1:2;sp.className="spd s"+lvl;sp.querySelector("i").style.width=Math.min(100,speed/20*100)+"%";sp.querySelector("b").textContent=["bien","un peu vite","trop vite"][lvl]}
-    if(rec&&rec.state==="recording"){const t=(now-t0)/1000;v.querySelector(".tvt i").style.width=Math.min(100,t/TV_MAX*100)+"%";v.querySelector(".tvt b").textContent=`0:${p2(Math.floor(t))} / 0:${TV_MAX}`}}
+    const gd=v.querySelector(".tgd");if(!gd)return;
+    if(rec&&rec.state==="recording"){const t=(now-t0)/1000,D=DUR(),k=Math.min(1,t/D);
+      gd.querySelector(".ph").setAttribute("transform",`translate(${17+k*266},0)`);gd.classList.toggle("fast",speed>=6);gd.classList.toggle("go",true);
+      if(!midDone&&t>=D/2){midDone=true;gd.classList.add("half");bip(1320,160);setTimeout(()=>bip(1320,160),220);if(navigator.vibrate)try{navigator.vibrate([60,60,60])}catch(e){}setTimeout(()=>gd.classList.remove("half"),900)}
+      gd.querySelector("b").textContent=`0:${p2(Math.floor(t))} / 0:${p2(D)}`}}
   function startRec(){const types=["video/mp4;codecs=avc1","video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm","video/mp4"];
     const mimeType=types.find(t=>MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(t))||"";
     try{rec=new MediaRecorder(stream,{...(mimeType?{mimeType}:{}),videoBitsPerSecond:16e6})}catch(e){rec=new MediaRecorder(stream)}
     chunks=[];rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
     rec.onstop=()=>{const dur=(performance.now()-t0)/1000;close({blob:new Blob(chunks,{type:rec.mimeType||mimeType||"video/webm"}),dur})};
-    rec.start(500);t0=performance.now();v.querySelector(".recb").classList.add("on");v.querySelector(".tch").innerHTML="Avance <b>lentement</b> · touche ⏹ à la fin";
-    if(navigator.vibrate)try{navigator.vibrate(30)}catch(e){}
-    timer=setTimeout(()=>{if(rec.state==="recording")rec.stop()},TV_MAX*1000)}
+    rec.start(500);t0=performance.now();midDone=false;v.querySelector(".recb").classList.add("on");v.querySelector(".tch").innerHTML="Suis le téléphone dessiné · bip = milieu du tiroir";
+    bip(1760,220);if(navigator.vibrate)try{navigator.vibrate(30)}catch(e){}
+    timer=setTimeout(()=>{if(rec.state==="recording")rec.stop()},DUR()*1000)}
+  async function countdown(){cdn=true;const c=v.querySelector(".cdn");c.hidden=false;v.querySelector(".tco").hidden=true;
+    for(const n of [3,2,1]){if(!v.isConnected)return;c.textContent=n;c.classList.remove("pop");void c.offsetWidth;c.classList.add("pop");bip(880,110);await sleep(1000)}
+    c.hidden=true;cdn=false;if(v.isConnected)startRec()}
   v.addEventListener("click",async e=>{const b=e.target.closest("[data-t]");if(!b)return;const t=b.dataset.t;
     if(t==="no")return close(null);
     if(t==="cam")return cam();
+    if(t==="dur"){st.params.tvDur=+b.dataset.d;save();v.querySelectorAll('[data-t="dur"]').forEach(x=>x.setAttribute("aria-pressed",x===b));return}
+    if(t==="lens"){if(rec||cdn||cams.length<2)return;const nx_=cams[(camI+1)%cams.length];b.disabled=true;st.params.tvDev=nx_.label||"";save();await openCam(nx_.label||null);b.disabled=false;return}
     if(t==="torch"){torch=!torch;try{await track.applyConstraints({advanced:[{torch}]});b.classList.toggle("pri",torch)}catch(x){}return}
-    if(t==="rec"){if(!rec||rec.state==="inactive"){startRec()}else if((performance.now()-t0)>1500){clearTimeout(timer);rec.stop()}}});
+    if(t==="rec"){if(cdn)return;if(!rec||rec.state==="inactive"){bip(1,1,0);countdown()}else if((performance.now()-t0)>1500){clearTimeout(timer);rec.stop()}}});
 })}
 
-// 2) tri : on parcourt la vidéo, on mesure la netteté de chaque image, on garde les meilleures (48 pour glisser, dont 12 en pleine résolution)
+// 2) tri : on parcourt la vidéo, on mesure la netteté de chaque image, on garde les meilleures (96 pour glisser, dont 24 en pleine résolution)
 function sharpness(x,w,h){const d=x.getImageData(0,0,w,h).data;let s=0,s2=0,n=0;
   for(let y=1;y<h-1;y++)for(let i=1;i<w-1;i++){const k=(y*w+i)*4,g=d[k+1],l=4*g-d[k-3]-d[k+5]-d[k-w*4+1]-d[k+w*4+1];s+=l;s2+=l*l;n++}
   return s2/n-(s/n)**2}
@@ -1852,13 +1938,17 @@ async function tvFrames(src,onStep){
   finally{vid.pause();vid.removeAttribute("src");vid.load();URL.revokeObjectURL(url)}}
 
 // 3) enregistrer : chaque image est une photo cachée (sauvegardée dans le .zip comme les autres) ; l'image la plus nette sert de couverture
-async function tvSave(f,res){
+async function cropBlob(blob,c){if(!c)return blob;const bm=await createImageBitmap(blob);const x=Math.round(c.x*bm.width),y=Math.round(c.y*bm.height),w=Math.max(8,Math.round(c.w*bm.width)),h=Math.max(8,Math.round(c.h*bm.height));
+  const o=document.createElement("canvas");o.width=w;o.height=h;o.getContext("2d").drawImage(bm,x,y,w,h,0,0,w,h);bm.close&&bm.close();return new Promise(r=>o.toBlob(r,"image/jpeg",.93))}
+async function tvSave(f,res,crop=null){
   const vid="v"+Date.now().toString(36)+Math.random().toString(36).slice(2,5),t=now(),list=[];
+  // recadrage : gardé à part (les images restent entières, on peut recadrer à nouveau) ; sans object-view-box, on coupe les images
+  if(crop&&!OVB)for(const fr of res.frames)fr.blob=await cropBlob(fr.blob,crop);
   for(let k=0;k<res.frames.length;k++){const fr=res.frames[k],id=vid+"-"+k;
     await idbDo("readwrite",x=>x.put({id,floor:f,t,name:`tiroir-video-${k+1}.jpg`,type:"image/jpeg",blob:fr.blob,prev:null,part:vid,...(fr.full?{}:{sc:1})}));
     PH.push({id,floor:f,t,size:fr.blob.size,part:vid,sc:!fr.full});list.push({id,t:+fr.t.toFixed(2),full:fr.full})}
-  const best=res.frames.filter(x=>x.full).sort((a,b)=>b.s-a.s)[0]||res.frames[0];const prev=await makePrev(best.blob);
-  await idbDo("readwrite",x=>x.put({id:vid,floor:f,t,name:"tiroir-video.jpg",type:"image/jpeg",blob:best.blob,prev,vid:{dur:res.dur,frames:list}}));
+  const best=res.frames.filter(x=>x.full).sort((a,b)=>b.s-a.s)[0]||res.frames[0],cover=crop&&OVB?await cropBlob(best.blob,crop):best.blob,prev=await makePrev(cover);
+  await idbDo("readwrite",x=>x.put({id:vid,floor:f,t,name:"tiroir-video.jpg",type:"image/jpeg",blob:cover,prev,vid:{dur:res.dur,frames:list,cover:res.frames.indexOf(best),...(crop&&OVB?{crop}:{})}}));
   PH.push({id:vid,floor:f,t,size:best.blob.size,vid:true});return vid}
 async function tvMake(f){
   if(!ED)return;const src=await tvCapture(f);if(!src)return;
@@ -1867,12 +1957,15 @@ async function tvMake(f){
   let res;try{res=await tvFrames(src,(p,m)=>{$("tcp").textContent=m;$("tcbar").style.width=p*100+"%"})}
   catch(e){v.remove();document.body.style.overflow="";toast("Vidéo illisible : "+e.message,5000);return}
   const best=res.frames.filter(x=>x.full).sort((a,b)=>b.s-a.s)[0],url=URL.createObjectURL(best.blob),mo=res.frames.reduce((t,x)=>t+x.blob.size,0)/1048576;
-  v.innerHTML=`<div class="tcs wide"><b>✓ ${res.frames.length} images gardées</b><p>dont ${TV_SHARP} en pleine qualité (${res.W}×${res.H}) · ${mo.toFixed(1)} Mo. Voici la plus nette :</p>
-    <img src="${url}" alt="Image la plus nette du tiroir"><div class="acts"><button class="btn" type="button" data-t="no">Annuler</button><button class="btn" type="button" data-t="again">Refilmer</button><button class="btn pri grow" type="button" data-t="keep">Garder</button></div></div>`;
+  let crop=null;
+  v.innerHTML=`<div class="tcs wide"><b>✓ ${res.frames.length} images gardées</b><p>dont ${TV_SHARP} en pleine qualité (${res.W}×${res.H}) · ${mo.toFixed(1)} Mo. Voici la plus nette. <b>✂️ Recadrer</b> enlève les pieds, le fond… sur toutes les images d'un coup.</p>
+    <img src="${url}" alt="Image la plus nette du tiroir"><div class="acts"><button class="btn" type="button" data-t="no">Annuler</button><button class="btn" type="button" data-t="again">Refilmer</button><button class="btn" type="button" data-t="crop">✂️ Recadrer</button><button class="btn pri grow" type="button" data-t="keep">Garder</button></div></div>`;
   v._close=()=>v.querySelector('[data-t="no"]').click();
-  v.addEventListener("click",async e=>{const b=e.target.closest("[data-t]");if(!b)return;const t=b.dataset.t;URL.revokeObjectURL(url);v.remove();document.body.style.overflow="";
+  v.addEventListener("click",async e=>{const b=e.target.closest("[data-t]");if(!b)return;const t=b.dataset.t;
+    if(t==="crop"){const c=await cropEditor(best.blob,{rect:true,init:crop});if(c&&c!=="keep"){crop=c;const im=v.querySelector("img");if(OVB)im.style.objectViewBox=ovb(c);b.textContent="✂️ Recadré ✓"}else if(c==="keep"){crop=null;v.querySelector("img").style.objectViewBox="";b.textContent="✂️ Recadrer"}return}
+    URL.revokeObjectURL(url);v.remove();document.body.style.overflow="";
     if(t==="again"){tvMake(f);return}
-    if(t==="keep"){try{const id=await tvSave(f,res);carPick[f]=id;log("photo","Tiroir vidéo ajouté",`Étage ${f} · ${res.frames.length} images`);save();render();toast("🎬 Tiroir vidéo gardé")}catch(x){toast("Mémoire pleine : tiroir non gardé")}}})}
+    if(t==="keep"){try{const id=await tvSave(f,res,crop);carPick[f]=id;log("photo","Tiroir vidéo ajouté",`Étage ${f} · ${res.frames.length} images`);save();render();toast("🎬 Tiroir vidéo gardé")}catch(x){toast("Mémoire pleine : tiroir non gardé")}}})}
 
 // 4) la vue : glisser = avancer dans le tiroir ; au lâcher, l'image nette la plus proche ; deux doigts = zoom ; léger relief avec le téléphone
 async function vidView(id){
@@ -1880,13 +1973,14 @@ async function vidView(id){
   const v=document.createElement("div");v.className="mv vv";
   v.innerHTML=`<div class="mvs"><div class="mvt"><div class="mvz"><img class="fa" alt="Tiroir de l'étage ${p.floor}"><img class="fb" alt=""></div></div><div class="vpos"><i></i></div></div>
     <div class="vth">${sharp.map(i=>`<button type="button" data-k="${i}"><img alt=""></button>`).join("")}</div>
-    <div class="vbar"><b>🎬 Étage ${p.floor} · tiroir vidéo</b><span class="grow"></span>${ED?'<button class="btn bad" type="button" data-v="del">Supprimer</button>':""}</div>
+    <div class="vbar"><b>🎬 Étage ${p.floor} · tiroir vidéo</b><span class="grow"></span>${ED&&OVB?'<button class="btn" type="button" data-v="crop">✂️ Recadrer</button>':""}${ED?'<button class="btn bad" type="button" data-v="del">Supprimer</button>':""}</div>
     <p class="vhint">Glisse le doigt pour avancer · deux doigts pour zoomer · un toucher ferme</p>`;
   document.body.appendChild(v);document.body.style.overflow="hidden";
   const stage=v.querySelector(".mvs"),tilt=v.querySelector(".mvt"),zm=v.querySelector(".mvz"),fa=v.querySelector(".fa"),fb=v.querySelector(".fb");
   const urls=await Promise.all(fr.map(x=>phSrc(x.id,true)));
   urls.forEach(u=>{const i=new Image();i.src=u});// préchargement : le glissé reste fluide
   v.querySelectorAll(".vth button").forEach(b=>b.querySelector("img").src=urls[+b.dataset.k]);
+  const setCrop=c=>{const o=ovb(c);[fa,fb,...v.querySelectorAll(".vth img")].forEach(im=>im.style.objectViewBox=o)};if(OVB)setCrop(p.vid.crop);
   let idx=sharp[0]??0,s=1,x=0,y=0,tx=0,ty=0,cx=0,cy=0,raf=0;
   const show=(k,soft)=>{idx=Math.max(0,Math.min(n-1,k));if(soft){fb.src=urls[idx];fb.classList.remove("on");void fb.offsetWidth;fb.classList.add("on");setTimeout(()=>{fa.src=urls[idx];fb.classList.remove("on")},260)}else fa.src=urls[idx];
     v.querySelector(".vpos i").style.left=idx/(n-1||1)*100+"%";v.querySelectorAll(".vth button").forEach(b=>b.classList.toggle("on",+b.dataset.k===idx))};
@@ -1899,7 +1993,12 @@ async function vidView(id){
   const close=()=>{cancelAnimationFrame(raf);removeEventListener("deviceorientation",onOri);v.remove();document.body.style.overflow=""};v._close=close;
   v.querySelector(".vth").onclick=e=>{const b=e.target.closest("[data-k]");if(b){s=1;x=y=0;apply();show(+b.dataset.k,true)}};
   v.querySelector(".vbar").onclick=async e=>{const b=e.target.closest("[data-v]");if(!b)return;
-    if(b.dataset.v==="del"){if(b.dataset.sure){await tirDel(id);close()}else{b.dataset.sure=1;b.textContent="Sûr ? Re-toucher"}}};
+    if(b.dataset.v==="del"){if(b.dataset.sure){await tirDel(id);close()}else{b.dataset.sure=1;b.textContent="Sûr ? Re-toucher"}}
+    if(b.dataset.v==="crop"){const ck=p.vid.cover??sharp[0]??0,fp=await phGet(fr[ck].id);if(!fp)return;const c=await cropEditor(fp.blob,{rect:true,init:p.vid.crop});if(!c)return;
+      const crop=c==="keep"?null:c,cover=await cropBlob(fp.blob,crop),q={...p,blob:cover,prev:await makePrev(cover),vid:{...p.vid}};if(crop)q.vid.crop=crop;else delete q.vid.crop;
+      try{await idbDo("readwrite",s=>s.put(q))}catch(x){toast("Mémoire pleine : recadrage non gardé");return}
+      p.vid=q.vid;["o","p"].forEach(k=>{const u=phUrl.get(id+":"+k);if(u)URL.revokeObjectURL(u);phUrl.delete(id+":"+k)});setCrop(crop);
+      log("photo","Tiroir vidéo recadré",`Étage ${p.floor}`);save();render();toast(crop?"✂️ Tiroir recadré":"Tiroir entier remis")}};
   const pts=new Map();let start=null,pinch=null,moved=false,lastTap=0,tapT=null;
   stage.addEventListener("pointerdown",e=>{stage.setPointerCapture(e.pointerId);pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
     if(pts.size===1){start={x:e.clientX,y:e.clientY,ox:x,oy:y,i:idx,t:Date.now()};moved=false}
