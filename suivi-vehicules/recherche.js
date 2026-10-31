@@ -21,7 +21,7 @@
   "use strict";
   var VERSION = "1.0";
   var O = null, EL = null, IN = null, RES = null, SUG = null, KBD = null, KBK = null;
-  var ITEMS = [], VOC = null, kbLayer = "abc", kbShift = false, kbShown = false, more = {}, last = [];
+  var CW = null, ITEMS = [], VOC = null, kbLayer = "abc", kbShift = false, kbShown = false, more = {}, last = [];
 
   /* ---------- texte : minuscules, sans accents, virgule décimale = point (même longueur, pour surligner) ---------- */
   function nc(c) {
@@ -154,7 +154,7 @@
     }
     var n = 0;
     groups.forEach(function (g) {
-      var L = byG[g], lim = more[g] ? 200 : 5;
+      var L = byG[g], lim = more[g] ? 200 : L[0]._dir ? 10 : 5;
       h += '<div class="rq-g">' + esc(g) + ' <span>' + L.length + '</span></div><div class="rq-l">';
       L.slice(0, lim).forEach(function (it) { last.push(it); h += row(it, toks, last.length - 1, n++ === 0); });
       h += '</div>';
@@ -252,9 +252,9 @@
     EL.className = "rq"; EL.hidden = true; EL.setAttribute("role", "dialog"); EL.setAttribute("aria-label", "Recherche");
     EL.style.setProperty("--rq-acc", O.couleur || "#F5B82E");
     EL.innerHTML = '<div class="rq-top"><button type="button" class="rq-back" aria-label="Fermer la recherche">‹</button>'
-      + '<label class="rq-f"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.6-4.6"/></svg>'
+      + '<div class="rq-f"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.6-4.6"/></svg>'
       + '<input class="rq-in" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" aria-label="Rechercher">'
-      + '<button type="button" class="rq-x" aria-label="Effacer" hidden>✕</button></label></div>'
+      + '<button type="button" class="rq-x" aria-label="Effacer" hidden>✕</button></div></div>'
       + '<div class="rq-sug"></div><div class="rq-res"></div>'
       + '<div class="rq-kb" hidden><div class="rq-kbk"></div></div>';
     document.body.appendChild(EL);
@@ -311,11 +311,14 @@
     EL.hidden = false; document.documentElement.classList.add("rq-on");
     requestAnimationFrame(function () { EL.classList.add("in"); });
     kbLayer = "abc"; kbShift = false; kbDraw(); kbShow(true); draw();
+    // touche Retour du téléphone : ferme la recherche (Chrome : CloseWatcher, sans toucher à l'historique de l'app)
+    if (!CW && typeof CloseWatcher === "function") { try { CW = new CloseWatcher(); CW.onclose = function () { CW = null; fermer(); }; } catch (e) { CW = null; } }
     setTimeout(function () { try { IN.focus({ preventScroll: true }); var n = IN.value.length; IN.setSelectionRange(n, n); } catch (e) { } }, 40);
   }
   function fermer(quiet) {
     if (!EL || EL.hidden) return false;
     if (!quiet) histAdd(IN.value);
+    if (CW) { var w = CW; CW = null; try { w.destroy(); } catch (e) { } }
     EL.classList.remove("in"); EL.hidden = true; kbShow(false);
     document.documentElement.classList.remove("rq-on");
     try { IN.blur(); } catch (e) { }
@@ -323,8 +326,11 @@
   }
   function init(o) {
     O = Object.assign({ cle: "app", nom: "", couleur: "#F5B82E", exemples: [], source: function () { return []; } }, o || {});
-    var bs = typeof O.bouton === "string" ? document.querySelectorAll(O.bouton) : O.bouton ? [O.bouton] : [];
-    Array.prototype.forEach.call(bs, function (b) { b.addEventListener("click", function (e) { e.preventDefault(); e.stopPropagation(); ouvrir(); }, true); });
+    // le(s) bouton(s) loupe : pris avant l'app (phase de capture), même si l'app avait déjà son propre bouton
+    if (O.bouton) document.addEventListener("click", function (e) {
+      var b = e.target.closest && (typeof O.bouton === "string" ? e.target.closest(O.bouton) : (O.bouton.contains(e.target) ? O.bouton : null));
+      if (!b) return; e.preventDefault(); e.stopImmediatePropagation(); ouvrir();
+    }, true);
   }
 
   var CSS = [
@@ -336,7 +342,7 @@
     ".rq-back{flex:none;width:42px;height:46px;border:0;border-radius:12px;background:#171B22;color:#EEF0F4;font-size:30px;line-height:1;cursor:pointer;padding:0 0 4px}",
     ".rq-f{flex:1;min-width:0;display:flex;align-items:center;gap:8px;height:46px;padding:0 6px 0 12px;border-radius:14px;background:#171B22;border:2px solid var(--rq-acc)}",
     ".rq-f svg{flex:none;width:20px;height:20px;color:var(--rq-acc)}",
-    ".rq-in{flex:1;min-width:0;border:0;outline:0;background:transparent;color:#EEF0F4;font:600 17px/1.2 inherit;font-family:inherit;padding:0;caret-color:var(--rq-acc)}",
+    ".rq .rq-in{flex:1 1 auto;min-width:0;width:auto;height:auto;margin:0;border:0;border-radius:0;outline:0;background:transparent;box-shadow:none;color:#EEF0F4;font-size:17px;font-weight:600;line-height:1.2;font-family:inherit;padding:0;caret-color:var(--rq-acc);display:block;appearance:none;-webkit-appearance:none}",
     ".rq-in::placeholder{color:#7D8592;font-weight:500}",
     ".rq-x{flex:none;width:34px;height:34px;border:0;border-radius:50%;background:#2B3038;color:#C9CED6;font-size:14px;cursor:pointer}",
     ".rq-sug{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;min-height:40px;align-items:center;padding:2px 12px 6px;flex:none}",
