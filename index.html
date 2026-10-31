@@ -55,5 +55,8 @@ footer{color:var(--muted); font-size:13px; margin-top:28px; text-align:center;}
 
   <footer>Données gardées sur le téléphone, rien n'est envoyé ailleurs.</footer>
 </main>
+<script>
+if("serviceWorker" in navigator){ window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js",{scope:"./"}).catch(()=>{})); }
+</script>
 </body>
 </html>
