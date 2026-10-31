@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="color-scheme" content="dark">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover, maximum-scale=2">
+<script>/* Zoom a deux doigts limite a 2x (Android : maximum-scale ; iPhone : ce garde-fou) */(function(){var M=2,v=window.visualViewport,d0=0,g0=1;function sc(){return v?v.scale:1}function di(t){return Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY)}document.addEventListener("touchstart",function(e){if(e.touches.length===2)d0=di(e.touches)},{passive:true});document.addEventListener("touchmove",function(e){if(e.touches.length!==2)return;var d=di(e.touches);if(e.cancelable&&d>d0&&sc()>=M-0.05)e.preventDefault();d0=d},{passive:false});document.addEventListener("gesturestart",function(){g0=sc()});document.addEventListener("gesturechange",function(e){if(g0*e.scale>M&&e.scale>1)e.preventDefault()})})();</script>
 <title>Kardex</title>
 <meta name="theme-color" content="#0E1014">
 <link rel="manifest" href="manifest.json">
