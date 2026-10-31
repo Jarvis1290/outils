@@ -494,6 +494,10 @@ div.addt{display:block;cursor:default;color:var(--fg)}
 .tle small{display:block;font-weight:400;color:var(--fg-3);font-size:11.5px}
 .tle .v{text-align:right;font-size:12px;color:var(--fg-2);font-weight:500;white-space:nowrap}
 .tle .v small{font-weight:600;color:var(--fg)}
+.tle .v small+small{font-weight:400;color:var(--fg-3);font-size:11px}
+.tle .t{min-width:0}
+.tle .t .pill{font-size:10px;padding:1px 6px;margin-left:3px}
+.tlm{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--fg-3);margin:6px 0 0}
 .pen{border:0;background:none;padding:4px;cursor:pointer;font-size:16px;display:inline-flex}
 .bedit{grid-template-columns:1fr 1fr;padding:6px 0}
 .bedit input{font-size:14px;padding:9px}
@@ -702,6 +706,11 @@ nav.tabs .in{position:relative}
 #rdrop{position:absolute;left:0;top:0;width:42px;height:42px;border-radius:50%;background:var(--volt);box-shadow:0 0 0 4px color-mix(in srgb,var(--volt) 22%,transparent),0 6px 18px color-mix(in srgb,var(--volt) 45%,transparent);pointer-events:none;z-index:0;opacity:0;transition:opacity .2s,width .25s,height .25s;will-change:transform}
 nav.tabs .in>button{position:relative;z-index:1}
 nav.tabs .in>button[aria-current="page"]{background:transparent!important;box-shadow:none!important}
+.tle.sw{position:relative;background:linear-gradient(90deg,transparent calc(100% + var(--sx,0px)),color-mix(in srgb,var(--bad) 88%,transparent) 0);border-radius:12px}
+.tle.sw>*:not(.dot){transform:translateX(var(--sx,0px))}
+.tle.sw::after{content:"🗑  Supprimer";position:absolute;right:14px;top:50%;translate:0 -50%;font:650 13px var(--f-body);color:#fff;opacity:clamp(0,calc((var(--sxn,0) - 40) / 60),1)}
+.tle.back>*{transition:transform .25s cubic-bezier(.3,1.4,.5,1)}
+.tle.torn{pointer-events:none;animation:tearOff .42s cubic-bezier(.5,0,.8,.4) forwards;clip-path:polygon(0 0,97% 0,100% 9%,94% 20%,99% 31%,93% 44%,100% 55%,94% 68%,99% 80%,95% 91%,100% 100%,0 100%,3% 88%,0 74%,4% 60%,0 46%,3% 33%,0 18%)}
 .row.sw{position:relative;background:linear-gradient(90deg,transparent calc(100% + var(--sx,0px)),color-mix(in srgb,var(--bad) 88%,transparent) 0);border-radius:12px}
 .row.sw>*{transform:translateX(var(--sx,0px))}
 .row.sw::after{content:"🗑  Supprimer";position:absolute;right:14px;top:50%;translate:0 -50%;font:650 13px var(--f-body);color:#fff;opacity:clamp(0,calc((var(--sxn,0) - 40) / 60),1)}
@@ -711,7 +720,7 @@ nav.tabs .in>button[aria-current="page"]{background:transparent!important;box-sh
 @keyframes tearOff{to{transform:translateX(-115%) rotate(-4deg);opacity:0}}
 .toast.undo{display:flex;align-items:center;gap:14px;pointer-events:none;white-space:nowrap;width:max-content;max-width:calc(100vw - 32px)}
 .toast.undo.on{pointer-events:auto}
-#histList{overflow:hidden}
+#tlBody{overflow:hidden}
 .toast.undo button{border:0;background:none;color:var(--volt-hi);font:700 14px var(--f-body);padding:4px 2px;cursor:pointer}
 .swtip{font-size:11.5px;color:var(--fg-3);text-align:center;padding:8px 2px 2px}
 .liq.bar{height:34px;border-radius:12px;background:var(--navy-2);box-shadow:inset 0 0 0 1px var(--line)}
@@ -814,7 +823,7 @@ html[data-magic="on"] header.top::before{opacity:var(--skyo,.5)}
 @keyframes ulGlow{to{box-shadow:0 0 0 3px #FFE58A,0 0 70px 16px rgba(245,208,76,.75)}}
 html[data-magic="on"] .dash .tu{transform:translate(calc(var(--gx,0) * 3px),calc(var(--gy,0) * 3px));transition:transform .25s ease-out}
 html[data-magic="on"] .dash .tw:nth-child(2n) .tu{transform:translate(calc(var(--gx,0) * 4.5px),calc(var(--gy,0) * 4.5px))}
-@media (prefers-reduced-motion:reduce){ .liq .w{animation:none} ::view-transition-new(root){animation:none} .row.torn{animation-duration:.01s} }
+@media (prefers-reduced-motion:reduce){ .liq .w{animation:none} ::view-transition-new(root){animation:none} .row.torn,.tle.torn{animation-duration:.01s} }
 
 /* v3.5 : sous-onglets de Coût & trajet, mini-icônes dans la barre, barre et tuiles */
 #costSeg{margin-bottom:2px}
@@ -976,17 +985,11 @@ html[data-magic="on"] .liq .lq{transform:rotate(calc(var(--gx,0) * -12deg))}
   <!-- FUN -->
   <section class="view" id="v-fun" hidden><div id="funBox" class="dash pgc"></div></section>
 
-  <!-- HISTORIQUE -->
-  <section class="view" id="v-hist" hidden>
-    <div class="chips" id="histVeh" hidden></div>
-    <div class="seg2" id="histType" style="align-self:flex-start"><button type="button" data-k="all">Tout</button><button type="button" data-k="fill">Pleins</button><button type="button" data-k="ent">Entretien</button><button type="button" data-k="fix">Frais fixes</button></div>
-    <div id="fixSum" hidden></div>
-    <div class="card list pgc" id="histList" style="padding-block:4px"></div>
-  </section>
-
   <!-- TIMELINE -->
   <section class="view" id="v-tl" hidden>
+    <div class="seg2" id="tlQuick" style="align-self:flex-start"></div>
     <div class="chiprow tlchk" id="tlTypes" style="flex-wrap:wrap"></div>
+    <div id="fixSum" hidden></div>
     <div class="card pgc" id="tlBody"></div>
   </section>
 
@@ -1089,7 +1092,6 @@ html[data-magic="on"] .liq .lq{transform:rotate(calc(var(--gx,0) * -12deg))}
     <button type="button" data-v="more" aria-label="Paramètres" title="Paramètres"><svg style="color:#A58CFF" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="m230.1 108.76l-31.85-18.14c-.64-1.16-1.31-2.29-2-3.41l-.12-36A104.6 104.6 0 0 0 162 32l-32 17.89h-4L94 32a104.6 104.6 0 0 0-34.11 19.25l-.16 36c-.7 1.12-1.37 2.26-2 3.41l-31.84 18.1a99.2 99.2 0 0 0 0 38.46l31.85 18.14c.64 1.16 1.31 2.29 2 3.41l.12 36A104.6 104.6 0 0 0 94 224l32-17.87h4L162 224a104.6 104.6 0 0 0 34.08-19.25l.16-36c.7-1.12 1.37-2.26 2-3.41l31.84-18.1a99.2 99.2 0 0 0 .02-38.48M128 168a40 40 0 1 1 40-40a40 40 0 0 1-40 40" opacity=".2"/><path d="M128 80a48 48 0 1 0 48 48a48.05 48.05 0 0 0-48-48m0 80a32 32 0 1 1 32-32a32 32 0 0 1-32 32m109.94-52.79a8 8 0 0 0-3.89-5.4l-29.83-17l-.12-33.62a8 8 0 0 0-2.83-6.08a111.9 111.9 0 0 0-36.72-20.67a8 8 0 0 0-6.46.59L128 41.85L97.88 25a8 8 0 0 0-6.47-.6a111.9 111.9 0 0 0-36.68 20.75a8 8 0 0 0-2.83 6.07l-.15 33.65l-29.83 17a8 8 0 0 0-3.89 5.4a106.5 106.5 0 0 0 0 41.56a8 8 0 0 0 3.89 5.4l29.83 17l.12 33.63a8 8 0 0 0 2.83 6.08a111.9 111.9 0 0 0 36.72 20.67a8 8 0 0 0 6.46-.59L128 214.15L158.12 231a7.9 7.9 0 0 0 3.9 1a8.1 8.1 0 0 0 2.57-.42a112.1 112.1 0 0 0 36.68-20.73a8 8 0 0 0 2.83-6.07l.15-33.65l29.83-17a8 8 0 0 0 3.89-5.4a106.5 106.5 0 0 0-.03-41.52m-15 34.91l-28.57 16.25a8 8 0 0 0-3 3c-.58 1-1.19 2.06-1.81 3.06a7.94 7.94 0 0 0-1.22 4.21l-.15 32.25a95.9 95.9 0 0 1-25.37 14.3L134 199.13a8 8 0 0 0-3.91-1h-3.83a8.1 8.1 0 0 0-4.1 1l-28.84 16.1A96 96 0 0 1 67.88 201l-.11-32.2a8 8 0 0 0-1.22-4.22c-.62-1-1.23-2-1.8-3.06a8.1 8.1 0 0 0-3-3.06l-28.6-16.29a90.5 90.5 0 0 1 0-28.26l28.52-16.28a8 8 0 0 0 3-3c.58-1 1.19-2.06 1.81-3.06a7.94 7.94 0 0 0 1.22-4.21l.15-32.25a95.9 95.9 0 0 1 25.37-14.3L122 56.87a8 8 0 0 0 4.1 1h3.64a8 8 0 0 0 4.1-1l28.84-16.1A96 96 0 0 1 188.12 55l.11 32.2a8 8 0 0 0 1.22 4.22c.62 1 1.23 2 1.8 3.06a8.1 8.1 0 0 0 3 3.06l28.6 16.29a90.5 90.5 0 0 1 .05 28.29Z"/></svg></button>
     <i class="sp"></i>
     <button type="button" data-v="home" aria-label="Bord" title="Bord" aria-current="page"><svg style="color:#FF6B5A" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M232 152v24a8 8 0 0 1-8 8H32a8 8 0 0 1-8-8v-22.87C24 95.65 70.15 48.2 127.63 48A104 104 0 0 1 232 152" opacity=".2"/><path d="M207.06 72.67A111.24 111.24 0 0 0 128 40h-.4C66.07 40.21 16 91 16 153.13V176a16 16 0 0 0 16 16h192a16 16 0 0 0 16-16v-24a111.25 111.25 0 0 0-32.94-79.33M224 176H119.71l54.76-75.3a8 8 0 0 0-12.94-9.42L99.92 176H32v-22.87c0-3.08.15-6.12.43-9.13H56a8 8 0 0 0 0-16H35.27c10.32-38.86 44-68.24 84.73-71.66V80a8 8 0 0 0 16 0V56.33A96.14 96.14 0 0 1 221 128h-21a8 8 0 0 0 0 16h23.67c.21 2.65.33 5.31.33 8Z"/></svg></button>
-    <button type="button" data-v="hist" aria-label="Journal" title="Journal"><svg style="color:#3DD39B" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M216 64v128H88V64Z" opacity=".2"/><path d="M80 64a8 8 0 0 1 8-8h128a8 8 0 0 1 0 16H88a8 8 0 0 1-8-8m136 56H88a8 8 0 1 0 0 16h128a8 8 0 0 0 0-16m0 64H88a8 8 0 1 0 0 16h128a8 8 0 0 0 0-16M44 52a12 12 0 1 0 12 12a12 12 0 0 0-12-12m0 64a12 12 0 1 0 12 12a12 12 0 0 0-12-12m0 64a12 12 0 1 0 12 12a12 12 0 0 0-12-12"/></svg></button>
     <button type="button" data-v="tl" aria-label="Timeline" title="Timeline"><svg style="color:#F5D04C" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M216 128a88 88 0 1 1-88-88a88 88 0 0 1 88 88" opacity=".2"/><path d="M136 80v43.47l36.12 21.67a8 8 0 0 1-8.24 13.72l-40-24A8 8 0 0 1 120 128V80a8 8 0 0 1 16 0m-8-48a95.44 95.44 0 0 0-67.92 28.15C52.81 67.51 46.35 74.59 40 82V64a8 8 0 0 0-16 0v40a8 8 0 0 0 8 8h40a8 8 0 0 0 0-16H49c7.15-8.42 14.27-16.35 22.39-24.57a80 80 0 1 1 1.66 114.75a8 8 0 1 0-11 11.64A96 96 0 1 0 128 32"/></svg></button>
     <button type="button" data-v="stats" aria-label="Stats" title="Stats"><svg style="color:#4FA8FF" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M208 40v168h-56V40Z" opacity=".2"/><path d="M224 200h-8V40a8 8 0 0 0-8-8h-56a8 8 0 0 0-8 8v40H96a8 8 0 0 0-8 8v40H48a8 8 0 0 0-8 8v64h-8a8 8 0 0 0 0 16h192a8 8 0 0 0 0-16M160 48h40v152h-40Zm-56 48h40v104h-40Zm-48 48h32v56H56Z"/></svg></button>
     <button type="button" data-v="cost" aria-label="Coût &amp; trajet" title="Coût &amp; trajet"><svg style="color:#E8C062" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M240 132c0 19.88-35.82 36-80 36c-19.6 0-37.56-3.17-51.47-8.44C146.76 156.85 176 142 176 124V96.72c36.52 3.34 64 17.86 64 35.28m-64-48c0-19.88-35.82-36-80-36S16 64.12 16 84s35.82 36 80 36s80-16.12 80-36" opacity=".2"/><path d="M184 89.57V84c0-25.08-37.83-44-88-44S8 58.92 8 84v40c0 20.89 26.25 37.49 64 42.46V172c0 25.08 37.83 44 88 44s88-18.92 88-44v-40c0-20.7-25.42-37.32-64-42.43M232 132c0 13.22-30.79 28-72 28c-3.73 0-7.43-.13-11.08-.37C170.49 151.77 184 139 184 124v-18.26c29.87 4.45 48 16.53 48 26.26M72 150.25v-23.79A184 184 0 0 0 96 128a184 184 0 0 0 24-1.54v23.79A163 163 0 0 1 96 152a163 163 0 0 1-24-1.75m96-40.32V124c0 8.39-12.41 17.4-32 22.87V123.5c12.91-3.13 23.84-7.79 32-13.57M96 56c41.21 0 72 14.78 72 28s-30.79 28-72 28s-72-14.78-72-28s30.79-28 72-28m-72 68v-14.07c8.16 5.78 19.09 10.44 32 13.57v23.37C36.41 141.4 24 132.39 24 124m64 48v-4.17c2.63.1 5.29.17 8 .17c3.88 0 7.67-.13 11.39-.35a122 122 0 0 0 12.61 3.76v23.46c-19.59-5.47-32-14.48-32-22.87m48 26.25V174.4a179.5 179.5 0 0 0 24 1.6a184 184 0 0 0 24-1.54v23.79a165.5 165.5 0 0 1-48 0m64-3.38V171.5c12.91-3.13 23.84-7.79 32-13.57V172c0 8.39-12.41 17.4-32 22.87"/></svg></button>
@@ -1376,7 +1378,7 @@ const THEME = { // v1.8 : même fond foncé pour tous, un accent par véhicule
   k:{txt:"#B3B8C2",grid:"rgba(255,255,255,.06)",tipBg:"#20242B",tipFg:"#EEF0F4",tipBd:"#E5484D",track:"#262A32",needle:"#EEF0F4",muted:"#8B92A0",bad:"#FF9F43",warn:"#F5D04C",acc:"#E5484D",fg:"#EEF0F4"}};
 let MODE=0; try{ const m=+localStorage.getItem("sv-mode"); if(m>0) MODE=m; }catch(e){}
 let T=THEME.k;
-const APP_VERSION="3.5.5";
+const APP_VERSION="3.6";
 const KEY="suivi-vehicules-v1";
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}}, lsSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 let STATE={fills:[],tyres:[],ent:[],rates:{},range:[925,350],tank:[60,20],buy:[3500,10000],fixed:[{},{}],trip:null};
@@ -1903,7 +1905,7 @@ function bindTiles(root,refresh){
   root.querySelectorAll("[data-w]").forEach(b=>b.onclick=()=>{ wOff+=+b.dataset.w; refresh(); });
   root.querySelectorAll(".seg2 [data-p]").forEach(b=>b.onclick=()=>{ dPer=b.dataset.p; refresh(); });
   root.querySelectorAll(".tabs2 [data-k]").forEach(b=>b.onclick=()=>{ tlK=b.dataset.k; refresh(); });
-  root.querySelectorAll(".dlast").forEach(x=>x.closest(".tu").onclick=()=>{ closeTV(); go("hist"); });
+  root.querySelectorAll(".dlast").forEach(x=>x.closest(".tu").onclick=()=>{ closeTV(); tlSet(["fill"]); go("tl"); });
   root.querySelectorAll("[data-cost]").forEach(x=>x.onclick=()=>{ closeTV(); go("cost"); });
 }
 function renderDash(){
@@ -2001,7 +2003,7 @@ function whyNot(k,c){
   if(k==="carb") return "pas encore de conso calculée";
   if(k==="ent"||k==="pneu") return `rien de noté sur ${c.span<365?"la période":"12 mois"} (bouton + → Entretien)`;
   if(k==="amo") return c.buy>0?"pas encore assez de km":"prix d'achat pas noté (Paramètres → Véhicules)";
-  return "pas noté (Journal → Frais fixes)";
+  return "pas noté (Timeline → Frais fixes)";
 }
 const TRIP0={v:0,km:100,pe:0,peOn:false,chk:{carb:true,ent:true,pneu:true,ass:true,imp:true,vig:true,gar:true,aut:true,amo:true}};
 function trip(){ if(!STATE.trip) STATE.trip=JSON.parse(JSON.stringify(TRIP0)); STATE.trip.chk=Object.assign({},TRIP0.chk,STATE.trip.chk); return STATE.trip; }
@@ -2039,7 +2041,7 @@ function budget(vs){
 function planItems(v){ // ce qui va tomber dans les 12 prochains mois pour un véhicule
   const L=[], H=TODAY+365, avg=a=>a.reduce((t,e)=>t+(+e.m),0)/a.length, lat=fixLatest(v);
   Object.keys(lat).forEach(k=>{ const e=lat[k]; let n=day(e.d)+365; const late=n<TODAY-7; if(late) n=TODAY;
-    L.push({v,d:n,late,t:FXN[k]||"Frais fixe",s:late?`payé le ${dfr(e.d)} : renouvelé ? Note-le dans le Journal`:`comme l'an dernier (${dfr(e.d)})`,m:+e.m,i:(FXI[k]||FXI.aut)[0],c:(FXI[k]||FXI.aut)[1],k:"fixe"}); });
+    L.push({v,d:n,late,t:FXN[k]||"Frais fixe",s:late?`payé le ${dfr(e.d)} : renouvelé ? Note-le dans la Timeline`:`comme l'an dernier (${dfr(e.d)})`,m:+e.m,i:(FXI[k]||FXI.aut)[0],c:(FXI[k]||FXI.aut)[1],k:"fixe"}); });
   const E=STATE.ent.filter(e=>e.v===v&&e.d&&e.k!=="F"&&e.k!=="S"&&!isTyre(e)&&+e.m>0).sort((a,b)=>a.d.localeCompare(b.d));
   if(E.length){ const gap=E.length>1?Math.max(120,Math.min(730,(day(E[E.length-1].d)-day(E[0].d))/(E.length-1))):365, m=avg(E.slice(-3));
     let n=day(E[E.length-1].d)+Math.round(gap), late=false; if(n<TODAY){ n=TODAY; late=true; }
@@ -2061,7 +2063,7 @@ function budTips(B,items){
   const out=[], vs=B.vs, cat=B.l12, tot=cat.t||1, nm=vs.length>1?"Tes véhicules te coûtent":`${esc(V[vs[0]].nl||V[vs[0]].n)} te coûte`;
   out.push(["coins","#E8C062",`${nm} environ <b>${fmt(B.day,2)} CHF par jour</b>, tout compris sauf l'achat (≈ ${fmt(B.day/4.5,1)} café${B.day/4.5>=2?"s":""} ☕ par jour).`]);
   const late=items.filter(x=>x.late&&x.k==="fixe");
-  if(late.length) out.push(["warning",T.warn,`${late.map(x=>esc(x.t)+(vs.length>1?` (${esc(V[x.v].n)})`:"")).join(", ")} : pas de nouveau paiement noté depuis plus d'un an. Note-${late.length>1?"les":"le"} dans le Journal (Frais fixes) pour garder des prévisions justes.`]);
+  if(late.length) out.push(["warning",T.warn,`${late.map(x=>esc(x.t)+(vs.length>1?` (${esc(V[x.v].n)})`:"")).join(", ")} : pas de nouveau paiement noté depuis plus d'un an. Note-${late.length>1?"les":"le"} dans la Timeline (Frais fixes) pour garder des prévisions justes.`]);
   if(B.hasPrev&&B.prevSame.t>0){ const d=B.ytd.t/B.prevSame.t-1, up=d>0;
     out.push([up?"trend-up":"trend-down",up?T.bad:"#3DD39B",Math.abs(d)<.03?`Cette année, tu dépenses <b>autant</b> que l'an dernier à la même date.`:`Cette année : <b>${up?"+":"−"}${fmt(Math.abs(d)*100)} %</b> par rapport à l'an dernier à la même date (${fmt(B.ytd.t)} contre ${fmt(B.prevSame.t)} CHF).`]); }
   const big=B.full.slice().sort((a,b)=>b.t-a.t)[0];
@@ -2104,7 +2106,7 @@ function renderBudget(){
   pc.innerHTML=`<div class="hd2">${ic("calendar-check","#3DD39B")} À prévoir · 12 prochains mois · ${who}</div>
     <div class="bkpi pl"><div><small>30 jours</small><b class="num">${fmt(inH(30))}</b><span>CHF</span></div><div><small>3 mois</small><b class="num">${fmt(inH(91))}</b><span>CHF</span></div><div><small>12 mois</small><b class="num">${fmt(inH(365))}</b><span>CHF</span></div></div>
     <div class="bline">${ic("gas-pump","#4FA8FF")} Carburant : environ <b>${fmt(fuelD*MJ)} CHF / mois</b>, compris dans ces totaux.</div>
-    <div class="plist">${items.length?items.map(x=>`<div class="pit${x.late?" late":""}${x.info?" info":""}"><span class="pd"><b>${x.late?"!":dOf(x.d).slice(8)*1}</b><small>${x.late?"à voir":MOIS[+dOf(x.d).slice(5,7)-1]}</small></span><span class="pt">${ic(x.i,x.c)} <span><b>${esc(x.t)}${all?` <em>${esc(V[x.v].n)}</em>`:""}</b><small>${x.s}</small></span></span><span class="pm">${x.m>0?`${x.est?"≈ ":""}${fmt(x.m)} CHF`:"–"}</span></div>`).join(""):`<div class="muted">Rien de connu pour l'instant : note tes frais fixes et entretiens dans le Journal.</div>`}</div>
+    <div class="plist">${items.length?items.map(x=>`<div class="pit${x.late?" late":""}${x.info?" info":""}"><span class="pd"><b>${x.late?"!":dOf(x.d).slice(8)*1}</b><small>${x.late?"à voir":MOIS[+dOf(x.d).slice(5,7)-1]}</small></span><span class="pt">${ic(x.i,x.c)} <span><b>${esc(x.t)}${all?` <em>${esc(V[x.v].n)}</em>`:""}</b><small>${x.s}</small></span></span><span class="pm">${x.m>0?`${x.est?"≈ ":""}${fmt(x.m)} CHF`:"–"}</span></div>`).join(""):`<div class="muted">Rien de connu pour l'instant : note tes frais fixes et entretiens dans la Timeline.</div>`}</div>
     ${big12>0?`<div class="bsave">${ic("piggy-bank","#FF7AA8")}<span>Mets de côté environ <b>${fmt(big12/12)} CHF par mois</b> pour les grosses factures (frais fixes, entretien, pneus), en plus du carburant.</span></div>`:""}
     <div class="cap">Frais fixes : renouvelés un an après le dernier paiement. Entretien : d'après l'écart moyen entre tes entretiens notés. ≈ = estimation.</div>`;
   tc.innerHTML=`<div class="hd2">${ic("sparkle","#F5D04C")} Bon à savoir</div>${budTips(B,items).map(t=>`<div class="tip">${ic(t[0],t[1])}<span>${t[2]}</span></div>`).join("")}`;
@@ -2261,8 +2263,6 @@ function renderPriceGroups(kind,list,col){
   }
 }
 
-let histV=-1, histMax=80;
-let histT="all";
 const EKIND={E:["wrench","Garage / mécanique","#F5A623"],S:["drop","Fournitures et divers","#FF7AA8"],P:["tire","Pneus","#A58CFF"],F:["receipt","Frais fixe","#E8C062"]};
 const FXI={ass:["shield-check","#3DD39B"],imp:["receipt","#E8C062"],vig:["road-horizon","#FF7AA8"],gar:["letter-circle-p","#6FD3DC"],aut:["plus-circle","#9AA0A8"]};
 const ekOf=e=>e.k&&EKIND[e.k]?e.k:(isTyre(e)?"P":"E");
@@ -2273,41 +2273,6 @@ function migrateFix(){ // v2.3 : les frais fixes de Paramètres deviennent des l
   (STATE.fixed||[]).forEach((F,v)=>{ if(!F||v>=V.length) return; FIXES.forEach(k=>{ const m=+F[k];
     if(m>0&&!STATE.ent.some(e=>e.v===v&&e.k==="F"&&e.fk===k&&+e.m===m)) STATE.ent.push({id:uid(),v,d:`${y}-01-01`,k:"F",fk:k,t:FXN[k],m,km:null}); }); });
   STATE.fixed=V.map(()=>({})); STATE.fx2=true; }
-function renderHist(){
-  histV=MODE; // le journal suit le véhicule choisi en haut
-  $("#histType").querySelectorAll("button").forEach(b=>{ if(b.dataset.k==="fill") b.textContent=hasFuel(MODE)?"Pleins":"Relevés"; b.setAttribute("aria-pressed",b.dataset.k===histT); b.onclick=()=>{ histT=b.dataset.k; renderHist(); }; });
-  const fx=histT==="fix", u=U(histV);
-  const F=histT==="ent"||fx?[]:A.all.flat().filter(f=>histV<0||f.v===histV).map(f=>({d:f.d,km:f.km,f}));
-  const E=histT==="fill"?[]:STATE.ent.filter(e=>(histV<0||e.v===histV)&&(fx?e.k==="F":histT==="ent"?e.k!=="F":true)).map(e=>({d:e.d||"0000-00-00",km:+e.km||0,e}));
-  const allF=F.concat(E).sort((a,b)=>b.d.localeCompare(a.d)||(b.km||0)-(a.km||0)), all=allF.slice(0,histMax);
-  // résumé des frais fixes : le dernier montant de chaque poste compte pour l'année
-  const fs=$("#fixSum"); fs.hidden=!fx;
-  if(fx){ const lat=fixLatest(MODE), tot=FIXES.reduce((t,k)=>t+(lat[k]?+lat[k].m:0),0);
-    fs.innerHTML=`<div class="card"><div class="hd2">${ic("receipt","#E8C062")} En cours · ${esc(V[MODE].n)} <span class="muted" style="float:right;font-weight:500">${fmt(tot)} CHF / an</span></div>
-      <div class="muted" style="font-size:12.5px;margin:-4px 0 8px">Calculé tout seul : la dernière année notée de chaque poste. Tu notes en dessous une ligne par poste et par année.</div>
-      <div class="fxs">${FIXES.map(k=>`<div>${ic(FXI[k][0],FXI[k][1])} ${FXN[k]}<b>${lat[k]?fmt(+lat[k].m)+" CHF":"–"}</b><small>${lat[k]?"année "+lat[k].d.slice(0,4):"pas noté"}</small></div>`).join("")}</div>
-      <button type="button" class="btn primary" id="fixAdd" style="margin-top:12px">${ic("plus-circle")} Noter un frais fixe</button>
-      <div class="cap">Une ligne par poste et par année (ex. assurance 2026, assurance 2027). Pour le coût au km et le budget, chaque montant compte de son année jusqu'à la suivante (le premier compte aussi pour les années d'avant, depuis le premier plein).</div></div>`;
-    $("#fixAdd").onclick=()=>openEnt(null,{k:"F"}); }
-  let html="",cur="";
-  all.forEach(x=>{ const k=fx?x.d.slice(0,4):x.d.slice(0,7); if(k!==cur){cur=k;const[y,m]=k.split("-");html+=`<div class="monthsep">${fx?(+y?y:"Sans date"):+y?MOIS[m-1]+" "+y:"Sans date"}</div>`;}
-    if(x.e){ const e=x.e, K=EKIND[ekOf(e)], fi=e.k==="F"?FXI[e.fk||"aut"]:null;
-      html+=`<div class="row" role="button" tabindex="0" data-eid="${e.id}" style="--c:${fi?fi[1]:K[2]}"><div class="ic">${fi?ic(fi[0],fi[1]):ic(K[0],K[2])}</div>
-      <div class="t"><b>${esc(e.t)}</b><div>${e.k==="F"&&e.d?"année "+e.d.slice(0,4):e.d?dfr(e.d):"date non notée"} · ${e.k==="F"?(FXN[e.fk]||"frais fixe").toLowerCase()+" · par an":K[1].toLowerCase()} · ${esc(V[e.v].n)}${e.km?` · ${fmt(+e.km)} km`:""}</div></div>
-      <div class="v">${e.m!=null&&e.m!==""?fmt(+e.m,2)+" CHF":"–"}<small>${ic("pencil-simple","var(--fg-3)")} modifier</small></div></div>`; return; }
-    const f=x.f;
-    if(f.kmOnly){ html+=`<div class="row" role="button" tabindex="0" data-id="${f.id}" style="--c:${V[f.v].c}"><div class="ic">${ic("speedometer",V[f.v].c)}</div>
-      <div class="t"><b>${fmt(f.km)} km</b><div>${dfr(f.d)} · relevé du compteur${f.dist?` · +${fmt(f.dist)} km`:""}</div></div><div class="v">–</div></div>`; return; }
-    html+=`<div class="row" role="button" tabindex="0" data-id="${f.id}" style="--c:${V[f.v].c}"><div class="ic">${esc(V[f.v].n.slice(0,3))}</div>
-      <div class="t"><b>${hasKm(f)?fmt(f.km)+" km":"km non noté"}</b>${f.conso!=null?`<span class="pill ok">${fmt(f.conso,2)} ${u.c100}</span>`:""}${f.eur!=null?`<span class="pill" style="color:var(--volt-hi);border-color:color-mix(in srgb,var(--volt) 50%,transparent)">€</span>`:""}${f.ign&&f.ign.length?f.ign.map(x=>`<span class="pill w">⚠ ignoré : ${x}</span>`).join(""):""}${f.weird?`<span class="pill w">conso inhabituelle</span>`:""}${f.force?`<span class="pill ok">compté quand même</span>`:""}${f.alert?`<span class="pill" style="color:var(--fg-3);border-color:var(--line)">${f.alert}</span>`:""}
-      <div>${CTRY[f.ctry||"CH"].f} ${dfr(f.d)} · ${f.vague?"je ne sais plus":f.full?u.plein:"partiel"}${f.dist?` · +${fmt(f.dist)} km`:""}${f.st?` · ${esc(f.st)}`:""}${Object.keys(f.opts||{}).filter(k=>f.opts[k]).map(k=>" "+ic(OPTS.find(o=>o[0]===k)[2])).join("")}</div></div>
-      <div class="v">${f.P!=null?fmt(f.P,2)+" CHF":"–"}<small>${f.eur!=null?fmt(f.eur,2)+" € · ":""}${f.L!=null?fmt(f.L,2)+" "+u.vol:"– "+u.vol}</small></div></div>`; });
-  $("#histList").innerHTML=(html||`<div class="muted" style="padding:12px 2px">${fx?"Aucun frais fixe noté pour ce véhicule.":"Rien de noté."}</div>`)+(allF.length>all.length?`<button class="btn" type="button" id="histMore" style="margin:8px 0">Afficher plus (${allF.length-all.length} de plus)</button>`:"")+`<div class="cap" style="padding:8px 2px">Touche une ligne pour la modifier ou la supprimer. Le bouton + en haut note un plein ou un entretien.</div>`;
-  if(html) $("#histList").insertAdjacentHTML("beforeend",`<div class="swtip">← Glisse une ligne vers la gauche pour la supprimer</div>`);
-  $("#histList").querySelectorAll(".row[data-id]").forEach(r=>r.onclick=()=>{ const f=fills.find(x=>x.id===r.dataset.id); if(f) openSheet(false,f); });
-  $("#histList").querySelectorAll(".row[data-eid]").forEach(r=>r.onclick=()=>{ const e=STATE.ent.find(x=>x.id===r.dataset.eid); if(e) openEnt(e); });
-  const hm=$("#histMore"); if(hm) hm.onclick=()=>{ histMax+=100; renderHist(); };
-}
 // ---------- saisie d'un entretien (ou d'un frais fixe) dans la même fenêtre que le plein
 let ENTEDIT=null, eKind="E", eFk="ass";
 const sheetTitle=m=>m==="p"?(EDIT?"Modifier":"Nouveau")+" "+(hasFuel(sv)?U(sv).plein:"relevé du compteur"):eKind==="F"?(ENTEDIT?"Modifier le frais fixe":"Nouveau frais fixe"):(ENTEDIT?"Modifier l'entretien":"Nouvel entretien");
@@ -2462,7 +2427,7 @@ async function phPanel(){
   $("#phExp").onclick=phExport;
 }
 
-// glisser une ligne du Journal vers la gauche = la supprimer (elle se déchire), avec « Annuler » pendant 6 s
+// glisser une ligne de la Timeline vers la gauche = la supprimer (elle se déchire), avec « Annuler » pendant 6 s
 function undoToast(txt,undo){ const u=$("#undo"); u.querySelector("span").textContent=txt; $("#toast").classList.remove("on"); u.classList.add("on"); clearTimeout(u._t);
   u.querySelector("button").onclick=()=>{ clearTimeout(u._t); u.classList.remove("on"); undo(); toast("↩ Remis"); };
   u._t=setTimeout(()=>u.classList.remove("on"),6000); }
@@ -2474,9 +2439,9 @@ function swipeDel(r){ const fid=r.dataset.id, eid=r.dataset.eid;
       undoToast(o.kmOnly?"Relevé supprimé":"Plein supprimé",()=>{ fills.splice(Math.min(k,fills.length),0,o); persist(); A=analyse(); views[curView](); }); }
     else { const k=STATE.ent.findIndex(e=>e.id===eid); if(k<0) return; const o=STATE.ent.splice(k,1)[0]; persist(); views[curView]();
       undoToast(o.k==="F"?"Frais fixe supprimé":"Ligne supprimée",()=>{ STATE.ent.splice(Math.min(k,STATE.ent.length),0,o); persist(); views[curView](); }); } },540); }
-(function(){ const L=$("#histList"); let S=null, block=0;
+(function(){ const L=$("#tlBody"); let S=null, block=0;
   const reset=r=>{ r.classList.add("back"); r.style.setProperty("--sx","0px"); r.style.setProperty("--sxn","0"); setTimeout(()=>r.classList.remove("sw","back"),260); };
-  L.addEventListener("touchstart",e=>{ const r=e.target.closest(".row[data-id],.row[data-eid]"); S=r&&e.touches.length===1?{r,x:e.touches[0].clientX,y:e.touches[0].clientY,dx:0,lock:null}:null; },{passive:true});
+  L.addEventListener("touchstart",e=>{ const r=e.target.closest(".tle[data-id],.tle[data-eid]"); S=r&&e.touches.length===1?{r,x:e.touches[0].clientX,y:e.touches[0].clientY,dx:0,lock:null}:null; },{passive:true});
   L.addEventListener("touchmove",e=>{ if(!S) return; const t=e.touches[0], dx=t.clientX-S.x, dy=t.clientY-S.y;
     if(!S.lock&&(Math.abs(dx)>9||Math.abs(dy)>9)) S.lock=dx<0&&Math.abs(dx)>Math.abs(dy)*1.2?"h":"v";
     if(S.lock!=="h") return; if(e.cancelable) e.preventDefault();
@@ -2489,25 +2454,53 @@ function swipeDel(r){ const fid=r.dataset.id, eid=r.dataset.eid;
 
 // ---------- timeline sobre, une case par type d'événement
 const TLT={fill:["gas-pump","Pleins","#4FA8FF"],E:["wrench","Garage / mécanique","#F5A623"],S:["drop","Fournitures","#FF7AA8"],P:["tire","Pneus","#F5A623"],F:["receipt","Frais fixes","#E8C062"],buy:["hand-coins","Achat","#6CB0FF"]};
-let tlMax=60;
+let tlMax=80;
+// raccourcis repris de l'ancien Journal : ils cochent les bonnes cases
+const TLQ=[["all","Tout",["fill","E","S","P","F","buy"]],["fill","Pleins",["fill"]],["ent","Entretien",["E","S","P"]],["fix","Frais fixes",["F"]]];
 function tlEvents(v){
-  const out=[];
-  A.all[v].forEach(f=>out.push({k:"fill",d:f.d,t:f.kmOnly?"Relevé du compteur":`${hasFuel(v)?(U(v).plein==="recharge"?"Recharge":"Plein"):"Relevé"} ${f.L!=null?fmt(f.L,1)+" "+U(v).vol:""}`,s:`${fmt(f.km)} km${f.st?" · "+esc(f.st):""}`,m:f.P}));
-  STATE.ent.filter(e=>e.v===v&&e.d).forEach(e=>out.push({k:ekOf(e),d:e.d,t:esc(e.t),s:e.k==="F"?(FXN[e.fk]||"frais")+" · par an":e.km?fmt(+e.km)+" km":"",m:e.m!=null&&e.m!==""?+e.m:null,e}));
-  STATE.tyres.filter(x=>x.v===v).forEach(x=>{ const T=TTYPE[tyreType(x)]; out.push({k:"P",d:x.d,t:`Pneus ${T.n.toLowerCase()} montés`,s:[x.mod?esc(x.mod):"",x.pos?TPOS[x.pos]:""].filter(Boolean).join(" · "),m:null}); });
-  if(STATE.buyD[v]) out.push({k:"buy",d:STATE.buyD[v],t:`Achat : ${esc(V[v].nl||V[v].n)}`,s:"",m:+STATE.buy[v]||null});
-  return out.sort((a,b)=>b.d.localeCompare(a.d)); }
+  const out=[], u=U(v);
+  A.all[v].forEach(f=>{ const opt=Object.keys(f.opts||{}).filter(k=>f.opts[k]).map(k=>{ const o=OPTS.find(o=>o[0]===k); return o?" "+ic(o[2]):""; }).join("");
+    if(f.kmOnly){ out.push({k:"fill",d:f.d,km:+f.km||0,f,t:`${fmt(f.km)} km`,s:`relevé du compteur${f.dist?` · +${fmt(f.dist)} km`:""}`,m:null}); return; }
+    const pills=(f.conso!=null?`<span class="pill ok">${fmt(f.conso,2)} ${u.c100}</span>`:"")+(f.eur!=null?`<span class="pill" style="color:var(--volt-hi);border-color:color-mix(in srgb,var(--volt) 50%,transparent)">€</span>`:"")
+      +(f.ign&&f.ign.length?f.ign.map(x=>`<span class="pill w">⚠ ignoré : ${x}</span>`).join(""):"")+(f.weird?`<span class="pill w">conso inhabituelle</span>`:"")+(f.force?`<span class="pill ok">compté quand même</span>`:"")+(f.alert?`<span class="pill" style="color:var(--fg-3);border-color:var(--line)">${f.alert}</span>`:"");
+    out.push({k:"fill",d:f.d,km:+f.km||0,f,t:`${hasFuel(v)?(u.plein==="recharge"?"Recharge":"Plein"):"Relevé"} ${f.L!=null?fmt(f.L,2)+" "+u.vol:"– "+u.vol}${pills}`,
+      s:`${CTRY[f.ctry||"CH"].f} ${hasKm(f)?fmt(f.km)+" km":"km non noté"} · ${f.vague?"je ne sais plus":f.full?u.plein:"partiel"}${f.dist?` · +${fmt(f.dist)} km`:""}${f.st?` · ${esc(f.st)}`:""}${opt}`,m:f.P,m2:f.eur!=null?fmt(f.eur,2)+" €":""}); });
+  STATE.ent.filter(e=>e.v===v).forEach(e=>{ const K=EKIND[ekOf(e)], fi=e.k==="F"?FXI[e.fk||"aut"]:null;
+    out.push({k:ekOf(e),d:e.d||"0000-00-00",km:+e.km||0,e,i:fi?fi[0]:null,c:fi?fi[1]:null,t:esc(e.t),
+      s:`${e.k==="F"?(e.d?"année "+e.d.slice(0,4)+" · ":"")+(FXN[e.fk]||"frais fixe").toLowerCase()+" · par an":K[1].toLowerCase()}${e.km?` · ${fmt(+e.km)} km`:""}${e.d?"":" · date non notée"}`,m:e.m!=null&&e.m!==""?+e.m:null}); });
+  STATE.tyres.filter(x=>x.v===v).forEach(x=>{ const T=TTYPE[tyreType(x)]; out.push({k:"P",d:x.d,km:+x.km||0,t:`Pneus ${T.n.toLowerCase()} montés`,s:[x.mod?esc(x.mod):"",x.pos?TPOS[x.pos]:""].filter(Boolean).join(" · "),m:null}); });
+  if(STATE.buyD[v]) out.push({k:"buy",d:STATE.buyD[v],km:0,t:`Achat : ${esc(V[v].nl||V[v].n)}`,s:"",m:+STATE.buy[v]||null});
+  return out.sort((a,b)=>b.d.localeCompare(a.d)||(b.km||0)-(a.km||0)); }
+function tlOn(){ const on=STATE.tlTypes||(STATE.tlTypes={fill:true,E:true,S:true,P:true,F:true,buy:true}); if(on.S==null) on.S=on.E!==false;
+  if(!STATE.tlJ){ on.fill=true; STATE.tlJ=true; } // 3.6 : le Journal est dans la Timeline, les pleins s'affichent (une seule fois, ensuite ton choix reste)
+  return on; }
+function tlSet(keys){ const on=tlOn(); Object.keys(TLT).forEach(k=>on[k]=keys.includes(k)); persist(); }
+function fixSumHtml(v){ const lat=fixLatest(v), tot=FIXES.reduce((t,k)=>t+(lat[k]?+lat[k].m:0),0);
+  return `<div class="card"><div class="hd2">${ic("receipt","#E8C062")} En cours · ${esc(V[v].n)} <span class="muted" style="float:right;font-weight:500">${fmt(tot)} CHF / an</span></div>
+      <div class="muted" style="font-size:12.5px;margin:-4px 0 8px">Calculé tout seul : la dernière année notée de chaque poste. Tu notes en dessous une ligne par poste et par année.</div>
+      <div class="fxs">${FIXES.map(k=>`<div>${ic(FXI[k][0],FXI[k][1])} ${FXN[k]}<b>${lat[k]?fmt(+lat[k].m)+" CHF":"–"}</b><small>${lat[k]?"année "+lat[k].d.slice(0,4):"pas noté"}</small></div>`).join("")}</div>
+      <button type="button" class="btn primary" id="fixAdd" style="margin-top:12px">${ic("plus-circle")} Noter un frais fixe</button>
+      <div class="cap">Une ligne par poste et par année (ex. assurance 2026, assurance 2027). Pour le coût au km et le budget, chaque montant compte de son année jusqu'à la suivante (le premier compte aussi pour les années d'avant, depuis le premier plein).</div></div>`; }
 function renderTl(){
-  const v=MODE, on=STATE.tlTypes||(STATE.tlTypes={fill:false,E:true,S:true,P:true,F:true,buy:true}); if(on.S==null) on.S=on.E!==false;
-  $("#tlTypes").innerHTML=Object.keys(TLT).map(k=>`<button type="button" aria-pressed="${!!on[k]}" data-k="${k}">${on[k]?"☑":"☐"} ${ic(TLT[k][0],TLT[k][2])} ${k==="fill"&&!hasFuel(v)?"Relevés":TLT[k][1]}</button>`).join("");
+  const v=MODE, on=tlOn(), ks=Object.keys(TLT), cur=ks.filter(k=>on[k]).join();
+  $("#tlQuick").innerHTML=TLQ.map(q=>`<button type="button" data-q="${q[0]}" aria-pressed="${q[0]==="all"?ks.every(k=>on[k]):q[2].join()===cur}">${q[0]==="fill"&&!hasFuel(v)?"Relevés":q[1]}</button>`).join("");
+  $("#tlQuick").querySelectorAll("button").forEach(b=>b.onclick=()=>{ tlSet(TLQ.find(q=>q[0]===b.dataset.q)[2]); renderTl(); });
+  $("#tlTypes").innerHTML=ks.map(k=>`<button type="button" aria-pressed="${!!on[k]}" data-k="${k}">${on[k]?"☑":"☐"} ${ic(TLT[k][0],TLT[k][2])} ${k==="fill"&&!hasFuel(v)?"Relevés":TLT[k][1]}</button>`).join("");
   $("#tlTypes").querySelectorAll("button").forEach(b=>b.onclick=()=>{ on[b.dataset.k]=!on[b.dataset.k]; persist(); renderTl(); });
-  const all=tlEvents(v).filter(x=>on[x.k]), ev=all.slice(0,tlMax); let y="", h="";
-  ev.forEach(x=>{ if(x.d.slice(0,4)!==y){ y=x.d.slice(0,4); h+=`<div class="tly">${y}</div>`; }
-    h+=`<div class="tle" style="--c:${TLT[x.k][2]}" ${x.e?`data-eid="${x.e.id}" role="button"`:""}><span class="dot"></span><span class="e">${ic(TLT[x.k][0],TLT[x.k][2])}</span><span class="t">${x.t}${x.s?`<small>${x.s}</small>`:""}</span><span class="v">${dshort(day(x.d))}${x.m!=null?`<small>${fmt(x.m,x.m>=1000?0:2)} CHF</small>`:""}</span></div>`; });
-  const first=STATE.buyD[v]||(A.per[v][0]&&A.per[v].reduce((m,f)=>f.d<m?f.d:m,"9999"));
-  $("#tlBody").innerHTML=(h?`<div class="tlist pgc">${h}</div>`:`<div class="muted">Rien à afficher : coche au moins un type.</div>`)
+  const fx=cur==="F", fs=$("#fixSum"); fs.hidden=!fx; // seulement les frais fixes : le résumé de l'année, comme dans l'ancien Journal
+  if(fx){ fs.innerHTML=fixSumHtml(v); $("#fixAdd").onclick=()=>openEnt(null,{k:"F"}); }
+  const all=tlEvents(v).filter(x=>on[x.k]), ev=all.slice(0,tlMax); let y="", mo="", h="";
+  ev.forEach(x=>{ const nd=!+x.d.slice(0,4);
+    if(x.d.slice(0,4)!==y){ y=x.d.slice(0,4); mo=""; h+=`<div class="tly">${nd?"Sans date":y}</div>`; }
+    if(!fx&&!nd&&x.d.slice(5,7)!==mo){ mo=x.d.slice(5,7); h+=`<div class="tlm">${MOIS[+mo-1]}</div>`; }
+    const c=x.c||TLT[x.k][2], col=x.f?V[v].c:c, att=x.f?`data-id="${x.f.id}" role="button" tabindex="0"`:x.e?`data-eid="${x.e.id}" role="button" tabindex="0"`:"";
+    h+=`<div class="tle" style="--c:${col}" ${att}><span class="dot"></span><span class="e">${x.f&&x.f.kmOnly?ic("speedometer",col):ic(x.i||TLT[x.k][0],c)}</span><span class="t">${x.t}${x.s?`<small>${x.s}</small>`:""}</span><span class="v">${nd?"–":dshort(day(x.d))}${x.m!=null?`<small>${fmt(x.m,x.m>=1000?0:2)} CHF</small>`:""}${x.m2?`<small>${x.m2}</small>`:""}${att?`<small>${ic("pencil-simple","var(--fg-3)")}</small>`:""}</span></div>`; });
+  const first=STATE.buyD[v]||(A.per[v][0]&&A.per[v].reduce((m,f)=>f.d<m?f.d:m,"9999")), anyOn=ks.some(k=>on[k]), click=ev.some(x=>x.f||x.e);
+  $("#tlBody").innerHTML=(h?`<div class="tlist pgc">${h}</div>`:`<div class="muted">${!anyOn?"Rien à afficher : coche au moins un type.":fx?"Aucun frais fixe noté pour ce véhicule.":"Rien de noté."}</div>`)
     +(all.length>ev.length?`<button class="btn" type="button" id="tlMore" style="margin-top:10px">Afficher plus (${all.length-ev.length} de plus)</button>`:"")
-    +`<div class="cap">${first&&first<"9999"?`Les données commencent le ${dfr(first)}${STATE.buyD[v]?", à l'achat":""}.`:""} ${STATE.buyD[v]?"":"La date d'achat se note dans Paramètres → Véhicules."}</div>`;
+    +(click?`<div class="swtip">← Glisse une ligne vers la gauche pour la supprimer</div>`:"")
+    +`<div class="cap">Touche une ligne pour la modifier ou la supprimer. Le bouton + en haut note un plein ou un entretien. ${first&&first<"9999"?`Les données commencent le ${dfr(first)}${STATE.buyD[v]?", à l'achat":""}.`:""} ${STATE.buyD[v]?"":"La date d'achat se note dans Paramètres → Véhicules."}</div>`;
+  $("#tlBody").querySelectorAll("[data-id]").forEach(r=>r.onclick=()=>{ const f=fills.find(x=>x.id===r.dataset.id); if(f) openSheet(false,f); });
   $("#tlBody").querySelectorAll("[data-eid]").forEach(r=>r.onclick=()=>{ const e=STATE.ent.find(x=>x.id===r.dataset.eid); if(e) openEnt(e); });
   const tm=$("#tlMore"); if(tm) tm.onclick=()=>{ tlMax+=100; renderTl(); };
 }
@@ -2800,7 +2793,7 @@ function renderAff(){
   $("#goFunOrg").onclick=()=>{ funEdit=true; go("fun"); };
 }
 // ordre des icônes de la barre (Paramètres toujours en haut)
-const RAIL0=["home","hist","tl","stats","cost","fun","veh"];
+const RAIL0=["home","tl","stats","cost","fun","veh"];
 const railSel=x=>`nav.tabs [data-v="${x}"]`;
 function railOrder(){ let o=null; try{ o=JSON.parse(localStorage.getItem("sv-order")||"null"); }catch(e){}
   if(!Array.isArray(o)||o.includes("fab")||o.includes("cmp")) return RAIL0.slice(); // ancien format (v2.1) : nouvel ordre par défaut
@@ -2895,6 +2888,7 @@ function renderMore(){
 
 // ---------- Quoi de neuf : la version en grand, une carte par version ; s'ouvre une fois après chaque mise à jour
 const CHANGELOG=[
+  ["3.6","31.10.2026","Timeline + Journal",["Le Journal et la Timeline ne font plus qu'une page : la Timeline, avec ses cases en haut","Raccourcis Tout, Pleins, Entretien, Frais fixes au-dessus des cases","Tous les détails du Journal dans la Timeline : conso, €, valeurs ignorées, station, pays, options, litres, prix","Touche une ligne pour la modifier ou la supprimer, glisse-la vers la gauche pour la supprimer (avec Annuler)","Frais fixes seuls : le résumé de l'année et le bouton Noter un frais fixe","Les mois sont marqués dans chaque année ; les lignes sans date sont à la fin"]],
   ["3.5.5","31.10.2026","Hors ligne",["Marche entièrement sans réseau (mode avion) : page, graphiques, export et polices sont gardés dans le téléphone","Réseau faible : l'app s'ouvre quand même tout de suite","Le taux €→CHF reste le seul besoin de réseau (sinon dernier taux connu ou à la main)"]],
   ["3.5.4","29.10.2026","Budget limpide",["Budget : partout le même compte, frais fixes compris","Le mois en cours comparé à un mois normal à la même date, avec une flèche ▲ ▼","« Un mois normal » = le même chiffre que la ligne pointillée du graphique","Flèches aussi pour l'année et pour « avant »"]],
   ["3.5.3","29.10.2026","Budget plus clair",["Budget : le bandeau du mois dit ce qui est compté et d'où vient la moyenne","Bon à savoir sur son propre écran","Barre d'icônes : la dernière icône n'est plus coupée en bas"]],
@@ -3054,12 +3048,12 @@ function renderFun(){
 }
 
 // navigation
-const views={home:renderHome,hist:renderHist,tl:renderTl,stats:renderStats,cost:renderCost,fun:renderFun,veh:renderVeh,more:renderMore};
+const views={home:renderHome,tl:renderTl,stats:renderStats,cost:renderCost,fun:renderFun,veh:renderVeh,more:renderMore};
 let curView="home";
-const TITRES={home:"Tableau de bord",hist:"Journal",tl:"Timeline",stats:"Stats",cost:"Coût & trajet",fun:"Fun & duel",veh:"Véhicule",more:"Paramètres"};
+const TITRES={home:"Tableau de bord",tl:"Timeline",stats:"Stats",cost:"Coût & trajet",fun:"Fun & duel",veh:"Véhicule",more:"Paramètres"};
 const titleOf=v=>v==="veh"?vehTitle(MODE):TITRES[v];
 let navStack=[];
-function go(v,dir,back){ closeTV(); if(v!=="home") tOpenIn=null; if(v!=="fun") funEdit=false; if(v!=="home"&&dEdit&&!back) dEdit=false;
+function go(v,dir,back){ if(v==="hist") v="tl"; /* 3.6 : le Journal est dans la Timeline */ closeTV(); if(v!=="home") tOpenIn=null; if(v!=="fun") funEdit=false; if(v!=="home"&&dEdit&&!back) dEdit=false;
   if(!back&&v!==curView){ navStack.push(curView); if(navStack.length>30) navStack.shift(); } curView=v; Object.keys(views).forEach(k=>$("#v-"+k).hidden=k!==v); $("#vTitle").textContent=titleOf(v);
   const el=$("#v-"+v); el.classList.remove("in-l","in-r"); if(dir){ void el.offsetWidth; el.classList.add(dir>0?"in-r":"in-l"); }
   document.querySelectorAll("nav.tabs [data-v]").forEach(b=>{ if(b.dataset.v===v) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current"); });
@@ -3080,7 +3074,7 @@ function railDrop(){ const d=$("#rdrop"), b=document.querySelector('nav.tabs .in
 (function(){ let x0=null,y0=null,t0=0,edge=false;
   document.addEventListener("touchstart",e=>{ if($("#sheet").classList.contains("on")||TV||e.touches.length!==1) return; const t=e.touches[0]; x0=t.clientX; y0=t.clientY; t0=Date.now();
     const H=document.documentElement.dataset; edge=railHidden()&&(H.rail==="d"?x0>innerWidth-22:H.rail==="b"?y0>innerHeight-28:x0<22);
-    if(!edge&&(e.target.closest(".chips")||e.target.closest("#kpad")||e.target.closest(".tblwrap")||e.target.closest("#histList .row")||e.target.closest(".chiprow")||e.target.closest("nav.tabs")||document.body.classList.contains("typing")||(document.activeElement&&document.activeElement.matches("input,textarea,select")))) x0=null; },{passive:true});
+    if(!edge&&(e.target.closest(".chips")||e.target.closest("#kpad")||e.target.closest(".tblwrap")||e.target.closest("#tlBody .tle[role=button]")||e.target.closest(".chiprow")||e.target.closest("nav.tabs")||document.body.classList.contains("typing")||(document.activeElement&&document.activeElement.matches("input,textarea,select")))) x0=null; },{passive:true});
   document.addEventListener("touchend",e=>{ if(x0==null) return; const t=e.changedTouches[0], dx=t.clientX-x0, dy=t.clientY-y0; x0=null;
     if(edge){ const H=document.documentElement.dataset, inw=H.rail==="d"?-dx:H.rail==="b"?-dy:dx; if(inw>30){ railOpen(); return; } }
     if(Math.abs(dx)>70 && Math.abs(dx)>Math.abs(dy)*1.6 && Date.now()-t0<700){ const O=railOrder().filter(v=>v!=="veh"||vehTabs(MODE).length), i=O.indexOf(curView), j=i+(dx<0?1:-1); if(i>=0&&j>=0&&j<O.length) go(O[j],dx<0?1:-1); } },{passive:true});
@@ -3579,7 +3573,7 @@ const BETISE=(function(){
       if(!c){ const bars=[...document.querySelectorAll(".bb")].filter(vis); if(!bars.length) return 0; const a=pick(bars); fx(a,"droop"); return 1; } /* une barre fait semblant de tomber */ try{ c.hide(0); const back=()=>{ try{ c.show(0); }catch(e){} }; STOPS.push(back); setTimeout(back,2600); }catch(e){ return 0; } return 1; }],
     ["Le compteur qui s'emballe",1,null,()=>{ const e=one(".dash .tu"); if(!e) return 0; rollNums(e); return 1; }],
     ["La pompe impatiente",0,null,()=>{ const f=$("#fab"); if(!seen(f)) return 0; fx(f,"wig"); return bub(f,"⛽ un plein ?"); }],
-    ["La ligne qui fait la sieste",1,null,()=>{ const r=one("#histList .row,.prow,.pit,.tip,.note,.tbl tr:not(:first-child)"); if(!r) return 0; return fx(r,"nap"); }],
+    ["La ligne qui fait la sieste",1,null,()=>{ const r=one("#tlBody .tle,.prow,.pit,.tip,.note,.tbl tr:not(:first-child)"); if(!r) return 0; return fx(r,"nap"); }],
     ["Les essuie-glaces",1,null,()=>{ const h=$("header.top"), r=h.getBoundingClientRect(); return toy("〰️",[-40,r.top+r.height/2-13],[innerWidth+40,r.top+r.height/2-13,.2],1400,0); }],
     ["Le clignotant",1,null,()=>{ const e=document.createElement("span"); e.className="btoy"; e.textContent="🟠"; e.style.cssText=`right:6px;top:${(PG.top||60)+10}px;font-size:14px`; document.body.appendChild(e);
       e.animate([{opacity:1},{opacity:0},{opacity:1},{opacity:0},{opacity:1},{opacity:0}],{duration:2200}).onfinish=()=>e.remove(); return 1; }],
@@ -3620,7 +3614,7 @@ const BETISE=(function(){
     if(k==="title"){ const e=$("#vTitle"); return seen(e)?fake(e,pick(FT)):0; }
     if(k==="veh"){ const b=vbtn(); if(!b) return 0; const n=V[MODE].n, f=n==="Kangoo"?"Kangourou 🦘":n.length>3?n.slice(0,3)+"-Tracteur 🚜":"Bolide 🏎️"; const e=$("#vTitle"); return 0||(e&&seen(e)?(bub(b,`Je m'appelle ${f} !`),1):0); }
     return 0; }
-  const VIEWS=["home","hist","tl","stats","cost","fun"];
+  const VIEWS=["home","tl","stats","cost","fun"];
   function tabWalk(){ if(FARCE_VIEW) return 0; const next=pick(VIEWS.filter(v=>v!==curView&&$(railSel(v))&&!$(railSel(v)).hidden)); if(!next) return 0;
     const b=$(railSel(next)); FARCE_VIEW=curView; if(seen(b)){ fx(b,"hop"); bub(b,pick(["Je vais voir par là 👉","Hop, on change !","Tiens, et ici ?"])); } setTimeout(()=>{ if(FARCE_VIEW) go(next,1); },900); return 1; }
   const setting=()=>lsGet("sv-bet")||"3", discOnly=()=>lsGet("sv-betd")==="discretes";
@@ -3639,7 +3633,7 @@ const BETISE=(function(){
     let k=+(lsGet("sv-betk")||0)||0; const isOk=i=>!L[i][2]||L[i][2]();
     const done=i=>{ lsSet("sv-betk",String((i+1)%L.length)); setTimeout(()=>toast(`Bêtise ${i+1}/${L.length} : ${L[i][0]}${isOk(i)?"":" (d'habitude seulement au bon moment)"}`),900); };
     if(!magicOn()){ toast("Allume d'abord la Magie (Oui)."); return; }
-    const i=k%L.length, pages=[...new Set([curView==="more"?"home":curView,"home","stats","hist","cost"])]; let p=0;
+    const i=k%L.length, pages=[...new Set([curView==="more"?"home":curView,"home","stats","tl","cost"])]; let p=0;
     const step=()=>{ if(p>=pages.length){ k=i+1; lsSet("sv-betk",String(k%L.length)); toast(`Bêtise ${i+1}/${L.length} : ${L[i][0]} (rien à faire ici)`); return; }
       const v=pages[p++]; if(curView!==v) go(v); setTimeout(()=>{ if(play(i)) done(i); else step(); },800); };
     step(); }
@@ -3662,7 +3656,7 @@ renderBet();
     if(ch.length) opts.push(()=>{ const c=charts[pick(ch)]; try{ c.reset(); c.update(); }catch(e){} }); // le graphique se redessine
     const n=all(".tm .mn,.num,.kmc .top b,.bkpi b,.pm,.byr b"); if(n.length) opts.push(()=>fx(pick(n),"hop"));
     const l=all(".liq .lq"); if(l.length) opts.push(()=>fx(pick(l),"slosh"));
-    const r=all("#histList .row,.prow,.pit,.tip,.note,.tbl tr:not(:first-child)"); if(r.length) opts.push(()=>fx(pick(r),"wig"));
+    const r=all("#tlBody .tle,.prow,.pit,.tip,.note,.tbl tr:not(:first-child)"); if(r.length) opts.push(()=>fx(pick(r),"wig"));
     if(viv()){ const bet=lsGet("sv-bet")!=="0", r=Math.random(), calm=Date.now()-idle0; // page vivante : on mélange tout, sans se presser
       if(bet&&calm>=60e3&&r<.5&&BETISE.tabWalk()) return; // changer d'onglet : seulement après 1 min sans toucher
       if(bet&&calm>=20e3&&r<.25&&BETISE.farce(pick(["num","num","lbl","title"]))) return; // les farces qui restent : après 20 s
