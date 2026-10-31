@@ -1138,7 +1138,7 @@ function fitScreen(){requestAnimationFrame(()=>{
 addEventListener("resize",()=>{if(tab!=="search")fitScreen()});
 /* ---------- 📜 notes de version : « Quoi de neuf » une fois après chaque mise à jour + historique dans Paramètres ---------- */
 const NOTES=[
- ["2.1","31.10.2026",["📸 Prendre le tiroir : un assistant pas à pas (un casier en photo, ou tout le tiroir en film)","📱 Portrait partout : haut du téléphone vers le fond du tiroir ; l'app vérifie « portrait » et « à plat »","✨ Relief automatique : calculé tout seul après chaque prise, gardé, et visible directement dans Photos en penchant le téléphone","🔒 Pages fixes : plus rien ne bouge un peu vers le haut ou le bas","🎡 Photos : on change d'étage seulement avec la roulette (plus de glissement)","🎚️ Relief : interrupteur et force dans Paramètres"]],
+ ["2.1","31.10.2026",["📸 Prendre le tiroir : un assistant pas à pas (un casier en photo, ou tout le tiroir en film)","📱 Portrait partout : haut du téléphone vers le fond du tiroir ; l'app vérifie « portrait » et « à plat »","✨ Relief automatique : calculé tout seul après chaque prise, gardé, et visible directement dans Photos en penchant le téléphone","🔒 Pages fixes : plus rien ne bouge un peu vers le haut ou le bas","🎡 Photos : on change d'étage seulement avec la roulette (plus de glissement ni de flèches)","↩️ Retour sécurisé : un seul appui ne fait jamais sortir, double appui pour quitter","🎚️ Relief : interrupteur et force dans Paramètres"]],
  ["2.0","31.10.2026",["📱 Photos et films de tiroirs en paysage : l'app le rappelle, demande de tourner le téléphone et propose le bon cadre (réglable dans Paramètres)","✨ Relief IA : touche ✨ Relief sur une photo ou dans un tiroir vidéo, puis penche le téléphone","🧠 L'IA (Depth Anything, libre) tourne dans le téléphone, hors ligne après un 1er téléchargement de 37 Mo","🎚️ Force du relief réglable"]],
  ["1.9.1","31.10.2026",["✈️ Marche entièrement hors ligne (mode avion), polices comprises"]],
  ["1.9","30.10.2026",["🎬 Tiroir vidéo : 96 images gardées (24 nettes), plus fluide","⏱️ Décompte 3-2-1, téléphone dessiné à suivre, bip + vibration à mi-temps, durée 8/10/12/15 s","🔭 Choix de l'objectif (normal, grand angle…) et zoom ×1 à ×2, retenus","📱 Film possible en paysage","✂️ Recadrage du tiroir (pieds, fond…), sur toutes les images, refaisable","📜 Ces notes de version"]],
@@ -1500,7 +1500,6 @@ function carHtml(){
   if(carF===null)carF=(openF&&openF.f)||(PH[0]&&Math.min(...PH.map(p=>p.floor)))||1;
   let h="";for(let f=1;f<=60;f++)h+=carSlide(f);
   return `<div class="carw"><div class="carm"><div class="car" id="car" tabindex="0" aria-label="Étages, la roulette pour changer">${h}</div>
-    <button class="nav prev" type="button" data-act="carprev" aria-label="Étage précédent">‹</button><button class="nav next" type="button" data-act="carnext" aria-label="Étage suivant">›</button>
     <div class="ccount" id="ccount">Étage ${carF} / 60</div></div>${railHtml()}</div>`;
 }
 function carSetup(){
@@ -1819,17 +1818,20 @@ const backNeed=()=>!!(kbOpen()||document.querySelector(".cr,.vw,.mv,.tc")||panel
 // prend le Retour tant que quelque chose est ouvert ; à l'accueil il n'y en a plus : 1er Retour = message, 2e = quitter.
 (function(){const armed=()=>history.state&&history.state.kx===1;
   try{if(!history.state||history.state.kx==null)history.replaceState({kx:0},"")}catch(e){}
-  let cw=null,quitT=null;
+  let cw=null,quitT=null,gGood=false; // gGood : la garde actuelle a été posée par un vrai geste (Chrome ne la saute pas)
   const cwSync=()=>{if(typeof CloseWatcher!=="function")return;
     if(backNeed()&&!cw){try{cw=new CloseWatcher();cw.onclose=()=>{cw=null;backStep();cwSync()}}catch(e){cw=null}}
     else if(!backNeed()&&cw){const w=cw;cw=null;try{w.destroy()}catch(e){}}};
   const gest=e=>{if(e.type==="keydown"&&e.key==="Escape")return;
-    if(e.type!=="pointerup"||e.pointerType!=="mouse"){if(!armed())try{history.pushState({kx:1},"")}catch(x){}}
+    if(e.type!=="pointerup"||e.pointerType!=="mouse"){if(!armed()||!gGood)try{history.pushState({kx:1},"");gGood=true}catch(x){}}
     setTimeout(cwSync,60)};
   ["pointerup","touchend","click","keydown"].forEach(t=>addEventListener(t,gest,true));
-  addEventListener("popstate",()=>{if(quitT){clearTimeout(quitT);quitT=null}
+  // Retour sécurisé : il ferme ce qui est ouvert ; à l'accueil, 1er appui = message, 2e appui dans les 2,5 s = quitter.
+  // Passé ce délai, la garde est reposée : un Retour isolé ne fait jamais sortir.
+  addEventListener("popstate",()=>{gGood=false;if(quitT){clearTimeout(quitT);quitT=null}
     if(backStep()){try{history.pushState({kx:1},"")}catch(x){}cwSync();return}
-    toast("Appuie encore sur Retour pour quitter");quitT=setTimeout(()=>{quitT=null},2500)});
+    toast("Appuie encore sur Retour pour quitter");
+    quitT=setTimeout(()=>{quitT=null;if(!armed())try{history.pushState({kx:1},"")}catch(x){}},2500)});
   setInterval(cwSync,700); // une fenêtre fermée autrement (bouton, toucher) libère son CloseWatcher
 })();
 
