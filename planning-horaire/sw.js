@@ -1,41 +1,53 @@
-// Service worker dédié au Planning Horaire (indépendant des autres outils du repo)
-// réseau d'abord (toujours la dernière version en ligne), cache seulement hors ligne.
-const CACHE_NAME = "planning-horaire-v2.2";
-const FILES = [
-  "index.html",
-  "manifest.json",
-  "icon-192.png",
-  "icon-512.png",
-  "icon-maskable-512.png"
-];
+// Planning Horaire — fonctionne entièrement hors ligne.
+// Tout est gardé dans le téléphone dès la première ouverture : page, icônes, polices.
+// La page : réseau d'abord (nouvelle version au lancement suivant), mais si le réseau ne répond pas
+// en 4 s, la copie du téléphone s'ouvre tout de suite (mode avion, réseau faible).
+const CACHE = "planning-horaire-v2.2.1";
+const PREFIX = "planning-horaire-";
+const CORE = ["./index.html", "./planning-horaire.html", "./manifest.json", "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png", "./fonts/fonts.css", "./fonts/Inter-latin-ext-cf3eb50f.woff2", "./fonts/Inter-latin-f11d729b.woff2"];
+const TIMEOUT = 4000;
 
-self.addEventListener("install", function(event){
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(function(cache){ return cache.addAll(FILES); })
-  );
+self.addEventListener("install", e => {
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE.map(u => new Request(u, { cache: "reload" })))));
   self.skipWaiting();
 });
-
-self.addEventListener("activate", function(event){
-  event.waitUntil(
-    caches.keys().then(function(keys){
-      return Promise.all(keys.filter(function(k){ return k.indexOf("planning-horaire-") === 0 && k !== CACHE_NAME; }).map(function(k){ return caches.delete(k); }));
-    })
-  );
+self.addEventListener("activate", e => {
+  e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith(PREFIX) && k !== CACHE).map(k => caches.delete(k)))));
   self.clients.claim();
 });
 
-self.addEventListener("fetch", function(event){
-  // Ne gère que les fichiers de ce dossier d'outil, laisse le reste du site tranquille.
-  var isOurs = event.request.mode === "navigate" || FILES.some(function(f){ return event.request.url.indexOf(f) !== -1; });
-  if (!isOurs || event.request.method !== "GET") return;
-  event.respondWith(
-    fetch(event.request, { cache: "no-cache" }).then(function(resp){
-      var copy = resp.clone();
-      caches.open(CACHE_NAME).then(function(c){ c.put(event.request, copy); });
-      return resp;
-    }).catch(function(){
-      return caches.match(event.request).then(function(c){ return c || caches.match("index.html"); });
-    })
-  );
+const OFFLINE = `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hors ligne</title></head><body style="margin:0;min-height:100vh;display:grid;place-items:center;background:#14171c;color:#eef0f3;font-family:system-ui,sans-serif;text-align:center;padding:24px">
+<div><div style="font-size:56px">✈️</div><h1 style="font-size:22px">Pas de réseau</h1>
+<p style="color:#9aa3ad;max-width:320px">Planning Horaire n'a pas encore été ouverte avec du réseau sur ce téléphone. Ouvre-la une fois connecté : ensuite elle marche partout, même en mode avion.</p>
+<button onclick="location.reload()" style="font-size:16px;padding:10px 18px;border-radius:12px;border:0;background:#f5a524;color:#14110a;font-weight:700">Réessayer</button></div></body></html>`;
+
+function fromCache(req) {
+  return caches.match(req, { ignoreSearch: true }).then(r => r || caches.match("./index.html"))
+    .then(r => r || new Response(OFFLINE, { headers: { "Content-Type": "text/html; charset=utf-8" } }));
+}
+
+self.addEventListener("fetch", e => {
+  const req = e.request;
+  if (req.method !== "GET") return;
+  const url = new URL(req.url);
+  if (url.origin !== location.origin) return;                    // le reste d'internet : toujours en direct
+  if (req.mode === "navigate") {
+    const net = fetch(req.url, { cache: "no-cache" }).then(r => {
+      if (r && r.ok) { const c = r.clone(); caches.open(CACHE).then(x => x.put(url.pathname.endsWith(".html") ? url.pathname : "./index.html", c)); }
+      return r;
+    });
+    e.waitUntil(net.catch(() => {}));                            // la mise à jour continue en arrière-plan
+    e.respondWith(new Promise(ok => {
+      let done = false;
+      const fallback = () => { if (!done) { done = true; ok(fromCache(req)); } };
+      const t = setTimeout(() => caches.match("./index.html").then(h => h && fallback()), TIMEOUT);
+      net.then(r => { if (done) return; if (r && r.ok) { done = true; clearTimeout(t); ok(r); } else fallback(); }, fallback);
+    }));
+    return;
+  }
+  e.respondWith(caches.match(req).then(hit => hit || fetch(req).then(r => {   // icônes, polices… : téléphone d'abord
+    if (r && r.ok) { const c = r.clone(); caches.open(CACHE).then(x => x.put(req, c)); }
+    return r;
+  }).catch(() => caches.match(req, { ignoreSearch: true }).then(h => h || Response.error()))));
 });
