@@ -571,6 +571,8 @@ body{height:100%;overflow:hidden;overscroll-behavior:none}
 .app{box-sizing:border-box;height:100%;overflow-y:auto;overflow-x:hidden;overscroll-behavior:none}
 body.fixe .app{overflow-y:hidden}
 .tc>.tcs{max-height:100%;overflow-y:auto;overscroll-behavior:contain}
+/* v2.1 Photos : pas de glissement entre étages, seulement la roulette (et ‹ ›) */
+.car{overflow-x:hidden!important;touch-action:pan-y}
 /* v2.1 ✨ relief directement dans Photos */
 .sl .big .rlc{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:0;transition:opacity .6s}
 .sl .big .rlc.on{opacity:1}
@@ -1136,7 +1138,7 @@ function fitScreen(){requestAnimationFrame(()=>{
 addEventListener("resize",()=>{if(tab!=="search")fitScreen()});
 /* ---------- 📜 notes de version : « Quoi de neuf » une fois après chaque mise à jour + historique dans Paramètres ---------- */
 const NOTES=[
- ["2.1","31.10.2026",["📸 Prendre le tiroir : un assistant pas à pas (un casier en photo, ou tout le tiroir en film)","📱 Portrait partout : haut du téléphone vers le fond du tiroir ; l'app vérifie « portrait » et « à plat »","✨ Relief automatique : calculé tout seul après chaque prise, gardé, et visible directement dans Photos en penchant le téléphone","🔒 Pages fixes : plus rien ne bouge un peu vers le haut ou le bas","🎚️ Relief : interrupteur et force dans Paramètres"]],
+ ["2.1","31.10.2026",["📸 Prendre le tiroir : un assistant pas à pas (un casier en photo, ou tout le tiroir en film)","📱 Portrait partout : haut du téléphone vers le fond du tiroir ; l'app vérifie « portrait » et « à plat »","✨ Relief automatique : calculé tout seul après chaque prise, gardé, et visible directement dans Photos en penchant le téléphone","🔒 Pages fixes : plus rien ne bouge un peu vers le haut ou le bas","🎡 Photos : on change d'étage seulement avec la roulette (plus de glissement)","🎚️ Relief : interrupteur et force dans Paramètres"]],
  ["2.0","31.10.2026",["📱 Photos et films de tiroirs en paysage : l'app le rappelle, demande de tourner le téléphone et propose le bon cadre (réglable dans Paramètres)","✨ Relief IA : touche ✨ Relief sur une photo ou dans un tiroir vidéo, puis penche le téléphone","🧠 L'IA (Depth Anything, libre) tourne dans le téléphone, hors ligne après un 1er téléchargement de 37 Mo","🎚️ Force du relief réglable"]],
  ["1.9.1","31.10.2026",["✈️ Marche entièrement hors ligne (mode avion), polices comprises"]],
  ["1.9","30.10.2026",["🎬 Tiroir vidéo : 96 images gardées (24 nettes), plus fluide","⏱️ Décompte 3-2-1, téléphone dessiné à suivre, bip + vibration à mi-temps, durée 8/10/12/15 s","🔭 Choix de l'objectif (normal, grand angle…) et zoom ×1 à ×2, retenus","📱 Film possible en paysage","✂️ Recadrage du tiroir (pieds, fond…), sur toutes les images, refaisable","📜 Ces notes de version"]],
@@ -1497,7 +1499,7 @@ function carSlide(f){
 function carHtml(){
   if(carF===null)carF=(openF&&openF.f)||(PH[0]&&Math.min(...PH.map(p=>p.floor)))||1;
   let h="";for(let f=1;f<=60;f++)h+=carSlide(f);
-  return `<div class="carw"><div class="carm"><div class="car" id="car" tabindex="0" aria-label="Étages, glisser pour changer">${h}</div>
+  return `<div class="carw"><div class="carm"><div class="car" id="car" tabindex="0" aria-label="Étages, la roulette pour changer">${h}</div>
     <button class="nav prev" type="button" data-act="carprev" aria-label="Étage précédent">‹</button><button class="nav next" type="button" data-act="carnext" aria-label="Étage suivant">›</button>
     <div class="ccount" id="ccount">Étage ${carF} / 60</div></div>${railHtml()}</div>`;
 }
