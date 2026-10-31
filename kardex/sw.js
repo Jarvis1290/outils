@@ -2,7 +2,8 @@
 // Tout est gardé dans le téléphone dès la première ouverture : page, icônes, polices.
 // La page : réseau d'abord (nouvelle version au lancement suivant), mais si le réseau ne répond pas
 // en 4 s, la copie du téléphone s'ouvre tout de suite (mode avion, réseau faible).
-const CACHE = "kardex-v1.9.1";
+const CACHE = "kardex-v2.0";
+const IA = "ia-depth-v1";   // moteur + modèle IA (37 Mo) : cache à part, gardé d'une version à l'autre
 const PREFIX = "kardex-";
 const CORE = ["./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png", "./fonts/fonts.css", "./fonts/Inter-latin-ext-cf3eb50f.woff2", "./fonts/Inter-latin-f11d729b.woff2", "./fonts/JetBrainsMono-latin-4f27206c.woff2", "./fonts/JetBrainsMono-latin-ext-06ad3600.woff2", "./fonts/SairaStencilOne-latin-0b383b2f.woff2", "./fonts/SairaStencilOne-latin-ext-917ada4f.woff2"];
 const TIMEOUT = 4000;
@@ -32,6 +33,10 @@ self.addEventListener("fetch", e => {
   if (req.method !== "GET") return;
   const url = new URL(req.url);
   if (url.origin !== location.origin) return;                    // le reste d'internet : toujours en direct
+  if (url.pathname.includes("/ia/")) {                           // IA : téléchargée une fois au 1er relief, puis hors ligne
+    e.respondWith(caches.open(IA).then(c => c.match(req).then(hit => hit || fetch(req).then(r => { if (r.ok) c.put(req, r.clone()); return r; }))));
+    return;
+  }
   if (req.mode === "navigate") {
     const net = fetch(req.url, { cache: "no-cache" }).then(r => {
       if (r && r.ok) { const c = r.clone(); caches.open(CACHE).then(x => x.put("./index.html", c)); }

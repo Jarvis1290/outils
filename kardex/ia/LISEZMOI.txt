@@ -1,0 +1,10 @@
+Kardex : relief IA (fonctionne sur le téléphone, hors ligne après le 1er téléchargement)
+
+depth-small-q8.onnx
+  Depth Anything V2 Small (Lihe Yang et al.), licence Apache 2.0
+  https://github.com/DepthAnything/Depth-Anything-V2
+  Export ONNX : fabio-sim/Depth-Anything-ONNX (Apache 2.0), puis compressé en 8 bits (quantification dynamique onnxruntime).
+
+ort.wasm.min.js, ort-wasm-simd-threaded.mjs, ort-wasm-simd-threaded.wasm
+  ONNX Runtime Web 1.20.1, © Microsoft, licence MIT
+  https://github.com/microsoft/onnxruntime
