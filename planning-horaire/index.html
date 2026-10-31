@@ -2,12 +2,12 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=2">
+<script>/* Zoom a deux doigts limite a 2x (Android : maximum-scale ; iPhone : ce garde-fou) */(function(){var M=2,v=window.visualViewport,d0=0,g0=1;function sc(){return v?v.scale:1}function di(t){return Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY)}document.addEventListener("touchstart",function(e){if(e.touches.length===2)d0=di(e.touches)},{passive:true});document.addEventListener("touchmove",function(e){if(e.touches.length!==2)return;var d=di(e.touches);if(e.cancelable&&d>d0&&sc()>=M-0.05)e.preventDefault();d0=d},{passive:false});document.addEventListener("gesturestart",function(){g0=sc()});document.addEventListener("gesturechange",function(e){if(g0*e.scale>M&&e.scale>1)e.preventDefault()})})();</script>
 <title>Planning Horaire</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#9ab583">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="fonts/fonts.css">
 <script>try{var D=document.documentElement.dataset,G=function(k,d){return localStorage.getItem(k)||d};D.phTheme=G("ph-theme","auto");D.rail=G("ph-rail","g");D.ricons=G("ph-ricons","b");}catch(e){}</script>
 <style>
 /* Planning Horaire v2.0 — thème pistache mat V18 : barre d'icônes, tuiles arrondies, clair ou foncé */
@@ -640,7 +640,7 @@ const Sauvegarde = (() => {
    - Report des heures (⏱) : tout vendredi, jour suivant, étalé, ou Perso (cases). Semaine = graphe en barres pour les exceptions.
    - Historique éditable : une correction recalcule le pot des semaines suivantes. */
 
-var APP_VERSION = "2.2", APP_DATE = "29.10.2026";
+var APP_VERSION = "2.2.1", APP_DATE = "31.10.2026";
 var KEY = "planning-horaire-v3";
 var DAYS = ["lundi","mardi","mercredi","jeudi","vendredi"];
 var SH = {lundi:"Lun",mardi:"Mar",mercredi:"Mer",jeudi:"Jeu",vendredi:"Ven"};
