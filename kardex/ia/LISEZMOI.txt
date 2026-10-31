@@ -8,3 +8,4 @@ depth-small-q8.onnx
 ort.wasm.min.js, ort-wasm-simd-threaded.mjs, ort-wasm-simd-threaded.wasm
   ONNX Runtime Web 1.20.1, © Microsoft, licence MIT
   https://github.com/microsoft/onnxruntime
+ia-worker-1.js : petit programme maison (même licence que l'app) qui fait tourner l'IA à part, pour que l'app reste fluide.
