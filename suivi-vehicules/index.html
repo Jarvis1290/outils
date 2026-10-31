@@ -13,6 +13,7 @@
 <script>try{var D=document.documentElement.dataset,G=function(k,d){return localStorage.getItem(k)||d};D.theme=G("sv-theme","fonce");D.rail=G("sv-rail","g");D.snap=G("sv-snap","f");D.ricons=G("sv-ricons","h");D.rhide=G("sv-rhide","e");D.magic=G("sv-magic","on");}catch(e){}</script>
 <script src="vendor/chart.umd.min.js"></script>
 <script src="vendor/xlsx.full.min.js"></script>
+<script src="recherche.js"></script>
 <style>
 /* Layout v1.8 « V18 » : barre latérale d'icônes à gauche, tuiles arrondies de tailles différentes, thème foncé sobre.
    Un seul accent par véhicule : Kangoo = rouge, BMW = bleu. Les deux modes partagent le même fond. */
@@ -537,6 +538,7 @@ html[data-rail="b"] .toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 html,body,*{scrollbar-width:none} *::-webkit-scrollbar{display:none;width:0;height:0}
 /* bouton + dans l'en-tête, à côté du choix du véhicule */
 .hplus{flex:none;width:36px;height:36px;border-radius:50%;border:0;background:var(--volt);color:#fff;display:grid;place-items:center;cursor:pointer;padding:0;box-shadow:0 4px 14px var(--volt-glow)}
+.hsrch{flex:none;width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--navy);color:var(--fg);display:grid;place-items:center;cursor:pointer;padding:0}.hsrch svg{width:20px;height:20px}
 .hplus .ico{color:#fff;width:22px;height:22px}
 /* barre : Paramètres en haut, icônes en haut ou en bas */
 nav.tabs [data-v="more"]{order:-2} nav.tabs .sp{order:-1;flex:0 0 2px} nav.tabs .in>button:not([data-v="more"]){order:0}
@@ -916,6 +918,7 @@ html[data-magic="on"] .liq .lq{transform:rotate(calc(var(--gx,0) * -12deg))}
 <div class="app">
   <header class="top">
     <div class="brand"><small id="sub"></small><h1 id="vTitle">Tableau de bord</h1></div>
+    <button type="button" class="hsrch" id="rqBtn" aria-label="Rechercher" title="Rechercher"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M192 112a80 80 0 1 1-80-80a80 80 0 0 1 80 80" opacity=".2"/><path d="m229.66 218.34l-50.06-50.06a88.21 88.21 0 1 0-11.32 11.31l50.06 50.07a8 8 0 0 0 11.32-11.32M40 112a72 72 0 1 1 72 72a72.08 72.08 0 0 1-72-72"/></svg></button>
     <button type="button" class="hplus" id="fab" aria-label="Nouveau plein ou entretien" title="Nouveau plein ou entretien"></button>
     <div class="vtog" id="vtog" role="group" aria-label="Véhicule"></div>
   </header>
@@ -1378,7 +1381,7 @@ const THEME = { // v1.8 : même fond foncé pour tous, un accent par véhicule
   k:{txt:"#B3B8C2",grid:"rgba(255,255,255,.06)",tipBg:"#20242B",tipFg:"#EEF0F4",tipBd:"#E5484D",track:"#262A32",needle:"#EEF0F4",muted:"#8B92A0",bad:"#FF9F43",warn:"#F5D04C",acc:"#E5484D",fg:"#EEF0F4"}};
 let MODE=0; try{ const m=+localStorage.getItem("sv-mode"); if(m>0) MODE=m; }catch(e){}
 let T=THEME.k;
-const APP_VERSION="3.6";
+const APP_VERSION="3.7";
 const KEY="suivi-vehicules-v1";
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}}, lsSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 let STATE={fills:[],tyres:[],ent:[],rates:{},range:[925,350],tank:[60,20],buy:[3500,10000],fixed:[{},{}],trip:null};
@@ -2888,6 +2891,7 @@ function renderMore(){
 
 // ---------- Quoi de neuf : la version en grand, une carte par version ; s'ouvre une fois après chaque mise à jour
 const CHANGELOG=[
+  ["3.7","31.10.2026","Recherche",["🔍 Nouvelle loupe en haut : cherche dans tout (pleins, entretiens, frais, pneus, notes, stations, pages, réglages)","Même champ, même clavier et mêmes mots proposés que dans Kardex et Suite Atelier","Les 2 meilleurs résultats s'ouvrent d'un toucher au-dessus du clavier","Une faute de frappe ? Il propose le bon mot","Dernières recherches gardées"]],
   ["3.6","31.10.2026","Timeline + Journal",["Le Journal et la Timeline ne font plus qu'une page : la Timeline, avec ses cases en haut","Raccourcis Tout, Pleins, Entretien, Frais fixes au-dessus des cases","Tous les détails du Journal dans la Timeline : conso, €, valeurs ignorées, station, pays, options, litres, prix","Touche une ligne pour la modifier ou la supprimer, glisse-la vers la gauche pour la supprimer (avec Annuler)","Frais fixes seuls : le résumé de l'année et le bouton Noter un frais fixe","Les mois sont marqués dans chaque année ; les lignes sans date sont à la fin"]],
   ["3.5.5","31.10.2026","Hors ligne",["Marche entièrement sans réseau (mode avion) : page, graphiques, export et polices sont gardés dans le téléphone","Réseau faible : l'app s'ouvre quand même tout de suite","Le taux €→CHF reste le seul besoin de réseau (sinon dernier taux connu ou à la main)"]],
   ["3.5.4","29.10.2026","Budget limpide",["Budget : partout le même compte, frais fixes compris","Le mois en cours comparé à un mois normal à la même date, avec une flèche ▲ ▼","« Un mois normal » = le même chiffre que la ligne pointillée du graphique","Flèches aussi pour l'année et pour « avant »"]],
@@ -3085,6 +3089,7 @@ function railDrop(){ const d=$("#rdrop"), b=document.querySelector('nav.tabs .in
 // la garde se pose donc seulement au relevé du doigt / au clic / à une touche, jamais au chargement ni après un Retour.
 // En plus, quand Chrome le permet (CloseWatcher), les fenêtres, tuiles et menus ouverts se ferment avec Retour sans toucher à l'historique.
 function closeTop(){ // ferme ce qui est ouvert par-dessus l'écran ; true si quelque chose a été fermé
+  if(window.Recherche&&Recherche.fermer()) return true;
   if(kpTarget){ closePad(); return true; }
   if($("#vmenu")){ $("#vmenu").remove(); return true; }
   if($("nav.tabs").classList.contains("open")){ railClose(); return true; }
@@ -3095,7 +3100,7 @@ function closeTop(){ // ferme ce qui est ouvert par-dessus l'écran ; true si qu
   if(funEdit){ funEdit=false; renderFun(); return true; }
   if(dEdit&&!navStack.length){ dEdit=false; renderHome(); return true; }
   return false; }
-const hasTop=()=>!!(kpTarget||$("#vmenu")||$("nav.tabs").classList.contains("open")||$("#sheet").classList.contains("on")||TV||tOpenIn||(VF&&curView==="more")||funEdit||(dEdit&&!navStack.length));
+const hasTop=()=>!!((window.Recherche&&Recherche.ouvert())||kpTarget||$("#vmenu")||$("nav.tabs").classList.contains("open")||$("#sheet").classList.contains("on")||TV||tOpenIn||(VF&&curView==="more")||funEdit||(dEdit&&!navStack.length));
 (function(){ const armed=()=>history.state&&history.state.sv===1;
   try{ if(!history.state||history.state.sv==null) history.replaceState({sv:0},""); }catch(e){}
   let cw=null, quitT=null;
@@ -3671,6 +3676,44 @@ if("serviceWorker" in navigator){ // nouvelle version : vérifiée à chaque ret
   window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js",{scope:"./"}).then(r=>{ swReg=r; }).catch(()=>{}));
   navigator.serviceWorker.addEventListener("controllerchange",()=>{ if(!had) return; swNew=true; if(document.visibilityState==="hidden") swReload(); else toast("✨ Nouvelle version installée : elle s'affiche à la prochaine ouverture"); });
   document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible"){ if(swReg) swReg.update().catch(()=>{}); } else swReload(); }); }
+// ---------- 🔍 recherche commune (même champ, même clavier que Kardex et Suite Atelier) ----------
+if(window.Recherche) (function(){
+  const svg=n=>ICO[n]?`<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">${ICO[n][0]}</svg>`:"";
+  const txt=h=>{ const d=document.createElement("div"); d.innerHTML=String(h||"").replace(/<span class="pill/g," · <span class=\"pill"); return d.textContent.replace(/\s+/g," ").trim(); };
+  const onV=(v,f)=>()=>{ if(MODE!==v) setMode(v); f(); };
+  const toH2=t=>()=>{ go("more"); setTimeout(()=>{ const h=[...document.querySelectorAll("#v-more .h2")].find(x=>x.textContent.trim().startsWith(t)); if(h) h.scrollIntoView({block:"start",behavior:"smooth"}); },80); };
+  const vehGo=(v,k)=>onV(v,()=>{ vehK=k; go("veh"); });
+  Recherche.init({cle:"sv",nom:"Suivi Véhicules",couleur:"#4FA8FF",bouton:"#rqBtn",clavier:()=>padOn(),
+    exemples:["plein","vidange","pneus","assurance","octobre"],
+    source(){ const L=[];
+      // pages
+      const pg=(id,t,i,c,go,x)=>L.push({id:"p:"+id,p:1,g:"Pages",t,ic:svg(i),c,go,x});
+      pg("plein","Nouveau plein","gas-pump","#4FA8FF",()=>openSheet(true),"ajouter noter essence carburant recharge");
+      pg("ent","Nouvel entretien","wrench","#F5A623",()=>openEnt(null),"ajouter noter garage frais facture");
+      pg("home","Tableau de bord","gauge","#FF6B5A",()=>go("home"),"bord accueil");
+      pg("tl","Timeline","clock-counter-clockwise","#F5D04C",()=>go("tl"),"journal historique liste pleins entretiens");
+      pg("stats","Stats","chart-bar","#4FA8FF",()=>go("stats"),"statistiques conso prix stations pays");
+      CTABS.forEach(c=>pg("cost-"+c[0],c[2],c[1],c[3],()=>costGo(c[0]),"coût trajet budget"));
+      pg("fun","Fun","trophy","#F5A623",()=>go("fun"),"records trophées");
+      pg("more","Paramètres","gear-six","#A58CFF",()=>go("more"),"réglages options");
+      pg("news","Quoi de neuf","newspaper","#3DD39B",()=>openNews(),"nouveautés version");
+      [["Véhicules","car","ajouter modifier véhicule voiture moto"],["Affichage","palette","thème couleurs barre icônes défilement"],["Saisie","calculator","pavé numérique clavier"],["Sauvegarde","cloud-arrow-up","drive export import excel photos zip"],["Données","trash","effacer tout"]]
+        .forEach(([t,i,x])=>L.push({id:"set:"+t,g:"Paramètres",t,s:"Paramètres",ic:svg(i),c:"#A58CFF",x,go:toH2(t)}));
+      [["statK","conso","Conso"],["statK","prix","Prix au litre"],["statK","annee","Année"],["statK","cout","Coûts"],["statK","stations","Stations"],["statK","pays","Pays"]]
+        .forEach(([,k,t])=>L.push({id:"st:"+k,g:"Stats",t:"Stats : "+t,ic:svg("chart-bar"),c:"#4FA8FF",go:()=>{ statK=k; go("stats"); }}));
+      V.forEach((x,v)=>{
+        L.push({id:"v:"+v,g:"Véhicules",t:x.n,s:x.nl&&x.nl!==x.n?x.nl:"Voir ce véhicule",ic:svg("car-profile"),c:x.c,x:x.type||"",go:onV(v,()=>go("home"))});
+        vehTabs(v).forEach(([k,t])=>L.push({id:"vt:"+v+":"+k,g:"Véhicules",t:`${t} · ${x.n}`,ic:svg(k==="notes"?"clipboard-text":k==="couples"?"nut":"tire"),c:x.c,go:vehGo(v,k)}));
+        let ev=[]; try{ ev=tlEvents(v); }catch(e){}
+        ev.forEach(e=>{ const T=TLT[e.k]||TLT.fill, f=e.f, en=e.e, nd=!+String(e.d).slice(0,4);
+          const x2=[f&&f.st, f&&CTRY[f.ctry||"CH"]&&CTRY[f.ctry||"CH"].n, f&&!f.kmOnly?"plein essence carburant":"", f&&f.kmOnly?"relevé compteur km":"", en&&en.k==="F"?FXN[en.fk]||"":"", e.km?e.km+" km":""].filter(Boolean).join(" ");
+          L.push({id:f?"f:"+f.id:en?"e:"+en.id:"t:"+v+":"+e.k+":"+e.d, g:T[1], t:txt(e.t), s:[x.n, nd?"sans date":dfr(e.d), txt(e.s)].filter(Boolean).join(" · "),
+            v:e.m!=null?fmt(e.m,e.m>=1000?0:2)+" CHF":"", d:nd?"":e.d, ic:svg(e.i||T[0]), c:e.c||T[2], x:x2,
+            go:f?onV(v,()=>openSheet(false,f)):en?onV(v,()=>openEnt(en)):onV(v,()=>go("tl"))}); });
+        try{ (vx(v).notes||[]).forEach(n=>L.push({id:"n:"+n.id,g:"Notes",t:n.t||String(n.x||"").split("\n")[0].slice(0,60)||"Note",s:`${x.n}${n.d?" · "+dfr(String(n.d).slice(0,10)):""}`,x:n.x,d:n.d,ic:svg(n.pin?"push-pin":"clipboard-text"),c:"#F5D04C",go:vehGo(v,"notes")})); }catch(e){}
+      });
+      return L; }});
+})();
 migrateFix(); persist();
 applyTheme(); applyRailOrder();
 applyPad();
