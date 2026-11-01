@@ -372,7 +372,7 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 .heads button svg { width: 100%; max-width: 84px; height: 62px; }
 .heads button[aria-pressed="true"] { border-color: var(--accent); color: var(--fg); background: #3d3c39; }
 .tqhead { width: 120px; height: 104px; flex: none; perspective: 400px; }
-.tqhead svg { width: 100%; height: 100%; transition: transform .25s ease-out; filter: drop-shadow(0 6px 8px rgba(0,0,0,.45)); }
+.tqhead svg { width: 100%; height: 100%; transition: transform .25s ease-out; }
 @media (prefers-reduced-motion: no-preference) { .tqhead svg { animation: sway 5s ease-in-out infinite alternate; } }
 @keyframes sway { from { rotate: y -10deg; } to { rotate: y 10deg; } }
 /* Quelle forme : une grande pièce à la fois */
@@ -1617,7 +1617,7 @@ if (typeof module !== "undefined") module.exports = Calc;
       pts.slice().reverse().forEach(function (p) { while (up.length >= 2 && cr(up[up.length - 2], up[up.length - 1], p) <= 0) up.pop(); up.push(p); });
       return lo.slice(0, -1).concat(up.slice(0, -1)); }
     function hullPath(h, fill) { return '<path d="M' + h.map(function (q) { return q[0].toFixed(1) + " " + q[1].toFixed(1); }).join("L") + 'Z" fill="' + fill + '" stroke="#1d232c" stroke-width=".7"/>'; }
-    var TOP = "url(#" + uid + "t)", FR = "#6c7787", RI = "#525c6b", IN = "#2a313c", IN2 = "#3a4350";
+    var TOP = "url(#" + uid + "t)", FR = "#6c7787", RI = "#5a6575", IN = "#66717f", IN2 = "#7d8896"; // faces internes en gris clair : plus d'ombres noires
     var HL = "var(--k)", hl = function (key, base) { return k === key ? HL : base; };
     var RED = "#ff5a5a";
     // cote ISO 129 : lignes d'attache avec petit jour et dépassement, ligne de cote décalée, flèches fines
@@ -1656,10 +1656,10 @@ if (typeof module !== "undefined") module.exports = Calc;
     s += poly([[0, 0, 0], [120, 0, 0], [120, 0, 14], [98, 0, 14], [98, 0, H], [88, 0, H], [88, 0, H - 8], [78, 0, H - 8], [78, 0, H], [0, 0, H]], k === "hauteur" ? HL : FR);
     // poche (vue par son ouverture)
     s += '<g clip-path="url(#' + uid + 'c1)">' + poly([[40, 30, H - 9], [70, 30, H - 9], [70, 52, H - 9], [40, 52, H - 9]], hl("profondeur", hl("poche", IN2))) +
-      poly([[40, 52, H - 9], [70, 52, H - 9], [70, 52, H], [40, 52, H]], k === "poche" || k === "profondeur" ? "color-mix(in srgb, var(--k) 70%, #000)" : IN) +
-      poly([[40, 30, H - 9], [40, 52, H - 9], [40, 52, H], [40, 30, H]], k === "poche" || k === "profondeur" ? "color-mix(in srgb, var(--k) 55%, #000)" : RI) + '</g>';
+      poly([[40, 52, H - 9], [70, 52, H - 9], [70, 52, H], [40, 52, H]], k === "poche" || k === "profondeur" ? "color-mix(in srgb, var(--k) 80%, #fff)" : IN) +
+      poly([[40, 30, H - 9], [40, 52, H - 9], [40, 52, H], [40, 30, H]], k === "poche" || k === "profondeur" ? "var(--k)" : RI) + '</g>';
     // alésage débouchant
-    s += '<g clip-path="url(#' + uid + 'c2)">' + hullPath(hull(circ(55, 15, H, 7)), k === "alesage" ? "color-mix(in srgb, var(--k) 60%, #000)" : IN) + hullPath(hull(circ(55, 15, H - 30, 7.6)), "#12161d") + '</g>';
+    s += '<g clip-path="url(#' + uid + 'c2)">' + hullPath(hull(circ(55, 15, H, 7)), k === "alesage" ? "var(--k)" : IN) + '</g>';
     s += hullPath(hull(circ(55, 15, H, 7)), "none");
     // tourillon (cylindre)
     var hb = 10, bc = circ(18, 44, H, 8, 36).concat(circ(18, 44, H + hb, 8, 36));
@@ -2079,7 +2079,7 @@ if (typeof module !== "undefined") module.exports = Calc;
     }).join("") + '</div><h2 style="margin-top:18px">Saisie des chiffres (téléphone)</h2><div class="setopt" id="set-pad">' +
       '<button type="button" data-p="on" aria-pressed="' + (padPref === "on") + '">Pavé numérique de l\'app<small>gros chiffres, touche +/−, le clavier du téléphone ne s\'ouvre pas</small></button>' +
       '<button type="button" data-p="off" aria-pressed="' + (padPref === "off") + '">Clavier du téléphone<small>les barres du bas se cachent pendant la saisie</small></button></div>' +
-      '<p class="note">Les réponses du pas à pas restent en mémoire pour la cote en cours.</p>' + '<h2 style="margin-top:18px">Notes de version</h2><div class="notes"><b>1.3.1 (page de test)</b><ul><li>Couleurs pleines partout : plus aucune transparence dans les dessins ni les encadrés.</li><li>Bac d\'émulsion : graduations 25 / 50 / 75 sorties du bac, en gris, lisibles ; volume écrit en foncé sur le liquide.</li><li>Triangle : la valeur calculée s\'écrit aussi en orange dans les cases vides.</li></ul><b>1.3</b><ul><li>Tolérances : roulettes Lettre et Qualité IT, grand affichage de la cote avec ses écarts, résumé et tranche ISO sur la même page.</li><li>ISO 2768 sur sa propre page.</li><li>Nouvelle page Couple de serrage (M3 à M20, 8.8 / 10.9 / 12.9).</li><li>Recherche (loupe en haut) : M8, 20 H7, 45… ouvre la bonne page déjà remplie.</li><li>Une chose par page (petits boutons en haut) dans Trigo, Taraudage, Vis et Émulsion.</li><li>Dessins qui suivent les chiffres : chanfrein, fraise à chanfreiner, filetage, profondeur de perçage, chanfrein d\'entrée, lamage, fraisure, bacs d\'émulsion.</li><li>Quelle forme : une grande pièce 3D à la fois, flèches ou glisser, avec explication.</li><li>Tolérances et ISO 2768 : une seule carte chacune, page verrouillée (rien ne défile)</li><li>Tolérances : tout sur un seul écran (milieu, écarts, ajustement, cote mesurée).</li><li>Dessins en 3D écorchés : filetage, profondeur, chanfrein d\'entrée, lamage, fraisure, chanfrein, fraise à chanfreiner.</li><li>Couple : têtes de vis seules en 3D, en grand. ISO 2768 : résultats en haut, réglages en bas, panneau d\'info.</li><li>Lamage et fraisure : vis en acier, pièce hachurée. Onglet Surépaisseur retiré.</li><li>Rangée de trous, et symbole d\'origine pièce sur les dessins de trous ; chiffres plus grands.</li><li>Retour du téléphone : revient en arrière dans l\'app, 2 appuis pour quitter. Effets d\'appui, vibration, pavé numérique animé.</li></ul><b>1.2.1</b><ul><li>Fonctionne hors ligne. Zoom limité à 2×.</li></ul></div>';
+      '<p class="note">Les réponses du pas à pas restent en mémoire pour la cote en cours.</p>' + '<h2 style="margin-top:18px">Notes de version</h2><div class="notes"><b>1.3.1 (page de test)</b><ul><li>Couleurs pleines partout : plus aucune transparence dans les dessins ni les encadrés.</li><li>Bac d\'émulsion : graduations 25 / 50 / 75 sorties du bac, en gris, lisibles ; volume écrit en foncé sur le liquide.</li><li>Triangle : la valeur calculée s\'écrit aussi en orange dans les cases vides.</li><li>Pièces 3D (Quelle forme, perçages, vis) : plus d\'ombres noires, faces internes en gris clair, la partie concernée entièrement en couleur.</li></ul><b>1.3</b><ul><li>Tolérances : roulettes Lettre et Qualité IT, grand affichage de la cote avec ses écarts, résumé et tranche ISO sur la même page.</li><li>ISO 2768 sur sa propre page.</li><li>Nouvelle page Couple de serrage (M3 à M20, 8.8 / 10.9 / 12.9).</li><li>Recherche (loupe en haut) : M8, 20 H7, 45… ouvre la bonne page déjà remplie.</li><li>Une chose par page (petits boutons en haut) dans Trigo, Taraudage, Vis et Émulsion.</li><li>Dessins qui suivent les chiffres : chanfrein, fraise à chanfreiner, filetage, profondeur de perçage, chanfrein d\'entrée, lamage, fraisure, bacs d\'émulsion.</li><li>Quelle forme : une grande pièce 3D à la fois, flèches ou glisser, avec explication.</li><li>Tolérances et ISO 2768 : une seule carte chacune, page verrouillée (rien ne défile)</li><li>Tolérances : tout sur un seul écran (milieu, écarts, ajustement, cote mesurée).</li><li>Dessins en 3D écorchés : filetage, profondeur, chanfrein d\'entrée, lamage, fraisure, chanfrein, fraise à chanfreiner.</li><li>Couple : têtes de vis seules en 3D, en grand. ISO 2768 : résultats en haut, réglages en bas, panneau d\'info.</li><li>Lamage et fraisure : vis en acier, pièce hachurée. Onglet Surépaisseur retiré.</li><li>Rangée de trous, et symbole d\'origine pièce sur les dessins de trous ; chiffres plus grands.</li><li>Retour du téléphone : revient en arrière dans l\'app, 2 appuis pour quitter. Effets d\'appui, vibration, pavé numérique animé.</li></ul><b>1.2.1</b><ul><li>Fonctionne hors ligne. Zoom limité à 2×.</li></ul></div>';
   }
   $("b-set").addEventListener("click", function () {
     openTable("Paramètres", "", settingsHtml());
@@ -2880,7 +2880,7 @@ if (typeof module !== "undefined") module.exports = Calc;
       '<linearGradient id="' + id + 'W" x1="0" x2="1"><stop offset="0" stop-color="#8a7a3e"/><stop offset=".45" stop-color="#e9d27a"/><stop offset="1" stop-color="#7d6d33"/></linearGradient></defs>';
     $(id).innerHTML = '<svg class="sk" viewBox="' + vb + '" aria-hidden="true">' + d + body.replace(/url\(#(H|S|W)\)/g, "url(#" + id + "$1)") + '</svg>';
   }
-  function threads(cx, sw, y1, y2) { var t = ""; for (var y = y1; y < y2; y += 5) t += '<path d="M' + (cx - sw + 1) + ' ' + (y + 2) + 'L' + (cx + sw - 1) + ' ' + y + '" stroke="#2e343c" stroke-opacity=".6" stroke-width="1"/>'; return t; }
+  function threads(cx, sw, y1, y2) { var t = ""; for (var y = y1; y < y2; y += 5) t += '<path d="M' + (cx - sw + 1) + ' ' + (y + 2) + 'L' + (cx + sw - 1) + ' ' + y + '" stroke="#3b424c" stroke-width="1"/>'; return t; }
   var PARTC = "url(#H)", HOLEC = "var(--panel-2)", STEEL = "url(#S)";
   function watch(resId, fn) { new MutationObserver(function () { try { fn(); } catch (e) {} }).observe($(resId), { childList: true }); }
   function addSk(resId, skId) { var d = document.createElement("div"); d.id = skId; d.className = "skw"; var r = $(resId); r.parentNode.insertBefore(d, r); }
@@ -2891,7 +2891,7 @@ if (typeof module !== "undefined") module.exports = Calc;
   function Q(x, y, z) { return [x + z * EX, y + z * EY]; }
   function qp(a) { return a.map(function (p) { return p[0].toFixed(1) + " " + p[1].toFixed(1); }).join("L"); }
   var TOPF = "#6b7891", SIDEF = "#47536a";
-  function shadeCol(th) { var v = .5 + .5 * Math.cos(th - 2.3), l = Math.round(26 + v * 70); return "rgb(" + l + "," + Math.round(l * 1.08) + "," + Math.round(l * 1.25) + ")"; }
+  function shadeCol(th) { var v = .5 + .5 * Math.cos(th - 2.3), l = Math.round(78 + v * 78); return "rgb(" + l + "," + Math.round(l * 1.08) + "," + Math.round(l * 1.25) + ")"; }
   // o = { cx, xL, xR, top, bot, prof: [[r, y], ...] du haut vers le bas, rings: [[r, y], ...] (filets) }
   function cut3d(o) {
     var s = '', r0 = o.prof[0][0], N = 14;
@@ -2909,8 +2909,8 @@ if (typeof module !== "undefined") module.exports = Calc;
         s += '<path d="M' + qp([p1, p2, p3, p4]) + 'Z" fill="' + c + '" stroke="' + c + '" stroke-width=".6"/>';
       });
     }
-    (o.rings || []).forEach(function (g) { s += '<path d="M' + qp(arc(g[0], g[1], 0, Math.PI)) + '" fill="none" stroke="#a9b6c9" stroke-opacity=".45" stroke-width="1"/>'; });
-    s += '<path d="M' + qp(arc(r0, o.top, 0, Math.PI)) + '" fill="none" stroke="#c7d0dc" stroke-opacity=".7" stroke-width="1.2"/>';
+    (o.rings || []).forEach(function (g) { s += '<path d="M' + qp(arc(g[0], g[1], 0, Math.PI)) + '" fill="none" stroke="#8794a6" stroke-width="1"/>'; });
+    s += '<path d="M' + qp(arc(r0, o.top, 0, Math.PI)) + '" fill="none" stroke="#b3bdca" stroke-width="1.2"/>';
     return s;
     function pr(L, th) { return Q(o.cx + L[0] * Math.cos(th), L[1], L[0] * Math.sin(th)); }
     function arc(r, y, a0, a1) { var a = []; for (var k = 0; k <= 24; k++) { var t = a0 + (a1 - a0) * k / 24; a.push(Q(o.cx + r * Math.cos(t), y, r * Math.sin(t))); } return a; }
@@ -3332,27 +3332,27 @@ if (typeof module !== "undefined") module.exports = Calc;
       faces.forEach(function (f) { var a = pt(V[f[0]], R, y), b = pt(V[f[1]], R, y); s += '<path d="M' + P([a, b, [b[0], b[1] + hh], [a[0], a[1] + hh]]) + 'Z" fill="' + g(f[2]) + '" stroke="#2b3038" stroke-width=".6"/>'; });
       var top = V.map(function (a) { return pt(a, R, y); });
       s += '<path d="M' + P(top) + 'Z" fill="' + g("t") + '" stroke="#5d6570" stroke-width=".6"/>';
-      s += ell(R * .86, y, "none", ' stroke="#ffffff" stroke-opacity=".35" stroke-width="1.2"');
+      s += ell(R * .86, y, "none", ' stroke="#dfe4ea" stroke-width="1.2"');
       if (hole) { s += ell(hole, y, g("h")); for (var j = 1; j <= 3; j++) s += '<path d="M' + (CX - hole * .8) + ' ' + (y + j * 2.2) + 'A' + (hole * .8) + ' ' + (hole * .8 * K) + ' 0 0 0 ' + (CX + hole * .8) + ' ' + (y + j * 2.2) + '" stroke="#6b737d" stroke-width=".8" fill="none"/>'; }
       return s;
     }
     function shank(r, y1, y2) {
       var s = cylSide(r, y1, y2, g("s"));
-      for (var y = y1 + 5; y < y2 - 2; y += 4.2) s += '<path d="M' + (CX - r) + ' ' + (y + 2.5) + 'Q' + CX + ' ' + (y + r * K + 2) + ' ' + (CX + r) + ' ' + y + '" stroke="#2e343c" stroke-opacity=".55" stroke-width="1" fill="none"/>';
+      for (var y = y1 + 5; y < y2 - 2; y += 4.2) s += '<path d="M' + (CX - r) + ' ' + (y + 2.5) + 'Q' + CX + ' ' + (y + r * K + 2) + ' ' + (CX + r) + ' ' + y + '" stroke="#454d58" stroke-width="1" fill="none"/>';
       return s;
     }
     function socketHex(r, y) { var a = []; for (var i = 0; i < 6; i++) a.push(pt(i * Math.PI / 3 + Math.PI / 6, r, y)); return '<path d="M' + P(a) + 'Z" fill="' + g("h") + '" stroke="#1a1e24" stroke-width=".8"/>'; }
     function socketTorx(r, y) { var a = []; for (var i = 0; i < 48; i++) { var t = i / 48 * 2 * Math.PI, rr = r * (.78 + .22 * Math.cos(6 * t)); a.push(pt(t, rr, y)); } return '<path d="M' + P(a) + 'Z" fill="' + g("h") + '" stroke="#1a1e24" stroke-width=".8"/>'; }
-    var s = defs + ell(48, 98, g("sh"));
+    var s = defs;
     if (h === "nut") { s += hexPrism(46, 42, 28, 21); }
     else if (h === "hex") { s += hexPrism(46, 42, 28); }
-    else if (h === "bolt") { CX = 34; s = defs + '<ellipse cx="60" cy="98" rx="56" ry="10" fill="' + g("sh") + '"/>' + hexPrism(28, 52, 18); CX = 88; s += hexPrism(28, 52, 18, 13); CX = 60;
+    else if (h === "bolt") { CX = 34; s = defs + hexPrism(28, 52, 18); CX = 88; s += hexPrism(28, 52, 18, 13); CX = 60;
       s += '<text x="34" y="20" text-anchor="middle" style="font:600 11px var(--f-body);fill:var(--muted)">vis</text><text x="88" y="20" text-anchor="middle" style="font:600 11px var(--f-body);fill:var(--muted)">écrou</text>'; }
     else if (h === "chc" || h === "torx" || h === "low") {
       var hh = h === "low" ? 16 : 34, ty = h === "low" ? 50 : 36, rr = h === "low" ? 46 : 40;
       s += cylSide(rr, ty, ty + hh, g("s"));
-      if (h !== "low") for (var t = .12; t < Math.PI; t += .13) { var x = CX + rr * Math.cos(t); s += '<path d="M' + x.toFixed(1) + ' ' + (ty + rr * K * Math.sin(t) + 2).toFixed(1) + 'v' + (hh - 5) + '" stroke="#2e343c" stroke-opacity=".35" stroke-width="1"/>'; }
-      s += ell(rr, ty, g("t"), ' stroke="#5d6570" stroke-width=".6"') + ell(rr - 5, ty, "none", ' stroke="#fff" stroke-opacity=".3" stroke-width="1.2"');
+      if (h !== "low") for (var t = .12; t < Math.PI; t += .13) { var x = CX + rr * Math.cos(t); s += '<path d="M' + x.toFixed(1) + ' ' + (ty + rr * K * Math.sin(t) + 2).toFixed(1) + 'v' + (hh - 5) + '" stroke="#59616c" stroke-width="1"/>'; }
+      s += ell(rr, ty, g("t"), ' stroke="#5d6570" stroke-width=".6"') + ell(rr - 5, ty, "none", ' stroke="#dfe4ea" stroke-width="1.2"');
       s += h === "torx" ? socketTorx(17, ty) : socketHex(16, ty);
     } else if (h === "fhc") {
       var ty2 = 40;
