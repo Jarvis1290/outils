@@ -2079,7 +2079,7 @@ if (typeof module !== "undefined") module.exports = Calc;
     }).join("") + '</div><h2 style="margin-top:18px">Saisie des chiffres (téléphone)</h2><div class="setopt" id="set-pad">' +
       '<button type="button" data-p="on" aria-pressed="' + (padPref === "on") + '">Pavé numérique de l\'app<small>gros chiffres, touche +/−, le clavier du téléphone ne s\'ouvre pas</small></button>' +
       '<button type="button" data-p="off" aria-pressed="' + (padPref === "off") + '">Clavier du téléphone<small>les barres du bas se cachent pendant la saisie</small></button></div>' +
-      '<p class="note">Les réponses du pas à pas restent en mémoire pour la cote en cours.</p>' + '<h2 style="margin-top:18px">Notes de version</h2><div class="notes"><b>1.3.1 (page de test)</b><ul><li>Couleurs pleines partout : plus aucune transparence dans les dessins ni les encadrés.</li><li>Bac d\'émulsion : graduations 25 / 50 / 75 sorties du bac, en gris, lisibles ; volume écrit en foncé sur le liquide.</li><li>Triangle : la valeur calculée s\'écrit aussi en orange dans les cases vides.</li><li>Pièces 3D (Quelle forme, perçages, vis) : plus d\'ombres noires, faces internes en gris clair, la partie concernée entièrement en couleur.</li></ul><b>1.3</b><ul><li>Tolérances : roulettes Lettre et Qualité IT, grand affichage de la cote avec ses écarts, résumé et tranche ISO sur la même page.</li><li>ISO 2768 sur sa propre page.</li><li>Nouvelle page Couple de serrage (M3 à M20, 8.8 / 10.9 / 12.9).</li><li>Recherche (loupe en haut) : M8, 20 H7, 45… ouvre la bonne page déjà remplie.</li><li>Une chose par page (petits boutons en haut) dans Trigo, Taraudage, Vis et Émulsion.</li><li>Dessins qui suivent les chiffres : chanfrein, fraise à chanfreiner, filetage, profondeur de perçage, chanfrein d\'entrée, lamage, fraisure, bacs d\'émulsion.</li><li>Quelle forme : une grande pièce 3D à la fois, flèches ou glisser, avec explication.</li><li>Tolérances et ISO 2768 : une seule carte chacune, page verrouillée (rien ne défile)</li><li>Tolérances : tout sur un seul écran (milieu, écarts, ajustement, cote mesurée).</li><li>Dessins en 3D écorchés : filetage, profondeur, chanfrein d\'entrée, lamage, fraisure, chanfrein, fraise à chanfreiner.</li><li>Couple : têtes de vis seules en 3D, en grand. ISO 2768 : résultats en haut, réglages en bas, panneau d\'info.</li><li>Lamage et fraisure : vis en acier, pièce hachurée. Onglet Surépaisseur retiré.</li><li>Rangée de trous, et symbole d\'origine pièce sur les dessins de trous ; chiffres plus grands.</li><li>Retour du téléphone : revient en arrière dans l\'app, 2 appuis pour quitter. Effets d\'appui, vibration, pavé numérique animé.</li></ul><b>1.2.1</b><ul><li>Fonctionne hors ligne. Zoom limité à 2×.</li></ul></div>';
+      '<p class="note">Les réponses du pas à pas restent en mémoire pour la cote en cours.</p>' + '<h2 style="margin-top:18px">Notes de version</h2><div class="notes"><b>1.3.1 (page de test)</b><ul><li>Couleurs pleines partout : plus aucune transparence dans les dessins ni les encadrés.</li><li>Bac d\'émulsion : graduations 25 / 50 / 75 sorties du bac, en gris, lisibles ; volume écrit en foncé sur le liquide.</li><li>Triangle : la valeur calculée s\'écrit aussi en orange dans les cases vides.</li><li>Menus déroulants maison partout : la liste s\'ouvre sous la case, on touche, ça se referme (plus de fenêtre du téléphone). Traitements écrits dans leur couleur : or, argent, nickel, zinc, chrome.</li><li>Pièces 3D (Quelle forme, perçages, vis) : plus d\'ombres noires, faces internes en gris clair, la partie concernée entièrement en couleur.</li></ul><b>1.3</b><ul><li>Tolérances : roulettes Lettre et Qualité IT, grand affichage de la cote avec ses écarts, résumé et tranche ISO sur la même page.</li><li>ISO 2768 sur sa propre page.</li><li>Nouvelle page Couple de serrage (M3 à M20, 8.8 / 10.9 / 12.9).</li><li>Recherche (loupe en haut) : M8, 20 H7, 45… ouvre la bonne page déjà remplie.</li><li>Une chose par page (petits boutons en haut) dans Trigo, Taraudage, Vis et Émulsion.</li><li>Dessins qui suivent les chiffres : chanfrein, fraise à chanfreiner, filetage, profondeur de perçage, chanfrein d\'entrée, lamage, fraisure, bacs d\'émulsion.</li><li>Quelle forme : une grande pièce 3D à la fois, flèches ou glisser, avec explication.</li><li>Tolérances et ISO 2768 : une seule carte chacune, page verrouillée (rien ne défile)</li><li>Tolérances : tout sur un seul écran (milieu, écarts, ajustement, cote mesurée).</li><li>Dessins en 3D écorchés : filetage, profondeur, chanfrein d\'entrée, lamage, fraisure, chanfrein, fraise à chanfreiner.</li><li>Couple : têtes de vis seules en 3D, en grand. ISO 2768 : résultats en haut, réglages en bas, panneau d\'info.</li><li>Lamage et fraisure : vis en acier, pièce hachurée. Onglet Surépaisseur retiré.</li><li>Rangée de trous, et symbole d\'origine pièce sur les dessins de trous ; chiffres plus grands.</li><li>Retour du téléphone : revient en arrière dans l\'app, 2 appuis pour quitter. Effets d\'appui, vibration, pavé numérique animé.</li></ul><b>1.2.1</b><ul><li>Fonctionne hors ligne. Zoom limité à 2×.</li></ul></div>';
   }
   $("b-set").addEventListener("click", function () {
     openTable("Paramètres", "", settingsHtml());
@@ -3647,6 +3647,106 @@ if (typeof module !== "undefined") module.exports = Calc;
 })();
 </script>
 
+<style>
+/* Menus maison : la liste se déplie sur place, plus de fenêtre plein écran du téléphone */
+select.ddnat { display: none !important; }
+.dd { appearance: none; width: 100%; display: flex; align-items: center; gap: 8px; text-align: left; background: var(--bg); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font: 500 15px var(--f-body); cursor: pointer; min-height: 44px; }
+.dd > span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dd > i { flex: none; width: 10px; height: 10px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: translateY(-3px) rotate(45deg); transition: transform .15s; }
+.dd[aria-expanded="true"] { border-color: var(--accent); }
+.dd[aria-expanded="true"] > i { transform: translateY(2px) rotate(-135deg); border-color: var(--accent); }
+.dd:disabled { opacity: 1; color: var(--muted); }
+#p-corr.wiz .dd { font-size: 20px; padding: 14px; }
+.onepage .dd, #p-tq .dd { padding: 7px 9px; min-height: 40px; }
+.ddpop { position: fixed; z-index: 40; background: var(--panel-2); border: 1px solid var(--accent); border-radius: 10px; box-shadow: 0 10px 24px #05080c; overflow-y: auto; overscroll-behavior: contain; padding: 4px; animation: ddin .12s ease-out; }
+@keyframes ddin { from { transform: translateY(-6px); } }
+.ddpop button { appearance: none; display: block; width: 100%; text-align: left; background: none; border: 0; border-radius: 7px; color: var(--fg); font: 500 16px var(--f-body); padding: 11px 12px; cursor: pointer; }
+.ddpop button + button { border-top: 1px solid var(--line); }
+.ddpop button[aria-selected="true"] { background: #4a3b22; color: var(--accent); font-weight: 700; }
+.ddpop button[aria-selected="true"] + button, .ddpop button + button[aria-selected="true"] { border-top-color: transparent; }
+.ddpop button:disabled { color: #5d6878; }
+/* Traitements : chaque dépôt écrit dans sa couleur */
+.t-or { background: linear-gradient(180deg, #fff1a8 0%, #f2c230 45%, #b8860b 100%); }
+.t-ag { background: linear-gradient(180deg, #ffffff 0%, #c9d1da 50%, #8a96a3 100%); }
+.t-cr { background: linear-gradient(180deg, #ffffff 0%, #b9d4ee 45%, #6f8fae 55%, #dbe8f5 100%); }
+.t-ni { background: linear-gradient(180deg, #f3eee0 0%, #c8bfa6 55%, #8f8670 100%); }
+.t-zn { background: linear-gradient(180deg, #e8f6ff 0%, #9fc6dc 50%, #6d93a8 100%); }
+.t-ad { background: linear-gradient(180deg, #c4c9d2 0%, #8a919c 60%, #5f6670 100%); }
+.t-ac { background: linear-gradient(180deg, #b8e2ff 0%, #4fa8ff 55%, #2f6fb8 100%); }
+.t-or, .t-ag, .t-cr, .t-ni, .t-zn, .t-ad, .t-ac { -webkit-background-clip: text; background-clip: text; color: transparent !important; font-weight: 700; }
+.ddpop button[aria-selected="true"] .t-or, .ddpop button[aria-selected="true"] [class^="t-"] { font-weight: 800; }
+</style>
+<script>
+(function () {
+  var pop = null, cur = null, list = [];
+  function txt(o) { return o ? o.text : ""; }
+  function cls(s, o) { if (!o) return ""; if (s.id === "c-trt") { var k = String(o.value).split("|")[1]; return k ? "t-" + k : ""; } return ""; }
+  function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function sync(s) {
+    var b = s._dd; if (!b) return;
+    var o = s.options[s.selectedIndex], c = cls(s, o);
+    b.firstChild.innerHTML = c ? '<em class="' + c + '" style="font-style:normal">' + esc(txt(o)) + '</em>' : esc(txt(o));
+    b.disabled = s.disabled;
+  }
+  function close() {
+    if (!pop) return;
+    pop.remove(); pop = null;
+    if (cur && cur._dd) cur._dd.setAttribute("aria-expanded", "false");
+    cur = null;
+  }
+  function open(s) {
+    if (cur === s) { close(); return; }
+    close(); cur = s;
+    var b = s._dd; b.setAttribute("aria-expanded", "true");
+    pop = document.createElement("div"); pop.className = "ddpop"; pop.setAttribute("role", "listbox");
+    pop.innerHTML = Array.prototype.map.call(s.options, function (o, i) {
+      var c = cls(s, o);
+      return '<button type="button" role="option" data-i="' + i + '" aria-selected="' + (i === s.selectedIndex) + '"' + (o.disabled ? " disabled" : "") + '>' + (c ? '<span class="' + c + '">' + esc(o.text) + '</span>' : esc(o.text)) + '</button>';
+    }).join("");
+    document.body.appendChild(pop);
+    var r = b.getBoundingClientRect(), vh = window.innerHeight, vw = window.innerWidth;
+    var below = vh - r.bottom - 10, above = r.top - 10, want = pop.scrollHeight;
+    var w = Math.max(r.width, Math.min(320, vw - 16));
+    pop.style.width = w + "px";
+    pop.style.left = Math.max(8, Math.min(r.left, vw - w - 8)) + "px";
+    if (want <= below || below >= above) { pop.style.top = (r.bottom + 4) + "px"; pop.style.maxHeight = Math.max(120, below) + "px"; }
+    else { var h = Math.min(want, above); pop.style.top = (r.top - 4 - h) + "px"; pop.style.maxHeight = h + "px"; }
+    var sel = pop.querySelector('[aria-selected="true"]');
+    if (sel) pop.scrollTop = Math.max(0, sel.offsetTop - pop.clientHeight / 2 + sel.offsetHeight / 2);
+    pop.addEventListener("click", function (e) {
+      var o = e.target.closest("button[data-i]"); if (!o || o.disabled) return;
+      var i = Number(o.dataset.i), changed = i !== s.selectedIndex;
+      s.selectedIndex = i; sync(s); close();
+      if (changed) { s.dispatchEvent(new Event("input", { bubbles: true })); s.dispatchEvent(new Event("change", { bubbles: true })); }
+      if (navigator.vibrate) try { navigator.vibrate(8); } catch (x) {}
+    });
+  }
+  function enhance(s) {
+    if (s._dd) return;
+    var b = document.createElement("button"); b.type = "button"; b.className = "dd"; b.setAttribute("aria-haspopup", "listbox"); b.setAttribute("aria-expanded", "false");
+    b.innerHTML = "<span></span><i></i>";
+    s.classList.add("ddnat"); s.insertAdjacentElement("afterend", b); s._dd = b;
+    b.addEventListener("click", function (e) { e.preventDefault(); e.stopPropagation(); open(s); });
+    s.addEventListener("change", function () { sync(s); });
+    new MutationObserver(function () { sync(s); }).observe(s, { childList: true, subtree: true, attributes: true, attributeFilter: ["disabled"] });
+    sync(s);
+  }
+  // le code de l'app change parfois la valeur directement : on garde le bouton à jour
+  ["value", "selectedIndex"].forEach(function (p) {
+    var d = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, p);
+    Object.defineProperty(HTMLSelectElement.prototype, p, { configurable: true, enumerable: d.enumerable, get: d.get, set: function (v) { d.set.call(this, v); if (this._dd) sync(this); } });
+  });
+  document.querySelectorAll("select").forEach(enhance);
+  new MutationObserver(function (m) { m.forEach(function (x) { x.addedNodes.forEach(function (n) { if (n.nodeType !== 1) return; if (n.tagName === "SELECT") enhance(n); else if (n.querySelectorAll) n.querySelectorAll("select").forEach(enhance); }); }); }).observe(document.body, { childList: true, subtree: true });
+  document.addEventListener("pointerdown", function (e) { if (pop && !pop.contains(e.target) && !(cur && cur._dd.contains(e.target))) close(); }, true);
+  window.addEventListener("resize", close);
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
+  // retour du téléphone : referme d'abord le menu
+  window.addEventListener("popstate", function () { close(); });
+  // un tap sur le texte du libellé ne doit pas viser le select caché
+  document.addEventListener("click", function (e) { var l = e.target.closest("label"); if (l && !e.target.closest(".dd, input, .ddpop")) { var s = l.querySelector("select.ddnat"); if (s) { e.preventDefault(); open(s); } } });
+})();
+</script>
 <script>
 if ("serviceWorker" in navigator) { window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js", { scope: "./" }).catch(function () {}); }); }
 </script>
