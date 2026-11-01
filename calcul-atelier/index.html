@@ -953,13 +953,12 @@ section.fitz { transform-origin: top center; }
           </div>
           <label data-vm="L">Volume dans le bac (L)<input id="y-v" inputmode="decimal" value="180"></label>
           <label data-vm="P" hidden>Remplissage estimé (%)<input id="y-pct" inputmode="decimal" value="75"></label>
-          <label>Capacité du bac (L<span data-vm="L">, facultatif</span>)<input id="y-cap" inputmode="decimal" placeholder="250"></label>
+          <label>Capacité du bac (L)<input id="y-cap" inputmode="decimal" value="250"></label>
           <label>Lecture réfractomètre (°Brix)<input id="y-b" inputmode="decimal" value="3,2"></label>
           <label>Facteur de l'huile<input id="y-f" inputmode="decimal" value="1"></label>
           <label>Concentration voulue (%)<input id="y-t" inputmode="decimal" value="5"></label>
-          <label>Appoint à (%)<input id="y-top" inputmode="decimal" value="100"></label>
         </div>
-        <p class="hint">Le facteur est sur la fiche technique de l'huile (concentration = Brix × facteur). Appoint : 100 = huile pure, ou la concentration de ton pré-mélange.</p>
+        <p class="hint">Le facteur est sur la fiche technique de l'huile (concentration = Brix × facteur). L'app calcule à quel % préparer l'appoint pour remplir le bac jusqu'en haut et tomber pile sur la concentration voulue.</p>
         <div id="y-res" aria-live="polite"></div>
       </div>
     </div>
@@ -1535,6 +1534,30 @@ var Calc = (function () {
   }
   // Correction du bac. brix = lecture réfractomètre, factor = facteur de l'huile (fiche technique),
   // target = % voulu, topPct = concentration de l'appoint (100 = huile pure), capacity = capacité du bac (facultatif).
+  // Remplir le bac jusqu'en haut avec un pré-mélange : à quel % d'huile pour tomber sur la cible ?
+  // (c·V + p·R) / C = t  avec R = C − V  →  p = (t·C − c·V) / R
+  function fill(volume, brix, factor, target, capacity) {
+    if (!(capacity > 0)) return { error: "Saisis la capacité du bac." };
+    if (!(volume >= 0)) return { error: "Saisis le volume actuel du bac." };
+    if (!(brix >= 0) || !(factor > 0)) return { error: "Saisis la lecture du réfractomètre et le facteur de l'huile." };
+    if (!(target > 0 && target < 100)) return { error: "Concentration voulue entre 0 et 100 %." };
+    var C = capacity, V = Math.min(volume, C), c = brix * factor, t = target, res = { current: c, target: t, volume: V, capacity: C };
+    var Rm = C - V;
+    if (Rm < C * 0.02) { // plein ou presque : pas de place pour un appoint
+      if (Math.abs(c - t) < 0.05) { res.action = "ok"; return res; }
+      res.action = "plein"; return res;
+    }
+    var p = (t * C - c * V) / Rm;
+    res.add = Rm;
+    if (p < 0) { // même à l'eau claire, trop riche : vidanger d'abord
+      res.action = "vider"; res.drain = V - t * C / c; res.pct = 0; res.add = C - (V - res.drain); res.oil = 0; res.water = res.add; return res;
+    }
+    if (p > 100) { // même à l'huile pure, trop pauvre : vidanger d'abord
+      res.action = "vider"; res.drain = V - C * (100 - t) / (100 - c); res.pct = 100; res.add = C - (V - res.drain); res.oil = res.add; res.water = 0; return res;
+    }
+    res.action = "remplir"; res.pct = p; res.oil = Rm * p / 100; res.water = Rm - res.oil;
+    return res;
+  }
   function tank(volume, brix, factor, target, topPct, capacity) {
     if (!(volume > 0)) return { error: "Saisis le volume actuel du bac." };
     if (!(brix >= 0) || !(factor > 0)) return { error: "Saisis la lecture du réfractomètre et le facteur de l'huile." };
@@ -1563,7 +1586,7 @@ var Calc = (function () {
     return res;
   }
 
-  return { rightTriangle: rightTriangle, chamfer: chamfer, chamferMill: chamferMill, boltCircle: boltCircle, mix: mix, tank: tank,
+  return { rightTriangle: rightTriangle, chamfer: chamfer, chamferMill: chamferMill, boltCircle: boltCircle, mix: mix, tank: tank, fill: fill,
            iso: iso, parseIso: parseIso, general: general, correction: correction, fao: fao,
            roughSize: roughSize, remaining: remaining, CASES: CASES, round3: round3, round4: round4 };
 })();
@@ -2079,7 +2102,7 @@ if (typeof module !== "undefined") module.exports = Calc;
     }).join("") + '</div><h2 style="margin-top:18px">Saisie des chiffres (téléphone)</h2><div class="setopt" id="set-pad">' +
       '<button type="button" data-p="on" aria-pressed="' + (padPref === "on") + '">Pavé numérique de l\'app<small>gros chiffres, touche +/−, le clavier du téléphone ne s\'ouvre pas</small></button>' +
       '<button type="button" data-p="off" aria-pressed="' + (padPref === "off") + '">Clavier du téléphone<small>les barres du bas se cachent pendant la saisie</small></button></div>' +
-      '<p class="note">Les réponses du pas à pas restent en mémoire pour la cote en cours.</p>' + '<h2 style="margin-top:18px">Notes de version</h2><div class="notes"><b>1.3.1 (page de test)</b><ul><li>Couleurs pleines partout : plus aucune transparence dans les dessins ni les encadrés.</li><li>Bac d\'émulsion : graduations 25 / 50 / 75 sorties du bac, en gris, lisibles ; volume écrit en foncé sur le liquide.</li><li>Triangle : la valeur calculée s\'écrit aussi en orange dans les cases vides.</li><li>Menus déroulants maison partout : la liste s\'ouvre sous la case, on touche, ça se referme (plus de fenêtre du téléphone). Traitements écrits dans leur couleur : or, argent, nickel, zinc, chrome.</li><li>Pièces 3D (Quelle forme, perçages, vis) : plus d\'ombres noires, faces internes en gris clair, la partie concernée entièrement en couleur.</li></ul><b>1.3</b><ul><li>Tolérances : roulettes Lettre et Qualité IT, grand affichage de la cote avec ses écarts, résumé et tranche ISO sur la même page.</li><li>ISO 2768 sur sa propre page.</li><li>Nouvelle page Couple de serrage (M3 à M20, 8.8 / 10.9 / 12.9).</li><li>Recherche (loupe en haut) : M8, 20 H7, 45… ouvre la bonne page déjà remplie.</li><li>Une chose par page (petits boutons en haut) dans Trigo, Taraudage, Vis et Émulsion.</li><li>Dessins qui suivent les chiffres : chanfrein, fraise à chanfreiner, filetage, profondeur de perçage, chanfrein d\'entrée, lamage, fraisure, bacs d\'émulsion.</li><li>Quelle forme : une grande pièce 3D à la fois, flèches ou glisser, avec explication.</li><li>Tolérances et ISO 2768 : une seule carte chacune, page verrouillée (rien ne défile)</li><li>Tolérances : tout sur un seul écran (milieu, écarts, ajustement, cote mesurée).</li><li>Dessins en 3D écorchés : filetage, profondeur, chanfrein d\'entrée, lamage, fraisure, chanfrein, fraise à chanfreiner.</li><li>Couple : têtes de vis seules en 3D, en grand. ISO 2768 : résultats en haut, réglages en bas, panneau d\'info.</li><li>Lamage et fraisure : vis en acier, pièce hachurée. Onglet Surépaisseur retiré.</li><li>Rangée de trous, et symbole d\'origine pièce sur les dessins de trous ; chiffres plus grands.</li><li>Retour du téléphone : revient en arrière dans l\'app, 2 appuis pour quitter. Effets d\'appui, vibration, pavé numérique animé.</li></ul><b>1.2.1</b><ul><li>Fonctionne hors ligne. Zoom limité à 2×.</li></ul></div>';
+      '<p class="note">Les réponses du pas à pas restent en mémoire pour la cote en cours.</p>' + '<h2 style="margin-top:18px">Notes de version</h2><div class="notes"><b>1.3.1 (page de test)</b><ul><li>Couleurs pleines partout : plus aucune transparence dans les dessins ni les encadrés.</li><li>Bac d\'émulsion : graduations 25 / 50 / 75 sorties du bac, en gris, lisibles ; volume écrit en foncé sur le liquide.</li><li>Triangle : la valeur calculée s\'écrit aussi en orange dans les cases vides.</li><li>Émulsion, Corriger le bac : l\'app calcule à quel % d\'huile préparer l\'appoint pour remplir le bac jusqu\'en haut et arriver pile à la cible (litres d\'huile et d\'eau donnés).</li><li>Menus déroulants maison partout : la liste s\'ouvre sous la case, on touche, ça se referme (plus de fenêtre du téléphone). Traitements écrits dans leur couleur : or, argent, nickel, zinc, chrome.</li><li>Pièces 3D (Quelle forme, perçages, vis) : plus d\'ombres noires, faces internes en gris clair, la partie concernée entièrement en couleur.</li></ul><b>1.3</b><ul><li>Tolérances : roulettes Lettre et Qualité IT, grand affichage de la cote avec ses écarts, résumé et tranche ISO sur la même page.</li><li>ISO 2768 sur sa propre page.</li><li>Nouvelle page Couple de serrage (M3 à M20, 8.8 / 10.9 / 12.9).</li><li>Recherche (loupe en haut) : M8, 20 H7, 45… ouvre la bonne page déjà remplie.</li><li>Une chose par page (petits boutons en haut) dans Trigo, Taraudage, Vis et Émulsion.</li><li>Dessins qui suivent les chiffres : chanfrein, fraise à chanfreiner, filetage, profondeur de perçage, chanfrein d\'entrée, lamage, fraisure, bacs d\'émulsion.</li><li>Quelle forme : une grande pièce 3D à la fois, flèches ou glisser, avec explication.</li><li>Tolérances et ISO 2768 : une seule carte chacune, page verrouillée (rien ne défile)</li><li>Tolérances : tout sur un seul écran (milieu, écarts, ajustement, cote mesurée).</li><li>Dessins en 3D écorchés : filetage, profondeur, chanfrein d\'entrée, lamage, fraisure, chanfrein, fraise à chanfreiner.</li><li>Couple : têtes de vis seules en 3D, en grand. ISO 2768 : résultats en haut, réglages en bas, panneau d\'info.</li><li>Lamage et fraisure : vis en acier, pièce hachurée. Onglet Surépaisseur retiré.</li><li>Rangée de trous, et symbole d\'origine pièce sur les dessins de trous ; chiffres plus grands.</li><li>Retour du téléphone : revient en arrière dans l\'app, 2 appuis pour quitter. Effets d\'appui, vibration, pavé numérique animé.</li></ul><b>1.2.1</b><ul><li>Fonctionne hors ligne. Zoom limité à 2×.</li></ul></div>';
   }
   $("b-set").addEventListener("click", function () {
     openTable("Paramètres", "", settingsHtml());
@@ -2429,29 +2452,33 @@ if (typeof module !== "undefined") module.exports = Calc;
     document.querySelectorAll("#p-emu [data-vm]").forEach(function (el) { el.hidden = el.dataset.vm !== vMode; });
     calcTank();
   }); });
-  function calcTank() {
+  function tankInput() {
     var cap = num($("y-cap").value), vol = num($("y-v").value);
-    if (vMode === "P") {
-      var pct = num($("y-pct").value);
-      if (isNaN(cap)) { $("y-res").innerHTML = '<p class="err">Avec un remplissage en %, saisis la capacité du bac.</p>'; return; }
-      if (!(pct > 0 && pct <= 100)) { $("y-res").innerHTML = '<p class="err">Remplissage entre 0 et 100 %.</p>'; return; }
-      vol = cap * pct / 100;
-    }
-    var r = Calc.tank(vol, num($("y-b").value), num($("y-f").value), num($("y-t").value), num($("y-top").value), isNaN(cap) ? 0 : cap), o = $("y-res");
-    if (r.error) { o.innerHTML = '<p class="err">' + r.error + '</p>'; return; }
-    var top = num($("y-top").value), pure = top >= 100;
+    if (vMode === "P") { var pct = num($("y-pct").value); if (!(pct >= 0 && pct <= 100)) return { err: "Remplissage entre 0 et 100 %." }; vol = cap * pct / 100; }
+    if (!(cap > 0)) return { err: "Saisis la capacité du bac." };
+    if (vol > cap) return { err: "Le volume dépasse la capacité du bac." };
+    var r = Calc.fill(vol, num($("y-b").value), num($("y-f").value), num($("y-t").value), cap);
+    return r.error ? { err: r.error } : { r: r, cap: cap, vol: vol };
+  }
+  function calcTank() {
+    var q = tankInput(), o = $("y-res");
+    if (q.err) { o.innerHTML = '<p class="err">' + q.err + '</p>'; return; }
+    var r = q.r, rich = r.current > r.target + 0.05, poor = r.current < r.target - 0.05;
     var h = '<div class="verdict ' + (r.action === "ok" ? "v-ok" : "v-reprendre") + '" style="margin-top:14px"><span class="pill">' + fmt(r.current, 1) + ' %</span><span>' +
-      (r.action === "ok" ? "Le bac est à la bonne concentration." : r.action === "huile" ? "Trop pauvre : il faut ajouter de l'huile." : "Trop riche : il faut ajouter de l'eau.") + '</span></div>';
-    if (r.action !== "ok") {
-      var what = r.action === "eau" ? "Eau à ajouter" : (pure ? "Huile pure à ajouter" : "Pré-mélange à " + fmt(top, 1) + " % à ajouter");
-      h += '<div class="big">' + box(what, L(r.add), true, r.action === "huile" && !pure ? "dont " + L(r.oilInside) + " d'huile" : "") + box("Volume final", L(r.final)) + '</div>';
-      if (r.overflow) h += '<div class="alert"><b>Ça déborde : le bac ne contient que ' + L(cap) + '.</b> Vide d\'abord ' + L(r.drain) + ', puis ajoute ' + L(r.addAfterDrain) + ' ' + (r.action === "eau" ? "d'eau" : pure ? "d'huile pure" : "de pré-mélange") + '.</div>';
-      if (r.action === "huile" && pure) h += '<p class="note">Si possible, ajoute plutôt un pré-mélange riche (par exemple 2 fois la cible) : l\'huile pure se mélange mal dans le bac. Mets sa concentration dans « Appoint à ».</p>';
+      (!rich && !poor ? "Le bac est à la bonne concentration." : poor ? "Trop pauvre (cible " + fmt(r.target, 1) + " %)." : "Trop riche (cible " + fmt(r.target, 1) + " %).") + '</span></div>';
+    if (r.action === "remplir") {
+      h += '<div class="big">' + box("Appoint à préparer", fmt(r.pct, 1) + " %", true, "d'huile dans l'eau") + box("Volume d'appoint", L(r.add), false, "pour remplir le bac") + '</div>';
+      h += '<p class="say">Prépare ' + L(r.add) + ' : <b>' + L(r.oil) + ' d\'huile</b> dans <b>' + L(r.water) + ' d\'eau</b>, puis remplis le bac jusqu\'en haut. Tu arrives à ' + fmt(r.target, 1) + ' %.</p>';
+      if (r.pct < 0.5) h += '<p class="note">L\'appoint est presque de l\'eau claire : le bac est déjà riche.</p>';
+    } else if (r.action === "vider") {
+      h += '<div class="alert"><b>' + (r.pct === 0 ? "Trop riche, même en remplissant à l'eau." : "Trop pauvre, même en remplissant à l'huile pure.") + '</b> Vide d\'abord ' + L(r.drain) + ', puis remplis avec ' + L(r.add) + ' ' + (r.pct === 0 ? "d'eau" : "d'huile pure") + '.</div>';
+    } else if (r.action === "plein") {
+      h += '<div class="alert"><b>Le bac est plein.</b> Pour corriger, vide d\'abord une partie (par exemple 20 %), puis refais le calcul.</div>';
     }
-    if (vMode === "P") h += '<p class="note">Volume estimé dans le bac : ' + L(vol) + ' (' + fmt(num($("y-pct").value), 0) + ' % de ' + L(cap) + ').</p>';
+    if (vMode === "P") h += '<p class="note">Volume estimé dans le bac : ' + L(q.vol) + ' (' + fmt(num($("y-pct").value), 0) + ' % de ' + L(q.cap) + ').</p>';
     o.innerHTML = h;
   }
-  ["y-v", "y-pct", "y-cap", "y-b", "y-f", "y-t", "y-top"].forEach(function (id) { $(id).addEventListener("input", calcTank); });
+  ["y-v", "y-pct", "y-cap", "y-b", "y-f", "y-t"].forEach(function (id) { $(id).addEventListener("input", calcTank); });
 
   /* Taraudage */
   var N = NORMS;
@@ -3222,35 +3249,30 @@ if (typeof module !== "undefined") module.exports = Calc;
   watch("x-res", drawMix);
   addSk("y-res", "y-sk");
   function drawTank() {
-    var cap = num($("y-cap").value), vol = num($("y-v").value);
-    if (vMode === "P") {
-      var pct = num($("y-pct").value);
-      if (isNaN(cap)) { // pas encore de capacité : on montre quand même le niveau
-        var f0 = Math.max(0, Math.min(1, (pct || 0) / 100)), b0 = bac(30, 36, 130, 130, null, [{ v: f0, col: MIXC }], "Bac") + tankMarks(f0, true);
-        b0 += tx(200, 60, "Glisse le niveau", null, "start", "nm") + tx(200, 80, "dans le bac", null, "start", "nm") + tx(200, 120, "Capacité du bac ?", "var(--warn)", "start");
-        sk("y-sk", "0 0 340 200", b0); return;
-      }
-      vol = cap * pct / 100;
+    var q = tankInput();
+    if (q.err) { // on montre quand même le niveau
+      var pct0 = vMode === "P" ? num($("y-pct").value) : 0, f0 = Math.max(0, Math.min(1, (pct0 || 0) / 100));
+      sk("y-sk", "0 0 340 200", bac(30, 36, 130, 130, null, [{ v: f0, col: MIXC }], "Bac") + tankMarks(f0, vMode === "P") + tx(200, 120, "Capacité du bac ?", "var(--warn)", "start")); return;
     }
-    var top = num($("y-top").value), r = Calc.tank(vol, num($("y-b").value), num($("y-f").value), num($("y-t").value), top, isNaN(cap) ? 0 : cap);
-    if (r.error) { $("y-sk").innerHTML = ""; return; }
-    var C = cap > 0 ? cap : Math.max(r.final, vol) * 1.25, fv = vol / C, fa = r.add / C;
-    var addCol = r.action === "eau" ? WATER : OIL;
-    var b = bac(30, 36, 130, 130, null, [{ v: Math.min(fv, 1), col: MIXC }, { v: Math.max(0, Math.min(fa, 1.15 - fv)), col: addCol, dash: true }], cap > 0 ? "Bac " + f2(cap, 0) + " L" : "Bac");
-    if (cap > 0) b += '<path d="M24 36H166" stroke="var(--bad)" stroke-width="1.5" stroke-dasharray="5 3"/>' + tx(170, 40, "plein", "var(--bad)", "start", "nm");
-    b += tankMarks(Math.min(fv, 1), cap > 0 || vMode === "P");
-    var yv = 36 + 136 - fv * 136;
-    b += fv > .16 ? tx(95, Math.min(166, Math.max(yv + 22, (yv + 172) / 2 + 6)), f2(vol, 0) + " L", "#10151c", "middle", "ink") : tx(95, yv - 8, f2(vol, 0) + " L", "#e8edf4");
-    if (r.action !== "ok") b += tx(200, 186, "+ " + f2(r.add, 1) + " L " + (r.action === "eau" ? "d'eau" : "d'huile"), r.action === "eau" ? "var(--c1)" : "var(--c5)", "start");
-    // jauge de concentration : actuel / visé
+    var r = q.r, C = q.cap, fv = q.vol / C, keep = r.action === "vider" ? (q.vol - r.drain) / C : fv;
+    var addCol = r.pct === 0 ? WATER : r.pct >= 100 ? OIL : "#e9d58c";
+    var b = bac(30, 36, 130, 130, null, [{ v: keep, col: MIXC }, { v: (r.action === "remplir" || r.action === "vider") ? 1 - keep : 0, col: addCol, dash: true }], "Bac " + f2(C, 0) + " L");
+    b += '<path d="M24 36H166" stroke="var(--bad)" stroke-width="1.5" stroke-dasharray="5 3"/>' + tx(95, 30, "plein", "var(--bad)", "middle", "nm");
+    b += tankMarks(Math.min(fv, 1), true);
+    var yk = 172 - keep * 136;
+    if (keep > .16) b += tx(95, Math.min(166, (yk + 172) / 2 + 6), f2(q.vol - (r.drain || 0), 0) + " L", "#10151c", "middle", "ink");
+    if ((r.action === "remplir" || r.action === "vider") && keep < .7) b += tx(105, (36 + yk) / 2 + 5, "+" + f2(r.add, 0) + " L", "#10151c", "middle", "ink");
     var mx = Math.max(r.target * 2, r.current * 1.2, 1), gx = 200, gw = 130, X = function (v) { return gx + gw * Math.min(v, mx) / mx; };
+    var okc = r.action === "ok";
     b += tx(gx, 40, "Concentration", null, "start", "nm");
     b += '<rect x="' + gx + '" y="50" width="' + gw + '" height="16" rx="8" fill="var(--panel-2)" stroke="var(--line)"/>';
-    b += '<rect x="' + gx + '" y="50" width="' + (X(r.current) - gx).toFixed(1) + '" height="16" rx="8" fill="' + (r.action === "ok" ? "var(--ok)" : "var(--warn)") + '"/>';
+    b += '<rect x="' + gx + '" y="50" width="' + (X(r.current) - gx).toFixed(1) + '" height="16" rx="8" fill="' + (okc ? "var(--ok)" : "var(--warn)") + '"/>';
     b += '<path d="M' + X(r.target).toFixed(1) + ' 44V72" stroke="var(--ok)" stroke-width="3"/>';
-    b += tx(gx, 90, "actuel " + f2(r.current, 1) + " %", r.action === "ok" ? "var(--ok)" : "var(--warn)", "start") + tx(gx, 110, "visé " + f2(r.target, 1) + " %", "var(--ok)", "start");
-    b += tx(gx, 140, r.action === "ok" ? "✓ rien à faire" : r.action === "eau" ? "trop riche" : "trop pauvre", "var(--fg)", "start");
-    if (r.overflow) b += tx(gx, 160, "vider " + f2(r.drain, 1) + " L avant", "var(--bad)", "start");
+    b += tx(gx, 90, "actuel " + f2(r.current, 1) + " %", okc ? "var(--ok)" : "var(--warn)", "start") + tx(gx, 110, "visé " + f2(r.target, 1) + " %", "var(--ok)", "start");
+    if (r.action === "remplir") { b += tx(gx, 140, "appoint à", "var(--fg)", "start") + tx(gx, 162, f2(r.pct, 1) + " %", "#e9d58c", "start"); b += tx(gx, 186, f2(r.oil, 1) + " L d'huile", "var(--c5)", "start"); }
+    else if (r.action === "vider") b += tx(gx, 150, "vider " + f2(r.drain, 1) + " L", "var(--bad)", "start");
+    else if (r.action === "plein") b += tx(gx, 150, "bac plein", "var(--bad)", "start");
+    else b += tx(gx, 150, "✓ rien à faire", "var(--fg)", "start");
     sk("y-sk", "0 0 340 200", b);
   }
   watch("y-res", drawTank);
@@ -3261,7 +3283,7 @@ if (typeof module !== "undefined") module.exports = Calc;
     var yv = 172 - f * 136;
     b += '<path d="M32 ' + yv.toFixed(1) + 'H158" stroke="var(--accent)" stroke-width="2"/>';
     b += '<g transform="translate(160 ' + yv.toFixed(1) + ')"><rect x="-2" y="-11" width="26" height="22" rx="11" fill="var(--accent)"/><path d="M11 -7l-4 5h8zM11 7l-4 -5h8z" fill="#1b1408"/></g>';
-    if (pctTxt) b += tx(36, Math.max(30, yv - 7), Math.round(f * 100) + " %", "var(--accent)", "start");
+    if (pctTxt) { var py = Math.max(40, yv - 3); b += '<rect x="34" y="' + (py - 15).toFixed(1) + '" width="40" height="16" rx="8" fill="var(--accent)"/>' + tx(54, py - 3, Math.round(f * 100) + " %", "#1b1408", "middle", "ink"); }
     return b;
   }
   (function () {
