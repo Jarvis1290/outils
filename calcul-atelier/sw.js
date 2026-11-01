@@ -2,7 +2,7 @@
 // Tout est gardé dans le téléphone dès la première ouverture : page, icônes, polices.
 // La page : réseau d'abord (nouvelle version au lancement suivant), mais si le réseau ne répond pas
 // en 4 s, la copie du téléphone s'ouvre tout de suite (mode avion, réseau faible).
-const CACHE = "calcul-atelier-v1.3";
+const CACHE = "calcul-atelier-v1.3.1";
 const PREFIX = "calcul-atelier-";
 const CORE = ["./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png", "./fonts/fonts.css", "./fonts/BarlowCondensed-latin-05ba48a1.woff2", "./fonts/BarlowCondensed-latin-0a7db401.woff2", "./fonts/BarlowCondensed-latin-ext-34541021.woff2", "./fonts/BarlowCondensed-latin-ext-352c6063.woff2", "./fonts/IBMPlexSans-latin-d8b4e62d.woff2", "./fonts/IBMPlexSans-latin-ext-69ec3099.woff2", "./fonts/JetBrainsMono-latin-4f27206c.woff2", "./fonts/JetBrainsMono-latin-ext-06ad3600.woff2", "./fonts/SairaStencilOne-latin.woff2"];
 const TIMEOUT = 4000;
