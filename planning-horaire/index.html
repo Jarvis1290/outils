@@ -451,17 +451,10 @@ header.top{flex:none}
 :root[data-rail="b"] #rail .rsep{width:2px;height:22px}
 /* v2.4 : timeline des changements dans la barre (entre ⚙ et ⏱) + mini semaine (entre ⏱ et les onglets) */
 #rail .sp{position:relative;min-height:0;align-self:stretch;display:flex;flex-direction:column;align-items:center;overflow:hidden}
-#rail .tl{display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;padding:6px 0 4px;width:100%}
-#rail .tl-all{width:30px;height:30px;border-radius:10px;opacity:.75;flex:none}
-#rail .tl-all .ico{width:17px;height:17px}
-#rail .tl-col{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:0;min-height:0;width:100%}
-#rail .tl-col::before{content:"";position:absolute;top:2px;bottom:11px;left:50%;width:2px;margin-left:-1px;border-radius:1px;background:var(--rail-fg);opacity:.18}
-#rail .tl-more{display:block;width:2px;flex:1;min-height:8px;background:repeating-linear-gradient(var(--rail-fg) 0 2px,transparent 2px 5px);opacity:.3}
-#rail button.tl-d{position:relative;width:34px;height:22px;border-radius:8px;flex:none;padding:0}
-#rail button.tl-d::after{content:"";width:9px;height:9px;border-radius:50%;background:var(--c);opacity:.8;box-shadow:0 0 0 2px var(--rail)}
-#rail button.tl-d.bk::after{border-radius:2px;transform:rotate(45deg)}
-#rail button.tl-d.now::after{width:12px;height:12px;opacity:1;background:var(--rail);box-shadow:0 0 0 2px var(--rail),inset 0 0 0 3px var(--c)}
-#rail button.tl-d:active::after{transform:scale(1.4)}
+#rail .tlb{position:relative;width:40px;height:40px;border-radius:12px;margin-top:10px;opacity:.85}
+#rail .tlb .ico{width:20px;height:20px}
+#rail .tlb small{position:absolute;right:-2px;top:-2px;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:var(--acc);color:var(--on-acc);font:800 10px/16px var(--f)}
+#rail .tlb small:empty{display:none}
 #rail .wmini{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;width:48px;height:100%;padding:6px 0;border-radius:12px;cursor:pointer;color:var(--rail-fg);font:inherit;background:none;border:0}
 #rail .wmini i{display:block;width:8px;height:8px;border-radius:50%;background:var(--rail-fg);opacity:.22}
 #rail .wmini i.ok{background:var(--acc);opacity:1}
@@ -471,15 +464,20 @@ header.top{flex:none}
 /* panneaux de l'historique */
 .hlist{padding:4px 10px}
 .hday{font-size:12px;font-weight:800;color:var(--mut);margin:10px 2px 2px;text-transform:uppercase;letter-spacing:.04em}
-.hrow{display:flex;align-items:center;gap:9px;width:100%;padding:10px 4px;border:0;border-bottom:1px solid var(--line);background:none;color:var(--fg);font:inherit;font-size:14px;text-align:left;cursor:pointer;border-radius:8px}
-.hrow.cur{background:var(--soft)}
-.hrow .ht{font-variant-numeric:tabular-nums;font-weight:700;color:var(--mut);flex:none}
-.hrow .hl{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hit{border-bottom:1px solid var(--line)}
+.hit:last-child{border-bottom:0}
+.hrow{display:flex;align-items:baseline;gap:10px;width:100%;padding:12px 4px;border:0;background:none;color:var(--fg);font:inherit;font-size:15px;text-align:left;cursor:pointer;border-radius:8px}
+.hit.cur .hrow{background:var(--soft)}
+.hit.open{background:var(--surf2);border-radius:12px}
+.hrow .ht{font-variant-numeric:tabular-nums;font-weight:800;color:var(--accS);flex:none;min-width:44px}
+.hrow .hl{flex:1;min-width:0;line-height:1.35}
+.hit.open .hrow .hl{font-weight:700}
+.hcar{flex:none;color:var(--mut);font-size:13px}
 .hnow{font-size:11px;color:var(--accS);flex:none}
-.hdot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--c);flex:none;vertical-align:middle;margin-right:2px}
-.hleg{display:flex;flex-wrap:wrap;gap:6px 14px;margin:10px 2px;font-size:12px;color:var(--mut)}
-.hk{font-size:13px;font-weight:700;color:var(--mut)}
-.hx{margin:8px 0 0;padding-left:20px;font-size:15px;line-height:1.5}
+.hdet{padding:0 10px 12px 58px;display:flex;flex-direction:column;gap:8px}
+.hdet .btn{width:100%}
+.hsum{font-size:13px;color:var(--mut)}
+.hx{margin:0;padding-left:18px;font-size:15px;line-height:1.5}
 .hconf{border:1.5px solid var(--lunch)}
 .btn:disabled{opacity:.4;cursor:default}
 header.top{margin-bottom:8px}
@@ -937,7 +935,7 @@ function buildRail(){
   var sp1=el("div","sp"), sp2=el("div","sp"), tb=el("div","tbox");
   tb.appendChild(el("i","rsep")); if(fab) tb.appendChild(fab); tb.appendChild(el("i","rsep"));
   r.appendChild(sp1); r.appendChild(tb); r.appendChild(sp2);
-  // v2.4 : timeline des changements (entre ⚙ et ⏱) et mini semaine (entre ⏱ et les onglets)
+  // v2.4 : bouton ↺ historique (entre ⚙ et ⏱) et mini semaine (entre ⏱ et les onglets)
   if(H.rail!=="b"){ Hist.mount(sp1); var wm=el("button","wmini"); wm.setAttribute("aria-label","Ma semaine"); wm.onclick=function(){ go("week"); }; sp2.appendChild(wm); }
   tabOrder().forEach(function(t){ var b=el("button",null,ic(TABS[t].i)); b.dataset.t=t; b.setAttribute("aria-label",TABS[t].t); r.appendChild(b); });
   r.querySelectorAll("button[data-t]").forEach(function(b){ b.onclick=function(){ go(b.dataset.t); }; });
@@ -1573,7 +1571,7 @@ function renderSettings(v){
 
   v.appendChild(el("div","sec","Historique des changements"));
   var hc=el("div","card stack"), hb2=el("button","btn",ic("arrow-counter-clockwise")+" Voir l'historique · revenir en arrière ("+Hist.entries().length+")"); hb2.onclick=function(){ pushSheet({type:"hist"}); }; hc.appendChild(hb2);
-  hc.appendChild(el("div","small","Chaque changement (heures, semaines, pot, réglages, affichage) est noté. La petite timeline de la barre montre les derniers : touche un point pour voir ce qui a changé et revenir à cet état. Un retour s'annule aussi."));
+  hc.appendChild(el("div","small","Chaque changement (heures, semaines, pot, réglages, affichage) est noté. Le bouton ↺ de la barre ouvre la liste : jour, heure et ce qui a changé ; touche une ligne pour le détail et « Revenir à cet état ». Un retour s'annule aussi."));
   v.appendChild(hc);
 
   v.appendChild(el("div","sec","Magie"));
@@ -1620,7 +1618,7 @@ function renderAbout(sh){
   sh.appendChild(sheetHead("Quoi de neuf"));
   var n=el("div","notes");
   n.innerHTML='<h3>v2.4 · 01.11.2026</h3><ul>'+
-    '<li><b>Historique des changements</b> : tout ce qui change (heures, semaines, pot, réglages, affichage) est noté. Dans la barre, entre ⚙ et ⏱, une petite timeline montre les derniers changements ; touche un point pour voir ce qui a changé et « Revenir à cet état ». Le retour s\'ajoute lui-même à l\'historique : il s\'annule d\'un toucher.</li>'+
+    '<li><b>Historique des changements</b> : tout ce qui change (heures, semaines, pot, réglages, affichage) est noté. Le bouton ↺ dans la barre, sous ⚙, ouvre la liste : jour, heure et ce qui a changé. Touche une ligne pour voir tout le détail et « Revenir à cet état ». Le retour s\'ajoute à la liste : il s\'annule aussi.</li>'+
     '<li><b>Mini semaine</b> dans la barre, entre ⏱ et les onglets : un point par jour (plein = fait, cerclé = aujourd\'hui) et le solde de la semaine. Touche-la pour aller à la Semaine.</li>'+
     '<li>L\'historique part aussi dans la sauvegarde Drive, avec les réglages.</li>'+
     '</ul><h3>v2.3 · 01.11.2026</h3><ul>'+
@@ -1855,68 +1853,41 @@ var Hist=(function(){
   function dayLbl(t){ var d=dayStart(new Date(t)), n=dayStart(new Date()), k=Math.round((n-d)/864e5);
     return k===0?"Aujourd'hui":k===1?"Hier":["Dim","Lun","Mar","Mer","Jeu","Ven","Sam"][d.getDay()]+" "+dmy(d); }
 
-  // ----- timeline dans la barre -----
+  // ----- petit bouton dans la barre (ouvre la liste) -----
   var box=null;
-  function mount(sp){ box=el("div","tl"); sp.appendChild(box); draw(); }
-  function draw(){ if(!box||!box.isConnected) return; requestAnimationFrame(function(){
-    var hgt=box.parentNode.clientHeight; box.innerHTML="";
-    var n=Math.max(0,Math.min(E.length,Math.floor((hgt-38)/22)));
-    if(hgt<70){ box.style.display="none"; return; } box.style.display="";
-    var top=el("button","tl-all",ic("arrow-counter-clockwise")); top.setAttribute("aria-label","Historique des changements"); top.onclick=function(){ pushSheet({type:"hist"}); }; box.appendChild(top);
-    var col=el("div","tl-col"); box.appendChild(col);
-    for(var i=E.length-n;i<E.length;i++){ (function(i){ var e=E[i], cur=i===E.length-1;
-      var d=el("button","tl-d"+(cur?" now":"")+(e.k==="back"?" bk":"")); d.style.setProperty("--c",(KIND[e.k]||KIND.reg)[1]);
-      d.setAttribute("aria-label",(cur?"Maintenant · ":"")+hhmm(e.t)+" · "+(e.x&&e.x[0]||""));
-      d.onclick=function(){ pushSheet({type:"hstate",i:i}); }; col.appendChild(d); })(i); }
-    if(E.length>n && n>0) col.insertBefore(el("i","tl-more"),col.firstChild);
-  }); }
+  function mount(sp){ box=el("button","tlb"); box.setAttribute("aria-label","Historique des changements"); box.onclick=function(){ pushSheet({type:"hist"}); }; sp.appendChild(box); draw(); }
+  function draw(){ if(!box||!box.isConnected) return; var n=E.filter(function(e){ return dayLbl(e.t)==="Aujourd'hui" && e.k!=="start"; }).length;
+    box.innerHTML=ic("arrow-counter-clockwise")+'<small>'+(n?n:"")+'</small>'; }
 
-  // ----- panneaux -----
-  function rowHtml(e,i){ var c=(KIND[e.k]||KIND.reg); var x=e.x||[];
-    return '<i class="hdot" style="--c:'+c[1]+'"></i><span class="ht">'+hhmm(e.t)+'</span><span class="hl">'+esc(x[0]||"")+(x.length>1?' <small class="muted">+'+(x.length-1)+'</small>':'')+'</span>'+(i===E.length-1?'<b class="hnow">maintenant</b>':''); }
+  // ----- la liste : jour, heure, ce qui a changé ; un toucher déplie le détail -----
   function renderList(sh){
+    var st=sheets[sheets.length-1];
     sh.appendChild(sheetHead(ic("arrow-counter-clockwise")+" Historique des changements"));
-    sh.appendChild(el("div","small","Tout ce qui a changé, le plus récent en haut. Touche une ligne pour voir le détail et revenir à cet état."));
+    sh.appendChild(el("div","small","Le plus récent en haut. Touche une ligne pour voir tout le détail et revenir à cet état."));
     var c=el("div","card hlist"), lastDay=null;
-    for(var i=E.length-1;i>=0;i--){ (function(i){ var e=E[i], dl=dayLbl(e.t);
-      if(dl!==lastDay){ c.appendChild(el("div","hday",dl)); lastDay=dl; }
-      var r=el("button","hrow"+(i===E.length-1?" cur":""),rowHtml(e,i)); r.onclick=function(){ pushSheet({type:"hstate",i:i}); }; c.appendChild(r); })(i); }
+    for(var i=E.length-1;i>=0;i--){ (function(i){ var e=E[i], dl=dayLbl(e.t), x=e.x||[], isNow=i===E.length-1, open=st.open===i;
+      if(dl!==lastDay){ c.appendChild(el("div","hday",dl+(dl==="Aujourd'hui"||dl==="Hier"?' · '+dmy(new Date(e.t)):''))); lastDay=dl; }
+      var it=el("div","hit"+(open?" open":"")+(isNow?" cur":""));
+      var r=el("button","hrow",'<span class="ht">'+hhmm(e.t)+'</span><span class="hl">'+esc(x[0]||"")+(x.length>1&&!open?' <small class="muted">et '+(x.length-1)+' autre'+(x.length>2?"s":"")+'</small>':'')+'</span>'+(isNow?'<b class="hnow">maintenant</b>':'')+'<span class="hcar">'+(open?"▴":"▾")+'</span>');
+      r.onclick=function(){ st.open=open?null:i; st.ask=false; redrawSheet(); };
+      it.appendChild(r);
+      if(open){ var d=el("div","hdet");
+        if(x.length>1){ var ul=el("ul","hx"); x.slice(1).forEach(function(t){ ul.appendChild(el("li",null,esc(t))); }); d.appendChild(ul); }
+        try{ var o=full(i).d, pot=o.pot.totalMin, nj=DAYS.filter(function(z){ var q=o.currentWeek.days[z]; return q&&q.arrival; }).length;
+          d.appendChild(el("div","hsum",'Dans cet état : pot <b class="'+cls(pot)+'">'+fhm(pot)+'</b> · '+nj+' jour'+(nj>1?"s":"")+' pointé'+(nj>1?"s":"")+' · '+o.history.length+' semaine'+(o.history.length>1?"s":"")+' gardée'+(o.history.length>1?"s":""))); }catch(err){}
+        if(isNow) d.appendChild(el("div","small","C'est l'état actuel."));
+        else if(!st.ask){ var b=el("button","btn",ic("arrow-counter-clockwise")+" Revenir à cet état"); b.onclick=function(){ st.ask=true; redrawSheet(); }; d.appendChild(b); }
+        else { var after=E.length-1-i; d.appendChild(el("div","small","Les "+after+" changement"+(after>1?"s":"")+" faits après seront défaits. Ce retour s'ajoute à la liste : tu peux revenir à « maintenant »."));
+          var rw=el("div","row"); rw.style.cssText="margin-top:8px;gap:10px";
+          var no=el("button","btn ghost","Annuler"); no.style.flex="1"; no.onclick=function(){ st.ask=false; redrawSheet(); };
+          var yes=el("button","btn",ic("arrow-counter-clockwise")+" Oui, revenir"); yes.style.flex="1"; yes.onclick=function(){ restore(i); };
+          rw.appendChild(no); rw.appendChild(yes); d.appendChild(rw); }
+        it.appendChild(d); }
+      c.appendChild(it); })(i); }
     if(!E.length) c.appendChild(el("div","small","Rien pour l'instant."));
     sh.appendChild(c);
-    var lg=el("div","hleg"); Object.keys(KIND).forEach(function(k){ if(k==="start") return; lg.appendChild(el("span",null,'<i class="hdot" style="--c:'+KIND[k][1]+'"></i>'+KIND[k][0])); }); sh.appendChild(lg);
     sh.appendChild(el("div","small","On garde les "+MAXN+" derniers changements. Ils partent aussi dans la sauvegarde Drive."));
   }
-  function renderState(sh,i,ask){
-    var e=E[i]; if(!e){ closeSheet(); return; }
-    var isNow=i===E.length-1, after=E.length-1-i;
-    sh.appendChild(sheetHead((isNow?"Maintenant":"État de "+hhmm(e.t))+' <small class="muted">· '+dayLbl(e.t)+'</small>'));
-    var c=el("div","card"); var x=e.x||[];
-    c.appendChild(el("div","hk",'<i class="hdot" style="--c:'+(KIND[e.k]||KIND.reg)[1]+'"></i>'+(KIND[e.k]||KIND.reg)[0]+' · ce qui a changé à '+hhmm(e.t)));
-    var ul=el("ul","hx"); x.forEach(function(t){ ul.appendChild(el("li",null,esc(t))); }); c.appendChild(ul);
-    sh.appendChild(c);
-    // petit résumé de cet état
-    try{ var o=full(i).d, pot=o.pot.totalMin, nj=DAYS.filter(function(d){ var z=o.currentWeek.days[d]; return z&&z.arrival; }).length;
-      var sm=el("div","card"); sm.innerHTML='<div class="row"><span>Dans cet état</span><b></b></div><div class="row" style="margin-top:6px"><span>Pot</span><b class="'+cls(pot)+'">'+fhm(pot)+'</b></div><div class="row" style="margin-top:6px"><span>Jours pointés (sem. '+weekNum(fromIso(o.currentWeek.start))+')</span><b>'+nj+'</b></div><div class="row" style="margin-top:6px"><span>Semaines gardées</span><b>'+o.history.length+'</b></div>';
-      sh.appendChild(sm); }catch(err){}
-    var nav=el("div","row"); nav.style.cssText="margin-top:12px;gap:10px";
-    var pv=el("button","btn ghost","‹ Avant"); pv.style.flex="1"; pv.disabled=i===0; pv.onclick=function(){ sheets[sheets.length-1].i=i-1; redrawSheet(); };
-    var nx=el("button","btn ghost","Après ›"); nx.style.flex="1"; nx.disabled=isNow; nx.onclick=function(){ sheets[sheets.length-1].i=i+1; redrawSheet(); };
-    nav.appendChild(pv); nav.appendChild(nx); sh.appendChild(nav);
-    if(isNow){ sh.appendChild(el("div","small","C'est l'état actuel de l'app. Choisis un point plus haut dans la timeline pour revenir en arrière.")); }
-    else if(!sheets[sheets.length-1].ask){
-      var go2=el("button","btn",ic("arrow-counter-clockwise")+" Revenir à cet état"); go2.style.cssText="width:100%;margin-top:12px";
-      go2.onclick=function(){ sheets[sheets.length-1].ask=true; redrawSheet(); }; sh.appendChild(go2);
-    } else {
-      var cf=el("div","card hconf"); cf.innerHTML='<b>Revenir à '+hhmm(e.t)+' ?</b><div class="small">Les '+after+' changement'+(after>1?"s":"")+' faits après seront défaits. Pas de panique : ce retour s\'ajoute à l\'historique, tu peux revenir à « maintenant » d\'un toucher.</div>';
-      var rw=el("div","row"); rw.style.cssText="margin-top:12px;gap:10px";
-      var no=el("button","btn ghost","Annuler"); no.style.flex="1"; no.onclick=function(){ sheets[sheets.length-1].ask=false; redrawSheet(); };
-      var yes=el("button","btn",ic("arrow-counter-clockwise")+" Oui, revenir"); yes.style.flex="1"; yes.onclick=function(){ restore(i); };
-      rw.appendChild(no); rw.appendChild(yes); cf.appendChild(rw); sh.appendChild(cf);
-    }
-    var all=el("button","btn ghost",ic("list-bullets")+" Tout l'historique"); all.style.cssText="width:100%;margin-top:10px";
-    all.onclick=function(){ pushSheet({type:"hist"}); }; sh.appendChild(all);
-  }
-
   // ----- démarrage -----
   function start(){ load(); var c=cur();
     if(E.length){ var l=E.length-1; lastD=E[l].d; lastH=hOf(l); }
@@ -1928,7 +1899,7 @@ var Hist=(function(){
   function exportLog(){ return E.slice(); }
   function importLog(a,label){ if(Array.isArray(a)&&a.length&&E.length<=1){ E=a.filter(function(e){ return e&&e.t&&typeof e.d==="string"; }); if(E.length&&E[0].h===0) E=[]; if(E.length){ var l=E.length-1; lastD=E[l].d; lastH=hOf(l); } }
     next={k:"back",t:label}; }
-  return {start:start,ping:ping,rec:rec,mount:mount,draw:draw,renderList:renderList,renderState:renderState,restore:restore,exportLog:exportLog,importLog:importLog,entries:function(){ return E; },full:full};
+  return {start:start,ping:ping,rec:rec,mount:mount,draw:draw,renderList:renderList,restore:restore,exportLog:exportLog,importLog:importLog,entries:function(){ return E; },full:full};
 })();
 
 // ---------- sauvegarde Drive (bloc commun SAUVEGARDE ATELIER) ----------
