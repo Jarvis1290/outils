@@ -413,6 +413,9 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 .sk text { paint-order: stroke; stroke: var(--panel); stroke-width: 3px; stroke-linejoin: round; }
 .sk text.hn { stroke: none; }
 .sk text.ink { stroke: none; font-weight: 700; }
+.emubac { display: grid; grid-template-columns: 1fr 96px auto; gap: 8px; align-items: end; margin-top: 6px; }
+.emubac .es-del { padding: 10px 12px; }
+.emuset { grid-template-columns: 1fr 1fr; }
 .sk text.gr { stroke: none; font: 600 12px var(--f-num); }
 /* Triangle : la valeur calculée s'affiche aussi dans la case vide, en orange */
 #p-trig input::placeholder { color: var(--accent); opacity: 1; }
@@ -945,20 +948,21 @@ section.fitz { transform-origin: top center; }
       <div class="card">
         <h2>Corriger le bac</h2>
         <div class="fields">
-          <div class="full">
+          <div class="full" hidden>
             <div class="seg" id="y-vmode">
-              <button type="button" data-v="L" aria-pressed="true">Volume en litres</button>
-              <button type="button" data-v="P" aria-pressed="false">Remplissage estimé en %</button>
+              <button type="button" data-v="L" aria-pressed="false">Volume en litres</button>
+              <button type="button" data-v="P" aria-pressed="true">Remplissage estimé en %</button>
             </div>
           </div>
-          <label data-vm="L">Volume dans le bac (L)<input id="y-v" inputmode="decimal" value="180"></label>
-          <label data-vm="P" hidden>Remplissage estimé (%)<input id="y-pct" inputmode="decimal" value="75"></label>
-          <label>Capacité du bac (L)<input id="y-cap" inputmode="decimal" value="250"></label>
+          <label class="full">Machine<select id="y-mach"></select></label>
+          <label data-vm="L" hidden>Volume dans le bac (L)<input id="y-v" inputmode="decimal" value="180"></label>
+          <label data-vm="P">Remplissage du bac (%)<input id="y-pct" inputmode="decimal" value="50"></label>
           <label>Lecture réfractomètre (°Brix)<input id="y-b" inputmode="decimal" value="3,2"></label>
-          <label>Facteur de l'huile<input id="y-f" inputmode="decimal" value="1"></label>
-          <label>Concentration voulue (%)<input id="y-t" inputmode="decimal" value="5"></label>
+          <label hidden>Capacité du bac (L)<input id="y-cap" inputmode="decimal" value="250"></label>
+          <label hidden>Facteur de l'huile<input id="y-f" inputmode="decimal" value="1"></label>
+          <label hidden>Concentration voulue (%)<input id="y-t" inputmode="decimal" value="7"></label>
         </div>
-        <p class="hint">Le facteur est sur la fiche technique de l'huile (concentration = Brix × facteur). L'app calcule à quel % préparer l'appoint pour remplir le bac jusqu'en haut et tomber pile sur la concentration voulue.</p>
+        <p class="hint" id="y-hint"></p>
         <div id="y-res" aria-live="polite"></div>
       </div>
     </div>
@@ -2096,16 +2100,62 @@ if (typeof module !== "undefined") module.exports = Calc;
     calcCorr(); saveMode(); goStep(2);
   });
   if (narrow) { var onNarrow = function () { renderWiz(); }; if (narrow.addEventListener) narrow.addEventListener("change", onNarrow); else if (narrow.addListener) narrow.addListener(onNarrow); }
+  /* Émulsion : concentration voulue, facteur de l'huile et bacs des machines (réglés dans Paramètres) */
+  var EMU = (function () { try { var o = JSON.parse(load("emu") || "null"); if (o && o.bacs && o.bacs.length) return o; } catch (e) {} return { t: 7, f: 1, m: 0, bacs: [{ n: "DMU 50", c: 250 }] }; })();
+  function saveEmu() { store("emu", JSON.stringify(EMU)); }
+  function applyEmu() {
+    if (!(EMU.m >= 0 && EMU.m < EMU.bacs.length)) EMU.m = 0;
+    var sel = $("y-mach");
+    sel.innerHTML = EMU.bacs.map(function (b, i) { return '<option value="' + i + '">' + String(b.n || ("Machine " + (i + 1))).replace(/</g, "&lt;") + ' · ' + fmt(b.c, 0) + ' L</option>'; }).join("");
+    sel.value = String(EMU.m);
+    sel.closest("label").hidden = EMU.bacs.length < 2;
+    $("y-cap").value = String(EMU.bacs[EMU.m].c).replace(".", ",");
+    $("y-t").value = String(EMU.t).replace(".", ","); $("y-f").value = String(EMU.f).replace(".", ",");
+    $("y-hint").innerHTML = 'Cible <b>' + fmt(EMU.t, 1) + ' %</b>, facteur de l\'huile ' + fmt(EMU.f, 2) + ' (à régler dans Paramètres ⚙). L\'app calcule à quel % préparer l\'appoint pour remplir le bac jusqu\'en haut. Les litres sont indicatifs.';
+    if (!load("x-p-touched")) $("x-p").value = String(EMU.t).replace(".", ",");
+    calcTank(); calcMix();
+  }
+  function emuSetHtml() {
+    return '<h2 style="margin-top:18px">Émulsion</h2><div class="fields emuset">' +
+      '<label>Concentration voulue (%)<input id="es-t" inputmode="decimal" value="' + String(EMU.t).replace(".", ",") + '"></label>' +
+      '<label>Facteur de l\'huile<input id="es-f" inputmode="decimal" value="' + String(EMU.f).replace(".", ",") + '"></label></div>' +
+      '<p class="note">Le facteur est sur la fiche technique de l\'huile (concentration = Brix × facteur).</p>' +
+      '<h2 style="margin-top:14px">Bacs des machines (facultatif)</h2><p class="note">Une seule ligne suffit. Avec plusieurs machines, un choix apparaît dans Émulsion.</p><div id="es-bacs"></div><button type="button" class="btn" id="es-add" style="margin-top:8px">+ Ajouter une machine</button>';
+  }
+  function emuBacsHtml() {
+    return EMU.bacs.map(function (b, i) {
+      return '<div class="fields emubac" data-i="' + i + '"><label>Machine<input class="es-n" value="' + String(b.n).replace(/"/g, "&quot;") + '"></label><label>Bac (L)<input class="es-c" inputmode="decimal" value="' + String(b.c).replace(".", ",") + '"></label>' +
+        (EMU.bacs.length > 1 ? '<button type="button" class="btn es-del" aria-label="Retirer">✕</button>' : '') + '</div>';
+    }).join("");
+  }
+  function emuSetBind() {
+    var box = $("es-bacs");
+    function draw() { box.innerHTML = emuBacsHtml(); }
+    draw();
+    $("es-t").addEventListener("input", function () { var v = num(this.value); if (v > 0 && v < 100) { EMU.t = v; saveEmu(); applyEmu(); } });
+    $("es-f").addEventListener("input", function () { var v = num(this.value); if (v > 0) { EMU.f = v; saveEmu(); applyEmu(); } });
+    box.addEventListener("input", function (e) {
+      var row = e.target.closest(".emubac"); if (!row) return; var b = EMU.bacs[Number(row.dataset.i)];
+      if (e.target.classList.contains("es-n")) b.n = e.target.value.trim() || "Machine";
+      else { var v = num(e.target.value); if (v > 0) b.c = v; else return; }
+      saveEmu(); applyEmu();
+    });
+    box.addEventListener("click", function (e) {
+      var d = e.target.closest(".es-del"); if (!d) return;
+      var i = Number(d.closest(".emubac").dataset.i); EMU.bacs.splice(i, 1); if (EMU.m >= EMU.bacs.length) EMU.m = 0; saveEmu(); applyEmu(); draw();
+    });
+    $("es-add").addEventListener("click", function () { EMU.bacs.push({ n: "Machine " + (EMU.bacs.length + 1), c: 200 }); saveEmu(); applyEmu(); draw(); var l = box.querySelector(".emubac:last-child .es-n"); if (l) { l.focus(); l.select(); } });
+  }
   function settingsHtml() {
     return '<h2 style="margin-top:14px">Affichage des corrections</h2><div class="setopt" id="set-view">' + VIEWS.map(function (v) {
       return '<button type="button" data-v="' + v[0] + '" aria-pressed="' + (v[0] === view) + '">' + v[1] + '<small>' + v[2] + '</small></button>';
     }).join("") + '</div><h2 style="margin-top:18px">Saisie des chiffres (téléphone)</h2><div class="setopt" id="set-pad">' +
       '<button type="button" data-p="on" aria-pressed="' + (padPref === "on") + '">Pavé numérique de l\'app<small>gros chiffres, touche +/−, le clavier du téléphone ne s\'ouvre pas</small></button>' +
       '<button type="button" data-p="off" aria-pressed="' + (padPref === "off") + '">Clavier du téléphone<small>les barres du bas se cachent pendant la saisie</small></button></div>' +
-      '<p class="note">Les réponses du pas à pas restent en mémoire pour la cote en cours.</p>' + '<h2 style="margin-top:18px">Notes de version</h2><div class="notes"><b>1.3.1 (page de test)</b><ul><li>Couleurs pleines partout : plus aucune transparence dans les dessins ni les encadrés.</li><li>Bac d\'émulsion : graduations 25 / 50 / 75 sorties du bac, en gris, lisibles ; volume écrit en foncé sur le liquide.</li><li>Triangle : la valeur calculée s\'écrit aussi en orange dans les cases vides.</li><li>Émulsion, Corriger le bac : l\'app calcule à quel % d\'huile préparer l\'appoint pour remplir le bac jusqu\'en haut et arriver pile à la cible (litres d\'huile et d\'eau donnés).</li><li>Menus déroulants maison partout : la liste s\'ouvre sous la case, on touche, ça se referme (plus de fenêtre du téléphone). Traitements écrits dans leur couleur : or, argent, nickel, zinc, chrome.</li><li>Pièces 3D (Quelle forme, perçages, vis) : plus d\'ombres noires, faces internes en gris clair, la partie concernée entièrement en couleur.</li></ul><b>1.3</b><ul><li>Tolérances : roulettes Lettre et Qualité IT, grand affichage de la cote avec ses écarts, résumé et tranche ISO sur la même page.</li><li>ISO 2768 sur sa propre page.</li><li>Nouvelle page Couple de serrage (M3 à M20, 8.8 / 10.9 / 12.9).</li><li>Recherche (loupe en haut) : M8, 20 H7, 45… ouvre la bonne page déjà remplie.</li><li>Une chose par page (petits boutons en haut) dans Trigo, Taraudage, Vis et Émulsion.</li><li>Dessins qui suivent les chiffres : chanfrein, fraise à chanfreiner, filetage, profondeur de perçage, chanfrein d\'entrée, lamage, fraisure, bacs d\'émulsion.</li><li>Quelle forme : une grande pièce 3D à la fois, flèches ou glisser, avec explication.</li><li>Tolérances et ISO 2768 : une seule carte chacune, page verrouillée (rien ne défile)</li><li>Tolérances : tout sur un seul écran (milieu, écarts, ajustement, cote mesurée).</li><li>Dessins en 3D écorchés : filetage, profondeur, chanfrein d\'entrée, lamage, fraisure, chanfrein, fraise à chanfreiner.</li><li>Couple : têtes de vis seules en 3D, en grand. ISO 2768 : résultats en haut, réglages en bas, panneau d\'info.</li><li>Lamage et fraisure : vis en acier, pièce hachurée. Onglet Surépaisseur retiré.</li><li>Rangée de trous, et symbole d\'origine pièce sur les dessins de trous ; chiffres plus grands.</li><li>Retour du téléphone : revient en arrière dans l\'app, 2 appuis pour quitter. Effets d\'appui, vibration, pavé numérique animé.</li></ul><b>1.2.1</b><ul><li>Fonctionne hors ligne. Zoom limité à 2×.</li></ul></div>';
+      '<p class="note">Les réponses du pas à pas restent en mémoire pour la cote en cours.</p>' + emuSetHtml() + '<h2 style="margin-top:18px">Notes de version</h2><div class="notes"><b>1.3.1 (page de test)</b><ul><li>Couleurs pleines partout : plus aucune transparence dans les dessins ni les encadrés.</li><li>Bac d\'émulsion : graduations 25 / 50 / 75 sorties du bac, en gris, lisibles ; volume écrit en foncé sur le liquide.</li><li>Triangle : la valeur calculée s\'écrit aussi en orange dans les cases vides.</li><li>Paramètres : concentration voulue (7 %), facteur de l\'huile et bacs des machines. Émulsion : on choisit la machine et le remplissage en %, les litres sont indicatifs.</li><li>Émulsion, Corriger le bac : l\'app calcule à quel % d\'huile préparer l\'appoint pour remplir le bac jusqu\'en haut et arriver pile à la cible (litres d\'huile et d\'eau donnés).</li><li>Menus déroulants maison partout : la liste s\'ouvre sous la case, on touche, ça se referme (plus de fenêtre du téléphone). Traitements écrits dans leur couleur : or, argent, nickel, zinc, chrome.</li><li>Pièces 3D (Quelle forme, perçages, vis) : plus d\'ombres noires, faces internes en gris clair, la partie concernée entièrement en couleur.</li></ul><b>1.3</b><ul><li>Tolérances : roulettes Lettre et Qualité IT, grand affichage de la cote avec ses écarts, résumé et tranche ISO sur la même page.</li><li>ISO 2768 sur sa propre page.</li><li>Nouvelle page Couple de serrage (M3 à M20, 8.8 / 10.9 / 12.9).</li><li>Recherche (loupe en haut) : M8, 20 H7, 45… ouvre la bonne page déjà remplie.</li><li>Une chose par page (petits boutons en haut) dans Trigo, Taraudage, Vis et Émulsion.</li><li>Dessins qui suivent les chiffres : chanfrein, fraise à chanfreiner, filetage, profondeur de perçage, chanfrein d\'entrée, lamage, fraisure, bacs d\'émulsion.</li><li>Quelle forme : une grande pièce 3D à la fois, flèches ou glisser, avec explication.</li><li>Tolérances et ISO 2768 : une seule carte chacune, page verrouillée (rien ne défile)</li><li>Tolérances : tout sur un seul écran (milieu, écarts, ajustement, cote mesurée).</li><li>Dessins en 3D écorchés : filetage, profondeur, chanfrein d\'entrée, lamage, fraisure, chanfrein, fraise à chanfreiner.</li><li>Couple : têtes de vis seules en 3D, en grand. ISO 2768 : résultats en haut, réglages en bas, panneau d\'info.</li><li>Lamage et fraisure : vis en acier, pièce hachurée. Onglet Surépaisseur retiré.</li><li>Rangée de trous, et symbole d\'origine pièce sur les dessins de trous ; chiffres plus grands.</li><li>Retour du téléphone : revient en arrière dans l\'app, 2 appuis pour quitter. Effets d\'appui, vibration, pavé numérique animé.</li></ul><b>1.2.1</b><ul><li>Fonctionne hors ligne. Zoom limité à 2×.</li></ul></div>';
   }
   $("b-set").addEventListener("click", function () {
-    openTable("Paramètres", "", settingsHtml());
+    openTable("Paramètres", "", settingsHtml()); emuSetBind();
     $("set-view").querySelectorAll("button").forEach(function (b) { b.addEventListener("click", function () {
       view = b.dataset.v; store("view", view);
       $("set-view").querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
@@ -2445,7 +2495,7 @@ if (typeof module !== "undefined") module.exports = Calc;
     o.innerHTML = '<div class="big">' + box("Huile", L(r.oil), true) + box("Eau", L(r.water)) + '</div>';
   }
   ["x-v", "x-p"].forEach(function (id) { $(id).addEventListener("input", calcMix); });
-  var vMode = "L";
+  var vMode = "P";
   document.querySelectorAll("#y-vmode button").forEach(function (b) { b.addEventListener("click", function () {
     vMode = b.dataset.v;
     document.querySelectorAll("#y-vmode button").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
@@ -2467,15 +2517,15 @@ if (typeof module !== "undefined") module.exports = Calc;
     var h = '<div class="verdict ' + (r.action === "ok" ? "v-ok" : "v-reprendre") + '" style="margin-top:14px"><span class="pill">' + fmt(r.current, 1) + ' %</span><span>' +
       (!rich && !poor ? "Le bac est à la bonne concentration." : poor ? "Trop pauvre (cible " + fmt(r.target, 1) + " %)." : "Trop riche (cible " + fmt(r.target, 1) + " %).") + '</span></div>';
     if (r.action === "remplir") {
-      h += '<div class="big">' + box("Appoint à préparer", fmt(r.pct, 1) + " %", true, "d'huile dans l'eau") + box("Volume d'appoint", L(r.add), false, "pour remplir le bac") + '</div>';
-      h += '<p class="say">Prépare ' + L(r.add) + ' : <b>' + L(r.oil) + ' d\'huile</b> dans <b>' + L(r.water) + ' d\'eau</b>, puis remplis le bac jusqu\'en haut. Tu arrives à ' + fmt(r.target, 1) + ' %.</p>';
+      h += '<div class="big">' + box("Appoint à préparer", fmt(r.pct, 1) + " %", true, "d'huile dans l'eau") + box("À remplir", fmt(100 - r.volume / r.capacity * 100, 0) + " %", false, "du bac, jusqu'en haut") + '</div>';
+      h += '<p class="say">Remplis le bac jusqu\'en haut avec un mélange à <b>' + fmt(r.pct, 1) + ' %</b>. Tu arrives à ' + fmt(r.target, 1) + ' %.</p>';
+      h += '<p class="note">Indicatif : environ ' + L(r.add) + ' d\'appoint, soit ' + L(r.oil) + ' d\'huile et ' + L(r.water) + ' d\'eau.</p>';
       if (r.pct < 0.5) h += '<p class="note">L\'appoint est presque de l\'eau claire : le bac est déjà riche.</p>';
     } else if (r.action === "vider") {
       h += '<div class="alert"><b>' + (r.pct === 0 ? "Trop riche, même en remplissant à l'eau." : "Trop pauvre, même en remplissant à l'huile pure.") + '</b> Vide d\'abord ' + L(r.drain) + ', puis remplis avec ' + L(r.add) + ' ' + (r.pct === 0 ? "d'eau" : "d'huile pure") + '.</div>';
     } else if (r.action === "plein") {
       h += '<div class="alert"><b>Le bac est plein.</b> Pour corriger, vide d\'abord une partie (par exemple 20 %), puis refais le calcul.</div>';
     }
-    if (vMode === "P") h += '<p class="note">Volume estimé dans le bac : ' + L(q.vol) + ' (' + fmt(num($("y-pct").value), 0) + ' % de ' + L(q.cap) + ').</p>';
     o.innerHTML = h;
   }
   ["y-v", "y-pct", "y-cap", "y-b", "y-f", "y-t"].forEach(function (id) { $(id).addEventListener("input", calcTank); });
@@ -3269,7 +3319,7 @@ if (typeof module !== "undefined") module.exports = Calc;
     b += '<rect x="' + gx + '" y="50" width="' + (X(r.current) - gx).toFixed(1) + '" height="16" rx="8" fill="' + (okc ? "var(--ok)" : "var(--warn)") + '"/>';
     b += '<path d="M' + X(r.target).toFixed(1) + ' 44V72" stroke="var(--ok)" stroke-width="3"/>';
     b += tx(gx, 90, "actuel " + f2(r.current, 1) + " %", okc ? "var(--ok)" : "var(--warn)", "start") + tx(gx, 110, "visé " + f2(r.target, 1) + " %", "var(--ok)", "start");
-    if (r.action === "remplir") { b += tx(gx, 140, "appoint à", "var(--fg)", "start") + tx(gx, 162, f2(r.pct, 1) + " %", "#e9d58c", "start"); b += tx(gx, 186, f2(r.oil, 1) + " L d'huile", "var(--c5)", "start"); }
+    if (r.action === "remplir") { b += tx(gx, 140, "appoint à", "var(--fg)", "start") + tx(gx, 164, f2(r.pct, 1) + " %", "#e9d58c", "start"); }
     else if (r.action === "vider") b += tx(gx, 150, "vider " + f2(r.drain, 1) + " L", "var(--bad)", "start");
     else if (r.action === "plein") b += tx(gx, 150, "bac plein", "var(--bad)", "start");
     else b += tx(gx, 150, "✓ rien à faire", "var(--fg)", "start");
@@ -3664,6 +3714,9 @@ if (typeof module !== "undefined") module.exports = Calc;
   /* Démarrage avec un exemple */
   applyMode(corrMode); renderWiz(); applyPad(); buildLetters(); buildGrades(); calcIso(); calc2768();
   var tt = load("thrType"); if (tt && seriesList(tt).length) $("f-type").value = tt;
+  $("y-mach").addEventListener("change", function () { EMU.m = Number(this.value) || 0; saveEmu(); applyEmu(); });
+  $("x-p").addEventListener("input", function () { store("x-p-touched", "1"); });
+  applyEmu();
   fillSizes(); calcChc(); calcFhc(); calcSur(); calcTri(); calcCham(); calcMill(); calcBolt(); calcMix(); calcTank(); calcRow(); calcTq(); findRun();
   var lastTab = load("tab"); if (lastTab && $("p-" + lastTab)) showTab(lastTab, true); else showTab("corr", true); drumsTo(false);
 })();
