@@ -2,7 +2,7 @@
 // Tout est gardé dans le téléphone dès la première ouverture : page, icônes, polices.
 // La page : réseau d'abord (nouvelle version au lancement suivant), mais si le réseau ne répond pas
 // en 4 s, la copie du téléphone s'ouvre tout de suite (mode avion, réseau faible).
-const CACHE = "planning-horaire-v2.3";
+const CACHE = "planning-horaire-v2.4";
 const PREFIX = "planning-horaire-";
 const CORE = ["./index.html", "./planning-horaire.html", "./manifest.json", "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png", "./fonts/fonts.css", "./fonts/Inter-latin-ext-cf3eb50f.woff2", "./fonts/Inter-latin-f11d729b.woff2"];
 const TIMEOUT = 4000;

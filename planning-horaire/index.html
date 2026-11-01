@@ -449,6 +449,39 @@ header.top{flex:none}
 #rail #fab.on{background:var(--acc);color:var(--on-acc)}
 :root[data-rail="b"] #rail .tbox{flex-direction:row}
 :root[data-rail="b"] #rail .rsep{width:2px;height:22px}
+/* v2.4 : timeline des changements dans la barre (entre ⚙ et ⏱) + mini semaine (entre ⏱ et les onglets) */
+#rail .sp{position:relative;min-height:0;align-self:stretch;display:flex;flex-direction:column;align-items:center;overflow:hidden}
+#rail .tl{display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;padding:6px 0 4px;width:100%}
+#rail .tl-all{width:30px;height:30px;border-radius:10px;opacity:.75;flex:none}
+#rail .tl-all .ico{width:17px;height:17px}
+#rail .tl-col{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:0;min-height:0;width:100%}
+#rail .tl-col::before{content:"";position:absolute;top:2px;bottom:11px;left:50%;width:2px;margin-left:-1px;border-radius:1px;background:var(--rail-fg);opacity:.18}
+#rail .tl-more{display:block;width:2px;flex:1;min-height:8px;background:repeating-linear-gradient(var(--rail-fg) 0 2px,transparent 2px 5px);opacity:.3}
+#rail button.tl-d{position:relative;width:34px;height:22px;border-radius:8px;flex:none;padding:0}
+#rail button.tl-d::after{content:"";width:9px;height:9px;border-radius:50%;background:var(--c);opacity:.8;box-shadow:0 0 0 2px var(--rail)}
+#rail button.tl-d.bk::after{border-radius:2px;transform:rotate(45deg)}
+#rail button.tl-d.now::after{width:12px;height:12px;opacity:1;background:var(--rail);box-shadow:0 0 0 2px var(--rail),inset 0 0 0 3px var(--c)}
+#rail button.tl-d:active::after{transform:scale(1.4)}
+#rail .wmini{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;width:48px;height:100%;padding:6px 0;border-radius:12px;cursor:pointer;color:var(--rail-fg);font:inherit;background:none;border:0}
+#rail .wmini i{display:block;width:8px;height:8px;border-radius:50%;background:var(--rail-fg);opacity:.22}
+#rail .wmini i.ok{background:var(--acc);opacity:1}
+#rail .wmini i.td{background:none;opacity:1;box-shadow:inset 0 0 0 2px var(--acc)}
+#rail .wmini b{font-size:10px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em;margin-top:2px;opacity:.9}
+#rail .wmini b.pos{color:#a9dc8a}#rail .wmini b.neg{color:#f0a493}
+/* panneaux de l'historique */
+.hlist{padding:4px 10px}
+.hday{font-size:12px;font-weight:800;color:var(--mut);margin:10px 2px 2px;text-transform:uppercase;letter-spacing:.04em}
+.hrow{display:flex;align-items:center;gap:9px;width:100%;padding:10px 4px;border:0;border-bottom:1px solid var(--line);background:none;color:var(--fg);font:inherit;font-size:14px;text-align:left;cursor:pointer;border-radius:8px}
+.hrow.cur{background:var(--soft)}
+.hrow .ht{font-variant-numeric:tabular-nums;font-weight:700;color:var(--mut);flex:none}
+.hrow .hl{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hnow{font-size:11px;color:var(--accS);flex:none}
+.hdot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--c);flex:none;vertical-align:middle;margin-right:2px}
+.hleg{display:flex;flex-wrap:wrap;gap:6px 14px;margin:10px 2px;font-size:12px;color:var(--mut)}
+.hk{font-size:13px;font-weight:700;color:var(--mut)}
+.hx{margin:8px 0 0;padding-left:20px;font-size:15px;line-height:1.5}
+.hconf{border:1.5px solid var(--lunch)}
+.btn:disabled{opacity:.4;cursor:default}
 header.top{margin-bottom:8px}
 #sheet{scrollbar-width:none;overscroll-behavior:none}
 </style>
@@ -661,7 +694,7 @@ const Sauvegarde = (() => {
    - Report des heures (⏱) : tout vendredi, jour suivant, étalé, ou Perso (cases). Semaine = graphe en barres pour les exceptions.
    - Historique éditable : une correction recalcule le pot des semaines suivantes. */
 
-var APP_VERSION = "2.3", APP_DATE = "01.11.2026";
+var APP_VERSION = "2.4", APP_DATE = "01.11.2026";
 var KEY = "planning-horaire-v3";
 var DAYS = ["lundi","mardi","mercredi","jeudi","vendredi"];
 var SH = {lundi:"Lun",mardi:"Mar",mercredi:"Mer",jeudi:"Jeu",vendredi:"Ven"};
@@ -693,7 +726,8 @@ function weekNum(d){ var x=dayStart(d); x.setDate(x.getDate()+3-((x.getDay()+6)%
 function nowMin(){ var n=new Date(); return n.getHours()*60+n.getMinutes(); }
 function clone(o){ return JSON.parse(JSON.stringify(o)); }
 function ls(k,def){ try{ var v=localStorage.getItem(k); return v==null?def:v; }catch(e){ return def; } }
-function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+var HIST_PREFS={"ph-theme":1,"ph-rail":1,"ph-ricons":1,"ph-order":1,"ph-betn":1,"ph-betd":1,"ph-idle":1,"ph-show":1};
+function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} if(HIST_PREFS[k]&&typeof Hist!=="undefined") Hist.ping(); }
 var toastT;
 function toast(t){ var m=$(".toast"); if(!m){ m=el("div","toast"); document.body.appendChild(m); } m.textContent=t; m.classList.add("on"); clearTimeout(toastT); toastT=setTimeout(function(){ m.classList.remove("on"); },2600); }
 
@@ -757,7 +791,7 @@ function migrate(d){
 }
 function load(){ try{ var r=localStorage.getItem(KEY); if(r) return migrate(JSON.parse(r)); }catch(e){} return defState(); }
 var S = load();
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ toast("Mémoire du téléphone pleine : pas enregistré"); } }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ toast("Mémoire du téléphone pleine : pas enregistré"); } if(typeof Hist!=="undefined") Hist.ping(); }
 
 // ---------- calculs d'une journée ----------
 function ref(day){ return day==="vendredi" ? S.settings.friday : S.settings.weekday; }
@@ -903,6 +937,8 @@ function buildRail(){
   var sp1=el("div","sp"), sp2=el("div","sp"), tb=el("div","tbox");
   tb.appendChild(el("i","rsep")); if(fab) tb.appendChild(fab); tb.appendChild(el("i","rsep"));
   r.appendChild(sp1); r.appendChild(tb); r.appendChild(sp2);
+  // v2.4 : timeline des changements (entre ⚙ et ⏱) et mini semaine (entre ⏱ et les onglets)
+  if(H.rail!=="b"){ Hist.mount(sp1); var wm=el("button","wmini"); wm.setAttribute("aria-label","Ma semaine"); wm.onclick=function(){ go("week"); }; sp2.appendChild(wm); }
   tabOrder().forEach(function(t){ var b=el("button",null,ic(TABS[t].i)); b.dataset.t=t; b.setAttribute("aria-label",TABS[t].t); r.appendChild(b); });
   r.querySelectorAll("button[data-t]").forEach(function(b){ b.onclick=function(){ go(b.dataset.t); }; });
   var tabs=r.querySelectorAll("button[data-t]:not(.set)");
@@ -926,8 +962,13 @@ function render(){
   else if(tab==="pot"){ title.textContent="Pot & historique"; sub.textContent=""; renderPot(v); }
   else { title.textContent="Paramètres"; sub.textContent="de l'app"; renderSettings(v); }
   $("#fab").classList.toggle("on", !!sheets.length && sheets[sheets.length-1].type==="time");
-  renderRemind();
+  drawWeekMini(); renderRemind();
 }
+// v2.4 : mini semaine dans la barre (5 points Lun→Ven + solde)
+function drawWeekMini(){ var wm=$("#rail .wmini"); if(!wm) return; var W=computeWeek(), h="";
+  DAYS.forEach(function(x){ var c=W[x]; h+='<i class="'+(c.done?"ok":c.today?"td":"")+'"></i>'; });
+  wm.innerHTML=h+'<b class="'+cls(W.solde)+'">'+fsign(W.solde)+'</b>';
+  requestAnimationFrame(function(){ wm.style.visibility=wm.parentNode&&wm.parentNode.clientHeight<96?"hidden":""; }); }
 
 // ----- Aujourd'hui -----
 function renderToday(v){
@@ -1530,6 +1571,11 @@ function renderSettings(v){
   v.appendChild(a);
 
 
+  v.appendChild(el("div","sec","Historique des changements"));
+  var hc=el("div","card stack"), hb2=el("button","btn",ic("arrow-counter-clockwise")+" Voir l'historique · revenir en arrière ("+Hist.entries().length+")"); hb2.onclick=function(){ pushSheet({type:"hist"}); }; hc.appendChild(hb2);
+  hc.appendChild(el("div","small","Chaque changement (heures, semaines, pot, réglages, affichage) est noté. La petite timeline de la barre montre les derniers : touche un point pour voir ce qui a changé et revenir à cet état. Un retour s'annule aussi."));
+  v.appendChild(hc);
+
   v.appendChild(el("div","sec","Magie"));
   var mg=el("div","card stack"), bc=Bet.cfg();
   mg.appendChild(segRow("Bêtises par jour",[["0","Aucune"],["1","1"],["3","3"],["5","5"],["10","10"]],String(bc.n),function(x){ lsSet("ph-betn",x); render(); }));
@@ -1573,7 +1619,11 @@ function renderBets(sh){
 function renderAbout(sh){
   sh.appendChild(sheetHead("Quoi de neuf"));
   var n=el("div","notes");
-  n.innerHTML='<h3>v2.3 · 01.11.2026</h3><ul>'+
+  n.innerHTML='<h3>v2.4 · 01.11.2026</h3><ul>'+
+    '<li><b>Historique des changements</b> : tout ce qui change (heures, semaines, pot, réglages, affichage) est noté. Dans la barre, entre ⚙ et ⏱, une petite timeline montre les derniers changements ; touche un point pour voir ce qui a changé et « Revenir à cet état ». Le retour s\'ajoute lui-même à l\'historique : il s\'annule d\'un toucher.</li>'+
+    '<li><b>Mini semaine</b> dans la barre, entre ⏱ et les onglets : un point par jour (plein = fait, cerclé = aujourd\'hui) et le solde de la semaine. Touche-la pour aller à la Semaine.</li>'+
+    '<li>L\'historique part aussi dans la sauvegarde Drive, avec les réglages.</li>'+
+    '</ul><h3>v2.3 · 01.11.2026</h3><ul>'+
     '<li><b>Supprimer une semaine</b> de l\'historique : onglet Pot, touche la semaine puis « Supprimer cette semaine » ; une confirmation montre l\'effet sur le pot avant de supprimer.</li>'+
     '<li><b>Jour qui se referme</b> : dans la bande du haut, touche un jour pour l\'ouvrir, touche-le encore pour le refermer.</li>'+
     '</ul><h3>v2.2 · 29.10.2026</h3><ul>'+
@@ -1615,6 +1665,8 @@ function redrawSheet(){
   else if(top.type==="hweek") renderHistWeek(sh,top.i);
   else if(top.type==="hday") renderHistDay(sh,top.i,top.day);
   else if(top.type==="hdel") renderHistDelete(sh,top.i);
+  else if(top.type==="hist") Hist.renderList(sh);
+  else if(top.type==="hstate") Hist.renderState(sh,top.i);
   else if(top.type==="about") renderAbout(sh);
   else if(top.type==="zoom") renderZoom(sh,top);
   else if(top.type==="bets") renderBets(sh);
@@ -1698,15 +1750,196 @@ function renderRemind(){
   setInterval(cwSync,700); // un panneau fermé autrement (bouton, toucher) libère son CloseWatcher
 })();
 
+// réglages d'affichage (dans la sauvegarde et dans l'historique ; sans la vue liste/barres pour l'historique)
+function prefsNow(noView){ var p={theme:H.phTheme,rail:H.rail,ricons:H.ricons,order:tabOrder().join(","),betn:ls("ph-betn","3"),betd:ls("ph-betd","0"),idle:ls("ph-idle","5"),show:ls("ph-show","20")}; if(!noView) p.wview=weekView; return p; }
+function applyPrefs(pf){ [["phTheme","theme","ph-theme"],["rail","rail","ph-rail"],["ricons","ricons","ph-ricons"]].forEach(function(x){ if(pf[x[1]]){ H[x[0]]=pf[x[1]]; lsSet(x[2],pf[x[1]]); } });
+  if(pf.order) lsSet("ph-order",pf.order); if(pf.betn!=null) lsSet("ph-betn",pf.betn); if(pf.betd!=null) lsSet("ph-betd",pf.betd); if(pf.idle!=null) lsSet("ph-idle",pf.idle); if(pf.show!=null) lsSet("ph-show",pf.show); if(pf.wview){ weekView=pf.wview; lsSet("ph-wview",pf.wview); } buildRail(); }
+
+// ---------- v2.4 : historique des changements (timeline dans la barre, retour à un état) ----------
+// Chaque changement (heures, semaines, pot, réglages, affichage) garde une photo complète de l'app.
+// Une photo = données + réglages d'affichage. On peut revenir à n'importe quelle photo ; le retour
+// s'ajoute lui-même à l'historique, donc il s'annule aussi. Les semaines clôturées ne sont gardées
+// qu'une fois tant qu'elles ne changent pas (h:0 = « comme la photo d'avant »).
+var Hist=(function(){
+  var K=KEY+"-retour", MAXN=80, MAXC=1500000, MERGE=15000;
+  var E=[], lastD=null, lastH=null, timer=0, next=null, ready=false;
+  var KIND={jour:["Heures","var(--acc)"],sem:["Semaines","#7fa7c9"],reg:["Réglages","var(--lunch)"],pot:["Pot","#d68aa6"],aff:["Affichage","var(--abs)"],back:["Retour","#e0b44c"],start:["Début","var(--rail-fg)"]};
+  function load(){ try{ var a=JSON.parse(localStorage.getItem(K)||"[]"); if(Array.isArray(a)) E=a.filter(function(e){ return e&&e.t&&typeof e.d==="string"; }); }catch(e){ E=[]; }
+    if(E.length&&E[0].h===0) E=[]; }
+  function store(){ for(;;){ var s=JSON.stringify(E); if((E.length<=MAXN&&s.length<=MAXC)||E.length<3){ try{ localStorage.setItem(K,s); return; }catch(e){ if(E.length<3) return; } } drop(); } }
+  function drop(){ if(E.length>1&&E[1].h===0) E[1].h=E[0].h; E.shift(); }
+  function hOf(i){ for(var j=i;j>=0;j--) if(E[j].h!==0) return E[j].h; return "[]"; }
+  function full(i){ var o=JSON.parse(E[i].d); o.d.history=JSON.parse(hOf(i)); return o; }
+  function cur(){ var d=clone(S), h=JSON.stringify(d.history); delete d.history; return {d:JSON.stringify({d:d,p:prefsNow(true)}),h:h}; }
+
+  // ----- ce qui a changé, en mots -----
+  var FD={arrival:"arrivée",lunchStart:"début du midi",lunchEnd:"fin du midi",departure:"départ",skipM:"pause du matin",skipA:"pause de l'après-midi",absMin:"absence",noLunch:"midi",apero:"apéro"};
+  function fv(f,v){ if(f==="skipM"||f==="skipA") return v?"sautée":"prise"; if(f==="noLunch") return v?"aucun":"normal";
+    if(f==="absMin"||f==="apero") return v?fdur(v):"aucun"; return v?fh(toMin(v)):"—"; }
+  function dayLines(pre,a,b,out){ a=a||{}; b=b||{}; var n=0;
+    Object.keys(FD).forEach(function(f){ var x=a[f]||null, y=b[f]||null; if(f==="skipM"||f==="skipA"||f==="noLunch"){ x=!!a[f]; y=!!b[f]; } if(f==="absMin"||f==="apero"){ x=+a[f]||0; y=+b[f]||0; }
+      if(x!==y){ out.push(pre+FD[f]+" "+fv(f,x)+" → "+fv(f,y)); n++; } });
+    if(!n && !!a.touched!==!!b.touched) out.push(pre+(b.touched?"journée comptée":"journée remise à vide"));
+  }
+  var PN={theme:["Thème",{auto:"auto",clair:"clair",fonce:"foncé"}],rail:["Barre d'icônes",{g:"à gauche",d:"à droite",b:"en bas"}],ricons:["Icônes de la barre",{h:"en haut",b:"en bas"}],order:["Ordre des onglets"],betn:["Bêtises par jour"],betd:["Bêtises discrètes",{"0":"non","1":"oui"}],idle:["Page vivante"],show:["La page fait sa vie"]};
+  function describe(A,B){
+    var L=[], k=null, a=A.d, b=B.d;
+    function add(kind,t){ if(!k) k=kind; L.push(t); }
+    // semaine en cours
+    if(a.currentWeek.start!==b.currentWeek.start) add("sem","Nouvelle semaine (sem. "+weekNum(fromIso(b.currentWeek.start))+")");
+    else { DAYS.forEach(function(x){ var o=[]; dayLines(SH[x]+" · ",a.currentWeek.days[x],b.currentWeek.days[x],o); o.forEach(function(t){ add("jour",t); }); });
+      if(JSON.stringify(a.currentWeek.adj||{})!==JSON.stringify(b.currentWeek.adj||{})) add("jour","Report d'heures déplacé entre les jours"); }
+    // semaines clôturées
+    var ha=a.history||[], hb=b.history||[], sa={}, sb={};
+    ha.forEach(function(h){ sa[h.start]=h; }); hb.forEach(function(h){ sb[h.start]=h; });
+    hb.forEach(function(h){ if(!sa[h.start]) add("sem","Semaine "+h.week+" clôturée"); });
+    ha.forEach(function(h){ if(!sb[h.start]) add("sem","Semaine "+h.week+" supprimée"); });
+    hb.forEach(function(h){ var o=sa[h.start]; if(!o) return; var t=[]; DAYS.forEach(function(x){ dayLines("Sem. "+h.week+" · "+SH[x]+" · ",o.days[x],h.days[x],t); });
+      t.forEach(function(s){ add("sem",s); }); });
+    // réglages horaires
+    [["weekday","lun-jeu"],["friday","ven"]].forEach(function(p){ var x=a.settings[p[0]], y=b.settings[p[0]];
+      if(x.refMin!==y.refMin) add("reg","Référence "+p[1]+" "+fdur(x.refMin)+" → "+fdur(y.refMin));
+      [["arrival","arrivée habituelle"],["lunchStart","début du midi"],["lunchEnd","fin du midi"]].forEach(function(f){ if(x[f[0]]!==y[f[0]]) add("reg",f[1].charAt(0).toUpperCase()+f[1].slice(1)+" "+p[1]+" "+fv("x",x[f[0]])+" → "+fv("x",y[f[0]])); }); });
+    [["morning","Pause du matin"],["afternoon","Pause de l'après-midi"]].forEach(function(f){ if(a.settings.breaks[f[0]]!==b.settings.breaks[f[0]]) add("reg",f[1]+" "+fv("x",a.settings.breaks[f[0]])+" → "+fv("x",b.settings.breaks[f[0]])); });
+    var mn=function(m){ var r=MODES.filter(function(x){ return x[0]===m; })[0]; return r?r[1]:m; };
+    if(a.report.mode!==b.report.mode) add("reg","Report : "+mn(a.report.mode)+" → "+mn(b.report.mode));
+    if(!!a.report.allFriday!==!!b.report.allFriday) add("reg","Tout sur vendredi : "+(b.report.allFriday?"oui":"non"));
+    if(!!a.report.bars!==!!b.report.bars) add("aff","Semaine en "+(b.report.bars?"barres":"liste"));
+    if(JSON.stringify(a.report.perso)!==JSON.stringify(b.report.perso)) add("reg","Report Perso modifié");
+    // pot
+    if(a.pot.spreadWeeks!==b.pot.spreadWeeks) add("pot","Pot étalé sur "+b.pot.spreadWeeks+" semaine"+(b.pot.spreadWeeks>1?"s":"")+" (avant "+a.pot.spreadWeeks+")");
+    if((a.pot.manualMin||0)!==(b.pot.manualMin||0)) add("pot","Correction du pot "+fhm(a.pot.manualMin||0)+" → "+fhm(b.pot.manualMin||0));
+    // rappel
+    var ra=a.remind||{}, rb=b.remind||{};
+    if(!!ra.on!==!!rb.on) add("reg","Rappel de sauvegarde "+(rb.on?"activé":"coupé"));
+    if(ra.freq!==rb.freq) add("reg","Fréquence du rappel changée");
+    if(ra.hour!==rb.hour) add("reg","Heure du rappel "+fv("x",ra.hour)+" → "+fv("x",rb.hour));
+    if(ra.snooze!==rb.snooze && rb.snooze) add("reg","Rappel remis à plus tard");
+    // affichage
+    Object.keys(PN).forEach(function(f){ var x=A.p[f], y=B.p[f]; if(x===y) return; var m=PN[f][1];
+      add("aff",f==="order"?"Ordre des onglets changé":PN[f][0]+" : "+(m&&m[x]||x)+" → "+(m&&m[y]||y)); });
+    if(!L.length && a.pot.totalMin!==b.pot.totalMin) add("pot","Pot recalculé "+fhm(a.pot.totalMin)+" → "+fhm(b.pot.totalMin));
+    if(!L.length) add("reg","Petit changement");
+    return {k:k,x:L};
+  }
+
+  // ----- enregistrer -----
+  function ping(){ if(!ready) return; clearTimeout(timer); timer=setTimeout(rec,600); }
+  function rec(){ clearTimeout(timer); var c=cur(); if(c.d===lastD && c.h===lastH){ next=null; return; }
+    var now=Date.now(), nw={d:JSON.parse(c.d).d,p:JSON.parse(c.d).p}; nw.d.history=JSON.parse(c.h);
+    var force=next; next=null;
+    var last=E[E.length-1], merge=false;
+    var info=null;
+    if(!force && last && last.k!=="back" && last.k!=="start" && E.length>1 && now-last.t<MERGE){
+      var prev=full(E.length-2); var inf2=describe(prev,nw);
+      var oldInf={k:last.k,x:last.x||[]};
+      if(inf2.k===oldInf.k && sameKey(inf2.x,oldInf.x)){ merge=true; info=inf2; }
+    }
+    if(!info) info=describe(last?full(E.length-1):nw,nw);
+    if(force){ info.k=force.k; info.x=[force.t].concat(info.x).slice(0,12); }
+    var hPrev=merge?hOf(E.length-2):(last?hOf(E.length-1):null);
+    var ent={t:now,k:info.k,x:info.x.slice(0,12),d:c.d,h:(hPrev===c.h?0:c.h)};
+    if(merge) E[E.length-1]=ent; else E.push(ent);
+    lastD=c.d; lastH=c.h; store(); draw();
+  }
+  function stem(t){ return t.split(" → ")[0]; }
+  function sameKey(a,b){ if(!a.length||!b.length) return false; var sa=a.map(stem).sort().join("|"), sb=b.map(stem).sort().join("|"); return sa===sb; }
+
+  // ----- revenir à un état -----
+  function restore(i){ var o=full(i), when=hhmm(E[i].t);
+    next={k:"back",t:"Retour à l'état de "+when+(dayLbl(E[i].t)!=="Aujourd'hui"?" ("+dayLbl(E[i].t).toLowerCase()+")":"")};
+    S=migrate(o.d); applyPrefs(o.p); tick(); save(); rec();
+    sheets=[]; redrawSheet(); buildRail(); render(); toast("Revenu à l'état de "+when);
+  }
+  function hhmm(t){ var d=new Date(t); return p2(d.getHours())+":"+p2(d.getMinutes()); }
+  function dayLbl(t){ var d=dayStart(new Date(t)), n=dayStart(new Date()), k=Math.round((n-d)/864e5);
+    return k===0?"Aujourd'hui":k===1?"Hier":["Dim","Lun","Mar","Mer","Jeu","Ven","Sam"][d.getDay()]+" "+dmy(d); }
+
+  // ----- timeline dans la barre -----
+  var box=null;
+  function mount(sp){ box=el("div","tl"); sp.appendChild(box); draw(); }
+  function draw(){ if(!box||!box.isConnected) return; requestAnimationFrame(function(){
+    var hgt=box.parentNode.clientHeight; box.innerHTML="";
+    var n=Math.max(0,Math.min(E.length,Math.floor((hgt-38)/22)));
+    if(hgt<70){ box.style.display="none"; return; } box.style.display="";
+    var top=el("button","tl-all",ic("arrow-counter-clockwise")); top.setAttribute("aria-label","Historique des changements"); top.onclick=function(){ pushSheet({type:"hist"}); }; box.appendChild(top);
+    var col=el("div","tl-col"); box.appendChild(col);
+    for(var i=E.length-n;i<E.length;i++){ (function(i){ var e=E[i], cur=i===E.length-1;
+      var d=el("button","tl-d"+(cur?" now":"")+(e.k==="back"?" bk":"")); d.style.setProperty("--c",(KIND[e.k]||KIND.reg)[1]);
+      d.setAttribute("aria-label",(cur?"Maintenant · ":"")+hhmm(e.t)+" · "+(e.x&&e.x[0]||""));
+      d.onclick=function(){ pushSheet({type:"hstate",i:i}); }; col.appendChild(d); })(i); }
+    if(E.length>n && n>0) col.insertBefore(el("i","tl-more"),col.firstChild);
+  }); }
+
+  // ----- panneaux -----
+  function rowHtml(e,i){ var c=(KIND[e.k]||KIND.reg); var x=e.x||[];
+    return '<i class="hdot" style="--c:'+c[1]+'"></i><span class="ht">'+hhmm(e.t)+'</span><span class="hl">'+esc(x[0]||"")+(x.length>1?' <small class="muted">+'+(x.length-1)+'</small>':'')+'</span>'+(i===E.length-1?'<b class="hnow">maintenant</b>':''); }
+  function renderList(sh){
+    sh.appendChild(sheetHead(ic("arrow-counter-clockwise")+" Historique des changements"));
+    sh.appendChild(el("div","small","Tout ce qui a changé, le plus récent en haut. Touche une ligne pour voir le détail et revenir à cet état."));
+    var c=el("div","card hlist"), lastDay=null;
+    for(var i=E.length-1;i>=0;i--){ (function(i){ var e=E[i], dl=dayLbl(e.t);
+      if(dl!==lastDay){ c.appendChild(el("div","hday",dl)); lastDay=dl; }
+      var r=el("button","hrow"+(i===E.length-1?" cur":""),rowHtml(e,i)); r.onclick=function(){ pushSheet({type:"hstate",i:i}); }; c.appendChild(r); })(i); }
+    if(!E.length) c.appendChild(el("div","small","Rien pour l'instant."));
+    sh.appendChild(c);
+    var lg=el("div","hleg"); Object.keys(KIND).forEach(function(k){ if(k==="start") return; lg.appendChild(el("span",null,'<i class="hdot" style="--c:'+KIND[k][1]+'"></i>'+KIND[k][0])); }); sh.appendChild(lg);
+    sh.appendChild(el("div","small","On garde les "+MAXN+" derniers changements. Ils partent aussi dans la sauvegarde Drive."));
+  }
+  function renderState(sh,i,ask){
+    var e=E[i]; if(!e){ closeSheet(); return; }
+    var isNow=i===E.length-1, after=E.length-1-i;
+    sh.appendChild(sheetHead((isNow?"Maintenant":"État de "+hhmm(e.t))+' <small class="muted">· '+dayLbl(e.t)+'</small>'));
+    var c=el("div","card"); var x=e.x||[];
+    c.appendChild(el("div","hk",'<i class="hdot" style="--c:'+(KIND[e.k]||KIND.reg)[1]+'"></i>'+(KIND[e.k]||KIND.reg)[0]+' · ce qui a changé à '+hhmm(e.t)));
+    var ul=el("ul","hx"); x.forEach(function(t){ ul.appendChild(el("li",null,esc(t))); }); c.appendChild(ul);
+    sh.appendChild(c);
+    // petit résumé de cet état
+    try{ var o=full(i).d, pot=o.pot.totalMin, nj=DAYS.filter(function(d){ var z=o.currentWeek.days[d]; return z&&z.arrival; }).length;
+      var sm=el("div","card"); sm.innerHTML='<div class="row"><span>Dans cet état</span><b></b></div><div class="row" style="margin-top:6px"><span>Pot</span><b class="'+cls(pot)+'">'+fhm(pot)+'</b></div><div class="row" style="margin-top:6px"><span>Jours pointés (sem. '+weekNum(fromIso(o.currentWeek.start))+')</span><b>'+nj+'</b></div><div class="row" style="margin-top:6px"><span>Semaines gardées</span><b>'+o.history.length+'</b></div>';
+      sh.appendChild(sm); }catch(err){}
+    var nav=el("div","row"); nav.style.cssText="margin-top:12px;gap:10px";
+    var pv=el("button","btn ghost","‹ Avant"); pv.style.flex="1"; pv.disabled=i===0; pv.onclick=function(){ sheets[sheets.length-1].i=i-1; redrawSheet(); };
+    var nx=el("button","btn ghost","Après ›"); nx.style.flex="1"; nx.disabled=isNow; nx.onclick=function(){ sheets[sheets.length-1].i=i+1; redrawSheet(); };
+    nav.appendChild(pv); nav.appendChild(nx); sh.appendChild(nav);
+    if(isNow){ sh.appendChild(el("div","small","C'est l'état actuel de l'app. Choisis un point plus haut dans la timeline pour revenir en arrière.")); }
+    else if(!sheets[sheets.length-1].ask){
+      var go2=el("button","btn",ic("arrow-counter-clockwise")+" Revenir à cet état"); go2.style.cssText="width:100%;margin-top:12px";
+      go2.onclick=function(){ sheets[sheets.length-1].ask=true; redrawSheet(); }; sh.appendChild(go2);
+    } else {
+      var cf=el("div","card hconf"); cf.innerHTML='<b>Revenir à '+hhmm(e.t)+' ?</b><div class="small">Les '+after+' changement'+(after>1?"s":"")+' faits après seront défaits. Pas de panique : ce retour s\'ajoute à l\'historique, tu peux revenir à « maintenant » d\'un toucher.</div>';
+      var rw=el("div","row"); rw.style.cssText="margin-top:12px;gap:10px";
+      var no=el("button","btn ghost","Annuler"); no.style.flex="1"; no.onclick=function(){ sheets[sheets.length-1].ask=false; redrawSheet(); };
+      var yes=el("button","btn",ic("arrow-counter-clockwise")+" Oui, revenir"); yes.style.flex="1"; yes.onclick=function(){ restore(i); };
+      rw.appendChild(no); rw.appendChild(yes); cf.appendChild(rw); sh.appendChild(cf);
+    }
+    var all=el("button","btn ghost",ic("list-bullets")+" Tout l'historique"); all.style.cssText="width:100%;margin-top:10px";
+    all.onclick=function(){ pushSheet({type:"hist"}); }; sh.appendChild(all);
+  }
+
+  // ----- démarrage -----
+  function start(){ load(); var c=cur();
+    if(E.length){ var l=E.length-1; lastD=E[l].d; lastH=hOf(l); }
+    ready=true;
+    if(!E.length){ E.push({t:Date.now(),k:"start",x:["Début de l'historique"],d:c.d,h:c.h}); lastD=c.d; lastH=c.h; store(); }
+    else rec();
+  }
+  // sauvegarde Drive : l'historique part avec ; à la restauration on le reprend seulement si celui du téléphone est vide
+  function exportLog(){ return E.slice(); }
+  function importLog(a,label){ if(Array.isArray(a)&&a.length&&E.length<=1){ E=a.filter(function(e){ return e&&e.t&&typeof e.d==="string"; }); if(E.length&&E[0].h===0) E=[]; if(E.length){ var l=E.length-1; lastD=E[l].d; lastH=hOf(l); } }
+    next={k:"back",t:label}; }
+  return {start:start,ping:ping,rec:rec,mount:mount,draw:draw,renderList:renderList,renderState:renderState,restore:restore,exportLog:exportLog,importLog:importLog,entries:function(){ return E; },full:full};
+})();
+
 // ---------- sauvegarde Drive (bloc commun SAUVEGARDE ATELIER) ----------
 var SV_CFG={
   app:"PlanningHoraire", nom:"Planning Horaire", cle:KEY, version:APP_VERSION,
   // les réglages d'affichage (thème, barre, ordre…) partent aussi dans la sauvegarde
-  lire:function(){ var d=clone(S); d.prefs={theme:H.phTheme,rail:H.rail,ricons:H.ricons,order:tabOrder().join(","),wview:weekView,betn:ls("ph-betn","3"),betd:ls("ph-betd","0"),idle:ls("ph-idle","5"),show:ls("ph-show","20")}; return d; },
-  ecrire:function(d){ var pf=d&&d.prefs; if(d) delete d.prefs; S=migrate(d);
-    if(pf){ [["phTheme","theme","ph-theme"],["rail","rail","ph-rail"],["ricons","ricons","ph-ricons"]].forEach(function(x){ if(pf[x[1]]){ H[x[0]]=pf[x[1]]; lsSet(x[2],pf[x[1]]); } });
-      if(pf.order) lsSet("ph-order",pf.order); if(pf.betn!=null) lsSet("ph-betn",pf.betn); if(pf.betd!=null) lsSet("ph-betd",pf.betd); if(pf.idle!=null) lsSet("ph-idle",pf.idle); if(pf.show!=null) lsSet("ph-show",pf.show); if(pf.wview){ weekView=pf.wview; lsSet("ph-wview",pf.wview); } buildRail(); }
-    tick(); save(); sheets=[]; redrawSheet(); render(); },
+  // v2.4 : l'historique des changements (timeline) part aussi dans la sauvegarde
+  lire:function(){ var d=clone(S); d.prefs=prefsNow(); d.retour=Hist.exportLog(); return d; },
+  ecrire:function(d){ var pf=d&&d.prefs, rt=d&&d.retour; if(d){ delete d.prefs; delete d.retour; } Hist.importLog(rt,"Sauvegarde restaurée"); S=migrate(d);
+    if(pf) applyPrefs(pf);
+    tick(); save(); Hist.rec(); sheets=[]; redrawSheet(); render(); },
   resume:function(d){
     var n=(d.history||[]).length, cw=d.currentWeek||{}, days=cw.days||cw;
     var j=DAYS.filter(function(x){ return days[x]&&days[x].touched; }).length, pot=(d.pot&&d.pot.totalMin)||0;
@@ -1726,6 +1959,8 @@ $("#fab").onclick=function(){ pushSheet({type:"time"}); };
 tab=defaultTab();
 render();
 save();
+Hist.start(); Hist.draw();
+window.addEventListener("resize",function(){ Hist.draw(); drawWeekMini(); });
 
 // toutes les 30 s : minuit, clôture du dimanche, marqueur « maintenant »
 setInterval(function(){ var ch=tick(); if(Bet.fete().on) return; if(!sheets.length && !dragging && (ch || tab==="today" || tab==="week")) render(); else if(ch) render(); },30000);
@@ -2179,7 +2414,7 @@ var Bet=(function(){
       setTimeout(function(){ if(!play(b)) toast("Pas possible maintenant (« "+b[1]+" » a besoin de son moment)"); },450); }};
 })();
 
-window.PH={state:function(){ return S; }, compute:computeWeek, tick:tick, migrate:migrate, recalc:function(i){ recalcHistory(i); save(); }, sv:SV_CFG, bet:Bet};
+window.PH={state:function(){ return S; }, compute:computeWeek, tick:tick, migrate:migrate, recalc:function(i){ recalcHistory(i); save(); }, sv:SV_CFG, bet:Bet, hist:Hist};
 })();
 </script>
 <script>
