@@ -228,6 +228,14 @@ details.extras[open] summary{margin-bottom:8px}
 .oline{font-style:italic;color:var(--fg-2)!important}
 .oscore{grid-column:1/-1;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;border-top:1px dashed var(--line);padding-top:8px;font-size:12px;color:var(--fg-2)}
 .oscore b{color:var(--fg);font-family:var(--f-num)}
+.pwhy{grid-column:1/-1;display:flex;flex-direction:column;gap:8px;border-top:1px dashed var(--line);padding-top:10px}
+.pwhy .wb{background:color-mix(in srgb,var(--fg) 4%,transparent);border:1px solid var(--line);border-radius:12px;padding:9px 11px}
+.pwhy .wh{display:flex;align-items:center;gap:7px;font-weight:700;flex-wrap:wrap}.pwhy .wt{flex:1;text-align:left}
+.pwhy .wv{font-family:var(--f-num);font-size:12px;font-weight:700;padding:2px 8px;border-radius:9px;white-space:nowrap}
+.pwhy .wv.up{color:var(--bad);background:color-mix(in srgb,var(--bad) 14%,transparent)}.pwhy .wv.dn{color:var(--ok);background:color-mix(in srgb,var(--ok) 14%,transparent)}.pwhy .wv.eq{color:var(--fg-2);background:var(--line)}
+.pwhy .wl{margin:6px 0 0;padding-left:16px;display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--fg-2);line-height:1.35}.pwhy .wl b{color:var(--fg);font-family:var(--f-num)}
+.pwhy .ww{font-family:var(--f-num);font-weight:700;white-space:nowrap}.pwhy .ww.up{color:var(--bad)}.pwhy .ww.dn{color:var(--ok)}
+.pwhy .wm{font-size:11.5px;color:var(--fg-3)}.pwhy .wl li .ico{vertical-align:-2px}
 .ignl .trip{grid-template-columns:auto 1fr}
 /* vedettes */
 .duo{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -1381,7 +1389,7 @@ const THEME = { // v1.8 : même fond foncé pour tous, un accent par véhicule
   k:{txt:"#B3B8C2",grid:"rgba(255,255,255,.06)",tipBg:"#20242B",tipFg:"#EEF0F4",tipBd:"#E5484D",track:"#262A32",needle:"#EEF0F4",muted:"#8B92A0",bad:"#FF9F43",warn:"#F5D04C",acc:"#E5484D",fg:"#EEF0F4"}};
 let MODE=0; try{ const m=+localStorage.getItem("sv-mode"); if(m>0) MODE=m; }catch(e){}
 let T=THEME.k;
-const APP_VERSION="3.7";
+const APP_VERSION="3.8";
 const KEY="suivi-vehicules-v1";
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}}, lsSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 let STATE={fills:[],tyres:[],ent:[],rates:{},range:[925,350],tank:[60,20],buy:[3500,10000],fixed:[{},{}],trip:null};
@@ -1749,6 +1757,59 @@ function gauge(frac,c){
 function deltaHtml(pl,ref){ if(!ref) return `<span class="delta eq">–</span>`;
   const d=pl/ref-1, cls=Math.abs(d)<.02?"eq":d>0?"up":"dn";
   return `<span class="delta ${cls}">${d>0?"+":d<0?"−":""}${fmt(Math.abs(d)*100)} %</span>`; }
+// ---------- prévision expliquée : la conso monte ou baisse ? ce mois plus cher ou moins cher ? et pourquoi, chiffres à l'appui
+function predWhy(v){
+  const l=A.per[v], u=U(v), s=A.stat[v]; if(!s||!hasFuel(v)) return "";
+  const pill=(r,up,dn,eq)=>{ const d=r-1; return Math.abs(d)<.05?`<span class="wv eq">≈ ${eq}</span>`:`<span class="wv ${d>0?"up":"dn"}">${d>0?"▲":"▼"} ${d>0?up:dn} · ${d>0?"+":"−"}${fmt(Math.abs(d)*100)} %</span>`; };
+  const li=a=>a.length?`<ul class="wl">${a.map(x=>`<li>${x}</li>`).join("")}</ul>`:"";
+  const out=[];
+  // 1. conso : 3 derniers pleins complets contre les pleins de l'année d'avant
+  const cs=l.filter(f=>f.conso!=null), r3=cs.slice(-3);
+  if(r3.length===3){ const d0=day(r3[0].d), ref=cs.filter(f=>day(f.d)<d0&&day(f.d)>=d0-365), rf=ref.length>=3?ref:cs.slice(0,-3);
+    if(rf.length>=3){ const wav=a=>{ let k=0,L=0; a.forEach(f=>{ k+=f.dist; L+=f.conso*f.dist/100; }); return k?L/k*100:null; };
+      const c3=wav(r3), cN=wav(rf), r=c3/cN, kd=a=>{ const k=a.reduce((t,f)=>t+f.dist,0), j=a.reduce((t,f)=>t+Math.max(1,day(f.d)-(f.prevD!=null?f.prevD:day(f.d)-7)),0); return k/j; };
+      const k3=kd(r3), kN=kd(rf), mo=new Date(r3[2].d).getMonth(), hiver=[10,11,0,1].includes(mo), ete=[5,6,7].includes(mo), why=[];
+      why.push(`3 derniers pleins : <b>${fmt(c3,1)} ${u.c100}</b> · d'habitude <b>${fmt(cN,1)}</b> (${rf.length} pleins d'avant)`);
+      if(Math.abs(r-1)>=.05){
+        if(r>1&&k3<kN*.85) why.push(`Tu roules moins par jour (<b>${fmt(k3)} km/j</b> au lieu de ${fmt(kN)}) : plus de petits trajets, moteur souvent froid.`);
+        if(r<1&&k3>kN*1.15) why.push(`Tu roules plus par jour (<b>${fmt(k3)} km/j</b> au lieu de ${fmt(kN)}) : plus de longs trajets, le moteur reste chaud.`);
+        if(r>1&&hiver) why.push(`${ic("snowflake","#6FD3DC")} C'est l'hiver : moteur froid, chauffage, pneus d'hiver, la conso monte souvent un peu.`);
+        if(r>1&&ete) why.push(`${ic("sun","#F5D04C")} C'est l'été : la clim fait monter la conso.`);
+        if(r<1&&!hiver&&[2,3,4,5,8,9].includes(mo)) why.push(`${ic("sun","#F5D04C")} Saison douce : ni chauffage ni clim, la conso baisse souvent.`);
+        const eu=Math.abs(c3-cN)/100*(s.pL||0)*100; if(eu>=.3) why.push(`Ça fait environ <b>${fmt(eu,2)} CHF ${r>1?"de plus":"de moins"}</b> tous les 100 km.`);
+      }
+      out.push(`<div class="wb"><div class="wh">${ic("drop","#4FA8FF")}<span class="wt">Conso</span>${pill(r,"elle augmente","elle baisse","stable")}</div>${li(why)}</div>`); } }
+  // 2. coût du mois : même compte que le Budget (tout compris, « un mois normal » = moyenne des 12 derniers mois)
+  const B=budget([v]);
+  if(B){ const T1=TODAY+1, now=mKey(TODAY), dd=+dOf(TODAY).slice(8,10), dim=k=>new Date(+k.slice(0,4),+k.slice(5),0).getDate();
+    const cur=dd>=10, k=cur?now:mKey(day(now+"-01")-1), a=day(k+"-01"), b=cur?T1:day(mNext(k)+"-01"), frac=cur?dd/dim(k):1, mois=MOISL[+k.slice(5)-1];
+    const m=spendIn(v,a,b), mt=m.carb+m.ent+m.four+m.pneu+m.fixe, a12=Math.max(B.st,T1-365), d12=T1-a12, per=MJ*frac/d12; // « normal » ramené à la même durée
+    const N=B.l12, nt=B.m12*frac, r=nt>0?mt/nt:1;
+    const F12=A.all[v].filter(f=>f.P>0&&day(f.d)>=a12&&day(f.d)<T1), Fm=A.all[v].filter(f=>f.P>0&&day(f.d)>=a&&day(f.d)<b);
+    const nN=F12.length*per, avgF=F12.length?F12.reduce((t,f)=>t+f.P,0)/F12.length:0;
+    const pr=x=>{ const p=x.filter(f=>f.Pok); return p.length?p.reduce((t,f)=>t+f.P,0)/p.reduce((t,f)=>t+f.L,0):null; }, pM=pr(Fm), pN=pr(F12), Lm=Fm.filter(f=>f.Pok).reduce((t,f)=>t+f.L,0);
+    let kmM=null, kmN=null; try{ kmM=odoAt(v,dOf(b))-odoAt(v,dOf(a)); kmN=(odoAt(v,dOf(T1))-odoAt(v,dOf(a12)))*per; }catch(e){}
+    const R=[]; // chaque raison avec son poids en CHF ; carburant = litres × prix, donc les deux raisons s'additionnent
+    const LN=F12.filter(f=>f.Pok).reduce((t,f)=>t+f.L,0)*per, kmT=kmM>0&&kmN>0&&Math.abs(kmM/kmN-1)>=.1?` Tu as roulé <b>${fmt(kmM)} km</b> au lieu de ${fmt(kmN)}.`:"";
+    if(pN&&Math.abs(Lm-LN)*pN>=3) R.push({w:(Lm-LN)*pN,t:`<b>${Fm.length} ${u.plein}${Fm.length>1?"s":""} · ${fmt(Lm)} ${u.vol}</b> au lieu de ${fmt(nN,1)} ${u.plein}s · ${fmt(LN)} ${u.vol} d'habitude.${kmT} Un plein compte le jour où tu le paies.`});
+    if(pM!=null&&pN&&Math.abs(pM/pN-1)>=.01) R.push({w:(pM-pN)*Lm,t:`Prix moyen <b>${fmt(pM,3)} CHF/${u.vol}</b> au lieu de ${fmt(pN,3)}.`});
+    const gar=m.ent+m.four+m.pneu, garN=(N.ent+N.four+N.pneu)*per;
+    if(Math.abs(gar-garN)>=5) R.push({w:gar-garN,t:gar>0?`Garage, pneus, fournitures : <b>${fmt(gar)} CHF</b> ce mois-là (d'habitude ${fmt(garN)}).`:`Aucun frais de garage ce mois-là (d'habitude ${fmt(garN)} CHF).`});
+    R.sort((x,y)=>Math.abs(y.w)-Math.abs(x.w));
+    const why=[`${cur?mois+" jusqu'ici":mois+" en tout"} : <b>${fmt(mt)} CHF</b> · un mois normal${cur?" à cette date":""} : <b>${fmt(nt)} CHF</b>`]
+      .concat(Math.abs(r-1)<.05?["Rien de spécial : tout est dans la normale."]:R.filter(x=>Math.abs(x.w)>=3).slice(0,3).map(x=>`${x.t} <span class="ww ${x.w>0?"up":"dn"}">${x.w>0?"+":"−"}${fmt(Math.abs(x.w))} CHF</span>`));
+    if(m.fixe>0) why.push(`<span class="wm">Frais fixes (assurance, taxe…) : ${fmt(m.fixe)} CHF, pareils chaque mois.</span>`);
+    out.push(`<div class="wb"><div class="wh">${ic("coins","#E8C062")}<span class="wt">Coût ${/^[aeiouyàâ]/i.test(mois)?"d'":"de "}${mois.toLowerCase()}</span>${pill(r,"plus cher","moins cher","comme d'habitude")}</div>${li(why)}</div>`);
+    // 3. prévision du mois en cours : ce qui est payé + les pleins prévus par l'IA + le reste d'un mois normal
+    const p=predict(v), end=day(mNext(now)+"-01"), cm=spendIn(v,day(now+"-01"),T1), cmt=cm.carb+cm.ent+cm.four+cm.pneu+cm.fixe, left=end-T1, perD=1/d12;
+    const gap=F12.length?d12/F12.length:30; let nf=0; if(p&&p.due!=null&&p.late<=Math.max(45,p.win*3)){ for(let d=Math.max(T1,p.due);d<end;d+=gap) nf++; } // en retard = le plein tombe maintenant
+    const rest=(N.ent+N.four+N.pneu+N.fixe)*perD*left, fc=cmt+nf*avgF+rest, mN=B.m12*dim(now)/MJ, mo2=MOISL[+now.slice(5)-1];
+    out.push(`<div class="wb"><div class="wh">${ic("calendar-check","#3DD39B")}<span class="wt">${mo2} prévu</span>${pill(mN>0?fc/mN:1,"plus cher","moins cher","normal")}</div>${li([
+      `Environ <b>${fmt(fc)} CHF</b> · un mois normal : <b>${fmt(mN)} CHF</b>`,
+      `${cmt-cm.fixe>=1?`Déjà payé : ${fmt(cmt-cm.fixe)} CHF. `:""}${nf?`<b>${nf} ${u.plein}${nf>1?"s":""}</b> prévu${nf>1?"s":""} d'ici la fin du mois${p&&p.due>=T1?` (le prochain vers le ${dshort(p.due)})`:p&&p.due<T1?" (le prochain est déjà en retard)":""}, ≈ ${fmt(avgF)} CHF chacun.`:`Pas de ${u.plein} prévu d'ici la fin du mois.`} Le reste : garage et frais fixes d'un mois normal (${fmt(rest)} CHF).`])}</div>`);
+  }
+  return out.length?`<div class="pwhy"><div class="otag">${ic("brain")} Ce que je vois · et pourquoi</div>${out.join("")}<div class="wm">▲ rouge = ça monte ou plus cher · ▼ vert = ça baisse ou moins cher · ≈ = moins de 5 % d'écart.</div></div>`:"";
+}
 function renderFeatured(){
   $("#predCards").innerHTML=[MODE].map(i=>{ const p=predict(i); if(!p) return `<div class="card muted">Il faut encore quelques pleins complets pour prédire le prochain.</div>`;
     let when, sub, kind;
@@ -1764,7 +1825,7 @@ function renderFeatured(){
     return `<div class="card pred solo oracle" style="--c:${V[i].c}"><div>${liquid(p.tank,V[i].c,"tank",`<b>${fmt(p.tank*100)}<small>%</small></b>`)}<div class="sub" style="text-align:center;color:var(--fg-3);margin-top:8px">réservoir estimé ${fmt(p.tank*100)} %</div></div>
       <div style="display:flex;flex-direction:column;gap:6px;min-width:0"><div class="otag">${ic("brain")} L'IA du réservoir</div><div class="when">${when}</div><div class="sub">${sub}</div>
       <div class="sub oline">« ${oracleLine(kind)} »</div>
-      <div class="sub" style="color:var(--fg-3)">${info}<br>Autonomie ≈ ${fmt(p.kmFill)} km · compteur ≈ ${fmt(Math.round(p.odo/10)*10)} km</div></div>${score}</div>`; }).join("");
+      <div class="sub" style="color:var(--fg-3)">${info}<br>Autonomie ≈ ${fmt(p.kmFill)} km · compteur ≈ ${fmt(Math.round(p.odo/10)*10)} km</div></div>${score}${predWhy(i)}</div>`; }).join("");
   $("#priceCards").innerHTML=[MODE].map(i=>{ const list=A.all[i].filter(f=>f.Pok); if(!list.length) return `<div class="card muted">Pas encore de plein avec litres et montant.</div>`;
     const f=list.slice().sort((a,b)=>b.d.localeCompare(a.d))[0], pl=f.P/f.L, ref=refPrice(i,f.d,f);
     const diff=ref?(pl-ref)*f.L:0; const last8=list.slice().sort((a,b)=>a.d.localeCompare(b.d)).slice(-8);
@@ -2891,6 +2952,7 @@ function renderMore(){
 
 // ---------- Quoi de neuf : la version en grand, une carte par version ; s'ouvre une fois après chaque mise à jour
 const CHANGELOG=[
+  ["3.8","01.11.2026","Prévisions expliquées",["Prochain plein (IA) : la conso monte ou baisse, avec les chiffres des 3 derniers pleins et la raison probable (petits trajets, hiver, clim…)","Coût du mois : plus cher ou moins cher qu'un mois normal, et pourquoi (nombre de pleins, km roulés, prix au litre, garage), avec les CHF de chaque raison","Mois en cours prévu : ce qui est déjà payé, les pleins prévus par l'IA et le reste d'un mois normal"]],
   ["3.7","31.10.2026","Recherche",["🔍 Nouvelle loupe en haut : cherche dans tout (pleins, entretiens, frais, pneus, notes, stations, pages, réglages)","Même champ, même clavier et mêmes mots proposés que dans Kardex et Suite Atelier","Les 2 meilleurs résultats s'ouvrent d'un toucher au-dessus du clavier","Une faute de frappe ? Il propose le bon mot","Dernières recherches gardées"]],
   ["3.6","31.10.2026","Timeline + Journal",["Le Journal et la Timeline ne font plus qu'une page : la Timeline, avec ses cases en haut","Raccourcis Tout, Pleins, Entretien, Frais fixes au-dessus des cases","Tous les détails du Journal dans la Timeline : conso, €, valeurs ignorées, station, pays, options, litres, prix","Touche une ligne pour la modifier ou la supprimer, glisse-la vers la gauche pour la supprimer (avec Annuler)","Frais fixes seuls : le résumé de l'année et le bouton Noter un frais fixe","Les mois sont marqués dans chaque année ; les lignes sans date sont à la fin"]],
   ["3.5.5","31.10.2026","Hors ligne",["Marche entièrement sans réseau (mode avion) : page, graphiques, export et polices sont gardés dans le téléphone","Réseau faible : l'app s'ouvre quand même tout de suite","Le taux €→CHF reste le seul besoin de réseau (sinon dernier taux connu ou à la main)"]],
