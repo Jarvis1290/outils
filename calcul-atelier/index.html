@@ -100,13 +100,13 @@ input.kpon { outline: 2px solid var(--accent); outline-offset: 2px; }
 .setopt { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
 .setopt button { appearance: none; text-align: left; background: var(--panel-2); color: var(--fg); border: 2px solid var(--line); border-radius: 10px; padding: 12px 14px; font: 500 15px var(--f-body); cursor: pointer; }
 .setopt button small { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
-.setopt button[aria-pressed="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--panel-2)); }
+.setopt button[aria-pressed="true"] { border-color: var(--accent); background: #3d3c39; }
 .wizbar { margin-bottom: 14px; }
 .wizstep { font: 700 22px var(--f-display); text-transform: uppercase; letter-spacing: .04em; }
 .wizstep small { display: block; font: 500 13px var(--f-body); color: var(--muted); text-transform: none; letter-spacing: 0; }
 .wizdots { display: flex; gap: 6px; margin-top: 8px; }
 .wizdots button { appearance: none; flex: 1; height: 8px; border-radius: 4px; border: 0; background: var(--line); cursor: pointer; padding: 0; }
-.wizdots button.done { background: color-mix(in srgb, var(--accent) 55%, var(--line)); }
+.wizdots button.done { background: #a27e48; }
 .wizdots button.cur { background: var(--accent); }
 /* Retour / Suivant toujours au même endroit, en bas de l'écran */
 .wiznav { position: fixed; left: 0; right: 0; bottom: var(--bnav-h); z-index: 6; display: grid; grid-template-columns: 1fr 1.4fr; gap: 10px;
@@ -139,7 +139,7 @@ body.haswiz main { padding-bottom: calc(var(--bnav-h) + 96px); }
 .subtabs button { appearance: none; text-align: left; background: var(--panel); color: var(--muted); border: 2px solid var(--line); border-radius: 12px; padding: 10px 14px; cursor: pointer; font-family: var(--f-body); display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .subtabs button b { font: 700 19px var(--f-display); text-transform: uppercase; letter-spacing: .04em; color: var(--fg); }
 .subtabs button small { font-size: 12px; line-height: 1.25; }
-.subtabs button[aria-selected="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--panel)); }
+.subtabs button[aria-selected="true"] { border-color: var(--accent); background: #36332e; }
 .subtabs button[aria-selected="true"] b { color: var(--accent); }
 /* Tableau au format de l'écran « Usure outil » (toujours clair, comme la CNC) */
 .mach { margin-top: 14px; background: #c5d3dc; color: #1d2a33; border-radius: 6px; padding: 10px 10px 0; font-family: var(--f-num); overflow: hidden; }
@@ -180,9 +180,9 @@ input::placeholder { color: #5d6878; }
 /* Résultats */
 .verdict { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 10px; font-weight: 600; }
 .verdict .pill { font: 700 13px var(--f-num); letter-spacing: .05em; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; color: #10151c; white-space: nowrap; }
-.v-ok { background: color-mix(in srgb, var(--ok) 14%, transparent); } .v-ok .pill { background: var(--ok); }
-.v-reprendre { background: color-mix(in srgb, var(--warn) 16%, transparent); } .v-reprendre .pill { background: var(--warn); }
-.v-rebut { background: color-mix(in srgb, var(--bad) 16%, transparent); } .v-rebut .pill { background: var(--bad); }
+.v-ok { background: #223a38; } .v-ok .pill { background: var(--ok); }
+.v-reprendre { background: #3f392f; } .v-reprendre .pill { background: var(--warn); }
+.v-rebut { background: #3f2d35; } .v-rebut .pill { background: var(--bad); }
 .v-none { background: var(--panel-2); color: var(--muted); }
 .big { margin-top: 14px; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
 .bigbox { background: var(--panel-2); border-radius: 10px; padding: 12px; min-width: 0; }
@@ -195,7 +195,7 @@ dl.rows { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin:
 dl.rows dt { color: var(--muted); font-size: 14px; }
 dl.rows dd { margin: 0; text-align: right; font: 500 15px var(--f-num); }
 .say { margin: 14px 0 0; font-size: 15px; }
-.alert { margin-top: 12px; padding: 10px 12px; border-radius: 8px; border-left: 4px solid var(--bad); background: color-mix(in srgb, var(--bad) 12%, transparent); font-size: 14px; }
+.alert { margin-top: 12px; padding: 10px 12px; border-radius: 8px; border-left: 4px solid var(--bad); background: #362a33; font-size: 14px; }
 .note { margin-top: 12px; font-size: 13px; color: var(--muted); }
 .err { color: var(--bad); font-size: 14px; margin-top: 10px; }
 .minus { color: var(--c1); } .plus { color: var(--c6); }
@@ -235,7 +235,7 @@ table.pts th:first-child, table.pts td:first-child { text-align: left; color: va
 .mbody { overflow: auto; padding: 0 16px 16px; }
 .mbody .norm { margin-top: 12px; }
 table.pts.wide td, table.pts.wide th { white-space: nowrap; }
-table.pts tr.hl td { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--fg); }
+table.pts tr.hl td { background: #3f392f; color: var(--fg); }
 footer { color: var(--muted); font-size: 12px; padding-block: 0 30px; }
 @media (prefers-reduced-motion: no-preference) { .bigbox.main { transition: outline-color .2s; } }
 /* ===== Démo 31.10 ===== */
@@ -370,7 +370,7 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 .heads { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
 .heads button { appearance: none; background: var(--panel-2); border: 2px solid var(--line); border-radius: 10px; padding: 4px 2px 6px; color: var(--muted); font: 600 11px var(--f-body); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; }
 .heads button svg { width: 100%; max-width: 84px; height: 62px; }
-.heads button[aria-pressed="true"] { border-color: var(--accent); color: var(--fg); background: color-mix(in srgb, var(--accent) 12%, var(--panel-2)); }
+.heads button[aria-pressed="true"] { border-color: var(--accent); color: var(--fg); background: #3d3c39; }
 .tqhead { width: 120px; height: 104px; flex: none; perspective: 400px; }
 .tqhead svg { width: 100%; height: 100%; transition: transform .25s ease-out; filter: drop-shadow(0 6px 8px rgba(0,0,0,.45)); }
 @media (prefers-reduced-motion: no-preference) { .tqhead svg { animation: sway 5s ease-in-out infinite alternate; } }
@@ -412,6 +412,10 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 .vline .pill { font: 700 11px var(--f-num); padding: 2px 8px; border-radius: 999px; color: #10151c; text-transform: uppercase; }
 .sk text { paint-order: stroke; stroke: var(--panel); stroke-width: 3px; stroke-linejoin: round; }
 .sk text.hn { stroke: none; }
+.sk text.ink { stroke: none; font-weight: 700; }
+.sk text.gr { stroke: none; font: 600 12px var(--f-num); }
+/* Triangle : la valeur calculée s'affiche aussi dans la case vide, en orange */
+#p-trig input::placeholder { color: var(--accent); opacity: 1; }
 /* Pages verrouillées */
 html.lock, html.lock body { overflow: hidden; overscroll-behavior: none; height: 100%; }
 html.lock footer { display: none; }
@@ -978,7 +982,7 @@ section.fitz { transform-origin: top center; }
   </div>
 </div>
 <nav class="bnav" aria-label="Onglets"><button class="tab" type="button" data-tab="corr" aria-selected="true"><svg style="color:var(--c3)" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M176 128a48 48 0 1 1-48-48a48 48 0 0 1 48 48" opacity=".2"/><path d="M221.87 83.16A104.1 104.1 0 1 1 195.67 49l22.67-22.68a8 8 0 0 1 11.32 11.32l-96 96a8 8 0 0 1-11.32-11.32l27.72-27.72a40 40 0 1 0 17.87 31.09a8 8 0 1 1 16-.9a56 56 0 1 1-22.38-41.65l22.75-22.75a87.88 87.88 0 1 0 23.13 29.67a8 8 0 0 1 14.44-6.9"/></svg>Corriger</button><button class="tab" type="button" data-tab="iso" aria-selected="false"><svg style="color:var(--c8)" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M229.66 90.34L90.34 229.66a8 8 0 0 1-11.31 0L26.34 177a8 8 0 0 1 0-11.31L165.66 26.34a8 8 0 0 1 11.31 0L229.66 79a8 8 0 0 1 0 11.34" opacity=".2"/><path d="m235.32 73.37l-52.69-52.68a16 16 0 0 0-22.63 0L20.68 160a16 16 0 0 0 0 22.63l52.69 52.68a16 16 0 0 0 22.63 0L235.32 96a16 16 0 0 0 0-22.63M84.68 224L32 171.31l32-32l26.34 26.35a8 8 0 0 0 11.32-11.32L75.31 128L96 107.31l26.34 26.35a8 8 0 0 0 11.32-11.32L107.31 96L128 75.31l26.34 26.35a8 8 0 0 0 11.32-11.32L139.31 64l32-32L224 84.69Z"/></svg>Tolér.</button><button class="tab" type="button" data-tab="gen" aria-selected="false"><svg style="color:var(--c7)" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M232 64v136H48a24 24 0 0 1 0-48h16V64Z" opacity=".2"/><path d="M232 56H72V40a8 8 0 0 0-8-8H48a32 32 0 0 0-32 32v112a32 32 0 0 0 32 32h184a8 8 0 0 0 8-8V64a8 8 0 0 0-8-8M32 64a16 16 0 0 1 16-16h8v96h-8a31.8 31.8 0 0 0-16 4.29Zm192 128H48a16 16 0 0 1 0-32h16a8 8 0 0 0 8-8V72h152Zm-120-56a8 8 0 0 0 0 16h16v8a8 8 0 0 0 16 0v-8h24v8a8 8 0 0 0 16 0v-8h16a8 8 0 0 0 0-16h-16v-16h16a8 8 0 0 0 0-16h-16v-8a8 8 0 0 0-16 0v8h-24v-8a8 8 0 0 0-16 0v8h-16a8 8 0 0 0 0 16h16v16Zm32-16h24v16h-24Z"/></svg>2768</button><button class="tab" type="button" data-tab="thr" aria-selected="false"><svg style="color:var(--c2)" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="m219.84 73.16l-88-48.16a8 8 0 0 0-7.68 0l-88 48.18a8 8 0 0 0-4.16 7v95.64a8 8 0 0 0 4.16 7l88 48.18a8 8 0 0 0 7.68 0l88-48.18a8 8 0 0 0 4.16-7V80.18a8 8 0 0 0-4.16-7.02M128 168a40 40 0 1 1 40-40a40 40 0 0 1-40 40" opacity=".2"/><path d="M128 80a48 48 0 1 0 48 48a48.06 48.06 0 0 0-48-48m0 80a32 32 0 1 1 32-32a32 32 0 0 1-32 32m95.68-93.85l-88-48.15a15.88 15.88 0 0 0-15.36 0l-88 48.17a16 16 0 0 0-8.32 14v95.64a16 16 0 0 0 8.32 14l88 48.17a15.88 15.88 0 0 0 15.36 0l88-48.17a16 16 0 0 0 8.32-14V80.18a16 16 0 0 0-8.32-14.03M128 224l-88-48.18V80.18L128 32l88 48.17v95.63Z"/></svg>Taraud</button><button class="tab" type="button" data-tab="vis" aria-selected="false"><svg style="color:var(--c4)" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="m227.57 88.43l-53.23 53.23a8 8 0 0 1-5.65 2.34H152a8 8 0 0 0-8 8v16.83a8 8 0 0 1-1.62 4.83l-8 8a8 8 0 0 1-11.32 0l-48.72-48.72a8 8 0 0 1 0-11.32l8-8a8 8 0 0 1 4.83-1.62H104a8 8 0 0 0 8-8V87.31a8 8 0 0 1 2.34-5.65l53.23-53.23a42.42 42.42 0 0 1 60 0a42.42 42.42 0 0 1 0 60" opacity=".2"/><path d="M205.66 50.32a8 8 0 0 1 0 11.32l-56 56a8 8 0 0 1-11.32-11.31l56-56a8 8 0 0 1 11.32-.01M248 58.41a50.13 50.13 0 0 1-14.77 35.66L180 147.3a15.86 15.86 0 0 1-11.31 4.7H152v16.83a16 16 0 0 1-3.25 9.66a8 8 0 0 1-.72.83l-8 8a16 16 0 0 1-22.62 0L98.7 168.6l-77 77.06a8 8 0 0 1-11.32-11.32l77.05-77.05l-18.7-18.71a16 16 0 0 1 0-22.63l8-8a8 8 0 0 1 .82-.72a16.14 16.14 0 0 1 9.62-3.23H104V87.3a15.92 15.92 0 0 1 4.68-11.3l53.24-53.23A50.43 50.43 0 0 1 248 58.41m-16 0a34.43 34.43 0 0 0-58.77-24.35L120 87.3V104a16 16 0 0 1-16 16H87.28L80 127.27L128.72 176l7.28-7.28V152a16 16 0 0 1 16-16h16.69l53.23-53.24A34.2 34.2 0 0 0 232 58.41"/></svg>Vis</button><button class="tab" type="button" data-tab="tq" aria-selected="false"><svg style="color:var(--c6)" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M224 96a64 64 0 0 1-94.94 56L73 217a24 24 0 0 1-34-34l65-56.06a64 64 0 0 1 80-90.29L144 80l5.66 26.34L176 112l43.35-40A63.8 63.8 0 0 1 224 96" opacity=".2"/><path d="M226.76 69a8 8 0 0 0-12.84-2.88l-40.3 37.19l-17.23-3.7l-3.7-17.23l37.19-40.3A8 8 0 0 0 187 29.24A72 72 0 0 0 88 96a72.3 72.3 0 0 0 6 28.94L33.79 177c-.15.12-.29.26-.43.39a32 32 0 0 0 45.26 45.26c.13-.13.27-.28.39-.42L131.06 162A72 72 0 0 0 232 96a71.6 71.6 0 0 0-5.24-27M160 152a56.14 56.14 0 0 1-27.07-7a8 8 0 0 0-9.92 1.77l-55.9 64.74a16 16 0 0 1-22.62-22.62L109.18 133a8 8 0 0 0 1.77-9.93a56 56 0 0 1 58.36-82.31l-31.2 33.81a8 8 0 0 0-1.94 7.1l5.66 26.33a8 8 0 0 0 6.14 6.14l26.35 5.66a8 8 0 0 0 7.1-1.94l33.81-31.2A56.06 56.06 0 0 1 160 152"/></svg>Couple</button><button class="tab" type="button" data-tab="trig" aria-selected="false"><svg style="color:var(--c5)" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M200 168v32H72V72h32a96 96 0 0 1 96 96" opacity=".2"/><path d="M96 72a8 8 0 0 1 8-8a104.11 104.11 0 0 1 104 104a8 8 0 0 1-16 0a88.1 88.1 0 0 0-88-88a8 8 0 0 1-8-8m144 120H80V32a8 8 0 0 0-16 0v32H32a8 8 0 0 0 0 16h32v120a8 8 0 0 0 8 8h168a8 8 0 0 0 0-16"/></svg>Trigo</button><button class="tab" type="button" data-tab="emu" aria-selected="false"><svg style="color:var(--c1)" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M208 144a80 80 0 0 1-160 0c0-72 80-128 80-128s80 56 80 128" opacity=".2"/><path d="M174 47.75a254.2 254.2 0 0 0-41.45-38.3a8 8 0 0 0-9.18 0A254.2 254.2 0 0 0 82 47.75C54.51 79.32 40 112.6 40 144a88 88 0 0 0 176 0c0-31.4-14.51-64.68-42-96.25M128 216a72.08 72.08 0 0 1-72-72c0-57.23 55.47-105 72-118c16.53 13 72 60.75 72 118a72.08 72.08 0 0 1-72 72m55.89-62.66a57.6 57.6 0 0 1-46.56 46.55a9 9 0 0 1-1.33.11a8 8 0 0 1-1.32-15.89c16.57-2.79 30.63-16.85 33.44-33.45a8 8 0 0 1 15.78 2.68Z"/></svg>Émulsion</button></nav>
-<footer class="wrap">Les valeurs ne sont jamais envoyées à la machine : vérifie le signe et recopie-les toi-même dans la table d'outils. Une correction négative fait enlever plus de matière. · v1.3</footer>
+<footer class="wrap">Les valeurs ne sont jamais envoyées à la machine : vérifie le signe et recopie-les toi-même dans la table d'outils. Une correction négative fait enlever plus de matière. · v1.3.1</footer>
 
 <script>
 // ISO 286-1:2010 / ISO 286-2:2010 : intervalles de tolérance IT1 à IT18 et écarts fondamentaux
@@ -1857,8 +1861,8 @@ if (typeof module !== "undefined") module.exports = Calc;
       html += '<p class="mach-note">' + (hot ? 'Change seulement la case <b style="color:#e2661f">orange</b> (' + name + '). L\'autre valeur reste comme elle est. <b>Quand c\'est tapé dans la machine, touche la case orange</b> : elle devient la valeur actuelle.' : 'Rien à changer dans Usure outil.') + (miss ? ' Valeur actuelle non saisie : 0.000 supposé, recopie celle de la machine.' : '') + '</p>';
       html += '<p class="say">' + say + '</p>';
     if (Math.abs(amount) > 0.1) html += '<div class="alert"><b>Grosse correction (plus de 0,1 mm).</b> Vérifie la mesure, le bon outil et le signe avant de la saisir. Une erreur de cette taille vient souvent d\'une mauvaise cote ou d\'un outil cassé.</div>';
-    if (trt !== "0" && !shift) html += '<div class="alert" style="border-left-color:var(--c4);background:color-mix(in srgb, var(--c4) 12%, transparent)"><b>' + trtTxt + ' :</b> cette cote ne bouge pas avec le traitement, rien à enlever ni à ajouter.</div>';
-    if (shift) html += '<div class="alert" style="border-left-color:var(--c4);background:color-mix(in srgb, var(--c4) 12%, transparent)"><b>Avant ' + trtName.toLowerCase() + ', usine à ' + mm4(nom + (upF + loF) / 2 + shift) + ' (' + mm4(nom + loF + shift) + ' à ' + mm4(nom + upF + shift) + ').</b> C\'est ' + fmt(Math.abs(shift), 4).replace(/0$/, "") + ' mm ' + (shift < 0 ? "plus petit" : "plus grand") + ' que la cote finie visée (' + mm4(nom + (upF + loF) / 2) + '), parce que la couche ' + (shift < 0 ? "va l\'agrandir" : "va la réduire") + ' de cette valeur. ' + trtTxt + '. La cote mesurée doit être prise avant traitement.</div>';
+    if (trt !== "0" && !shift) html += '<div class="alert" style="border-left-color:var(--c4);background:#21363d"><b>' + trtTxt + ' :</b> cette cote ne bouge pas avec le traitement, rien à enlever ni à ajouter.</div>';
+    if (shift) html += '<div class="alert" style="border-left-color:var(--c4);background:#21363d"><b>Avant ' + trtName.toLowerCase() + ', usine à ' + mm4(nom + (upF + loF) / 2 + shift) + ' (' + mm4(nom + loF + shift) + ' à ' + mm4(nom + upF + shift) + ').</b> C\'est ' + fmt(Math.abs(shift), 4).replace(/0$/, "") + ' mm ' + (shift < 0 ? "plus petit" : "plus grand") + ' que la cote finie visée (' + mm4(nom + (upF + loF) / 2) + '), parce que la couche ' + (shift < 0 ? "va l\'agrandir" : "va la réduire") + ' de cette valeur. ' + trtTxt + '. La cote mesurée doit être prise avant traitement.</div>';
     html += '<dl class="rows"><dt>Tolérance</dt><dd>' + tolTxt + '</dd>' + (shift ? '<dt>Cote finie (après traitement)</dt><dd>' + mm4(nom + loF) + ' à ' + mm4(nom + upF) + '</dd>' : '') + '<dt>' + (shift ? 'Mini à usiner' : 'Mini') + '</dt><dd>' + mm4(c.min) + '</dd><dt>' + (shift ? 'Maxi à usiner' : 'Maxi') + '</dt><dd>' + mm4(c.max) + '</dd><dt>Cote visée (milieu)</dt><dd>' + mm4(c.target) + '</dd><dt>Mesurée</dt><dd>' + mm4(mes) + '</dd><dt>Écart / nominale</dt><dd>' + sgn(c.deviation) + '</dd><dt>Écart / cote visée</dt><dd>' + sgn(Calc.round3(c.devTarget)) + '</dd></dl>';
     if (curCase === "rainure") html += '<p class="note">Valable si la rainure est contournée avec correction de rayon (G41/G42). Si la fraise fait la largeur en une passe, c\'est le Ø de la fraise qu\'il faut changer.</p>';
     if (curCase === "profondeur" || curCase === "hauteur") html += '<p class="note">Valable si le zéro pièce en Z n\'a pas bougé. Si plusieurs outils sont faux de la même valeur, contrôle plutôt le zéro pièce.</p>';
@@ -1925,9 +1929,9 @@ if (typeof module !== "undefined") module.exports = Calc;
         + f.passes.map(function (p, i) { var last = i === f.passes.length - 1; return '<tr' + (last ? ' class="last"' : '') + '><td>' + p.n + (last ? ' (finale)' : '') + '</td><td>' + v4(p.cut) + '</td><td>' + v4(p.left) + (last ? ' ✓' : '') + '</td></tr>'; }).join("") + '</tbody></table>' + (f.warn === "two" ? '<p class="note">Avec 2 passes, il n\'y a pas de milieu : la dernière passe fait ce qui reste (' + v4(f.passes[1].cut) + '), pas ' + v4(pl) + '. Vérifie dans AlphaCam ou ajoute une passe.</p>' : '') + (spec && np === 1 ? '<p class="note">Avec 1 passe, les largeurs première et dernière ne servent pas.</p>' : '')
       : '<p class="note">Saisis la Surép. XY initiale (laissée par l\'ébauche) à l\'étape Réglages pour voir le tableau des passes.</p>';
     if (isR && Math.abs(f.stock) > 0.1) html += '<div class="alert"><b>Grosse surépaisseur (plus de 0,1 mm).</b> Vérifie la tolérance et le cas de figure avant de la saisir.</div>';
-    if (isR && f.stock !== 0) html += '<div class="alert" style="border-left-color:var(--c1);background:color-mix(in srgb, var(--c1) 12%, transparent)"><b>Une seule méthode à la fois.</b> Soit la géométrie reste au nominal avec cette surépaisseur, soit tu ' + (f.sides === 2 && c.div === 2 ? "dessines la géométrie à " + mm4(f.target) : "déplaces la paroi de " + fmt(Math.abs(f.stock), 4).replace(/0$/, "") + " mm dans la géométrie") + ' avec surépaisseur 0. Les deux ensemble doublent la correction.</div>';
-    if (trt !== "0" && !shift) html += '<div class="alert" style="border-left-color:var(--c4);background:color-mix(in srgb, var(--c4) 12%, transparent)"><b>' + trtTxt + ' :</b> cette cote ne bouge pas avec le traitement, rien à enlever ni à ajouter.</div>';
-    if (shift) html += '<div class="alert" style="border-left-color:var(--c4);background:color-mix(in srgb, var(--c4) 12%, transparent)"><b>Avant ' + trtName.toLowerCase() + ', usine à ' + mm4(f.target) + ' (' + mm4(f.min) + ' à ' + mm4(f.max) + ').</b> Les valeurs AlphaCam ci-dessus en tiennent déjà compte. C\'est ' + fmt(Math.abs(shift), 4).replace(/0$/, "") + ' mm ' + (shift < 0 ? "plus petit" : "plus grand") + ' que la cote finie visée (' + mm4(nom + (upF + loF) / 2) + '). ' + trtTxt + '.</div>';
+    if (isR && f.stock !== 0) html += '<div class="alert" style="border-left-color:var(--c1);background:#233344"><b>Une seule méthode à la fois.</b> Soit la géométrie reste au nominal avec cette surépaisseur, soit tu ' + (f.sides === 2 && c.div === 2 ? "dessines la géométrie à " + mm4(f.target) : "déplaces la paroi de " + fmt(Math.abs(f.stock), 4).replace(/0$/, "") + " mm dans la géométrie") + ' avec surépaisseur 0. Les deux ensemble doublent la correction.</div>';
+    if (trt !== "0" && !shift) html += '<div class="alert" style="border-left-color:var(--c4);background:#21363d"><b>' + trtTxt + ' :</b> cette cote ne bouge pas avec le traitement, rien à enlever ni à ajouter.</div>';
+    if (shift) html += '<div class="alert" style="border-left-color:var(--c4);background:#21363d"><b>Avant ' + trtName.toLowerCase() + ', usine à ' + mm4(f.target) + ' (' + mm4(f.min) + ' à ' + mm4(f.max) + ').</b> Les valeurs AlphaCam ci-dessus en tiennent déjà compte. C\'est ' + fmt(Math.abs(shift), 4).replace(/0$/, "") + ' mm ' + (shift < 0 ? "plus petit" : "plus grand") + ' que la cote finie visée (' + mm4(nom + (upF + loF) / 2) + '). ' + trtTxt + '.</div>';
     html += '<dl class="rows"><dt>Tolérance</dt><dd>' + tolTxt + '</dd>' + (shift ? '<dt>Cote finie (après traitement)</dt><dd>' + mm4(nom + loF) + ' à ' + mm4(nom + upF) + '</dd>' : '') + '<dt>' + (shift ? 'Mini à usiner' : 'Mini') + '</dt><dd>' + mm4(f.min) + '</dd><dt>' + (shift ? 'Maxi à usiner' : 'Maxi') + '</dt><dd>' + mm4(f.max) + '</dd><dt>Cote visée (milieu)</dt><dd>' + mm4(f.target) + '</dd><dt>Écart / nominale</dt><dd>' + sgn(f.change, 4) + '</dd></dl>';
     if (curCase === "rainure") html += '<p class="note">Si la fraise fait la largeur en une passe, la surépaisseur ne sert à rien : il faut une fraise d\'un autre Ø ou un contournage.</p>';
     if (!isR) html += '<p class="note">Valable si la surface de référence est bien le dessus de la pièce et si la case de la profondeur est en relatif.</p>';
@@ -2075,7 +2079,7 @@ if (typeof module !== "undefined") module.exports = Calc;
     }).join("") + '</div><h2 style="margin-top:18px">Saisie des chiffres (téléphone)</h2><div class="setopt" id="set-pad">' +
       '<button type="button" data-p="on" aria-pressed="' + (padPref === "on") + '">Pavé numérique de l\'app<small>gros chiffres, touche +/−, le clavier du téléphone ne s\'ouvre pas</small></button>' +
       '<button type="button" data-p="off" aria-pressed="' + (padPref === "off") + '">Clavier du téléphone<small>les barres du bas se cachent pendant la saisie</small></button></div>' +
-      '<p class="note">Les réponses du pas à pas restent en mémoire pour la cote en cours.</p>' + '<h2 style="margin-top:18px">Notes de version</h2><div class="notes"><b>1.3 (page de test)</b><ul><li>Tolérances : roulettes Lettre et Qualité IT, grand affichage de la cote avec ses écarts, résumé et tranche ISO sur la même page.</li><li>ISO 2768 sur sa propre page.</li><li>Nouvelle page Couple de serrage (M3 à M20, 8.8 / 10.9 / 12.9).</li><li>Recherche (loupe en haut) : M8, 20 H7, 45… ouvre la bonne page déjà remplie.</li><li>Une chose par page (petits boutons en haut) dans Trigo, Taraudage, Vis et Émulsion.</li><li>Dessins qui suivent les chiffres : chanfrein, fraise à chanfreiner, filetage, profondeur de perçage, chanfrein d\'entrée, lamage, fraisure, bacs d\'émulsion.</li><li>Quelle forme : une grande pièce 3D à la fois, flèches ou glisser, avec explication.</li><li>Tolérances et ISO 2768 : une seule carte chacune, page verrouillée (rien ne défile)</li><li>Tolérances : tout sur un seul écran (milieu, écarts, ajustement, cote mesurée).</li><li>Dessins en 3D écorchés : filetage, profondeur, chanfrein d\'entrée, lamage, fraisure, chanfrein, fraise à chanfreiner.</li><li>Couple : têtes de vis seules en 3D, en grand. ISO 2768 : résultats en haut, réglages en bas, panneau d\'info.</li><li>Lamage et fraisure : vis en acier, pièce hachurée. Onglet Surépaisseur retiré.</li><li>Rangée de trous, et symbole d\'origine pièce sur les dessins de trous ; chiffres plus grands.</li><li>Retour du téléphone : revient en arrière dans l\'app, 2 appuis pour quitter. Effets d\'appui, vibration, pavé numérique animé.</li></ul><b>1.2.1</b><ul><li>Fonctionne hors ligne. Zoom limité à 2×.</li></ul></div>';
+      '<p class="note">Les réponses du pas à pas restent en mémoire pour la cote en cours.</p>' + '<h2 style="margin-top:18px">Notes de version</h2><div class="notes"><b>1.3.1 (page de test)</b><ul><li>Couleurs pleines partout : plus aucune transparence dans les dessins ni les encadrés.</li><li>Bac d\'émulsion : graduations 25 / 50 / 75 sorties du bac, en gris, lisibles ; volume écrit en foncé sur le liquide.</li><li>Triangle : la valeur calculée s\'écrit aussi en orange dans les cases vides.</li></ul><b>1.3</b><ul><li>Tolérances : roulettes Lettre et Qualité IT, grand affichage de la cote avec ses écarts, résumé et tranche ISO sur la même page.</li><li>ISO 2768 sur sa propre page.</li><li>Nouvelle page Couple de serrage (M3 à M20, 8.8 / 10.9 / 12.9).</li><li>Recherche (loupe en haut) : M8, 20 H7, 45… ouvre la bonne page déjà remplie.</li><li>Une chose par page (petits boutons en haut) dans Trigo, Taraudage, Vis et Émulsion.</li><li>Dessins qui suivent les chiffres : chanfrein, fraise à chanfreiner, filetage, profondeur de perçage, chanfrein d\'entrée, lamage, fraisure, bacs d\'émulsion.</li><li>Quelle forme : une grande pièce 3D à la fois, flèches ou glisser, avec explication.</li><li>Tolérances et ISO 2768 : une seule carte chacune, page verrouillée (rien ne défile)</li><li>Tolérances : tout sur un seul écran (milieu, écarts, ajustement, cote mesurée).</li><li>Dessins en 3D écorchés : filetage, profondeur, chanfrein d\'entrée, lamage, fraisure, chanfrein, fraise à chanfreiner.</li><li>Couple : têtes de vis seules en 3D, en grand. ISO 2768 : résultats en haut, réglages en bas, panneau d\'info.</li><li>Lamage et fraisure : vis en acier, pièce hachurée. Onglet Surépaisseur retiré.</li><li>Rangée de trous, et symbole d\'origine pièce sur les dessins de trous ; chiffres plus grands.</li><li>Retour du téléphone : revient en arrière dans l\'app, 2 appuis pour quitter. Effets d\'appui, vibration, pavé numérique animé.</li></ul><b>1.2.1</b><ul><li>Fonctionne hors ligne. Zoom limité à 2×.</li></ul></div>';
   }
   $("b-set").addEventListener("click", function () {
     openTable("Paramètres", "", settingsHtml());
@@ -2946,7 +2950,7 @@ if (typeof module !== "undefined") module.exports = Calc;
     b += '<path d="M' + (ax + R) + ' ' + cy + 'A' + R + ' ' + R + ' 0 0 1 ' + (ax + R * Math.cos(ang)).toFixed(1) + ' ' + (cy + R * Math.sin(ang)).toFixed(1) + '" stroke="var(--accent)" stroke-width="2" fill="none"/>';
     b += tx(ax + (R + 14) * Math.cos(ang / 2), cy + (R + 14) * Math.sin(ang / 2) + 5, f2(a, 1) + "°", "var(--accent)");
     b += tx(40, cy + 112, "pièce", "var(--muted)", "start", "nm");
-    b = extrude([[20, cy], [cx - W, cy], [cx, cy + O], [cx, cy + 120], [20, cy + 120]], function (j) { return j === 1 ? "color-mix(in srgb, var(--c4) 55%, #2a313c)" : null; }) + b;
+    b = extrude([[20, cy], [cx - W, cy], [cx, cy + O], [cx, cy + 120], [20, cy + 120]], function (j) { return j === 1 ? "#3e8987" : null; }) + b;
     sk("k-sk", "0 -24 376 224", b);
   }
   watch("k-res", drawCham);
@@ -2979,7 +2983,7 @@ if (typeof module !== "undefined") module.exports = Calc;
     b += arrV(wall + hs + 14, top, top + vs, "var(--c4)") + tx(wall + hs + 22, top + vs / 2 + 5, "h " + f2(r.v) + " mm", "var(--c4)", "start");
     b += tx(axx, tipY + 18, f2(ang, 0) + "°", "var(--c2)");
     if (d0 > 0) b += tx(axx - r0 - 6, tipY + 4, "Ø pointe " + f2(d0), "var(--c2)", "end", "nm");
-    b = extrude([[wall, top + vs], [wall + hs, top], [330, top], [330, tipY + 50], [wall, tipY + 50]], function (j) { return j === 0 ? "color-mix(in srgb, var(--c4) 55%, #2a313c)" : null; }) + b;
+    b = extrude([[wall, top + vs], [wall + hs, top], [330, top], [330, tipY + 50], [wall, tipY + 50]], function (j) { return j === 0 ? "#3e8987" : null; }) + b;
     sk("m-sk", "0 -6 420 " + Math.round(tipY + 98), b);
   }
   watch("m-res", drawMill);
@@ -3105,7 +3109,7 @@ if (typeof module !== "undefined") module.exports = Calc;
     var z = "", pz = 7;
     for (var y = top; y + pz <= yL; y += pz) z += "M" + (cx - hw) + " " + y + "l-7 " + (pz / 2) + "l7 " + (pz / 2) + "M" + (cx + hw) + " " + y + "l7 " + (pz / 2) + "l-7 " + (pz / 2);
     b += '<path d="' + z + '" stroke="var(--c1)" stroke-width="1.4" fill="none"/>';
-    b += '<rect x="' + (cx - hw) + '" y="' + yL + '" width="' + (2 * hw) + '" height="' + (yD - yL) + '" fill="color-mix(in srgb, var(--c6) 30%, transparent)"/>';
+    b += '<rect x="' + (cx - hw) + '" y="' + yL + '" width="' + (2 * hw) + '" height="' + (yD - yL) + '" fill="#5f4739"/>';
     b += tx(cx, top + (yL - top) / 2 + 5, "filet utile", "var(--c1)", "middle", "nm") + tx(cx, (yL + yD) / 2 + 4, "entrée", "var(--c6)", "middle", "nm");
     var xa = 250;
     b += ext(cx + hw + 8, top, 330, top) + ext(cx + hw + 8, yL, xa + 6, yL) + ext(cx + hw, yD, 330, yD) + ext(cx + 4, yT, 345, yT);
@@ -3129,7 +3133,7 @@ if (typeof module !== "undefined") module.exports = Calc;
     var s = 150 / dc, cx = 160, top = 70, wc = dc * s / 2, wh = Math.min(hole * s / 2, wc - 4), t = Math.tan(Math.max(20, Math.min(75, a / 2)) * RAD);
     var vc = (wc - wh) / t, w0 = d0 * s / 2, tipY = top + (wc - w0) / t;
     var b = cut3d({ cx: cx, xL: 20, xR: 320, top: top, bot: 200, prof: [[wc, top], [wh, top + vc], [wh, 200]] }) + '<path d="M20 ' + top + 'H' + (cx - wc) + 'L' + (cx - wh) + ' ' + (top + vc) + 'V200H20Z" fill="' + PARTC + '"/><path d="M' + (cx + wc) + ' ' + top + 'H320V200H' + (cx + wh) + 'V' + (top + vc) + 'Z" fill="' + PARTC + '"/>';
-    b += '<path d="M' + (cx - w0) + ' ' + tipY + 'H' + (cx + w0) + 'L' + (cx + wc + 30 * t) + ' ' + (top - 30) + 'H' + (cx - wc - 30 * t) + 'Z" fill="color-mix(in srgb, var(--c2) 18%, transparent)" stroke="var(--c2)" stroke-width="2"/>';
+    b += '<path d="M' + (cx - w0) + ' ' + tipY + 'H' + (cx + w0) + 'L' + (cx + wc + 30 * t) + ' ' + (top - 30) + 'H' + (cx - wc - 30 * t) + 'Z" fill="none" stroke="var(--c2)" stroke-width="2.4" stroke-dasharray="6 3"/>';
     b += '<path d="M' + cx + ' 10V205" stroke="var(--muted)" stroke-dasharray="8 3 2 3"/>';
     b += ext(cx - wc, top - 2, cx - wc, top - 46) + ext(cx + wc, top - 2, cx + wc, top - 46) + arrH(cx - wc, cx + wc, top - 40, "var(--accent)") + tx(cx, top - 46, "Ø chanfrein " + f2(dc, 2), "var(--accent)");
     b += ext(cx + w0 + 4, tipY, 330, tipY) + ext(cx + wc + 4, top, 330, top) + arrV(326, top, tipY, "var(--c5)") + lbl(334, (top + tipY) / 2 + 8, "Plongée", f2(depth, 2), "var(--c5)", "start");
@@ -3197,7 +3201,7 @@ if (typeof module !== "undefined") module.exports = Calc;
     if (title) b += tx(x + w / 2, y + h + 26, title, null, "middle", "nm");
     return b;
   }
-  var WATER = "color-mix(in srgb, var(--c1) 55%, transparent)", OIL = "color-mix(in srgb, var(--c5) 85%, transparent)", MIXC = "color-mix(in srgb, #e9f0f7 60%, var(--c1) 25%)";
+  var WATER = "#3d8fd6", OIL = "#f2c14e", MIXC = "#c9def0"; // couleurs pleines, sans transparence
   addSk("x-res", "x-sk");
   function drawMix() {
     var V = num($("x-v").value), p = num($("x-p").value), r = Calc.mix(V, p);
@@ -3212,7 +3216,7 @@ if (typeof module !== "undefined") module.exports = Calc;
     b += bac(222, 40, 100, 120, null, [{ v: 1, col: MIXC }], "Bac " + f2(V, 1) + " L");
     // barre de concentration (dans le bac final) : part d'huile à la bonne proportion
     var pc = Math.max(0, Math.min(100, p));
-    b += '<rect x="226" y="58" width="92" height="14" rx="3" fill="var(--bg)" stroke="var(--line)"/><rect x="226" y="58" width="' + (92 * pc / 100).toFixed(1) + '" height="14" rx="3" fill="var(--c5)"/>' + tx(272, 92, f2(p, 1) + " %", "#10151c");
+    b += '<rect x="226" y="58" width="92" height="14" rx="3" fill="var(--bg)" stroke="var(--line)"/><rect x="226" y="58" width="' + (92 * pc / 100).toFixed(1) + '" height="14" rx="3" fill="var(--c5)"/>' + tx(272, 92, f2(p, 1) + " %", "#10151c", "middle", "ink");
     sk("x-sk", "0 0 340 200", b);
   }
   watch("x-res", drawMix);
@@ -3236,7 +3240,7 @@ if (typeof module !== "undefined") module.exports = Calc;
     if (cap > 0) b += '<path d="M24 36H166" stroke="var(--bad)" stroke-width="1.5" stroke-dasharray="5 3"/>' + tx(170, 40, "plein", "var(--bad)", "start", "nm");
     b += tankMarks(Math.min(fv, 1), cap > 0 || vMode === "P");
     var yv = 36 + 136 - fv * 136;
-    b += tx(80, Math.min(166, Math.max(yv + 22, (yv + 172) / 2 + 6)), f2(vol, 0) + " L", "var(--fg)");
+    b += fv > .16 ? tx(95, Math.min(166, Math.max(yv + 22, (yv + 172) / 2 + 6)), f2(vol, 0) + " L", "#10151c", "middle", "ink") : tx(95, yv - 8, f2(vol, 0) + " L", "#e8edf4");
     if (r.action !== "ok") b += tx(200, 186, "+ " + f2(r.add, 1) + " L " + (r.action === "eau" ? "d'eau" : "d'huile"), r.action === "eau" ? "var(--c1)" : "var(--c5)", "start");
     // jauge de concentration : actuel / visé
     var mx = Math.max(r.target * 2, r.current * 1.2, 1), gx = 200, gw = 130, X = function (v) { return gx + gw * Math.min(v, mx) / mx; };
@@ -3253,7 +3257,7 @@ if (typeof module !== "undefined") module.exports = Calc;
   // graduations 25/50/75 % et poignée du niveau (on glisse dans le bac pour régler le remplissage)
   function tankMarks(f, pctTxt) {
     var b = '';
-    [.25, .5, .75].forEach(function (t) { var y = (172 - t * 136).toFixed(1); b += '<path d="M146 ' + y + 'H158" stroke="var(--fg)" stroke-width="1.2" opacity=".55"/>' + tx(143, Number(y) + 4, Math.round(t * 100) + "", "var(--fg)", "end", "nm"); });
+    [.25, .5, .75].forEach(function (t) { var y = (172 - t * 136).toFixed(1); b += '<path d="M20 ' + y + 'H29" stroke="#95a1b3" stroke-width="1.5"/><path d="M32 ' + y + 'H40" stroke="#6f8aa3" stroke-width="1.5"/>' + tx(17, Number(y) + 4, Math.round(t * 100) + "", "#95a1b3", "end", "gr"); });
     var yv = 172 - f * 136;
     b += '<path d="M32 ' + yv.toFixed(1) + 'H158" stroke="var(--accent)" stroke-width="2"/>';
     b += '<g transform="translate(160 ' + yv.toFixed(1) + ')"><rect x="-2" y="-11" width="26" height="22" rx="11" fill="var(--accent)"/><path d="M11 -7l-4 5h8zM11 7l-4 -5h8z" fill="#1b1408"/></g>';
@@ -3379,7 +3383,7 @@ if (typeof module !== "undefined") module.exports = Calc;
     }
     var P_ = { 3: "0,5", 4: "0,7", 5: "0,8", 6: "1", 8: "1,25", 10: "1,5", 12: "1,75", 14: "2", 16: "2", 18: "2,5", 20: "2,5" }[m];
     h += '<dl class="rows"><dt>Filet</dt><dd>M' + m + ' × ' + P_ + '</dd><dt>Implant. mini</dt><dd>acier ' + f2(m, 0) + ' · fonte ' + f2(m * 1.25, 1) + ' · alu ' + f2(m * 2, 0) + '</dd><dt>Serrage</dt><dd>50 % puis 100 %, en croix</dd></dl>';
-    h += '<div class="alert" style="border-left-color:var(--warn);background:color-mix(in srgb, var(--warn) 12%, transparent)"><b>À vérifier avant usage.</b> Valeurs maxi indicatives (VDI 2230, Bossard), sans marge de sécurité, pour filetage métrique gros pas, vis H ou CHC, trou de passage moyen. Taraudage dans l\'alu ou pièce fragile : beaucoup moins. En cas de doute, la notice du fabricant prime.</div>';
+    h += '<div class="alert" style="border-left-color:var(--warn);background:#36332e"><b>À vérifier avant usage.</b> Valeurs maxi indicatives (VDI 2230, Bossard), sans marge de sécurité, pour filetage métrique gros pas, vis H ou CHC, trou de passage moyen. Taraudage dans l\'alu ou pièce fragile : beaucoup moins. En cas de doute, la notice du fabricant prime.</div>';
     o.innerHTML = h;
   }
 
@@ -3578,7 +3582,7 @@ if (typeof module !== "undefined") module.exports = Calc;
         return '<g transform="translate(' + x.toFixed(1) + ' ' + y.toFixed(1) + ')' + (rot ? ' rotate(' + rot.toFixed(1) + ')' : '') + '"><circle cx="' + (sx + 9) + '" cy="-5" r="9" fill="var(--c1)"/><text class="lt" x="' + (sx + 9) + '" y="0" text-anchor="middle">' + name + '</text>' +
           '<text x="' + (sx + 22) + '" y="0"><tspan class="v ' + (g[id] ? "given" : "calc") + '">' + t + '</tspan></text></g>';
       }
-      var b = '<path d="M' + x0 + ' ' + yb + 'H' + x1 + 'V' + y1 + 'Z" fill="#2b3442" stroke="var(--c1)" stroke-width="2" stroke-linejoin="round"/>';
+      var b = '<path d="M' + x0 + ' ' + yb + 'H' + x1 + 'V' + y1 + 'Z" fill="#232b37" stroke="var(--c1)" stroke-width="2" stroke-linejoin="round"/>';
       b += '<path d="M' + (x1 - 12) + ' ' + yb + 'V' + (yb - 12) + 'H' + x1 + '" fill="none" stroke="var(--muted)" stroke-width="1.5"/>';
       var ra = 34; b += '<path d="M' + (x0 + ra) + ' ' + yb + 'A' + ra + ' ' + ra + ' 0 0 0 ' + (x0 + ra * Math.cos(al * RAD)).toFixed(1) + ' ' + (yb - ra * Math.sin(al * RAD)).toFixed(1) + '" fill="none" stroke="var(--accent)" stroke-width="2"/>';
       var rb = 24, be = (90 - al) * RAD; b += '<path d="M' + x1 + ' ' + (y1 + rb) + 'A' + rb + ' ' + rb + ' 0 0 1 ' + (x1 - rb * Math.sin(be)).toFixed(1) + ' ' + (y1 + rb * Math.cos(be)).toFixed(1) + '" fill="none" stroke="var(--accent)" stroke-width="2"/>';
@@ -3590,6 +3594,8 @@ if (typeof module !== "undefined") module.exports = Calc;
       b += v("g-c", ok ? F(r.c) : 0, mx + nx * 11, my + ny * 11, "middle", "c", -al);
       b += v("g-al", ok ? A(r.alpha) : 0, x0 + ra + 8, yb - 7, "start", "α");
       b += v("g-be", ok ? A(r.beta) : 0, x1 - 8, y1 + rb + 18, "end", "β");
+      var PV = { "g-a": ok ? F(r.a) : "", "g-b": ok ? F(r.b) : "", "g-c": ok ? F(r.c) : "", "g-al": ok ? f2(r.alpha, 2) : "", "g-be": ok ? f2(r.beta, 2) : "" };
+      IDS.forEach(function (id) { $(id).placeholder = g[id] ? "" : PV[id]; });
       svg.setAttribute("viewBox", "0 " + (y1 - 8 - (al > 45 ? 14 : 0)).toFixed(0) + " " + (x1 + 36).toFixed(0) + " " + (yb - y1 + 38 + (al > 45 ? 14 : 0)).toFixed(0));
       svg.innerHTML = b;
     }
