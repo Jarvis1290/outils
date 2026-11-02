@@ -318,6 +318,7 @@ button.swr{width:100%;background:none;border:0;padding:0;text-align:left;cursor:
 /* ----- 27.10 : solde en haut, jour en cours plus grand, ronds début / fin du midi ----- */
 .wtop .wsolde{margin:0 0 10px}
 .wd.today b{font-size:22px}
+.wstrip.shut .wd.today b{font-size:15px}
 .frise .lunch .hd{top:50%;width:22px;height:22px;margin-top:-11px;border-radius:50%;background:var(--surf);border:3px solid var(--lunch);box-shadow:0 1px 3px rgba(0,0,0,.25);z-index:2}
 .frise .lunch .hd::after{display:none}
 .frise .lunch .hd::before{content:"";position:absolute;inset:-10px}
@@ -692,7 +693,7 @@ const Sauvegarde = (() => {
    - Report des heures (⏱) : tout vendredi, jour suivant, étalé, ou Perso (cases). Semaine = graphe en barres pour les exceptions.
    - Historique éditable : une correction recalcule le pot des semaines suivantes. */
 
-var APP_VERSION = "2.4", APP_DATE = "01.11.2026";
+var APP_VERSION = "2.4.1", APP_DATE = "02.11.2026";
 var KEY = "planning-horaire-v3";
 var DAYS = ["lundi","mardi","mercredi","jeudi","vendredi"];
 var SH = {lundi:"Lun",mardi:"Mar",mercredi:"Mer",jeudi:"Jeu",vendredi:"Ven"};
@@ -924,7 +925,7 @@ function potIfDeleted(i){ var keep=S; S=clone(S); try{ deleteHistWeek(i); return
 
 // ---------- affichage ----------
 var resetView = false; function topView(){ resetView=true; var v=$("#view"); if(v) v.scrollTop=0; }
-var tab = null, navStack = [], sheets = [], dragging = false, absOpen = null, fsel = null, selDay = null, weekView = ls("ph-wview","liste");
+var tab = null, navStack = [], sheets = [], dragging = false, absOpen = null, fsel = null, selDay = null, dayShut = false, weekView = ls("ph-wview","liste");
 var H = document.documentElement.dataset;
 function tabOrder(){ var o=ls("ph-order","today,week,pot").split(",").filter(function(t){ return TABS[t]; }); ["today","week","pot"].forEach(function(t){ if(o.indexOf(t)<0) o.push(t); }); return o; }
 
@@ -982,6 +983,8 @@ function renderToday(v){
   }
   var W=computeWeek(), day=selDay||DAYS[ti], c=W[day];
   v.appendChild(weekStrip(W));
+  // v2.4.1 : jour refermé = la bande seule (toucher un jour le rouvre)
+  if(dayShut){ var op=el("button","lnk back",ic("arrow-counter-clockwise")+" Ouvrir aujourd'hui"); op.onclick=function(){ dayShut=false; selDay=null; fsel=null; render(); }; v.appendChild(op); return; }
   if(selDay && selDay!==DAYS[ti]){ var bk=el("button","lnk back",ic("arrow-counter-clockwise")+" Revenir à aujourd'hui"); bk.onclick=function(){ selDay=null; fsel=null; render(); }; v.appendChild(bk); }
   v.appendChild(dayPanel(day,c,{today:c.today,big:true}));
   var h=reportHint(W); if(h) v.appendChild(h);
@@ -996,19 +999,24 @@ function weekStrip(W){
     else if(x.past){ t="pas<br>pointé"; e=""; st="off"; }
     else { t="dû "+fdur(x.planTarget)+"<br>sortie "+fh(x.dep); e=Math.abs(x.planTarget-x.ref)>0.5?'<span class="muted">'+fsign(x.planTarget-x.ref)+'</span>':'<span class="muted">–</span>'; }
     var b=el("button","wd "+st+(x.today?" today":""),'<b>'+SH[day].toUpperCase()+(x.today?' <i></i>':'')+'</b><small>'+dmy(dates[i]).slice(0,2)+'</small><span class="t">'+t+'</span><span class="e">'+e+'</span>');
-    if((selDay||(W[day].today&&day))===day) b.classList.add("sel");
-    b.onclick=function(){ if(day==='vendredi'&&aperoTap()) return; selDay=(x.today||selDay===day)?null:day; fsel=null; topView(); render(); };
+    if(!dayShut && (selDay||(W[day].today&&day))===day) b.classList.add("sel");
+    b.onclick=function(){ if(day==='vendredi'&&aperoTap()) return;
+      // v2.4.1 : toucher le jour ouvert (aujourd'hui compris) le referme ; toucher un autre jour l'ouvre
+      var open=!dayShut && (selDay?selDay===day:x.today);
+      if(open){ dayShut=true; selDay=null; } else { dayShut=false; selDay=x.today?null:day; }
+      fsel=null; topView(); render(); };
     box.appendChild(b);
   });
   var sc=el("div","wsolde",'<div><span class="k">Solde semaine</span>'+(Math.abs(W.P)>0.5?'<small>dont '+fhm(W.P)+' du pot</small>':'<small>'+modeName()+'</small>')+'</div><b class="'+cls(W.solde)+'">'+fhm(W.solde)+'</b>');
   sc.onclick=function(){ go("week"); };
   var ti=selDay?DAYS.indexOf(selDay):DAYS.findIndex(function(x){ return W[x].today; });
-  if(ti>=0) box.style.gridTemplateColumns=DAYS.map(function(x,i){ return i===ti?"1.7fr":"1fr"; }).join(" ");
+  if(dayShut) box.classList.add("shut");
+  if(ti>=0 && !dayShut) box.style.gridTemplateColumns=DAYS.map(function(x,i){ return i===ti?"1.7fr":"1fr"; }).join(" ");
   var wrap=el("div","wtop"); wrap.appendChild(sc); wrap.appendChild(box); return wrap;
 }
 // secret : 5 touchers rapides sur Vendredi (bande du haut) = l'apéro, 20 ou 30 min pas travaillées
 var apT={n:0,t:0};
-function aperoTap(){ var t=Date.now(); apT.n=t-apT.t<600?apT.n+1:1; apT.t=t; if(apT.n<5) return false; apT.n=0; selDay=computeWeek().vendredi.today?null:"vendredi"; fsel=null; render(); pushSheet({type:"apero"}); return true; }
+function aperoTap(){ var t=Date.now(); apT.n=t-apT.t<600?apT.n+1:1; apT.t=t; if(apT.n<5) return false; apT.n=0; dayShut=false; selDay=computeWeek().vendredi.today?null:"vendredi"; fsel=null; render(); pushSheet({type:"apero"}); return true; }
 function renderApero(sh){
   sh.appendChild(sheetHead("🍻 L'apéro du vendredi"));
   var d=S.currentWeek.days.vendredi||{}, ch=el("div","chips");
@@ -1339,7 +1347,7 @@ function barsView(c,dates){
       bb.appendChild(b);
     }
     col.appendChild(bb);
-    var bl=el("div","bl",SH[day]+'<small>'+dmy(dates[DAYS.indexOf(day)])+'</small>'); bl.onclick=function(){ var t=computeWeek()[day].today; selDay=(t||(tab==="today"&&selDay===day))?null:day; fsel=null; go("today"); }; col.appendChild(bl);
+    var bl=el("div","bl",SH[day]+'<small>'+dmy(dates[DAYS.indexOf(day)])+'</small>'); bl.onclick=function(){ var t=computeWeek()[day].today; dayShut=false; selDay=(t||(tab==="today"&&selDay===day))?null:day; fsel=null; go("today"); }; col.appendChild(bl);
     col.appendChild(el("div","bv",(x.done?"fait ":"")+fdur(total)));
     col.appendChild(el("div","bv "+cls(val),n?fsign(val):"·"));
     bars.appendChild(col);
@@ -1617,7 +1625,9 @@ function renderBets(sh){
 function renderAbout(sh){
   sh.appendChild(sheetHead("Quoi de neuf"));
   var n=el("div","notes");
-  n.innerHTML='<h3>v2.4 · 01.11.2026</h3><ul>'+
+  n.innerHTML='<h3>v2.4.1 · 02.11.2026</h3><ul>'+
+    '<li><b>Jour qui se referme, pour de vrai</b> : touche le jour ouvert (aujourd\'hui compris) dans la bande du haut, sa fiche se replie et il ne reste que les 5 jours. Touche un jour pour le rouvrir.</li>'+
+    '</ul><h3>v2.4 · 01.11.2026</h3><ul>'+
     '<li><b>Historique des changements</b> : tout ce qui change (heures, semaines, pot, réglages, affichage) est noté. Le bouton ↺ dans la barre, sous ⚙, ouvre la liste : jour, heure et ce qui a changé. Touche une ligne pour voir tout le détail et « Revenir à cet état ». Le retour s\'ajoute à la liste : il s\'annule aussi.</li>'+
     '<li><b>Mini semaine</b> dans la barre, entre ⏱ et les onglets : un point par jour (plein = fait, cerclé = aujourd\'hui) et le solde de la semaine. Touche-la pour aller à la Semaine.</li>'+
     '<li>L\'historique part aussi dans la sauvegarde Drive, avec les réglages.</li>'+
