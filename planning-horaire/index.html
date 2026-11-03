@@ -7,6 +7,7 @@
 <title>Planning Horaire</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0b0a20">
+<meta name="color-scheme" content="dark light">
 <link rel="stylesheet" href="fonts/fonts.css">
 <script>try{var D=document.documentElement.dataset,G=function(k,d){return localStorage.getItem(k)||d};D.phTheme=G("ph-theme","fonce");D.rail=G("ph-rail","g");D.ricons=G("ph-ricons","b");}catch(e){}</script>
 <style>
@@ -19,7 +20,7 @@
   --lunch:#c39a52; --good:#4f8a38; --bad:#b56f5e; --abs:#9aa08f;
   --shadow:0 1px 3px rgba(0,0,0,.07);
   --f:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
-  color-scheme:light;
+  color-scheme:only light;
 }
 :root[data-ph-theme="fonce"]{
   --bg:#14170f; --page:#181c13; --surf:#20261b; --surf2:#262d20; --line:#323a2a;
@@ -498,7 +499,7 @@ header.top{margin-bottom:8px}
   --base:#3f2aa8;
   --shadow:0 8px 24px -14px rgba(40,30,120,.35),0 1px 2px rgba(40,30,120,.08);
   --pagebg:radial-gradient(120% 60% at 15% -10%,rgba(124,92,255,.18),transparent 60%),radial-gradient(90% 50% at 110% 110%,rgba(47,180,255,.16),transparent 60%),#f3f2ff;
-  color-scheme:light;
+  color-scheme:only light;
 }
 :root[data-ph-theme="fonce"]{
   --bg:#08081a; --page:#0b0a20; --surf:#151337; --surf2:#1c1a46; --line:#2a2760;
@@ -950,7 +951,7 @@ const Sauvegarde = (() => {
    - Report des heures (⏱) : tout vendredi, jour suivant, étalé, ou Perso (cases). Semaine = graphe en barres pour les exceptions.
    - Historique éditable : une correction recalcule le pot des semaines suivantes. */
 
-var APP_VERSION = "2.6", APP_DATE = "03.11.2026";
+var APP_VERSION = "2.6.1", APP_DATE = "03.11.2026";
 var KEY = "planning-horaire-v3";
 var DAYS = ["lundi","mardi","mercredi","jeudi","vendredi"];
 var SH = {lundi:"Lun",mardi:"Mar",mercredi:"Mer",jeudi:"Jeu",vendredi:"Ven"};
@@ -1891,7 +1892,9 @@ function renderBets(sh){
 function renderAbout(sh){
   sh.appendChild(sheetHead("Quoi de neuf"));
   var n=el("div","notes");
-  n.innerHTML='<h3>v2.6 · 03.11.2026</h3><ul>'+
+  n.innerHTML='<h3>v2.6.1 · 03.11.2026</h3><ul>'+
+    '<li><b>Couleurs éclatantes</b> : Chrome n\'assombrit plus l\'app tout seul (son « thème sombre pour les sites » ternissait les dégradés et les lueurs).</li>'+
+    '</ul><h3>v2.6 · 03.11.2026</h3><ul>'+
     '<li><b>Jolis boutons partout</b> : boutons en relief qui s\'enfoncent, contours lumineux, pastilles pour les petites actions, + et − du pot en dégradé.</li>'+
     '<li><b>Jolie sélection</b> : la pilule glisse sous le choix (Thème, Déplacer / Début / Fin…), le jour choisi se soulève avec une barre lumineuse, la roulette brille.</li>'+
     '<li><b>Midi en rose-violet</b> (plus d\'orange) avec poignées néon, trait « maintenant » blanc-cyan.</li>'+
