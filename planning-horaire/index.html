@@ -6,9 +6,9 @@
 <script>/* Zoom a deux doigts limite a 2x (Android : maximum-scale ; iPhone : ce garde-fou) */(function(){var M=2,v=window.visualViewport,d0=0,g0=1;function sc(){return v?v.scale:1}function di(t){return Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY)}document.addEventListener("touchstart",function(e){if(e.touches.length===2)d0=di(e.touches)},{passive:true});document.addEventListener("touchmove",function(e){if(e.touches.length!==2)return;var d=di(e.touches);if(e.cancelable&&d>d0&&sc()>=M-0.05)e.preventDefault();d0=d},{passive:false});document.addEventListener("gesturestart",function(){g0=sc()});document.addEventListener("gesturechange",function(e){if(g0*e.scale>M&&e.scale>1)e.preventDefault()})})();</script>
 <title>Planning Horaire</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#9ab583">
+<meta name="theme-color" content="#0b0a20">
 <link rel="stylesheet" href="fonts/fonts.css">
-<script>try{var D=document.documentElement.dataset,G=function(k,d){return localStorage.getItem(k)||d};D.phTheme=G("ph-theme","auto");D.rail=G("ph-rail","g");D.ricons=G("ph-ricons","b");}catch(e){}</script>
+<script>try{var D=document.documentElement.dataset,G=function(k,d){return localStorage.getItem(k)||d};D.phTheme=G("ph-theme","fonce");D.rail=G("ph-rail","g");D.ricons=G("ph-ricons","b");}catch(e){}</script>
 <style>
 /* Planning Horaire v2.0 — thème pistache mat V18 : barre d'icônes, tuiles arrondies, clair ou foncé */
 :root{
@@ -483,6 +483,185 @@ header.top{flex:none}
 .btn:disabled{opacity:.4;cursor:default}
 header.top{margin-bottom:8px}
 #sheet{scrollbar-width:none;overscroll-behavior:none}
+
+/* ===== v2.5 (03.11) : thème bleu / violet, dégradés, lueurs, micro-animations ===== */
+:root{
+  --bg:#ecebff; --page:#f3f2ff; --surf:#ffffff; --surf2:#f1efff; --line:#e1ddfa;
+  --rail:#17143f; --rail-fg:#c3c0f2;
+  --fg:#1d1a45; --mut:#6c68a0;
+  --acc:#6c4dff; --accS:#5a3df0; --on-acc:#ffffff; --soft:#ebe6ff;
+  --lunch:#ea9a1a; --good:#10a889; --bad:#e2456b; --abs:#a9a5d3;
+  --cy:#2f9bff; --vi:#7c5cff; --pk:#d04cff;
+  --grad:linear-gradient(135deg,#7c5cff 0%,#4f7dff 55%,#2fb4ff 100%);
+  --gradH:linear-gradient(90deg,#7c5cff,#3fb5ff);
+  --glow:0 8px 24px -8px rgba(108,77,255,.55);
+  --base:#3f2aa8;
+  --shadow:0 8px 24px -14px rgba(40,30,120,.35),0 1px 2px rgba(40,30,120,.08);
+  --pagebg:radial-gradient(120% 60% at 15% -10%,rgba(124,92,255,.18),transparent 60%),radial-gradient(90% 50% at 110% 110%,rgba(47,180,255,.16),transparent 60%),#f3f2ff;
+  color-scheme:light;
+}
+:root[data-ph-theme="fonce"]{
+  --bg:#08081a; --page:#0b0a20; --surf:#151337; --surf2:#1c1a46; --line:#2a2760;
+  --rail:#09081d; --rail-fg:#a3a0d6;
+  --fg:#eeedff; --mut:#8e8bc6;
+  --acc:#7c5cff; --accS:#a796ff; --on-acc:#ffffff; --soft:#231f58;
+  --lunch:#ffb547; --good:#3ee6c1; --bad:#ff6b8b; --abs:#4b4884;
+  --cy:#3fc3ff; --vi:#8f73ff; --pk:#e06bff;
+  --glow:0 8px 26px -6px rgba(124,92,255,.7);
+  --base:#3a24a6;
+  --shadow:0 14px 34px -16px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.04);
+  --pagebg:radial-gradient(120% 55% at 10% -10%,rgba(124,92,255,.32),transparent 60%),radial-gradient(90% 50% at 110% 105%,rgba(47,160,255,.22),transparent 60%),#0b0a20;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme:dark){
+  :root[data-ph-theme="auto"]{
+    --bg:#08081a; --page:#0b0a20; --surf:#151337; --surf2:#1c1a46; --line:#2a2760;
+    --rail:#09081d; --rail-fg:#a3a0d6;
+    --fg:#eeedff; --mut:#8e8bc6;
+    --acc:#7c5cff; --accS:#a796ff; --on-acc:#ffffff; --soft:#231f58;
+    --lunch:#ffb547; --good:#3ee6c1; --bad:#ff6b8b; --abs:#4b4884;
+    --cy:#3fc3ff; --vi:#8f73ff; --pk:#e06bff;
+    --glow:0 8px 26px -6px rgba(124,92,255,.7);
+    --base:#3a24a6;
+    --shadow:0 14px 34px -16px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.04);
+    --pagebg:radial-gradient(120% 55% at 10% -10%,rgba(124,92,255,.32),transparent 60%),radial-gradient(90% 50% at 110% 105%,rgba(47,160,255,.22),transparent 60%),#0b0a20;
+    color-scheme:dark;
+  }
+}
+html,body{background:var(--pagebg)}
+body{background-attachment:fixed}
+
+/* titre en dégradé */
+header.top h1{background:var(--gradH);-webkit-background-clip:text;background-clip:text;color:transparent;font-size:22px}
+
+/* cartes : verre sombre, fin liseré */
+.card{background:linear-gradient(180deg,color-mix(in srgb,var(--surf) 100%,#fff 3%),var(--surf));border:1px solid var(--line);box-shadow:var(--shadow)}
+
+/* barre d'icônes : sombre, onglet actif en pilule dégradée qui gonfle */
+#rail{background:linear-gradient(180deg,#0d0b28,#120f36 60%,#0b0a22)}
+:root[data-rail="g"] #rail{box-shadow:1px 0 0 rgba(124,92,255,.25),8px 0 30px -12px rgba(124,92,255,.45)}
+:root[data-rail="d"] #rail{box-shadow:-1px 0 0 rgba(124,92,255,.25),-8px 0 30px -12px rgba(124,92,255,.45)}
+:root[data-rail="b"] #rail{box-shadow:0 -1px 0 rgba(124,92,255,.25),0 -8px 30px -12px rgba(124,92,255,.45)}
+#rail button{transition:background .25s,color .25s,box-shadow .25s}
+#rail button[aria-current="page"]{background:var(--grad);color:#fff;box-shadow:0 0 0 1px rgba(255,255,255,.12) inset,0 6px 20px -4px rgba(124,92,255,.85),0 0 18px -2px rgba(63,181,255,.45);animation:fxTabPop .55s cubic-bezier(.3,1.6,.5,1)}
+#rail button[aria-current="page"] .ico{animation:fxIcoFill .55s ease-out}
+@keyframes fxTabPop{0%{scale:.7}45%{scale:1.14 .9}70%{scale:.95 1.06}100%{scale:1}}
+@keyframes fxIcoFill{0%{filter:none;translate:0 4px}60%{filter:drop-shadow(0 0 6px #fff);translate:0 -2px}100%{translate:0 0}}
+/* ⏱ : anneau néon qui respire */
+#rail #fab{box-shadow:inset 0 0 0 2px var(--cy);animation:fxBreathe 3.2s ease-in-out infinite;color:#cfe9ff}
+#rail #fab.on{background:var(--grad);color:#fff}
+@keyframes fxBreathe{0%,100%{box-shadow:inset 0 0 0 2px var(--cy),0 0 0 0 rgba(63,195,255,0)}50%{box-shadow:inset 0 0 0 2px var(--cy),0 0 16px 2px rgba(63,195,255,.55)}}
+#rail .rsep{background:linear-gradient(90deg,var(--vi),var(--cy));opacity:.6}
+#rail .tlb small{background:var(--grad);color:#fff}
+#rail .wmini i.ok{background:var(--cy);box-shadow:0 0 6px var(--cy)}
+#rail .wmini i.td{box-shadow:inset 0 0 0 2px var(--vi)}
+#rail .wmini b.pos{color:var(--good)}#rail .wmini b.neg{color:var(--bad)}
+
+/* boutons principaux : dégradé, socle plus foncé (s'enfonce), reflet qui passe */
+.btn{position:relative;overflow:hidden;background:var(--grad);color:#fff;box-shadow:0 4px 0 var(--base),var(--glow);transition:translate .12s,box-shadow .12s,filter .2s}
+.btn::after{content:"";position:absolute;top:0;bottom:0;left:-60%;width:40%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-18deg);animation:fxShine 5s ease-in-out infinite;pointer-events:none}
+@keyframes fxShine{0%,72%{left:-60%}88%,100%{left:130%}}
+.btn:active{translate:0 3px;box-shadow:0 1px 0 var(--base),0 3px 10px -6px rgba(124,92,255,.6)}
+.btn.ghost{background:var(--surf2);color:var(--fg);border:1px solid var(--line);box-shadow:0 3px 0 var(--line)}
+.btn.ghost::after,.btn.danger::after,.btn:disabled::after{display:none}
+.btn.danger{background:none;color:var(--bad);border:1.5px solid var(--bad);box-shadow:0 0 14px -6px var(--bad)}
+.rord .btn{box-shadow:0 3px 0 var(--line)}
+.rord .btn::after{display:none}
+
+/* toucher : s'enfonce un peu et revient en ressort */
+.chip,.times button,.wd,.seg2 button,.xbtn,.stepper button,.mini button,#rail button,.lnk,.wsolde,.grid .c,.hrow,.dr,.wk,button.swr,button.set{transition:scale .35s cubic-bezier(.3,1.7,.5,1),background .2s,border-color .2s,box-shadow .25s}
+.chip:active,.times button:active,.wd:active,.seg2 button:active,.xbtn:active,.stepper button:active,.mini button:active,#rail button:active,.lnk:active,.wsolde:active,.grid .c:active{scale:.93;transition-duration:.08s}
+
+/* pastilles de choix */
+.chip{border-color:color-mix(in srgb,var(--acc) 55%,transparent);color:var(--accS)}
+.chip.on{background:var(--grad);border-color:transparent;color:#fff;box-shadow:var(--glow)}
+.seg2{border-color:color-mix(in srgb,var(--acc) 55%,transparent);background:var(--surf2)}
+.seg2 button.on{background:var(--grad);color:#fff;box-shadow:0 0 12px -2px rgba(124,92,255,.7)}
+.grid .c.on{background:var(--grad);border-color:transparent;color:#fff}
+
+/* interrupteurs : néon + ressort */
+.sw{background:color-mix(in srgb,var(--line) 85%,#000 15%);box-shadow:inset 0 1px 3px rgba(0,0,0,.35)}
+.sw::after{background:linear-gradient(180deg,#fff,#dcd8ff)}
+.sw.on{background:var(--grad);box-shadow:0 0 0 1px rgba(255,255,255,.15) inset,0 0 14px -1px rgba(63,181,255,.75),0 0 22px -4px rgba(124,92,255,.8)}
+.sw.on::after{background:#fff;box-shadow:0 0 10px 2px rgba(255,255,255,.8)}
+.sw.fx-on::after{animation:fxKnobOn .5s cubic-bezier(.3,1.5,.5,1)}
+.sw.fx-off::after{animation:fxKnobOff .5s cubic-bezier(.3,1.5,.5,1)}
+@keyframes fxKnobOn{0%{left:3px;width:20px}40%{left:12px;width:28px}100%{left:23px;width:20px}}
+@keyframes fxKnobOff{0%{left:23px;width:20px}40%{left:3px;width:28px}100%{left:3px;width:20px}}
+.sw.fx-on{animation:fxNeon .7s ease-out}
+@keyframes fxNeon{0%{box-shadow:0 0 0 0 rgba(63,195,255,.9)}60%{box-shadow:0 0 0 8px rgba(63,195,255,0),0 0 22px rgba(124,92,255,.9)}}
+
+/* temps du jour */
+.times button{background:var(--surf2);border-color:var(--line)}
+.times button.todo{border:2px solid transparent;background:linear-gradient(var(--surf2),var(--surf2)) padding-box,var(--grad) border-box;box-shadow:0 0 16px -4px rgba(124,92,255,.7)}
+.times button.todo b{color:var(--accS)}
+
+/* frise : barre dégradée et lumineuse */
+.frise .bar{background:color-mix(in srgb,var(--line) 80%,transparent)}
+.frise .seg{background:var(--gradH);box-shadow:0 0 12px -2px rgba(63,181,255,.7)}
+.frise .lunch{background:linear-gradient(135deg,#ffc56b,#ff9a3c);border-color:var(--surf)}
+.frise .now{background:var(--pk);box-shadow:0 0 8px var(--pk)}
+.frise .knob{border-color:var(--cy);box-shadow:0 0 0 3px rgba(63,195,255,.18),0 0 12px rgba(63,195,255,.6)}
+.frise .knob.on{background:var(--cy);border-color:var(--cy)}
+.frise .pz i{background:linear-gradient(135deg,#3ee6c1,#2fb4ff)}
+.frise .pz.off i{background:linear-gradient(135deg,#ff6b8b,#d04cff)}
+.fctl{background:var(--soft)}
+.fbtn{background:var(--grad);color:#fff;box-shadow:0 4px 0 var(--base),var(--glow)}
+.fbtn:active{transform:none;translate:0 3px;box-shadow:0 1px 0 var(--base)}
+
+/* bande des 5 jours */
+.wd{background:var(--surf);border-color:var(--line)}
+.wd b i{background:var(--cy);box-shadow:0 0 6px var(--cy)}
+.wd.today{border:1.5px solid transparent;background:linear-gradient(var(--surf),var(--surf)) padding-box,var(--grad) border-box;box-shadow:0 0 18px -6px rgba(124,92,255,.8)}
+.wd.sel{border:2px solid transparent;background:linear-gradient(var(--soft),var(--soft)) padding-box,var(--grad) border-box;box-shadow:0 0 22px -4px rgba(124,92,255,.9)}
+.wd.sel b{color:var(--accS)}
+.wd .e{color:var(--good)}
+
+/* solde de la semaine : grande tuile dégradée */
+.wsolde{background:linear-gradient(135deg,#2a1d7a 0%,#3a2fb0 45%,#1f6fd8 100%);color:#fff;box-shadow:0 12px 30px -12px rgba(80,60,220,.9),inset 0 1px 0 rgba(255,255,255,.18);position:relative;overflow:hidden}
+.wsolde::before{content:"";position:absolute;inset:-40% -10% auto auto;width:60%;height:160%;background:radial-gradient(closest-side,rgba(255,255,255,.18),transparent);pointer-events:none}
+.wsolde .k,.wsolde small{color:#c9c4ff}
+.wsolde>b{color:#fff;text-shadow:0 0 18px rgba(255,255,255,.35)}
+.wsolde>b.pos{color:#7dffe0;text-shadow:0 0 16px rgba(62,230,193,.6)}.wsolde>b.neg{color:#ffb0c2;text-shadow:0 0 16px rgba(255,107,139,.6)}
+
+/* semaine, pot, listes */
+.dr.cur,.hit.cur .hrow{background:linear-gradient(90deg,color-mix(in srgb,var(--acc) 22%,transparent),transparent)}
+.bb{background:linear-gradient(180deg,color-mix(in srgb,var(--acc) 22%,var(--surf)),var(--soft));border-color:color-mix(in srgb,var(--acc) 60%,transparent)}
+.blk.p{background:linear-gradient(90deg,#3ee6c1,#2fb4ff)}.blk.m{background:linear-gradient(90deg,#ff6b8b,#d04cff)}
+.ring .rf{stroke:var(--cy);filter:drop-shadow(0 0 4px var(--cy))}
+.pill{background:var(--soft)}
+.hint{background:linear-gradient(135deg,color-mix(in srgb,var(--acc) 16%,var(--surf)),color-mix(in srgb,var(--cy) 10%,var(--surf)));border:1px solid var(--line)}
+.lnk{color:var(--accS)}
+.rord .it .ico{color:var(--cy)}
+.hrow .ht{color:var(--accS)}
+
+/* panneau du bas : verre + liseré lumineux */
+#sheetBack{background:rgba(6,5,22,.55);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+#sheet{background:var(--surf);box-shadow:0 -1px 0 rgba(124,92,255,.5),0 -18px 40px -16px rgba(124,92,255,.6);transition:transform .38s cubic-bezier(.25,1.4,.45,1)}
+.grab{background:var(--gradH);opacity:.7}
+.xbtn{background:var(--surf2)}
+.wheels::before{background:linear-gradient(90deg,color-mix(in srgb,var(--acc) 30%,transparent),color-mix(in srgb,var(--cy) 25%,transparent));box-shadow:0 0 18px -6px rgba(124,92,255,.8)}
+
+/* rappel, bulle */
+#remind{background:linear-gradient(135deg,#221a6b,#183e9a);box-shadow:0 14px 34px -12px rgba(60,40,200,.9)}
+#remind .tx small,#remind .later{color:#c9c4ff}
+#remind .go{background:var(--grad);color:#fff;box-shadow:0 4px 0 var(--base)}
+.toast{background:linear-gradient(135deg,#2a1d7a,#1f6fd8);box-shadow:0 10px 26px -10px rgba(80,60,220,.9)}
+
+/* bouton « Valider la journée » : anneau qui pulse */
+.lnk.fx-cta{padding:8px 12px;border-radius:999px;background:color-mix(in srgb,var(--acc) 14%,transparent);box-shadow:0 0 0 1.5px color-mix(in srgb,var(--acc) 55%,transparent);animation:fxCta 2.6s ease-in-out infinite}
+@keyframes fxCta{0%,100%{box-shadow:0 0 0 1.5px color-mix(in srgb,var(--acc) 55%,transparent),0 0 0 0 rgba(124,92,255,0)}50%{box-shadow:0 0 0 1.5px var(--acc),0 0 18px 2px rgba(124,92,255,.55)}}
+
+/* effets ajoutés par fx.js */
+.fx-rw{position:absolute;inset:0;border-radius:inherit;overflow:hidden;pointer-events:none;z-index:0}
+.fx-rip{position:absolute;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.55),rgba(160,140,255,.25) 60%,transparent 70%);animation:fxRip .6s ease-out forwards}
+@keyframes fxRip{to{transform:scale(var(--s,30));opacity:0}}
+.fx-jelly{animation:fxJelly .6s cubic-bezier(.3,1.4,.5,1)}
+@keyframes fxJelly{0%{scale:1}25%{scale:1.12 .86}50%{scale:.92 1.08}75%{scale:1.04 .97}100%{scale:1}}
+.fx-p{position:fixed;z-index:300;pointer-events:none;width:8px;height:8px;border-radius:2px}
+.fx-bub{position:fixed;z-index:300;pointer-events:none;width:8px;height:8px;border-radius:50%;border:1.5px solid var(--cy);box-shadow:0 0 6px var(--cy)}
+@media (prefers-reduced-motion:reduce){.btn::after,#rail #fab,.lnk.fx-cta{animation:none}}
+
 </style>
 </head>
 <body>
@@ -693,7 +872,7 @@ const Sauvegarde = (() => {
    - Report des heures (⏱) : tout vendredi, jour suivant, étalé, ou Perso (cases). Semaine = graphe en barres pour les exceptions.
    - Historique éditable : une correction recalcule le pot des semaines suivantes. */
 
-var APP_VERSION = "2.4.3", APP_DATE = "03.11.2026";
+var APP_VERSION = "2.5", APP_DATE = "03.11.2026";
 var KEY = "planning-horaire-v3";
 var DAYS = ["lundi","mardi","mercredi","jeudi","vendredi"];
 var SH = {lundi:"Lun",mardi:"Mar",mercredi:"Mer",jeudi:"Jeu",vendredi:"Ven"};
@@ -1634,7 +1813,9 @@ function renderBets(sh){
 function renderAbout(sh){
   sh.appendChild(sheetHead("Quoi de neuf"));
   var n=el("div","notes");
-  n.innerHTML='<h3>v2.4.3 · 03.11.2026</h3><ul>'+
+  n.innerHTML='<h3>v2.5 · 03.11.2026</h3><ul>'+
+    '<li><b>Nouveau look bleu et violet</b> : dégradés, lueurs, boutons qui s\'enfoncent, vague au toucher, interrupteurs néon, onglet qui gonfle, confettis en validant la journée. Thème Clair (lavande) dans Paramètres.</li>'+
+    '</ul><h3>v2.4.3 · 03.11.2026</h3><ul>'+
     '<li><b>Valider sans pointer</b> : un jour pas pointé (même passé) se valide aussi. Touche le jour dans la bande, puis « Valider la journée sans pointer » : l\'arrivée et le départ prévus sont retenus, le jour passe en ✓. Appui long pour choisir l\'heure de départ.</li>'+
     '</ul><h3>v2.4.2 · 02.11.2026</h3><ul>'+
     '<li><b>Valider la journée</b> : sur la fiche du jour, dès l\'arrivée pointée. Un toucher retient le départ prévu tout de suite (le jour passe en ✓) ; un appui long ouvre la roulette pour choisir l\'heure. « Remettre le départ en automatique » annule.</li>'+
@@ -1946,7 +2127,7 @@ Sauvegarde.init(SV_CFG);
 try{ navigator.storage && navigator.storage.persist && navigator.storage.persist(); }catch(e){}
 
 function defaultTab(){ var o=tabOrder(), i=todayIdx(); return (i>=0&&i<5) ? (o.indexOf("today")>=0?"today":o[0]) : "week"; }
-H.phTheme=ls("ph-theme","auto"); H.rail=ls("ph-rail","g"); H.ricons=ls("ph-ricons","b");
+H.phTheme=ls("ph-theme","fonce"); H.rail=ls("ph-rail","g"); H.ricons=ls("ph-ricons","b");
 tick();
 buildRail();
 $("#fab").onclick=function(){ pushSheet({type:"time"}); };
@@ -2415,6 +2596,49 @@ window.PH={state:function(){ return S; }, compute:computeWeek, tick:tick, migrat
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js'); });
 }
+</script>
+<script>
+(function(){ // v2.5 : micro-animations (vague au toucher, gelée, interrupteurs, confettis, bulles)
+  var RIP=".btn,.chip,.times button,.wd,.seg2 button,.xbtn,.stepper button,.mini button,#rail button,.lnk,.wsolde,.grid .c,.hrow,.dr,.wk,button.set,.fbtn,#remind .go";
+  var JEL=".chip,.seg2 button,.grid .c,#rail button,.wd,.xbtn,.stepper button";
+  var reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var last=null;
+  document.addEventListener("pointerdown",function(e){
+    var b=e.target.closest&&e.target.closest(RIP); last={x:e.clientX,y:e.clientY,t:Date.now()};
+    if(!b||reduce||b.closest(".frise,.bars,.whl")) return;
+    var cs=getComputedStyle(b); if(cs.position==="static") b.style.position="relative";
+    var r=b.getBoundingClientRect(), w=document.createElement("span"); w.className="fx-rw";
+    var s=document.createElement("span"); s.className="fx-rip"; s.style.left=(e.clientX-r.left)+"px"; s.style.top=(e.clientY-r.top)+"px";
+    s.style.setProperty("--s",Math.ceil(Math.hypot(r.width,r.height)/6)); w.appendChild(s); b.appendChild(w);
+    setTimeout(function(){ w.remove(); },650);
+  },true);
+  function burst(x,y,n,cls,cols){ for(var i=0;i<n;i++){ var p=document.createElement("i"); p.className=cls; p.style.left=x+"px"; p.style.top=y+"px";
+      if(cols) p.style.background=cols[i%cols.length]; document.body.appendChild(p);
+      var a=Math.random()*Math.PI*2, d=40+Math.random()*90, up=cls==="fx-bub";
+      var tx=up?(Math.random()*30-15):Math.cos(a)*d, ty=up?-(40+Math.random()*50):Math.sin(a)*d-40;
+      p.animate([{transform:"translate(0,0) rotate(0) scale(1)",opacity:1},{transform:"translate("+tx+"px,"+ty+"px) rotate("+(Math.random()*540)+"deg) scale(.9)",opacity:1,offset:.6},{transform:"translate("+tx*1.1+"px,"+(ty+(up?-20:90))+"px) rotate(720deg) scale(.6)",opacity:0}],{duration:up?900:1300+Math.random()*500,easing:"cubic-bezier(.2,.7,.3,1)"}).onfinish=(function(q){ return function(){ q.remove(); }; })(p); } }
+  window.PHFX={burst:burst};
+  document.addEventListener("click",function(e){
+    if(reduce) return;
+    var x=e.clientX||(last&&last.x)||0, y=e.clientY||(last&&last.y)||0;
+    var src=e.target.closest&&e.target.closest("button"), txt=src?src.textContent:"", wasOn=src&&src.classList.contains("sw")?src.classList.contains("on"):null;
+    var isTab=src&&src.closest("#rail");
+    setTimeout(function(){ // l'app redessine souvent : on retrouve l'élément sous le doigt
+      var n=document.elementFromPoint(x,y); if(!n) return;
+      var sw=n.closest(".sw")||(n.closest(".swr")&&n.closest(".swr").querySelector(".sw"));
+      if(sw){ sw.classList.remove("fx-on","fx-off"); void sw.offsetWidth; sw.classList.add(sw.classList.contains("on")?"fx-on":"fx-off");
+        if(sw.classList.contains("on")){ var r=sw.getBoundingClientRect(); burst(r.right-12,r.top+13,6,"fx-bub"); }
+        setTimeout(function(){ sw.classList.remove("fx-on","fx-off"); },700); }
+      var j=n.closest(JEL); if(j&&!sw){ j.classList.remove("fx-jelly"); void j.offsetWidth; j.classList.add("fx-jelly"); setTimeout(function(){ j.classList.remove("fx-jelly"); },650); }
+      if(isTab) burst(x,y-10,5,"fx-bub");
+      if(/Valider la journée/.test(txt)) burst(x,y,26,"fx-p",["#7c5cff","#3fc3ff","#d04cff","#3ee6c1","#ffb547","#fff"]);
+    },40);
+  },true);
+  // repère le bouton « Valider la journée » pour l'anneau qui pulse
+  var pend=0; function tag(){ pend=0; document.querySelectorAll("button.lnk").forEach(function(b){ if(/Valider la journée/.test(b.textContent)) b.classList.add("fx-cta"); }); }
+  new MutationObserver(function(){ if(!pend){ pend=1; requestAnimationFrame(tag); } }).observe(document.body,{childList:true,subtree:true});
+  tag();
+})();
 </script>
 </body>
 </html>
