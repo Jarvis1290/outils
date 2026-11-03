@@ -662,6 +662,84 @@ header.top h1{background:var(--gradH);-webkit-background-clip:text;background-cl
 .fx-bub{position:fixed;z-index:300;pointer-events:none;width:8px;height:8px;border-radius:50%;border:1.5px solid var(--cy);box-shadow:0 0 6px var(--cy)}
 @media (prefers-reduced-motion:reduce){.btn::after,#rail #fab,.lnk.fx-cta{animation:none}}
 
+/* ===== v2.6 (03.11) : jolis boutons partout, jolie sélection, midi et « maintenant » en bleu/violet ===== */
+:root{--base2:color-mix(in srgb,var(--line) 70%,#000 30%);--hi:inset 0 1px 0 rgba(255,255,255,.10)}
+/* pas de cadre de focus bizarre au toucher ; au clavier, anneau cyan */
+button:focus,[tabindex]:focus{outline:none}
+button:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
+
+/* boutons secondaires : relief, socle qui s'enfonce, petit liseré violet */
+.stepper button,.rord .it button,.xbtn,.mini button,.times button:not(.todo),.grid .c:not(.on),#remind .later{
+  background:linear-gradient(180deg,color-mix(in srgb,var(--surf2) 88%,#fff 12%),var(--surf2));
+  border:1px solid color-mix(in srgb,var(--acc) 30%,var(--line));
+  box-shadow:0 3px 0 var(--base2),0 8px 16px -10px rgba(124,92,255,.65),var(--hi);
+  transition:translate .1s,box-shadow .1s,scale .35s cubic-bezier(.3,1.7,.5,1),background .2s}
+.stepper button:active,.rord .it button:active,.xbtn:active,.mini button:active,.times button:active,.grid .c:active,#remind .later:active{translate:0 2px;box-shadow:0 1px 0 var(--base2),0 3px 8px -6px rgba(124,92,255,.6);scale:1}
+.rord .it button:disabled{box-shadow:none;translate:0 0}
+.times button.todo{box-shadow:0 3px 0 var(--base),0 0 16px -4px rgba(124,92,255,.7)}
+.times button.todo:active{translate:0 2px;box-shadow:0 1px 0 var(--base)}
+#remind .later{border-radius:12px;padding:10px 12px;color:#e4e0ff;background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.05));border:1px solid rgba(190,180,255,.35);box-shadow:0 3px 0 rgba(10,6,40,.7),inset 0 1px 0 rgba(255,255,255,.15)}
+#remind .later:active{box-shadow:0 1px 0 rgba(10,6,40,.7)}
+
+/* + / − du pot : boutons pleins en dégradé (comme −5 / +5) */
+.stepper button{background:var(--grad);color:#fff;border:0;box-shadow:0 4px 0 var(--base),var(--glow);text-shadow:0 1px 0 rgba(0,0,0,.2)}
+.stepper button:active{box-shadow:0 1px 0 var(--base),0 3px 10px -6px rgba(124,92,255,.6)}
+
+/* bouton clair : contour dégradé lumineux (« Get started ») */
+.btn.ghost,.rord .btn{border:1.5px solid transparent;background:linear-gradient(var(--surf2),var(--surf2)) padding-box,var(--grad) border-box;color:var(--fg);box-shadow:0 3px 0 var(--base2),0 0 18px -8px rgba(124,92,255,.9),var(--hi)}
+.btn.ghost:active,.rord .btn:active{translate:0 2px;box-shadow:0 1px 0 var(--base2),0 0 10px -6px rgba(124,92,255,.8)}
+/* bouton rouge : rose néon en relief */
+.btn.danger{border:1.5px solid transparent;background:linear-gradient(var(--surf2),var(--surf2)) padding-box,linear-gradient(135deg,#ff6b8b,#d04cff) border-box;color:var(--bad);box-shadow:0 3px 0 color-mix(in srgb,var(--bad) 45%,#000),0 0 18px -8px var(--bad)}
+.btn.danger:active{translate:0 2px;box-shadow:0 1px 0 color-mix(in srgb,var(--bad) 45%,#000)}
+
+/* petits liens d'action : pastilles */
+.lnk{padding:7px 12px;border-radius:999px;background:color-mix(in srgb,var(--acc) 13%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 40%,transparent)}
+.lnk:active{background:color-mix(in srgb,var(--acc) 26%,transparent)}
+
+/* pastilles de choix : relief, choisie = dégradé qui brille */
+.chip{background:linear-gradient(180deg,color-mix(in srgb,var(--surf2) 85%,#fff 15%),var(--surf2));box-shadow:0 3px 0 var(--base2),var(--hi);transition:translate .1s,box-shadow .1s,scale .35s cubic-bezier(.3,1.7,.5,1)}
+.chip:active{translate:0 2px;box-shadow:0 1px 0 var(--base2)}
+.chip.on{box-shadow:0 3px 0 var(--base),0 0 0 1px rgba(255,255,255,.14) inset,0 8px 22px -6px rgba(124,92,255,.95),0 0 16px -4px rgba(63,181,255,.6);animation:fxSelPop .45s cubic-bezier(.3,1.6,.5,1)}
+.grid .c.on{box-shadow:0 0 0 1px rgba(255,255,255,.14) inset,0 0 14px -3px rgba(124,92,255,.9);animation:fxSelPop .45s cubic-bezier(.3,1.6,.5,1)}
+@keyframes fxSelPop{0%{scale:.88}55%{scale:1.06}100%{scale:1}}
+
+/* boutons à choix (Thème, Déplacer / Début / Fin…) : pilule qui glisse */
+.seg2{border:1px solid color-mix(in srgb,var(--acc) 40%,var(--line));background:color-mix(in srgb,var(--surf2) 80%,#000 20%);box-shadow:inset 0 2px 4px rgba(0,0,0,.35);padding:2px;border-radius:12px}
+.seg2 button{border-radius:9px;transition:color .25s}
+.seg2 button.on{box-shadow:0 0 0 1px rgba(255,255,255,.14) inset,0 4px 14px -3px rgba(124,92,255,.9)}
+.seg2.fx-sl{position:relative;isolation:isolate}
+.seg2.fx-sl button.on{background:transparent;box-shadow:none}
+.seg2 .fx-pill{position:absolute;top:2px;bottom:2px;left:0;width:0;border-radius:9px;background:var(--grad);box-shadow:0 0 0 1px rgba(255,255,255,.14) inset,0 4px 14px -3px rgba(124,92,255,.95),0 0 12px -2px rgba(63,181,255,.55);z-index:-1;pointer-events:none}
+.seg2 .fx-pill.go{transition:left .42s cubic-bezier(.3,1.45,.5,1),width .42s cubic-bezier(.3,1.45,.5,1)}
+
+/* jour choisi dans la bande : se soulève, contour dégradé, petite barre lumineuse dessous */
+.wd{position:relative;transition:translate .3s cubic-bezier(.3,1.6,.5,1),box-shadow .3s,scale .35s cubic-bezier(.3,1.7,.5,1)}
+.wd.sel{translate:0 -4px;background:linear-gradient(180deg,color-mix(in srgb,var(--acc) 30%,var(--surf)),var(--surf) 75%) padding-box,var(--grad) border-box;box-shadow:0 14px 26px -12px rgba(124,92,255,1),0 0 22px -6px rgba(63,181,255,.65),var(--hi)}
+.wd.sel::after{content:"";position:absolute;left:30%;right:30%;bottom:5px;height:3px;border-radius:2px;background:var(--gradH);box-shadow:0 0 8px var(--cy);animation:fxBarIn .4s cubic-bezier(.3,1.6,.5,1)}
+@keyframes fxBarIn{from{left:50%;right:50%;opacity:0}}
+.wd.sel b{background:var(--gradH);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* lignes choisies (semaine, historique) : barre néon à gauche */
+.dr.cur,.hit.cur .hrow{box-shadow:inset 3px 0 0 var(--cy),inset 0 0 0 1px color-mix(in srgb,var(--acc) 30%,transparent)}
+
+/* roulette : bande de sélection néon */
+.wheels::before{box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--acc) 70%,transparent),0 0 20px -6px rgba(124,92,255,.9)}
+.whl .it.on{background:var(--gradH);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* midi sur la frise : plus d'orange, bloc rose-violet en verre, poignées néon */
+.frise .lunch{background:linear-gradient(135deg,#ff7ad9 0%,#b65cff 55%,#7c5cff 100%);border:1.5px solid rgba(255,255,255,.35);box-shadow:0 0 0 1px rgba(124,92,255,.35),0 6px 18px -6px rgba(208,76,255,.9),inset 0 1px 0 rgba(255,255,255,.35)}
+.frise .lunch.on{box-shadow:0 0 0 3px rgba(224,107,255,.35),0 0 22px -2px rgba(224,107,255,.95),inset 0 1px 0 rgba(255,255,255,.35)}
+.frise .lunch .hd{background:radial-gradient(circle at 35% 30%,#fff,#e8e2ff 70%);border:2.5px solid #e06bff;box-shadow:0 0 0 3px rgba(224,107,255,.2),0 0 12px rgba(224,107,255,.75)}
+.frise .lunch .hd.on{background:radial-gradient(circle at 35% 30%,#fff,#ffb8f0 60%,#e06bff);box-shadow:0 0 0 4px rgba(224,107,255,.3),0 0 16px 2px rgba(224,107,255,.9);animation:fxHdPulse 1.8s ease-in-out infinite}
+@keyframes fxHdPulse{50%{box-shadow:0 0 0 7px rgba(224,107,255,.12),0 0 22px 4px rgba(224,107,255,.8)}}
+.frise .lab.lm{background:color-mix(in srgb,var(--surf) 85%,transparent);box-shadow:0 0 0 1px color-mix(in srgb,#e06bff 45%,transparent),0 4px 12px -6px rgba(208,76,255,.8);border-radius:999px;padding:1px 8px}
+/* trait « maintenant » : blanc-cyan avec un point */
+.frise .now{background:linear-gradient(#fff,var(--cy));box-shadow:0 0 8px var(--cy);width:2px}
+.frise .now::before{content:"";position:absolute;left:-3px;top:-6px;width:8px;height:8px;border-radius:50%;background:#fff;box-shadow:0 0 8px 2px var(--cy)}
+/* arrivée / départ choisis */
+.frise .knob.on{background:radial-gradient(circle at 35% 30%,#fff,var(--cy));border-color:#fff;box-shadow:0 0 0 5px rgba(63,195,255,.25),0 0 18px 2px rgba(63,195,255,.85)}
+@media (prefers-reduced-motion:reduce){.frise .lunch .hd.on,.chip.on,.grid .c.on,.wd.sel::after{animation:none}}
+
 </style>
 </head>
 <body>
@@ -872,7 +950,7 @@ const Sauvegarde = (() => {
    - Report des heures (⏱) : tout vendredi, jour suivant, étalé, ou Perso (cases). Semaine = graphe en barres pour les exceptions.
    - Historique éditable : une correction recalcule le pot des semaines suivantes. */
 
-var APP_VERSION = "2.5", APP_DATE = "03.11.2026";
+var APP_VERSION = "2.6", APP_DATE = "03.11.2026";
 var KEY = "planning-horaire-v3";
 var DAYS = ["lundi","mardi","mercredi","jeudi","vendredi"];
 var SH = {lundi:"Lun",mardi:"Mar",mercredi:"Mer",jeudi:"Jeu",vendredi:"Ven"};
@@ -1289,7 +1367,7 @@ function dayPanel(day,c,o){
       dc.innerHTML='<div class="row">'+ring+'<div style="flex:1"><div class="k">Tu sors à</div><div class="big">'+fh(c.dep)+'</div></div><div class="detail">'+parts.join("<br>")+(c.skipsLunch&&!d.noLunch?"<br>pas besoin de midi":"")+(d.arrival?"":"<br><i>si tu arrives à "+fh(c.arr)+"</i>")+'</div></div>';
       // v2.4.2 : valider la journée finie (toucher = départ prévu ; appui long = roulette pour choisir l'heure)
       // v2.4.3 : aussi sans pointage (jour pas pointé) : arrivée et départ prévus retenus d'un coup
-      if(!o.hist){ var vb=el("button","lnk",ic("check-circle")+(d.arrival?" Valider la journée":" Valider la journée sans pointer")), vlong=false, vlp=null;
+      if(!o.hist){ var vb=el("button","lnk",ic("check-circle")+(d.arrival?" Valider la journée":" Valider avec mes heures habituelles")), vlong=false, vlp=null;
         vb.title="Toucher : départ prévu. Appui long : choisir l'heure.";
         vb.onpointerdown=function(){ vlong=false; clearTimeout(vlp); vlp=setTimeout(function(){ vlong=true; openDayWheel(day,"departure",o.refresh?{refresh:o.refresh}:null); },550); };
         vb.onpointerup=vb.onpointerleave=vb.onpointercancel=function(){ clearTimeout(vlp); };
@@ -1813,7 +1891,12 @@ function renderBets(sh){
 function renderAbout(sh){
   sh.appendChild(sheetHead("Quoi de neuf"));
   var n=el("div","notes");
-  n.innerHTML='<h3>v2.5 · 03.11.2026</h3><ul>'+
+  n.innerHTML='<h3>v2.6 · 03.11.2026</h3><ul>'+
+    '<li><b>Jolis boutons partout</b> : boutons en relief qui s\'enfoncent, contours lumineux, pastilles pour les petites actions, + et − du pot en dégradé.</li>'+
+    '<li><b>Jolie sélection</b> : la pilule glisse sous le choix (Thème, Déplacer / Début / Fin…), le jour choisi se soulève avec une barre lumineuse, la roulette brille.</li>'+
+    '<li><b>Midi en rose-violet</b> (plus d\'orange) avec poignées néon, trait « maintenant » blanc-cyan.</li>'+
+    '<li><b>Bouton plus clair</b> : « Valider la journée sans pointer » s\'appelle maintenant « Valider avec mes heures habituelles » (arrivée et départ prévus). Pointer = toucher la case Arrivée « je suis là » en arrivant.</li>'+
+    '</ul><h3>v2.5 · 03.11.2026</h3><ul>'+
     '<li><b>Nouveau look bleu et violet</b> : dégradés, lueurs, boutons qui s\'enfoncent, vague au toucher, interrupteurs néon, onglet qui gonfle, confettis en validant la journée. Thème Clair (lavande) dans Paramètres.</li>'+
     '</ul><h3>v2.4.3 · 03.11.2026</h3><ul>'+
     '<li><b>Valider sans pointer</b> : un jour pas pointé (même passé) se valide aussi. Touche le jour dans la bande, puis « Valider la journée sans pointer » : l\'arrivée et le départ prévus sont retenus, le jour passe en ✓. Appui long pour choisir l\'heure de départ.</li>'+
@@ -2631,13 +2714,36 @@ if ('serviceWorker' in navigator) {
         setTimeout(function(){ sw.classList.remove("fx-on","fx-off"); },700); }
       var j=n.closest(JEL); if(j&&!sw){ j.classList.remove("fx-jelly"); void j.offsetWidth; j.classList.add("fx-jelly"); setTimeout(function(){ j.classList.remove("fx-jelly"); },650); }
       if(isTab) burst(x,y-10,5,"fx-bub");
-      if(/Valider la journée/.test(txt)) burst(x,y,26,"fx-p",["#7c5cff","#3fc3ff","#d04cff","#3ee6c1","#ffb547","#fff"]);
+      if(/Valider la journée|Valider avec mes heures/.test(txt)) burst(x,y,26,"fx-p",["#7c5cff","#3fc3ff","#d04cff","#3ee6c1","#ffb547","#fff"]);
     },40);
   },true);
   // repère le bouton « Valider la journée » pour l'anneau qui pulse
-  var pend=0; function tag(){ pend=0; document.querySelectorAll("button.lnk").forEach(function(b){ if(/Valider la journée/.test(b.textContent)) b.classList.add("fx-cta"); }); }
+  var pend=0; function tag(){ pend=0; document.querySelectorAll("button.lnk").forEach(function(b){ if(/Valider la journée|Valider avec mes heures/.test(b.textContent)) b.classList.add("fx-cta"); }); }
   new MutationObserver(function(){ if(!pend){ pend=1; requestAnimationFrame(tag); } }).observe(document.body,{childList:true,subtree:true});
   tag();
+})();
+</script>
+<script>
+(function(){ // v2.6 : pilule qui glisse sous le choix (Thème, Barre, Déplacer / Début / Fin…)
+  var last={}, pend=0;
+  function key(g){ var r=g.closest(".swr"), s=r&&r.querySelector("span"); return (s?s.textContent:"")+"|"+[].map.call(g.children,function(b){ return b.tagName==="BUTTON"?b.textContent:""; }).join("/"); }
+  function place(g){
+    var on=g.querySelector("button.on"), p=g.querySelector(".fx-pill");
+    if(!on){ if(p) p.style.opacity=0; return; }
+    if(!p){ p=document.createElement("i"); p.className="fx-pill"; g.insertBefore(p,g.firstChild); g.classList.add("fx-sl"); }
+    var k=key(g), L=on.offsetLeft, W=on.offsetWidth; if(!W) return;
+    var o=last[k]; last[k]={l:L,w:W};
+    if(p.dataset.l==L+"/"+W) return;
+    if(o&&!p.dataset.l&&(o.l!==L||o.w!==W)){ // l'app a redessiné : on repart de l'ancienne place
+      p.classList.remove("go"); p.style.left=o.l+"px"; p.style.width=o.w+"px"; void p.offsetWidth; }
+    else if(!p.dataset.l){ p.classList.remove("go"); p.style.left=L+"px"; p.style.width=W+"px"; void p.offsetWidth; }
+    p.classList.add("go"); p.style.opacity=1; p.style.left=L+"px"; p.style.width=W+"px"; p.dataset.l=L+"/"+W;
+  }
+  function all(){ pend=0; document.querySelectorAll(".seg2").forEach(place); }
+  new MutationObserver(function(m){ if(pend) return; for(var i=0;i<m.length;i++){ if(m[i].target.closest&&m[i].target.closest(".fx-pill")) continue; pend=1; requestAnimationFrame(all); return; } })
+    .observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:["class"]});
+  addEventListener("resize",function(){ document.querySelectorAll(".seg2 .fx-pill").forEach(function(p){ p.dataset.l=""; }); all(); });
+  all();
 })();
 </script>
 </body>
