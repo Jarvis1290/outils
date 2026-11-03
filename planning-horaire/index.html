@@ -693,7 +693,7 @@ const Sauvegarde = (() => {
    - Report des heures (⏱) : tout vendredi, jour suivant, étalé, ou Perso (cases). Semaine = graphe en barres pour les exceptions.
    - Historique éditable : une correction recalcule le pot des semaines suivantes. */
 
-var APP_VERSION = "2.4.2", APP_DATE = "02.11.2026";
+var APP_VERSION = "2.4.3", APP_DATE = "03.11.2026";
 var KEY = "planning-horaire-v3";
 var DAYS = ["lundi","mardi","mercredi","jeudi","vendredi"];
 var SH = {lundi:"Lun",mardi:"Mar",mercredi:"Mer",jeudi:"Jeu",vendredi:"Ven"};
@@ -1109,12 +1109,13 @@ function dayPanel(day,c,o){
         ring='<div class="ring"><svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="'+R+'" class="rb"/><circle cx="32" cy="32" r="'+R+'" class="rf" stroke-dasharray="'+C.toFixed(1)+'" stroke-dashoffset="'+(C*(1-pr)).toFixed(1)+'"/></svg><b>'+Math.round(pr*100)+'%</b></div>'; }
       dc.innerHTML='<div class="row">'+ring+'<div style="flex:1"><div class="k">Tu sors à</div><div class="big">'+fh(c.dep)+'</div></div><div class="detail">'+parts.join("<br>")+(c.skipsLunch&&!d.noLunch?"<br>pas besoin de midi":"")+(d.arrival?"":"<br><i>si tu arrives à "+fh(c.arr)+"</i>")+'</div></div>';
       // v2.4.2 : valider la journée finie (toucher = départ prévu ; appui long = roulette pour choisir l'heure)
-      if(d.arrival && !o.hist){ var vb=el("button","lnk",ic("check-circle")+" Valider la journée"), vlong=false, vlp=null;
+      // v2.4.3 : aussi sans pointage (jour pas pointé) : arrivée et départ prévus retenus d'un coup
+      if(!o.hist){ var vb=el("button","lnk",ic("check-circle")+(d.arrival?" Valider la journée":" Valider la journée sans pointer")), vlong=false, vlp=null;
         vb.title="Toucher : départ prévu. Appui long : choisir l'heure.";
         vb.onpointerdown=function(){ vlong=false; clearTimeout(vlp); vlp=setTimeout(function(){ vlong=true; openDayWheel(day,"departure",o.refresh?{refresh:o.refresh}:null); },550); };
         vb.onpointerup=vb.onpointerleave=vb.onpointercancel=function(){ clearTimeout(vlp); };
         vb.oncontextmenu=function(e){ e.preventDefault(); };
-        vb.onclick=function(){ if(vlong){ vlong=false; return; } var dd=dayObj(day), m=Math.round(c.dep); dd.departure=toClock(m); dd.touched=true; dd.auto=false; commit(o); toast("✓ "+LB[day]+" validé · départ "+fh(m)); };
+        vb.onclick=function(){ if(vlong){ vlong=false; return; } var dd=dayObj(day), m=Math.round(c.dep); if(!dd.arrival) dd.arrival=toClock(Math.round(c.arr)); dd.departure=toClock(m); dd.touched=true; dd.auto=false; commit(o); toast("✓ "+LB[day]+" validé · départ "+fh(m)); };
         dc.appendChild(vb); }
       if(o.today && d.arrival){ var now=el("button","lnk",ic("sign-out")+" Je pars maintenant"); now.onclick=function(){ var dd=dayObj(day); dd.departure=toClock(nowMin()); dd.touched=true; dd.auto=false; commit(o); toast("Départ noté à "+fh(nowMin())); }; dc.appendChild(now); }
     }
@@ -1633,7 +1634,9 @@ function renderBets(sh){
 function renderAbout(sh){
   sh.appendChild(sheetHead("Quoi de neuf"));
   var n=el("div","notes");
-  n.innerHTML='<h3>v2.4.2 · 02.11.2026</h3><ul>'+
+  n.innerHTML='<h3>v2.4.3 · 03.11.2026</h3><ul>'+
+    '<li><b>Valider sans pointer</b> : un jour pas pointé (même passé) se valide aussi. Touche le jour dans la bande, puis « Valider la journée sans pointer » : l\'arrivée et le départ prévus sont retenus, le jour passe en ✓. Appui long pour choisir l\'heure de départ.</li>'+
+    '</ul><h3>v2.4.2 · 02.11.2026</h3><ul>'+
     '<li><b>Valider la journée</b> : sur la fiche du jour, dès l\'arrivée pointée. Un toucher retient le départ prévu tout de suite (le jour passe en ✓) ; un appui long ouvre la roulette pour choisir l\'heure. « Remettre le départ en automatique » annule.</li>'+
     '</ul><h3>v2.4.1 · 02.11.2026</h3><ul>'+
     '<li><b>Jour qui se referme, pour de vrai</b> : touche le jour ouvert (aujourd\'hui compris) dans la bande du haut, sa fiche se replie et il ne reste que les 5 jours. Touche un jour pour le rouvrir.</li>'+
