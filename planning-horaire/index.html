@@ -1367,7 +1367,7 @@ function dayPanel(day,c,o){
       dc.innerHTML='<div class="row">'+ring+'<div style="flex:1"><div class="k">Tu sors à</div><div class="big">'+fh(c.dep)+'</div></div><div class="detail">'+parts.join("<br>")+(c.skipsLunch&&!d.noLunch?"<br>pas besoin de midi":"")+(d.arrival?"":"<br><i>si tu arrives à "+fh(c.arr)+"</i>")+'</div></div>';
       // v2.4.2 : valider la journée finie (toucher = départ prévu ; appui long = roulette pour choisir l'heure)
       // v2.4.3 : aussi sans pointage (jour pas pointé) : arrivée et départ prévus retenus d'un coup
-      if(!o.hist){ var vb=el("button","lnk",ic("check-circle")+(d.arrival?" Valider la journée":" Valider la journée sans pointer")), vlong=false, vlp=null;
+      if(!o.hist){ var vb=el("button","lnk",ic("check-circle")+(d.arrival?" Valider la journée":" Valider avec mes heures habituelles")), vlong=false, vlp=null;
         vb.title="Toucher : départ prévu. Appui long : choisir l'heure.";
         vb.onpointerdown=function(){ vlong=false; clearTimeout(vlp); vlp=setTimeout(function(){ vlong=true; openDayWheel(day,"departure",o.refresh?{refresh:o.refresh}:null); },550); };
         vb.onpointerup=vb.onpointerleave=vb.onpointercancel=function(){ clearTimeout(vlp); };
@@ -1895,6 +1895,7 @@ function renderAbout(sh){
     '<li><b>Jolis boutons partout</b> : boutons en relief qui s\'enfoncent, contours lumineux, pastilles pour les petites actions, + et − du pot en dégradé.</li>'+
     '<li><b>Jolie sélection</b> : la pilule glisse sous le choix (Thème, Déplacer / Début / Fin…), le jour choisi se soulève avec une barre lumineuse, la roulette brille.</li>'+
     '<li><b>Midi en rose-violet</b> (plus d\'orange) avec poignées néon, trait « maintenant » blanc-cyan.</li>'+
+    '<li><b>Bouton plus clair</b> : « Valider la journée sans pointer » s\'appelle maintenant « Valider avec mes heures habituelles » (arrivée et départ prévus). Pointer = toucher la case Arrivée « je suis là » en arrivant.</li>'+
     '</ul><h3>v2.5 · 03.11.2026</h3><ul>'+
     '<li><b>Nouveau look bleu et violet</b> : dégradés, lueurs, boutons qui s\'enfoncent, vague au toucher, interrupteurs néon, onglet qui gonfle, confettis en validant la journée. Thème Clair (lavande) dans Paramètres.</li>'+
     '</ul><h3>v2.4.3 · 03.11.2026</h3><ul>'+
@@ -2713,11 +2714,11 @@ if ('serviceWorker' in navigator) {
         setTimeout(function(){ sw.classList.remove("fx-on","fx-off"); },700); }
       var j=n.closest(JEL); if(j&&!sw){ j.classList.remove("fx-jelly"); void j.offsetWidth; j.classList.add("fx-jelly"); setTimeout(function(){ j.classList.remove("fx-jelly"); },650); }
       if(isTab) burst(x,y-10,5,"fx-bub");
-      if(/Valider la journée/.test(txt)) burst(x,y,26,"fx-p",["#7c5cff","#3fc3ff","#d04cff","#3ee6c1","#ffb547","#fff"]);
+      if(/Valider la journée|Valider avec mes heures/.test(txt)) burst(x,y,26,"fx-p",["#7c5cff","#3fc3ff","#d04cff","#3ee6c1","#ffb547","#fff"]);
     },40);
   },true);
   // repère le bouton « Valider la journée » pour l'anneau qui pulse
-  var pend=0; function tag(){ pend=0; document.querySelectorAll("button.lnk").forEach(function(b){ if(/Valider la journée/.test(b.textContent)) b.classList.add("fx-cta"); }); }
+  var pend=0; function tag(){ pend=0; document.querySelectorAll("button.lnk").forEach(function(b){ if(/Valider la journée|Valider avec mes heures/.test(b.textContent)) b.classList.add("fx-cta"); }); }
   new MutationObserver(function(){ if(!pend){ pend=1; requestAnimationFrame(tag); } }).observe(document.body,{childList:true,subtree:true});
   tag();
 })();
