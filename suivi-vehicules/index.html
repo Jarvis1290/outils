@@ -946,6 +946,66 @@ html[data-magic="on"] .liq .lq{transform:rotate(calc(var(--gx,0) * -12deg))}
 .ph-ann .ph-acts{flex-wrap:wrap}
 .ph-ann .ph-acts>*{flex:1 1 40%}
 @media (prefers-reduced-motion:reduce){ .nope,.dodge,.wheelie,.tilt,.yawn,.bumpL,.bumpR,.shy,.nap,.stretch,.flip,.sulk,.shiver,.phares{animation:none} }
+/* 3.12 : thème Néon (bleu / violet), comme le Planning 2.5 : dégradés, lueurs, boutons qui s'enfoncent */
+html[data-theme="neon"]{color-scheme:dark;
+  --ink:#0b0a20;--navy:#151337;--navy-2:#1c1a46;--line:#2a2760;
+  --fg:#eeedff;--fg-2:#c3c0f2;--fg-3:#8e8bc6;--navbg:#09081d;--scrim:rgba(6,5,22,.6);
+  --volt:#7c5cff;--volt-hi:#a796ff;--volt-glow:rgba(124,92,255,.45);--grad1:#8f73ff;--grad2:#2fb4ff;--on-acc:#fff;--bg-glow:rgba(124,92,255,.22);
+  --ok:#3ee6c1;--warn:#ffb547;--bad:#ff6b8b;
+  --cy:#3fc3ff;--vi:#8f73ff;--pk:#e06bff;--nbase:#3a24a6;
+  --ngrad:linear-gradient(135deg,#7c5cff 0%,#4f7dff 55%,#2fb4ff 100%);--ngradH:linear-gradient(90deg,#a796ff,#3fc3ff);
+  --nglow:0 8px 26px -6px rgba(124,92,255,.7);
+  --sh:0 14px 34px -16px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.04),0 0 0 1px #2a2760;--rail-sh:0 0 0 1px rgba(124,92,255,.25),0 10px 30px -12px rgba(124,92,255,.55)}
+html[data-theme="neon"][data-mode="b"]{--volt:#3f8cff;--volt-hi:#8fc6ff;--volt-glow:rgba(63,140,255,.45);--bg-glow:rgba(63,140,255,.2)}
+html[data-theme="neon"] body{background:radial-gradient(120% 55% at 10% -10%,rgba(124,92,255,.32),transparent 60%),radial-gradient(90% 50% at 110% 105%,rgba(47,160,255,.22),transparent 60%),#0b0a20;background-attachment:fixed}
+html[data-theme="neon"] body::before{background:#0b0a20}
+html[data-theme="neon"] header.top{background:linear-gradient(#0d0b26 70%,transparent)}
+html[data-theme="neon"] #vTitle{background:var(--ngradH);-webkit-background-clip:text;background-clip:text;color:transparent}
+/* tuiles et cartes : verre sombre, fin liseré */
+html[data-theme="neon"] .card,html[data-theme="neon"] .tu{background:linear-gradient(180deg,#191640,#151337);border:1px solid var(--line)}
+html[data-theme="neon"] .hero{background:linear-gradient(135deg,#2a1d7a 0%,#3a2fb0 45%,#1f6fd8 100%);box-shadow:0 12px 30px -12px rgba(80,60,220,.9),inset 0 1px 0 rgba(255,255,255,.18)}
+/* barre : sombre, onglet actif en pilule dégradée qui gonfle */
+html[data-theme="neon"] nav.tabs{background:linear-gradient(180deg,#0d0b28,#120f36 60%,#0b0a22)}
+html[data-theme="neon"] #rdrop{background:var(--ngrad);box-shadow:0 0 0 1px rgba(255,255,255,.12) inset,0 6px 20px -4px rgba(124,92,255,.85),0 0 18px -2px rgba(63,181,255,.45)}
+html[data-theme="neon"] nav.tabs button{transition:scale .35s cubic-bezier(.3,1.7,.5,1),color .25s}
+html[data-theme="neon"] nav.tabs .in>button[aria-current="page"]{animation:nxTabPop .55s cubic-bezier(.3,1.6,.5,1)}
+html[data-theme="neon"] nav.tabs button:active{scale:.9;transition-duration:.08s}
+@keyframes nxTabPop{0%{scale:.7}45%{scale:1.14 .9}70%{scale:.95 1.06}100%{scale:1}}
+/* loupe : anneau néon qui respire */
+html[data-theme="neon"] nav.tabs .rqbox .rqb{box-shadow:inset 0 0 0 2px var(--cy);color:#cfe9ff;animation:nxBreathe 3.2s ease-in-out infinite}
+html[data-theme="neon"] nav.tabs .rqbox .rsep{background:linear-gradient(90deg,var(--vi),var(--cy));opacity:.7}
+@keyframes nxBreathe{0%,100%{box-shadow:inset 0 0 0 2px var(--cy),0 0 0 0 rgba(63,195,255,0)}50%{box-shadow:inset 0 0 0 2px var(--cy),0 0 16px 2px rgba(63,195,255,.55)}}
+/* + : dégradé, socle, s'enfonce */
+html[data-theme="neon"] .hplus{background:var(--ngrad);box-shadow:0 3px 0 var(--nbase),var(--nglow);transition:translate .12s,box-shadow .12s}
+html[data-theme="neon"] .hplus:active{translate:0 3px;box-shadow:0 0 0 var(--nbase),0 3px 10px -6px rgba(124,92,255,.6)}
+/* boutons principaux : dégradé, socle plus foncé (s'enfonce), reflet qui passe */
+html[data-theme="neon"] .btn.primary,html[data-theme="neon"] .hero .go{position:relative;overflow:hidden;background:var(--ngrad);color:#fff;border:0;box-shadow:0 4px 0 var(--nbase),var(--nglow);transition:translate .12s,box-shadow .12s}
+html[data-theme="neon"] .btn.primary::after{content:"";position:absolute;top:0;bottom:0;left:-60%;width:40%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-18deg);animation:nxShine 5s ease-in-out infinite;pointer-events:none}
+@keyframes nxShine{0%,72%{left:-60%}88%,100%{left:130%}}
+html[data-theme="neon"] .btn.primary:active,html[data-theme="neon"] .hero .go:active{translate:0 3px;box-shadow:0 1px 0 var(--nbase),0 3px 10px -6px rgba(124,92,255,.6)}
+html[data-theme="neon"] .btn:not(.primary):not(.danger){background:var(--navy-2);box-shadow:0 3px 0 #120f36,0 0 0 1px var(--line);transition:translate .12s,box-shadow .12s}
+html[data-theme="neon"] .btn:not(.primary):not(.danger):active{translate:0 2px;box-shadow:0 1px 0 #120f36,0 0 0 1px var(--line)}
+html[data-theme="neon"] .btn.danger{background:none;color:var(--bad);box-shadow:0 0 0 1.5px var(--bad),0 0 14px -6px var(--bad)}
+/* choix : pastilles dégradées qui brillent, petit ressort au toucher */
+html[data-theme="neon"] .seg{background:#100e2c;border-color:var(--line)}
+html[data-theme="neon"] .seg button[aria-pressed="true"],html[data-theme="neon"] .seg2 button[aria-pressed="true"],html[data-theme="neon"] .vtog button[aria-pressed="true"],html[data-theme="neon"] .tabs2 button[aria-pressed="true"]{background:var(--ngrad);color:#fff;box-shadow:0 0 12px -2px rgba(124,92,255,.75)}
+html[data-theme="neon"] .seg button[aria-pressed="true"] .ico,html[data-theme="neon"] .seg button[aria-pressed="true"] svg{color:#fff!important}
+html[data-theme="neon"] .seg2{background:#100e2c;box-shadow:0 0 0 1px color-mix(in srgb,var(--volt) 45%,transparent)}
+html[data-theme="neon"] .chiprow button[aria-pressed="true"]{border-color:transparent;background:linear-gradient(#1c1a46,#1c1a46) padding-box,var(--ngrad) border-box;border:1.5px solid transparent;box-shadow:0 0 14px -4px rgba(124,92,255,.8)}
+html[data-theme="neon"] :is(.seg button,.seg2 button,.chiprow button,.vtog button,.tabs2 button){transition:scale .35s cubic-bezier(.3,1.7,.5,1),background .2s,box-shadow .25s}
+html[data-theme="neon"] :is(.seg button,.seg2 button,.chiprow button,.vtog button,.tabs2 button):active{scale:.93;transition-duration:.08s}
+html[data-theme="neon"] .switch input{accent-color:#7c5cff}
+/* fiche du bas : verre + liseré lumineux */
+html[data-theme="neon"] .sheet .in{box-shadow:0 -1px 0 rgba(124,92,255,.5),0 -18px 40px -16px rgba(124,92,255,.6)}
+html[data-theme="neon"] .toast{background:linear-gradient(135deg,#2a1d7a,#1f6fd8);color:#fff;box-shadow:0 10px 26px -10px rgba(80,60,220,.9)}
+/* effets posés par le petit script néon */
+.nx-rw{position:absolute;inset:0;border-radius:inherit;overflow:hidden;pointer-events:none;z-index:0}
+.nx-rip{position:absolute;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.55),rgba(160,140,255,.25) 60%,transparent 70%);animation:nxRip .6s ease-out forwards}
+@keyframes nxRip{to{transform:scale(var(--s,30));opacity:0}}
+.nx-jelly{animation:nxJelly .6s cubic-bezier(.3,1.4,.5,1)}
+@keyframes nxJelly{0%{scale:1}25%{scale:1.12 .86}50%{scale:.92 1.08}75%{scale:1.04 .97}100%{scale:1}}
+.nx-bub{position:fixed;z-index:300;pointer-events:none;width:8px;height:8px;border-radius:50%;border:1.5px solid #3fc3ff;box-shadow:0 0 6px #3fc3ff}
+@media (prefers-reduced-motion:reduce){html[data-theme="neon"] .btn.primary::after,html[data-theme="neon"] nav.tabs .rqbox .rqb{animation:none}}
 </style>
 </head>
 <body>
@@ -1057,7 +1117,7 @@ html[data-magic="on"] .liq .lq{transform:rotate(calc(var(--gx,0) * -12deg))}
     <div class="card vform" id="vehForm" hidden></div>
     <div class="h2">Affichage</div>
     <div class="card" style="display:flex;flex-direction:column;gap:12px">
-      <div class="switch"><span>Thème</span><span class="seg2" id="setTheme"><button type="button" data-x="fonce">Foncé</button><button type="button" data-x="clair">Clair</button><button type="button" data-x="grim">Grimoire</button></span></div>
+      <div class="switch"><span>Thème</span><span class="seg2" id="setTheme"><button type="button" data-x="fonce">Foncé</button><button type="button" data-x="clair">Clair</button><button type="button" data-x="grim">Grimoire</button><button type="button" data-x="neon">Néon</button></span></div>
       <div class="switch"><span>Magie <small class="muted">(étincelles, chiffres qui roulent, ciel, tuiles qui flottent)</small></span><span class="seg2" id="setMagic"><button type="button" data-x="on">Oui</button><button type="button" data-x="off">Non</button></span></div>
       <div class="switch"><span>Bêtises <small class="muted">(petites farces de l'app, par jour)</small></span><span class="seg2" id="setBet"><button type="button" data-x="0">Aucune</button><button type="button" data-x="1">1</button><button type="button" data-x="3">3</button><button type="button" data-x="5">5</button><button type="button" data-x="fete">Fête 🎉</button></span></div>
       <div class="switch"><span>Page vivante <small class="muted">(sans toucher l'écran : un petit quelque chose toutes les 5 s)</small></span><span class="seg2" id="setViv"><button type="button" data-x="on">Oui</button><button type="button" data-x="off">Non</button></span></div>
@@ -1418,7 +1478,7 @@ const THEME = { // v1.8 : même fond foncé pour tous, un accent par véhicule
   k:{txt:"#B3B8C2",grid:"rgba(255,255,255,.06)",tipBg:"#20242B",tipFg:"#EEF0F4",tipBd:"#E5484D",track:"#262A32",needle:"#EEF0F4",muted:"#8B92A0",bad:"#FF9F43",warn:"#F5D04C",acc:"#E5484D",fg:"#EEF0F4"}};
 let MODE=0; try{ const m=+localStorage.getItem("sv-mode"); if(m>0) MODE=m; }catch(e){}
 let T=THEME.k;
-const APP_VERSION="3.11";
+const APP_VERSION="3.12";
 const KEY="suivi-vehicules-v1";
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}}, lsSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 let STATE={fills:[],tyres:[],ent:[],rates:{},range:[925,350],tank:[60,20],buy:[3500,10000],fixed:[{},{}],trip:null};
@@ -1555,17 +1615,18 @@ const used = ()=>V.map((_,i)=>i).filter(i=>A.stat[i]);
 const hexMix=(a,b,t)=>{ const p=x=>[1,3,5].map(i=>parseInt(x.slice(i,i+2),16)), A=p(a), B=p(b); return "#"+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,"0")).join(""); };
 const rgba=(x,a)=>`rgba(${[1,3,5].map(i=>parseInt(x.slice(i,i+2),16)).join(",")},${a})`;
 function applyTheme(){
-  const H=document.documentElement, x=V[MODE], light=H.dataset.theme==="clair"||H.dataset.theme==="grim", grim=H.dataset.theme==="grim";
+  const H=document.documentElement, x=V[MODE], light=H.dataset.theme==="clair"||H.dataset.theme==="grim", grim=H.dataset.theme==="grim", neon=H.dataset.theme==="neon";
   T=Object.assign({},THEME.k);
   const std=x.id==="k"&&x.c==="#E5484D"?"k":x.id==="b"&&x.c==="#3D86F8"?"b":null;
   H.dataset.mode=std||"x";
   ["--volt","--volt-hi","--volt-glow","--grad1","--grad2","--bg-glow"].forEach(k=>H.style.removeProperty(k));
-  if(!std){ const c=x.c; H.style.setProperty("--volt",c); H.style.setProperty("--volt-hi",light?c:hexMix(c,"#ffffff",.35)); H.style.setProperty("--volt-glow",rgba(c,.28));
+  if(!std&&!neon){ const c=x.c; H.style.setProperty("--volt",c); H.style.setProperty("--volt-hi",light?c:hexMix(c,"#ffffff",.35)); H.style.setProperty("--volt-glow",rgba(c,.28));
     H.style.setProperty("--grad1",hexMix(c,"#ffffff",.18)); H.style.setProperty("--grad2",hexMix(c,"#000000",.12)); H.style.setProperty("--bg-glow",rgba(c,.1)); }
   T.acc=std==="b"?"#2F7CF6":x.c; T.tipBd=T.acc;
+  if(neon) Object.assign(T,{txt:"#a3a0d6",grid:"rgba(124,92,255,.14)",tipBg:"#1c1a46",tipFg:"#eeedff",track:"#2a2760",muted:"#8e8bc6",tipBd:"#7c5cff"});
   if(grim) Object.assign(T,{txt:"#5A4630",grid:"rgba(90,60,20,.12)",tipBg:"#F6EDD5",tipFg:"#2B1F12",track:"#D8C59C",needle:"#2B1F12",muted:"#8A7355",fg:"#2B1F12",bad:"#B4441B",warn:"#A86B12"});
   else if(light) Object.assign(T,{txt:"#4A505C",grid:"rgba(20,22,26,.07)",tipBg:"#FFFFFF",tipFg:"#16181D",track:"#E4E7ED",needle:"#16181D",muted:"#848B98",fg:"#16181D"});
-  const mc=document.querySelector('meta[name="theme-color"]'); if(mc) mc.content=grim?"#E8DCBC":light?"#EEF0F5":"#0D0F13"; if(typeof skyNow==="function") skyNow();
+  const mc=document.querySelector('meta[name="theme-color"]'); if(mc) mc.content=grim?"#E8DCBC":light?"#EEF0F5":neon?"#0b0a20":"#0D0F13"; if(typeof skyNow==="function") skyNow();
   Chart.defaults.color=T.txt; Chart.defaults.borderColor=T.grid;
   Object.assign(tip,{backgroundColor:T.tipBg,borderColor:T.tipBd,titleColor:T.tipFg,bodyColor:T.tipFg});
   $("#sub").textContent = new Date().toLocaleDateString("fr-CH",{weekday:"long",day:"numeric",month:"long"});
@@ -3174,6 +3235,7 @@ function renderMore(){
 
 // ---------- Quoi de neuf : la version en grand, une carte par version ; s'ouvre une fois après chaque mise à jour
 const CHANGELOG=[
+  ["3.12","03.11.2026","Thème Néon",["Nouveau thème Néon (Paramètres › Affichage › Thème) : bleu et violet, dégradés et lueurs, comme le Planning","Boutons qui s'enfoncent, vague au toucher, pastilles qui rebondissent, loupe avec un anneau qui respire"]],
   ["3.11","03.11.2026","Barre et frais fixes",["La loupe de recherche est dans la barre, au milieu des onglets","Stats : touche encore l'onglet pour passer à l'écran suivant (Conso, Prix/L, Année, Coûts, Stations, Pays, Stats communes)","Frais fixes : tu choisis comment tu paies (annuel, semestriel, trimestriel ou mensuel) et le mois du paiement ; le budget, À prévoir et le Bilan suivent","Timeline : juste la liste et les boutons Tout, Pleins, Entretien, Frais fixes"]],
   ["3.10","01.11.2026","Bilan annuel",["Coût & trajet › Bilan : un récapitulatif par année, présenté comme une facture (carburant, garage, fournitures, pneus, assurance, impôt, vignette…)","Comparaison avec l'année d'avant poste par poste (▲ plus cher, ▼ moins cher), et toutes les années côte à côte","Frais fixes répartis sur l'année ou comptés le jour du paiement, au choix","Imprimer en PDF ou partager le bilan (fichier propre, lisible partout)"]],
   ["3.9","01.11.2026","Budget prévu mois par mois",["À prévoir : les 12 prochains mois en barres, avec la ligne d'un mois normal","Touche un mois : ce qui est prévu (pleins, assurance, entretien, pneus…) et le total, plus cher ou moins cher qu'un mois normal","Cases Ce mois, 3 mois, 6 mois et 12 mois : le total, le détail mois par mois et ce que ça contient"]],
@@ -3622,7 +3684,7 @@ function save(){
 
 // ---------- 💾 sauvegarde Drive commune (bloc SAUVEGARDE ATELIER v2) + import des anciens fichiers
 // réglages d'affichage (gardés dans ce téléphone) : aussi dans la sauvegarde, pour tout retrouver après une réinstallation
-const AFF={theme:["sv-theme",["fonce","clair","grim"]],magie:["sv-magic",["on","off"]],barre:["sv-rail",["g","d","b"]],iconesBarre:["sv-ricons",["h","b"]],barreCachee:["sv-rhide",["e","c"]],
+const AFF={theme:["sv-theme",["fonce","clair","grim","neon"]],magie:["sv-magic",["on","off"]],barre:["sv-rail",["g","d","b"]],iconesBarre:["sv-ricons",["h","b"]],barreCachee:["sv-rhide",["e","c"]],
   defilement:["sv-snap",["f","l"]],ouvrirTuile:["sv-topen",["p","s"]],pave:["sv-pad",["on","off"]],budget:["sv-bud",["v","t"]],bilanFrais:["sv-bilfx",["r","p"]],betises:["sv-bet",["3","0","1","5","fete"]],genreBetises:["sv-betd",["toutes","discretes"]],pageVivante:["sv-viv",["on","off"]]};
 function affRead(){ const o={}; Object.keys(AFF).forEach(k=>{ const v=lsGet(AFF[k][0]); o[k]=AFF[k][1].includes(v)?v:AFF[k][1][0]; }); o.ordreBarre=railOrder(); return o; } // sans réglage : la valeur par défaut (la première)
 function affOk(g){ if(!g||typeof g!=="object") return null; const o={};
@@ -4007,5 +4069,34 @@ applyTheme(); applyRailOrder();
 applyPad();
 go("home");
 if(lsGet("sv-seen")!==APP_VERSION){ if(fills.length) setTimeout(openNews,500); else lsSet("sv-seen",APP_VERSION); }
+})();
+</script>
+<script>
+// 3.12 : thème Néon : vague au toucher, petit effet gelée, bulles sur la barre (seulement avec ce thème)
+(function(){
+  const RIP=".btn,.hplus,.seg button,.seg2 button,.chiprow button,.vtog button,.tabs2 button,.hero .go,nav.tabs button";
+  const JEL=".seg button,.seg2 button,.chiprow button,.vtog button,.tabs2 button";
+  const on=()=>document.documentElement.dataset.theme==="neon"&&!(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches);
+  let last=null;
+  document.addEventListener("pointerdown",e=>{
+    last={x:e.clientX,y:e.clientY}; if(!on()) return;
+    const b=e.target.closest&&e.target.closest(RIP); if(!b||b.closest("#kpad")) return;
+    if(getComputedStyle(b).position==="static") b.style.position="relative";
+    const r=b.getBoundingClientRect(), w=document.createElement("span"), s=document.createElement("span");
+    w.className="nx-rw"; s.className="nx-rip"; s.style.left=(e.clientX-r.left)+"px"; s.style.top=(e.clientY-r.top)+"px";
+    s.style.setProperty("--s",Math.ceil(Math.hypot(r.width,r.height)/6)); w.appendChild(s); b.appendChild(w); setTimeout(()=>w.remove(),650);
+  },true);
+  function bubbles(x,y,n){ for(let i=0;i<n;i++){ const p=document.createElement("i"); p.className="nx-bub"; p.style.left=x+"px"; p.style.top=y+"px"; document.body.appendChild(p);
+    const tx=Math.random()*30-15, ty=-(40+Math.random()*50);
+    p.animate([{transform:"translate(0,0) scale(1)",opacity:1},{transform:`translate(${tx}px,${ty}px) scale(.9)`,opacity:1,offset:.6},{transform:`translate(${tx*1.1}px,${ty-20}px) scale(.6)`,opacity:0}],{duration:900,easing:"cubic-bezier(.2,.7,.3,1)"}).onfinish=()=>p.remove(); } }
+  document.addEventListener("click",e=>{
+    if(!on()) return;
+    const x=e.clientX||(last&&last.x)||0, y=e.clientY||(last&&last.y)||0, tab=e.target.closest&&e.target.closest("nav.tabs button");
+    setTimeout(()=>{ // l'app redessine souvent : on reprend l'élément sous le doigt
+      const n=document.elementFromPoint(x,y); if(!n) return;
+      const j=n.closest(JEL); if(j){ j.classList.remove("nx-jelly"); void j.offsetWidth; j.classList.add("nx-jelly"); setTimeout(()=>j.classList.remove("nx-jelly"),650); }
+      if(tab) bubbles(x,y-10,5);
+    },40);
+  },true);
 })();
 </script>
