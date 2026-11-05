@@ -1235,9 +1235,6 @@ html[data-theme="neon"] .toast{background:linear-gradient(135deg,#2a1d7a,#1f6fd8
     <div class="h2">Sauvegarde</div>
     <div id="svBox"></div>
     <div id="phBox" hidden></div>
-    <button class="btn" type="button" id="btnImport" hidden><span class="ico" style="--ic:#E8C062"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M208 88h-56V32Z" opacity=".2"/><path d="m213.66 82.34l-56-56A8 8 0 0 0 152 24H56a16 16 0 0 0-16 16v176a16 16 0 0 0 16 16h144a16 16 0 0 0 16-16V88a8 8 0 0 0-2.34-5.66M160 51.31L188.69 80H160ZM200 216H56V40h88v48a8 8 0 0 0 8 8h48zm-42.34-77.66a8 8 0 0 1-11.32 11.32L136 139.31V184a8 8 0 0 1-16 0v-44.69l-10.34 10.35a8 8 0 0 1-11.32-11.32l24-24a8 8 0 0 1 11.32 0Z"/></svg></span> Importer un ancien fichier</button>
-    <input type="file" id="fileImport" accept=".txt,.json,.xlsx,.xls,text/plain,application/json" hidden>
-    <div class="cap" hidden>Ancien fichier = une sauvegarde d'avant la v1.5 (<span style="font-family:var(--f-num)">Vehicules_sauvegarde_AAAA-MM-JJ.txt</span>) ou ton fichier <span style="font-family:var(--f-num)">Vehicules.xlsx</span> d'origine. Tes données actuelles sont d'abord gardées dans « Copies avant import ».</div>
     <div class="h2">Données</div>
     <button class="btn danger" type="button" id="btnWipe">Effacer toutes les données</button>
     <div class="h2">À propos</div>
@@ -2037,7 +2034,7 @@ function renderHome(){
     $("#homeEmpty").innerHTML=`<div style="font-size:40px;line-height:1">${none?ic("gas-pump","var(--volt-hi)"):vIc(i)}</div><div class="big">${none?"Bienvenue !":`Pas encore de ${hasFuel(i)?U(i).plein:"relevé"} pour ${esc(V[i].n)}`}</div>
       <p>${none?"Importe ton fichier <b>Vehicules.xlsx</b> pour reprendre tout ton historique, ou commence directement avec le bouton <b>+</b> en haut.":`Touche le bouton <b>+</b> en haut pour noter ${hasFuel(i)?"le premier "+U(i).plein:"le compteur"} de ce véhicule.`}</p>
       ${none?`<button class="btn primary" type="button" id="homeImport">⬆ Importer Vehicules.xlsx</button>`:""}`;
-    if(none) $("#homeImport").onclick=()=>$("#fileImport").click();
+    if(none) $("#homeImport").onclick=()=>toast("Restaurer un zip : Paramètres › Sauvegarde.");
     return; }
   renderFeatured();
   const u=U(i);
@@ -2403,7 +2400,7 @@ function renderBudSimple(vs){ // 3.14 (test) : un seul budget, moyennes des 12 d
 }
 function oracleConf(vs){ const n=vs.reduce((t,v)=>t+A.all[v].filter(f=>f.P>0&&day(f.d)>=TODAY-365).length,0); return n>=12?{k:"bon",s:.1,l:"bon"}:n>=6?{k:"moyen",s:.2,l:"moyenne"}:{k:"faible",s:.35,l:"faible"}; }
 function renderOracle(vs){ // 3.17 (test) : À prévoir = oracle : prévisions avec fourchette et niveau de confiance
-  const pc=$("#planCard"), B=budget(vs), all=budAll(); if(!B){ pc.hidden=true; return; }
+  const pc=$("#planCard"); A=analyse(); const B=budget(vs), all=budAll(); if(!B){ pc.hidden=true; return; }
   const items=vs.flatMap(planItems).sort((a,b)=>a.d-b.d), PM=planMonths(vs,items,B), cf=oracleConf(vs);
   const HZ=[[1,"Ce mois"],[3,"3 mois"],[6,"6 mois"],[12,"12 mois"]], ms=k=>MOIS[+k.slice(5)-1]+".";
   const rng=n=>{ const s=PM.slice(0,n).reduce((t,m)=>t+m.t,0); return {s, lo:s*(1-cf.s), hi:s*(1+cf.s)}; };
@@ -2861,7 +2858,7 @@ $("#phDel").onclick=()=>confirmTap($("#phDel"),"Toucher encore pour supprimer la
 document.addEventListener("click",e=>{const t=e.target.closest(".ph-thumb[data-ph]");if(t)phView(t.dataset.ph)});
 document.addEventListener("change",e=>{
   if(e.target.id==="phIn"&&e.target.files.length){phAdd([...e.target.files]);e.target.value=""}
-  if(e.target.classList.contains("pdf-in")&&e.target.files.length){const files=[...e.target.files];e.target.value="";docImport(files,sv)}
+  if(e.target.classList.contains("pdf-in")&&e.target.files.length){const files=[...e.target.files];e.target.value="";DOCLIEN=(ENTEDIT&&ENTEDIT.id)||(EDIT&&EDIT.id)||null;docImport(files,sv)}
   if(e.target.classList.contains("nph-in")&&e.target.files.length){const files=[...e.target.files];e.target.value="";phAdd(files,e.target.dataset.ref||(NEWREF=uid()))}
   if(e.target.id==="phImp"&&e.target.files[0]){phImport(e.target.files[0]);e.target.value=""}});
 
@@ -2955,13 +2952,14 @@ async function renderDocs(){ const v=MODE, B=$("#vehBody"), L=docsOf(v);
 }
 
 // ----- enregistrer un document (pages = Blobs)
-async function docSave(meta,blobs){ const v=meta.v, d={id:uid(),k:meta.k||"fac",t:meta.t||"",d:meta.d||dOf(TODAY),m:meta.m??null,pdf:blobs.some(b=>isPdf(b)),np:0};
+let DOCLIEN=null;
+async function docSave(meta,blobs){ const v=meta.v, d={id:uid(),k:meta.k||"fac",t:meta.t||"",d:meta.d||dOf(TODAY),m:meta.m??null,pdf:blobs.some(b=>isPdf(b)),np:0,lien:DOCLIEN||null};
   let pg=0;
   for(const b of blobs){ const pdf=isPdf(b); let prev=null; if(!pdf) prev=await phPrev(b);
     try{ await phDo("readwrite",s=>s.put({id:uid(),ref:docRef(d.id),pg:pg++,t:new Date().toISOString(),name:b.name||(pdf?"document.pdf":"page.jpg"),type:pdf?"application/pdf":(b.type||"image/jpeg"),blob:b,prev})); }
     catch(e){ toast("Mémoire pleine : document non gardé"); await phDelRef(docRef(d.id)); return null; } }
   d.np=d.pdf?await pdfCount(blobs):pg;
-  docsOf(v).push(d); persist(); return d; }
+  docsOf(v).push(d); DOCLIEN=null; persist(); return d; }
 async function pdfCount(blobs){ let n=0; for(const b of blobs){ if(!isPdf(b)){ n++; continue; }
   try{ const PL=await loadPdfLib(); n+=(await PL.PDFDocument.load(await b.arrayBuffer(),{ignoreEncryption:true,updateMetadata:false})).getPageCount(); continue; }catch(e){}
   try{ const t=new TextDecoder("latin1").decode(await b.arrayBuffer()); const m=t.match(/\/Type\s*\/Page[^s]/g); n+=m?m.length:1; }catch(e){ n++; } } return n; }
@@ -3236,10 +3234,10 @@ function tlEvents(v){
     const pills=(f.conso!=null?`<span class="pill ok">${fmt(f.conso,2)} ${u.c100}</span>`:"")+(f.eur!=null?`<span class="pill" style="color:var(--volt-hi);border-color:color-mix(in srgb,var(--volt) 50%,transparent)">€</span>`:"")
       +(f.ign&&f.ign.length?f.ign.map(x=>`<span class="pill w">⚠ ignoré : ${x}</span>`).join(""):"")+(f.weird?`<span class="pill w">conso inhabituelle</span>`:"")+(f.force?`<span class="pill ok">compté quand même</span>`:"")+"";
     out.push({k:"fill",d:f.d,km:+f.km||0,f,t:`${hasFuel(v)?(u.plein==="recharge"?"Recharge":"Plein"):"Relevé"} ${f.L!=null?fmt(f.L,2)+" "+u.vol:"– "+u.vol}${pills}`,
-      s:`${CTRY[f.ctry||"CH"].f} ${hasKm(f)?fmt(f.km)+" km":"km non noté"} · ${f.vague?"je ne sais plus":f.full?u.plein:"partiel"}${f.dist?` · +${fmt(f.dist)} km`:""}${f.st?` · ${esc(f.st)}`:""}${f.lieu?` (${esc(f.lieu)})`:""}${opt}`,m:f.P,m2:f.eur!=null?fmt(f.eur,2)+" €":""}); });
+      s:`${CTRY[f.ctry||"CH"].f} ${hasKm(f)?fmt(f.km)+" km":"km non noté"} · ${f.vague?"je ne sais plus":f.full?u.plein:"partiel"}${f.dist?` · +${fmt(f.dist)} km`:""}${f.st?` · ${esc(f.st)}`:""}${f.lieu?` (${esc(f.lieu)})`:""}${docsOf(v).some(d=>d.lien===f.id)?" · 📎 document":""}${opt}`,m:f.P,m2:f.eur!=null?fmt(f.eur,2)+" €":""}); });
   STATE.ent.filter(e=>e.v===v).forEach(e=>{ const K=EKIND[ekOf(e)], fi=e.k==="F"?FXI[e.fk||"aut"]:null;
     out.push({k:ekOf(e),d:e.d||"0000-00-00",km:+e.km||0,e,i:fi?fi[0]:null,c:fi?fi[1]:null,t:esc(e.t),
-      s:`${e.k==="F"?(e.d?"année "+e.d.slice(0,4)+" · ":"")+(FXN[e.fk]||"frais fixe").toLowerCase()+(perOf(e)>1&&+e.m>0?` · ${fmt(+e.m/perOf(e),2)} CHF ${perN(e)[2]} · ${fmt(+e.m)} CHF par an`:" · par an"):K[1].toLowerCase()}${e.km?` · ${fmt(+e.km)} km`:""}${e.d?"":" · date non notée"}`,m:e.m!=null&&e.m!==""?+e.m:null}); });
+      s:`${e.k==="F"?(e.d?"année "+e.d.slice(0,4)+" · ":"")+(FXN[e.fk]||"frais fixe").toLowerCase()+(perOf(e)>1&&+e.m>0?` · ${fmt(+e.m/perOf(e),2)} CHF ${perN(e)[2]} · ${fmt(+e.m)} CHF par an`:" · par an"):K[1].toLowerCase()}${e.km?` · ${fmt(+e.km)} km`:""}${e.d?"":" · date non notée"}${docsOf(v).some(d=>d.lien===e.id)?" · 📎 document":""}`,m:e.m!=null&&e.m!==""?+e.m:null}); });
   (()=>{ let rv=[]; try{ rv=JSON.parse(localStorage.getItem("sv-res-ev-"+v)||"[]"); }catch(e){}
     rv.forEach(r=>out.push({k:"res",d:r.d||"0000-00-00",km:+r.km||0,t:"Voyant de réserve",s:`${fmt(r.km)} km${r.dist?` · ${fmt(r.dist)} km après le plein`:""}`,m:null})); })();
   STATE.tyres.filter(x=>x.v===v).forEach(x=>{ const T=TTYPE[tyreType(x)]; out.push({k:"P",d:x.d,km:+x.km||0,t:`Pneus ${T.n.toLowerCase()} montés`,s:[x.mod?esc(x.mod):"",x.pos?TPOS[x.pos]:""].filter(Boolean).join(" · "),m:null}); });
@@ -4243,8 +4241,7 @@ function backupFrom(j){ // relit les données d'une sauvegarde (ancien .txt ou s
   (j.entretien||[]).forEach(e=>{ const v=vi(e.v); if(v>=0&&e.t){ const x={id:okId(e.id),d:okD(e.d),v,t:okS(e.t,120),m:okN(e.m),km:okN(e.km)}; if(e.k==="E"||e.k==="S"||e.k==="P"||e.k==="F") x.k=e.k; if(x.k==="F"){ x.fk=FXN[e.fk]?e.fk:guessFk(e.t); if([2,4,12].includes(+e.per)) x.per=+e.per; } out.ent.push(x); } });
   return out; }
 let pendingImport=null;
-$("#btnImport").onclick=()=>$("#fileImport").click();
-$("#fileImport").onchange=async e=>{ const file=e.target.files[0]; e.target.value=""; if(!file) return;
+const _ancienImport=async e=>{ const file=e.target.files[0]; e.target.value=""; if(!file) return;
   try{ let d;
     const txt=/\.(txt|json)$/i.test(file.name)||file.type.startsWith("text")||file.type.includes("json");
     if(txt){ const t=await file.text(); if(t.startsWith("SAUVEGARDE ATELIER")){ toast("C'est une sauvegarde Drive : utilise 📂 Importer dans la carte verte juste au-dessus."); return; } d=parseBackup(t); }
