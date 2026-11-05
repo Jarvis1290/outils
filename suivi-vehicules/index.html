@@ -2345,7 +2345,7 @@ let budSel=null; // mois touché dans le graphique
 let planSel=null; // « h3 » = les 3 prochains mois, « m2026-12 » = un mois : touché dans À prévoir
 function planMonths(vs,items,B){ // les 12 prochains mois (le mois en cours compte à partir d'aujourd'hui) : carburant au rythme des 12 derniers mois + ce qui tombe
   const T1=TODAY+1, a12=Math.max(B.st,T1-365), d12=T1-a12;
-  const fu=vs.filter(hasFuel).map(v=>{ const F=A.all[v].filter(f=>f.P>0&&day(f.d)>=a12&&day(f.d)<T1); return {v,perD:F.reduce((t,f)=>t+f.P,0)/d12,nD:F.length/d12,avg:F.length?F.reduce((t,f)=>t+f.P,0)/F.length:0}; });
+  const fu=vs.filter(hasFuel).map(v=>{ const F=A.all[v].filter(f=>f.P>0&&day(f.d)>=a12&&day(f.d)<T1), F3=A.all[v].filter(f=>f.P>0&&day(f.d)>=T1-91&&day(f.d)<T1); const r12=F.reduce((t,f)=>t+f.P,0)/d12, r3=F3.length?F3.reduce((t,f)=>t+f.P,0)/91:r12; return {v,perD:(r12+r3)/2,nD:F.length/d12,avg:F.length?F.reduce((t,f)=>t+f.P,0)/F.length:0}; }); // 3.17 : moyenne du rythme 12 mois et des 3 derniers mois
   const out=[]; let k=mKey(TODAY);
   for(let i=0;i<12;i++,k=mNext(k)){ const a=i?day(k+"-01"):TODAY, b=day(mNext(k)+"-01"), d=b-a, its=items.filter(x=>!x.info&&x.d>=a&&x.d<b);
     const o={k,a,b,d,first:!i,carb:fu.reduce((t,f)=>t+f.perD*d,0),ent:0,four:0,pneu:0,fixe:0,its,late:its.some(x=>x.late),fu:fu.map(f=>({v:f.v,n:f.nD*d,avg:f.avg,m:f.perD*d}))};
@@ -2399,7 +2399,24 @@ function renderBudSimple(vs){ // 3.14 (test) : un seul budget, moyennes des 12 d
     <div class="bsc">À mettre de côté par mois : <b>${fmt(cote/N)} CHF</b> (hors essence)</div>
     <div class="cap">Moyenne des 12 derniers mois, tirée de ta Timeline. Pas de prévision de dates.</div>`;
   el.querySelectorAll("#bsN button").forEach(bn=>bn.onclick=()=>{ window.budSimpleN=+bn.dataset.n; renderBudget(); });
-  box.hidden=true; pc.hidden=true; tc.hidden=true;
+  box.hidden=true; tc.hidden=true; renderOracle(Array.isArray(vs)?vs:[MODE]);
+}
+function oracleConf(vs){ const n=vs.reduce((t,v)=>t+A.all[v].filter(f=>f.P>0&&day(f.d)>=TODAY-365).length,0); return n>=12?{k:"bon",s:.1,l:"bon"}:n>=6?{k:"moyen",s:.2,l:"moyenne"}:{k:"faible",s:.35,l:"faible"}; }
+function renderOracle(vs){ // 3.17 (test) : À prévoir = oracle : prévisions avec fourchette et niveau de confiance
+  const pc=$("#planCard"), B=budget(vs), all=budAll(); if(!B){ pc.hidden=true; return; }
+  const items=vs.flatMap(planItems).sort((a,b)=>a.d-b.d), PM=planMonths(vs,items,B), cf=oracleConf(vs);
+  const HZ=[[1,"Ce mois"],[3,"3 mois"],[6,"6 mois"],[12,"12 mois"]], ms=k=>MOIS[+k.slice(5)-1]+".";
+  const rng=n=>{ const s=PM.slice(0,n).reduce((t,m)=>t+m.t,0); return {s, lo:s*(1-cf.s), hi:s*(1+cf.s)}; };
+  const who=all?"Tous les véhicules":esc(V[MODE].n), pmx=Math.max(1,B.m12,...PM.map(m=>m.t));
+  pc.hidden=false;
+  pc.innerHTML=`<div class="hd2">${ic("calendar-check","#3DD39B")} Oracle · à prévoir · ${who}</div>
+    <div class="bkpi pl pl4">${HZ.map(([n,l])=>{ const r=rng(n); return `<button type="button" data-h="${n}" aria-pressed="${planSel==="h"+n}"><small>${l}</small><b class="num">${fmt(r.s)}</b><span>CHF · ${fmt(r.lo)}–${fmt(r.hi)}</span></button>`; }).join("")}</div>
+    <div class="bline">Confiance : <b>${cf.l}</b> (${cf.k==="bon"?"assez de pleins pour une estimation serrée":cf.k==="moyen"?"quelques pleins, la fourchette est plus large":"peu de pleins, estimation large"}). Carburant : moyenne du rythme des 12 derniers mois et des 3 derniers.</div>
+    <div class="bch pch" style="--avgf:${(Math.min(1,B.m12/pmx)).toFixed(3)}"><div class="bavg"><span>mois normal ${fmt(B.m12)}</span></div>${PM.map(m=>`<button type="button" class="bb${m.late?" late":""}" data-m="${m.k}" aria-pressed="${planSel==="m"+m.k}" aria-label="${ms(m.k)} ${fmt(m.t)} CHF"><span class="bs"><i style="height:${(m.t/pmx*100).toFixed(1)}%;background:#3DD39B"></i></span><small>${MOIS[+m.k.slice(5)-1].slice(0,3)}</small></button>`).join("")}</div>
+    <div id="planDet"></div>
+    <div class="plist">${items.length?items.map(x=>`<div class="pit${x.late?" late":""}"><span class="pd"><b>${x.late?"!":dOf(x.d).slice(8)*1}</b><small>${x.late?"à voir":MOIS[+dOf(x.d).slice(5,7)-1]}</small></span><span class="pt">${esc(x.t)}<small>${esc(x.s||"")}</small></span><span class="pv">${fmt(x.m)} CHF</span></div>`).join(""):`<div class="muted">Rien de prévu dans les frais fixes ou l'entretien.</div>`}</div>
+    <div class="cap">L'oracle prévoit les dépenses à venir : carburant, frais fixes et entretien. Le Budget, lui, reste le bilan réel de ce qui a été dépensé.</div>`;
+  planBind(PM,B,all);
 }
 function renderBudget(){
   const box=$("#budCard"), pc=$("#planCard"), tc=$("#tipCard"), vs=budVs(), B=budget(vs), all=budAll(), who=all?"Tous les véhicules":esc(V[MODE].n);
