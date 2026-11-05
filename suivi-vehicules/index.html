@@ -465,6 +465,9 @@ html[data-theme="liseuse"] .btn{background:#FFFFFF;color:#000000;border:2px soli
 html[data-theme="liseuse"] .btn.primary,html[data-theme="liseuse"] button[aria-pressed="true"]{background:#000000;color:#FFFFFF}
 html[data-theme="liseuse"] nav.tabs,html[data-theme="liseuse"] .rail{background:#FFFFFF;border:2px solid #111111}
 html[data-theme="liseuse"] .tlist{border-left:2px solid #111111}
+html[data-theme="liseuse"],html[data-theme="liseuse"] body,html[data-theme="liseuse"] #app,html[data-theme="liseuse"] main,html[data-theme="liseuse"] .view,html[data-theme="liseuse"] .pg{background:#FFFFFF!important;color:#000000}
+html[data-theme="liseuse"] .tle .v .vd{color:#000000;font-weight:800}
+html[data-theme="liseuse"] .tle .v .vp{color:#000000;font-weight:700}
 html[data-theme="clair"]{color-scheme:light;
   --ink:#EEF0F5;--navy:#FFFFFF;--navy-2:#F4F5F8;--line:#E4E7ED;
   --fg:#16181D;--fg-2:#4A505C;--fg-3:#848B98;--navbg:#14161A;--scrim:rgba(20,22,26,.45);
@@ -1301,7 +1304,8 @@ html[data-theme="neon"] .toast{background:linear-gradient(135deg,#2a1d7a,#1f6fd8
         <div class="hint" id="hRate">Taux du jour chargé automatiquement, modifiable.</div>
       </div>
       <div class="field full fuelOnly"><label>Station</label><div class="chiprow" id="fSt"></div>
-        <input class="txt" id="fStOther" type="text" placeholder="Nom de la station" hidden><div class="hint" id="hSt"></div></div>
+        <input class="txt" id="fStOther" type="text" placeholder="Nom de la station" hidden><div class="hint" id="hSt"></div>
+        <label style="margin-top:8px">Type de lieu (facultatif)</label><div class="chiprow" id="fLieu"></div></div>
       <div class="typ seg fuelOnly" id="fType"><button type="button" aria-pressed="true" data-t="1">Plein complet</button><button type="button" aria-pressed="false" data-t="0">Partiel</button><button type="button" aria-pressed="false" data-t="?">Je ne sais plus</button></div>
       <div class="live fuelOnly"><div><b id="lPL">–</b><small>CHF / L</small></div><div><b id="lKm">–</b><small>Km parcourus</small></div><div><b id="lPK">–</b><small>CHF / km</small></div><div><b id="lC">–</b><small>L / 100 km</small></div></div>
       <div class="field full fuelOnly"><div class="hint" id="hC"></div><div class="hint" id="hP"></div></div>
@@ -1556,7 +1560,7 @@ const THEME = { // v1.8 : même fond foncé pour tous, un accent par véhicule
   k:{txt:"#B3B8C2",grid:"rgba(255,255,255,.06)",tipBg:"#20242B",tipFg:"#EEF0F4",tipBd:"#E5484D",track:"#262A32",needle:"#EEF0F4",muted:"#8B92A0",bad:"#FF9F43",warn:"#F5D04C",acc:"#E5484D",fg:"#EEF0F4"}};
 let MODE=0; try{ const m=+localStorage.getItem("sv-mode"); if(m>0) MODE=m; }catch(e){}
 let T=THEME.k;
-const APP_VERSION="3.15";
+const APP_VERSION="3.16";
 const KEY="suivi-vehicules-v1";
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}}, lsSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 let STATE={fills:[],tyres:[],ent:[],rates:{},range:[925,350],tank:[60,20],buy:[3500,10000],fixed:[{},{}],trip:null};
@@ -3183,10 +3187,10 @@ function swipeDel(r){ const fid=r.dataset.id, eid=r.dataset.eid;
 })();
 
 // ---------- timeline sobre, une case par type d'événement
-const TLT={fill:["gas-pump","Pleins","#4FA8FF"],E:["wrench","Garage / mécanique","#F5A623"],S:["drop","Fournitures","#FF7AA8"],P:["tire","Pneus","#F5A623"],F:["receipt","Frais fixes","#E8C062"],buy:["hand-coins","Achat","#6CB0FF"],doc:["file-pdf","Documents","#A58CFF"]};
+const TLT={res:["gas-pump","Réserve","#FF7A3D"],fill:["gas-pump","Pleins","#4FA8FF"],E:["wrench","Garage / mécanique","#F5A623"],S:["drop","Fournitures","#FF7AA8"],P:["tire","Pneus","#F5A623"],F:["receipt","Frais fixes","#E8C062"],buy:["hand-coins","Achat","#6CB0FF"],doc:["file-pdf","Documents","#A58CFF"]};
 let tlMax=80, TLYR=null; // filtre par année (en mémoire, pas sauvegardé)
 // raccourcis repris de l'ancien Journal : ils cochent les bonnes cases
-const TLQ=[["all","Tout",["fill","E","S","P","F","buy","doc"]],["fill","Pleins",["fill"]],["ent","Entretien",["E","S","P"]],["fix","Frais fixes",["F"]],["docs","Documents",["doc"]]];
+const TLQ=[["all","Tout",["fill","E","S","P","F","buy","doc","res"]],["fill","Pleins",["fill"]],["ent","Entretien",["E","S","P"]],["fix","Frais fixes",["F"]],["docs","Documents",["doc"]]];
 function tlEvents(v){
   const out=[], u=U(v);
   A.all[v].forEach(f=>{ const opt=Object.keys(f.opts||{}).filter(k=>f.opts[k]).map(k=>{ const o=OPTS.find(o=>o[0]===k); return o?" "+ic(o[2]):""; }).join("");
@@ -3194,16 +3198,18 @@ function tlEvents(v){
     const pills=(f.conso!=null?`<span class="pill ok">${fmt(f.conso,2)} ${u.c100}</span>`:"")+(f.eur!=null?`<span class="pill" style="color:var(--volt-hi);border-color:color-mix(in srgb,var(--volt) 50%,transparent)">€</span>`:"")
       +(f.ign&&f.ign.length?f.ign.map(x=>`<span class="pill w">⚠ ignoré : ${x}</span>`).join(""):"")+(f.weird?`<span class="pill w">conso inhabituelle</span>`:"")+(f.force?`<span class="pill ok">compté quand même</span>`:"")+(f.alert?`<span class="pill" style="color:var(--fg-3);border-color:var(--line)">${f.alert}</span>`:"");
     out.push({k:"fill",d:f.d,km:+f.km||0,f,t:`${hasFuel(v)?(u.plein==="recharge"?"Recharge":"Plein"):"Relevé"} ${f.L!=null?fmt(f.L,2)+" "+u.vol:"– "+u.vol}${pills}`,
-      s:`${CTRY[f.ctry||"CH"].f} ${hasKm(f)?fmt(f.km)+" km":"km non noté"} · ${f.vague?"je ne sais plus":f.full?u.plein:"partiel"}${f.dist?` · +${fmt(f.dist)} km`:""}${f.st?` · ${esc(f.st)}`:""}${opt}`,m:f.P,m2:f.eur!=null?fmt(f.eur,2)+" €":""}); });
+      s:`${CTRY[f.ctry||"CH"].f} ${hasKm(f)?fmt(f.km)+" km":"km non noté"} · ${f.vague?"je ne sais plus":f.full?u.plein:"partiel"}${f.dist?` · +${fmt(f.dist)} km`:""}${f.st?` · ${esc(f.st)}`:""}${f.lieu?` (${esc(f.lieu)})`:""}${opt}`,m:f.P,m2:f.eur!=null?fmt(f.eur,2)+" €":""}); });
   STATE.ent.filter(e=>e.v===v).forEach(e=>{ const K=EKIND[ekOf(e)], fi=e.k==="F"?FXI[e.fk||"aut"]:null;
     out.push({k:ekOf(e),d:e.d||"0000-00-00",km:+e.km||0,e,i:fi?fi[0]:null,c:fi?fi[1]:null,t:esc(e.t),
       s:`${e.k==="F"?(e.d?"année "+e.d.slice(0,4)+" · ":"")+(FXN[e.fk]||"frais fixe").toLowerCase()+(perOf(e)>1&&+e.m>0?` · ${fmt(+e.m/perOf(e),2)} CHF ${perN(e)[2]} · ${fmt(+e.m)} CHF par an`:" · par an"):K[1].toLowerCase()}${e.km?` · ${fmt(+e.km)} km`:""}${e.d?"":" · date non notée"}`,m:e.m!=null&&e.m!==""?+e.m:null}); });
+  (()=>{ let rv=[]; try{ rv=JSON.parse(localStorage.getItem("sv-res-ev-"+v)||"[]"); }catch(e){}
+    rv.forEach(r=>out.push({k:"res",d:r.d||"0000-00-00",km:+r.km||0,t:"Voyant de réserve",s:`${fmt(r.km)} km${r.dist?` · ${fmt(r.dist)} km après le plein`:""}`,m:null})); })();
   STATE.tyres.filter(x=>x.v===v).forEach(x=>{ const T=TTYPE[tyreType(x)]; out.push({k:"P",d:x.d,km:+x.km||0,t:`Pneus ${T.n.toLowerCase()} montés`,s:[x.mod?esc(x.mod):"",x.pos?TPOS[x.pos]:""].filter(Boolean).join(" · "),m:null}); });
   if(STATE.buyD[v]) out.push({k:"buy",d:STATE.buyD[v],km:0,t:`Achat : ${esc(V[v].nl||V[v].n)}`,s:"",m:+STATE.buy[v]||null});
   docsOf(v).forEach(d=>{ const K=DOCK.find(x=>x[0]===d.k)||DOCK[0];
     out.push({k:"doc",d:d.d||"0000-00-00",km:0,doc:d,i:d.pdf?"file-pdf":K[2],c:K[3],t:esc(d.t||K[1]),s:`${K[1]}${d.pdf?" · PDF":""}${d.np?" · "+d.np+" page"+(d.np>1?"s":""):""}`,m:d.m!=null&&d.m!==""?+d.m:null}); });
   return out.sort((a,b)=>b.d.localeCompare(a.d)||(b.km||0)-(a.km||0)); }
-function tlOn(){ const on=STATE.tlTypes||(STATE.tlTypes={fill:true,E:true,S:true,P:true,F:true,buy:true,doc:true}); if(on.S==null) on.S=on.E!==false; if(on.doc==null) on.doc=true; // 3.14 : documents (PDF, images) dans la Timeline
+function tlOn(){ const on=STATE.tlTypes||(STATE.tlTypes={fill:true,E:true,S:true,P:true,F:true,buy:true,doc:true,res:true}); if(on.S==null) on.S=on.E!==false; if(on.doc==null) on.doc=true; if(on.res==null) on.res=true; // 3.14 : documents (PDF, images) dans la Timeline
   if(!STATE.tlJ){ on.fill=true; STATE.tlJ=true; } // 3.6 : le Journal est dans la Timeline, les pleins s'affichent (une seule fois, ensuite ton choix reste)
   return on; }
 function tlSet(keys){ const on=tlOn(); Object.keys(TLT).forEach(k=>on[k]=keys.includes(k)); persist(); }
@@ -3225,7 +3231,7 @@ function tlRecapBox(html,onEdit){
   o.querySelector(".tlr-x").onclick=()=>o.remove();
   o.querySelector("#tlrEdit").onclick=()=>{ o.remove(); onEdit(); };
 }
-function tlIcone(){ const b=document.querySelector('nav.tabs [data-v="tl"]'); if(b&&!b.dataset.ico){ b.innerHTML=ic("list-bullets","#F5D04C"); b.dataset.ico="1"; } }
+function tlIcone(){ const b=document.querySelector('nav.tabs [data-v="tl"]'); if(b&&!b.dataset.ico){ b.innerHTML='<svg style="color:#F5D04C" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">'+ICO["list-bullets"][0]+'</svg>'; b.dataset.ico="1"; } }
 function renderTl(){ tlIcone();
   const v=MODE, on=tlOn(), ks=Object.keys(TLT); let cur=ks.filter(k=>on[k]).join();
   if(!TLQ.some(q=>q[2].join()===cur)){ tlSet(TLQ[0][2]); cur=ks.join(); } // 3.11 : plus de cases, un mélange d'avant revient à « Tout »
@@ -3241,7 +3247,7 @@ function renderTl(){ tlIcone();
     if(x.d.slice(0,4)!==y){ y=x.d.slice(0,4); mo=""; h+=`<div class="tly">${nd?"Sans date":y}</div>`; }
     if(!fx&&!nd&&x.d.slice(5,7)!==mo){ mo=x.d.slice(5,7); h+=`<div class="tlm">${MOIS[+mo-1]}</div>`; }
     const c=x.c||TLT[x.k][2], col=x.f?V[v].c:c, att=x.f?`data-id="${x.f.id}" role="button" tabindex="0"`:x.e?`data-eid="${x.e.id}" role="button" tabindex="0"`:x.doc?`data-doc="${x.doc.id}" role="button" tabindex="0"`:"";
-    h+=`<div class="tle" style="--c:${col}" ${att}><span class="dot"></span><span class="e">${x.f&&x.f.kmOnly?ic("speedometer",col):ic(x.i||TLT[x.k][0],c)}</span><span class="t">${x.t}${x.s?`<small>${x.s}</small>`:""}</span><span class="v">${nd?"–":dshort(day(x.d))}${x.m!=null?`<small>${fmt(x.m,x.m>=1000?0:2)} CHF</small>`:""}${x.m2?`<small>${x.m2}</small>`:""}${att?`<small>${ic("pencil-simple","var(--fg-3)")}</small>`:""}</span></div>`; });
+    h+=`<div class="tle" style="--c:${col}" ${att}><span class="dot"></span><span class="e">${x.f&&x.f.kmOnly?ic("speedometer",col):ic(x.i||TLT[x.k][0],c)}</span><span class="t">${x.t}${x.s?`<small>${x.s}</small>`:""}</span><span class="v"><b class="vd" style="color:var(--c)">${nd?"–":dshort(day(x.d))}</b>${x.m!=null?`<small class="vp">${fmt(x.m,x.m>=1000?0:2)} CHF</small>`:""}${x.m2?`<small>${x.m2}</small>`:""}${att?`<small>${ic("pencil-simple","var(--fg-3)")}</small>`:""}</span></div>`; });
   const first=STATE.buyD[v]||(A.per[v][0]&&A.per[v].reduce((m,f)=>f.d<m?f.d:m,"9999")), anyOn=ks.some(k=>on[k]), click=ev.some(x=>x.f||x.e);
   $("#tlBody").innerHTML=(h?`<div class="tlist pgc">${h}</div>`:`<div class="muted">${!anyOn?"Rien à afficher : coche au moins un type.":fx?"Aucun frais fixe noté pour ce véhicule.":"Rien de noté."}</div>`)
     +(all.length>ev.length?`<button class="btn" type="button" id="tlMore" style="margin-top:10px">Afficher plus (${all.length-ev.length} de plus)</button>`:"")
@@ -3640,6 +3646,7 @@ function renderMore(){
 
 // ---------- Quoi de neuf : la version en grand, une carte par version ; s'ouvre une fois après chaque mise à jour
 const CHANGELOG=[
+  ["3.16","05.11.2026","Réserve, Timeline, lieux, sauvegarde",["Réserve : estimation d'après l'autonomie mesurée et la distance depuis le dernier plein (plein complet, partiel ou non)","Chaque voyant de réserve apparaît dans la Timeline, avec une icône","Pleins : type de lieu (pays, ville, village, centre commercial) à côté du nom de la station","Timeline : date et prix en deux couleurs, bouton Timeline au bon format dès l'ouverture","Thème Liseuse : fond blanc partout","Sauvegarde : un seul zip, avec un petit fichier carte.txt à côté"]],
   ["3.15","05.11.2026","Timeline, saisie, stats, budget, réserve",["Timeline : icône liste, filtre par année, un appui ouvre le récapitulatif avec le bouton Modifier","Saisie : prix du litre facultatif (calcule le total), affichage CHF/km, conso estimée sur un plein partiel après un plein complet","Stats : plus de stats communes ; 1 et 3 mois affichent « pas de plein complet » quand il faut ; prix Suisse (bleu) et France (orange) sur le même graphique","Budget : un seul écran (ce mois, 3, 6, 12 mois), moyennes des 12 derniers mois, « À mettre de côté par mois (hors essence) »","Paramètres › Thème : nouveau thème Liseuse (papier blanc, texte noir, contrastes forts)","⛽ Réserve en haut du tableau de bord : tu entres le km quand le voyant s'allume, l'app estime ce qu'il reste d'après tes voyants"]],
   ["3.13","05.11.2026","Documents et dossier PDF",["Onglet du véhicule › Documents : factures, pneus, assurance, carte grise, contrôles, doc technique…, rangés par véhicule puis par type","Scanner une facture : photo, tu places les 4 coins, l'app la redresse et la rend nette en noir et blanc (plusieurs pages possibles)","Importer des photos ou des PDF, ou les partager vers Suivi Véhicules depuis une autre app (scanner Google Drive, mail…)","Export PDF : tu coches ce que tu veux (résumé, pleins, entretiens, frais fixes, totaux, documents) et l'année, ou « Dossier complet »","Les documents partent avec la sauvegarde des photos (.zip)"]],
   ["3.12","03.11.2026","Thème Néon",["Nouveau thème Néon (Paramètres › Affichage › Thème) : bleu et violet, dégradés et lueurs, comme le Planning","Boutons qui s'enfoncent, vague au toucher, pastilles qui rebondissent, loupe avec un anneau qui respire"]],
@@ -3951,9 +3958,11 @@ function renderSt(){
   const recent=[...new Set(A.all[sv].filter(f=>f.st&&(f.ctry||"CH")===sCtry).sort((a,b)=>b.d.localeCompare(a.d)).map(f=>f.st))].slice(0,3);
   const list=recent.concat((STATIONS[sCtry]||[]).filter(x=>!recent.includes(x)));
   $("#fSt").innerHTML=list.map(x=>`<button type="button" class="${recent.includes(x)?"recent":""}" aria-pressed="${x===sSt}" data-s="${esc(x)}">${esc(x)}</button>`).join("")+`<button type="button" aria-pressed="${sSt==="__autre"}" data-s="__autre">Autre…</button>`;
-  $("#fStOther").hidden = sSt!=="__autre";
+  $("#fStOther").hidden = sSt!=="__autre"; renderLieu();
   $("#fSt").querySelectorAll("button").forEach(b=>b.onclick=()=>{ sSt = sSt===b.dataset.s?null:b.dataset.s; renderSt(); live(); });
 }
+let sLieu=null; const LIEUX=["Pays","Ville","Village","Centre commercial"];
+function renderLieu(){ $("#fLieu").innerHTML=LIEUX.map(x=>`<button type="button" aria-pressed="${x===sLieu}" data-l="${x}">${x}</button>`).join(""); $("#fLieu").querySelectorAll("button").forEach(b=>b.onclick=()=>{ sLieu = sLieu===b.dataset.l?null:b.dataset.l; renderLieu(); }); }
 function curStation(){ return sSt==="__autre" ? ($("#fStOther").value.trim()||null) : sSt; }
 function renderOpts(){ $("#fOpts").innerHTML=OPTS.map(o=>`<button type="button" aria-pressed="${!!sOpts[o[0]]}" data-k="${o[0]}">${optL(o)}</button>`).join("");
   $("#fOpts").querySelectorAll("button").forEach(b=>b.onclick=()=>{ sOpts[b.dataset.k]=!sOpts[b.dataset.k]; renderOpts(); }); }
@@ -3978,10 +3987,10 @@ function openSheet(fresh,edit){
     $("#fDate").value=e.d; $("#fKm").value=hasKm(e)?e.km:""; $("#fL").value=e.L??""; sCtry=e.ctry||"CH";
     sCur = e.eur!=null?"EUR":"CHF"; $("#fP").value = e.eur!=null?e.eur:(e.P??""); $("#fR").value = e.rate??""; rateManual = e.rate!=null;
     sFull=!!e.full; sVague=!!e.vague; sOpts={...(e.opts||{})};
-    const known=(STATIONS[sCtry]||[]).includes(e.st); sSt = e.st?(known?e.st:"__autre"):null; $("#fStOther").value = e.st&&!known?e.st:"";
+    sLieu=e.lieu||null; const known=(STATIONS[sCtry]||[]).includes(e.st); sSt = e.st?(known?e.st:"__autre"):null; $("#fStOther").value = e.st&&!known?e.st:"";
   } else {
     $("#fDate").value=dOf(TODAY); $("#fKm").value=""; $("#fL").value=""; $("#fP").value="";
-    sOpts={}; sSt=null; sFull=true; sVague=false; $("#fStOther").value=""; rateManual=false;
+    sOpts={}; sSt=null; sLieu=null; sFull=true; sVague=false; $("#fStOther").value=""; rateManual=false;
     const lastC=lastOf(sv); sCtry = "CH"; sCur="CHF";
   }
   const l=lastOf(sv); $("#fKm").placeholder=l?String(l.km):"km";
@@ -4078,13 +4087,13 @@ function live(){ const r=preview();
 function save(){
   const r=preview(); if(!live()) return;
   if(EDIT){
-    Object.assign(EDIT,{d:$("#fDate").value,v:sv,km:r.km||null,L:r.L,P:r.P,eur:r.eur,rate:r.rate,full:r.kmOnly?false:sFull,ctry:sCtry,st:r.kmOnly?null:curStation(),opts:r.kmOnly?{}:{...sOpts},force:!$("#forceBox").hidden&&$("#fForce").checked}); if(r.kmOnly) EDIT.kmOnly=true; else delete EDIT.kmOnly; if(sVague&&!r.kmOnly) EDIT.vague=true; else delete EDIT.vague;
+    Object.assign(EDIT,{d:$("#fDate").value,v:sv,km:r.km||null,L:r.L,P:r.P,eur:r.eur,rate:r.rate,full:r.kmOnly?false:sFull,ctry:sCtry,st:r.kmOnly?null:curStation(),lieu:r.kmOnly?null:sLieu,opts:r.kmOnly?{}:{...sOpts},force:!$("#forceBox").hidden&&$("#fForce").checked}); if(r.kmOnly) EDIT.kmOnly=true; else delete EDIT.kmOnly; if(sVague&&!r.kmOnly) EDIT.vague=true; else delete EDIT.vague;
     if(r.rate) STATE.lastRate=r.rate;
     persist(); A=analyse(); closeSheet(); views[curView](); toast("✓ Plein modifié"); return;
   }
   const prevBest=Math.min(...A.per[sv].filter(f=>f.conso!=null).map(f=>f.conso)), lastKm=lastOf(sv)?lastOf(sv).km:0;
   let verdict=""; try{ const pr=predict(sv); if(pr&&pr.due!=null&&sFull){ const e=day($("#fDate").value)-pr.due; verdict=Math.abs(e)<=2?` · 🧠 L'IA avait prévu le ${dshort(pr.due)} : 🎯 dans le mille !`:Math.abs(e)<=pr.win?` · 🧠 Prévu le ${dshort(pr.due)} : à ${Math.abs(e)} j près 👍`:` · 🧠 Prévu le ${dshort(pr.due)} : raté de ${Math.abs(e)} j 😅`; } }catch(_){}
-  const nf={id:phTake(),d:$("#fDate").value,v:sv,km:r.km||null,L:r.L,P:r.P,eur:r.eur,rate:r.rate,full:r.kmOnly?false:sFull,ctry:sCtry,st:r.kmOnly?null:curStation(),opts:r.kmOnly?{}:{...sOpts}}; if(r.kmOnly) nf.kmOnly=true; if(sVague&&!r.kmOnly) nf.vague=true; fills.push(nf);
+  const nf={id:phTake(),d:$("#fDate").value,v:sv,km:r.km||null,L:r.L,P:r.P,eur:r.eur,rate:r.rate,full:r.kmOnly?false:sFull,ctry:sCtry,st:r.kmOnly?null:curStation(),lieu:r.kmOnly?null:sLieu,opts:r.kmOnly?{}:{...sOpts}}; if(r.kmOnly) nf.kmOnly=true; if(sVague&&!r.kmOnly) nf.vague=true; fills.push(nf);
   if(r.rate) STATE.lastRate=r.rate;
   persist(); ORACLE_CACHE={}; A=analyse(); closeSheet(); go(curView==="more"?"home":curView);
   const bornes=lastKm&&r.km>lastKm&&Math.floor(r.km/5000)>Math.floor(lastKm/5000)?` · 🎉 ${fmt(Math.floor(r.km/5000)*5000)} km franchis !`:"";
@@ -4487,22 +4496,40 @@ applyPad();
 // 3.14 (test) : oracle réserve. Tu entres le km quand le voyant s'allume : l'app estime ce qu'il reste.
 function oracleRender(){
   const box=document.getElementById("oracleRes"); if(!box) return;
-  const v=MODE, key="sv-res-ev-"+v, ev=(()=>{ try{ return JSON.parse(localStorage.getItem(key)||"[]"); }catch(e){ return []; } })();
-  const dists=ev.map(e=>e.dist).filter(x=>x>0), avgD=dists.length?dists.reduce((t,x)=>t+x,0)/dists.length:null;
-  const R=defRange(v), reste=avgD!=null?Math.max(0,Math.round(R-avgD)):null;
-  const fullKm=fills.filter(f=>f.v===v&&f.full&&f.km).map(f=>f.km).sort((a,b)=>b-a)[0]||null;
+  const v=MODE, key="sv-res-ev-"+v;
+  const ev=(()=>{ try{ return JSON.parse(localStorage.getItem(key)||"[]"); }catch(e){ return []; } })();
+  const kms=fills.filter(f=>f.v===v&&f.km>0).map(f=>f.km).sort((a,b)=>a-b);
+  const fu=fills.filter(f=>f.v===v&&f.full&&f.km>0).map(f=>f.km).sort((a,b)=>a-b);
+  const gaps=[]; for(let i=1;i<fu.length;i++){ const g=fu[i]-fu[i-1]; if(g>50&&g<5000) gaps.push(g); }
+  const g6=gaps.slice(-6).sort((a,b)=>a-b), mAuto=g6.length>=2?g6[Math.floor(g6.length/2)]:null;
+  const auto=mAuto||defRange(v);
+  const autoTxt=mAuto?`mesuré sur tes ${g6.length} derniers intervalles entre pleins complets`:`réglage par défaut (${auto} km), pas encore assez de pleins complets pour mesurer`;
+  const dists=ev.map(e=>e.dist), avgD=dists.length?dists.reduce((a,b)=>a+b,0)/dists.length:null;
+  const prev=dists.slice(0,-1), avgP=prev.length?prev.reduce((a,b)=>a+b,0)/prev.length:null;
+  const last=ev.length?ev[ev.length-1]:null;
+  let lastTxt="";
+  if(last){
+    const cmp=avgP!=null&&avgP>0?(()=>{ const x=Math.round((last.dist-avgP)/avgP*100); return x===0?"comme la moyenne":(x>0?`${x} % plus que la moyenne (tu as tiré plus loin)`:`${-x} % moins que la moyenne (tu as fait moins de route)`); })():"premier voyant, pas encore de comparaison";
+    lastTxt=`<div class="cap">Dernier voyant (${last.km} km, le ${last.d}) : ${last.dist} km après le dernier plein, ${cmp}. Il restait environ <b>${Math.max(0,Math.round(auto-last.dist))} km</b> à ce moment-là.</div>`;
+  }
+  const moyTxt=avgD!=null?`Moyenne de tes ${dists.length} voyant${dists.length>1?"s":""} : le voyant arrive <b>${Math.round(avgD)} km</b> après le dernier plein. Il te reste donc environ <b>${Math.max(0,Math.round(auto-avgD))} km</b> dès qu'il s'allume.`:"Pas encore de voyant. Enregistre le premier, à chaque fois que la réserve s'allume.";
   box.innerHTML=`<div class="hd2">⛽ Réserve</div>
     <div class="field"><label for="oKm">Km au moment où le voyant s'allume</label><input id="oKm" type="text" inputmode="numeric" placeholder="ex. 62 800"></div>
     <button class="btn primary" type="button" id="oOk">Enregistrer ce voyant</button>
-    <div class="cap">${reste!=null?`Après le voyant, il te reste environ <b>${reste} km</b> (moyenne de ${dists.length} voyant${dists.length>1?"s":""} : ${Math.round(avgD)} km depuis le plein complet).`:"Pas encore assez de voyants : à chaque fois que tu l'enregistres, l'estimation devient plus juste."}${fullKm?"":" Ajoute un plein complet pour que je calcule la distance."}</div>`;
+    <div class="cap">Autonomie du réservoir : <b>${auto} km</b> (${autoTxt}). Je compte la distance depuis le dernier plein, quel qu'il soit (complet, partiel ou à moitié).</div>
+    <div class="cap">${moyTxt}</div>${lastTxt}`;
   document.getElementById("oOk").onclick=()=>{ const k=nv(document.getElementById("oKm"));
-    if(!k||!fullKm||k<=fullKm){ toast("Entre le km du voyant (et il faut un plein complet avant)."); return; }
-    const e=[...ev,{km:k,dist:k-fullKm,d:new Date().toISOString().slice(0,10)}].slice(-20);
+    const base=kms.filter(x=>x<k).pop();
+    if(!k||base==null){ toast("Entre le km du voyant (il faut au moins un plein avant)."); return; }
+    const d=new Date().toISOString().slice(0,10);
+    const e=[...ev,{km:k,dist:k-base,d}].slice(-20);
     try{ localStorage.setItem(key,JSON.stringify(e)); }catch(x){}
     oracleRender(); toast("Voyant enregistré"); };
 }
 
 { const pl=document.getElementById("fPL"); pl.addEventListener("input",()=>{ const L=nv($("#fL")), PL=nv(pl); if(L&&PL!=null){ $("#fP").value=(L*PL).toFixed(2); live(); } }); }
+tlIcone();
+tlIcone();
 go("home");
 oracleRender();
 shareInbox().catch(()=>{});
@@ -4541,10 +4568,12 @@ async function zipSauver(){
        if(!Array.isArray(x.vehicules)) throw new Error("données incomplètes"); }
   catch(e){ toast("⚠ Zip non vérifié ("+e.message+") : rien n'a été remplacé."); return false; }
   const f=new File([blob],ZIPV.nom,{type:"application/zip"});
+  const carte=["SAUVEGARDE SUIVI VÉHICULES",`Date : ${zLst(cur.date)}`,`Version de l'app : ${APP_VERSION}`,cur.resume,`Fichier : ${ZIPV.nom}`,`Anciennes versions gardées dans le zip : ${hist.length}`,"Pour restaurer : Paramètres › Restaurer un zip (ou Importer)."].join("\n");
+  const ft=new File([carte],"Suivi-Vehicules-carte.txt",{type:"text/plain"});
   let fait=false;
-  try{ if(navigator.canShare&&navigator.canShare({files:[f]})){ await navigator.share({files:[f],title:ZIPV.nom}); fait=true; } }
+  try{ if(navigator.canShare&&navigator.canShare({files:[f,ft]})){ await navigator.share({files:[f,ft],title:ZIPV.nom}); fait=true; } }
   catch(e){ if(e&&e.name==="AbortError"){ toast("Sauvegarde annulée"); return false; } }
-  if(!fait){ const a=document.createElement("a"); a.href=URL.createObjectURL(f); a.download=ZIPV.nom; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),60000); }
+  if(!fait){ for(const x of [f,ft]){ const a=document.createElement("a"); a.href=URL.createObjectURL(x); a.download=x.name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),60000); } }
   zSet(ZIPV.hist,hist); zSet(ZIPV.cle,cur);
   toast(`Zip créé (${(blob.size/1048576).toFixed(1)} Mo, ${hist.length} ancienne(s) version(s) dedans)`);
   refreshZip(); return true;
@@ -4590,7 +4619,7 @@ function zipCarte(el){
   el.querySelector("#zipSave").onclick=()=>zipSauver();
   el.querySelector("#zipImp").onchange=e=>{ const f=e.target.files[0]; e.target.value=""; if(f) zipChoisir(f,el.querySelector("#zipVer")); };
 }
-{ const orig=Sauvegarde.panneau; Sauvegarde.panneau=function(el){ orig(el); const c=document.createElement("div"); c.id="zipCarte"; el.appendChild(c); zipCarte(c); }; }
+{ Sauvegarde.panneau=function(el){ el.innerHTML=""; const c=document.createElement("div"); c.id="zipCarte"; el.appendChild(c); zipCarte(c); }; }
 })();
 </script>
 <script>
