@@ -1530,7 +1530,7 @@ const THEME = { // v1.8 : même fond foncé pour tous, un accent par véhicule
   k:{txt:"#B3B8C2",grid:"rgba(255,255,255,.06)",tipBg:"#20242B",tipFg:"#EEF0F4",tipBd:"#E5484D",track:"#262A32",needle:"#EEF0F4",muted:"#8B92A0",bad:"#FF9F43",warn:"#F5D04C",acc:"#E5484D",fg:"#EEF0F4"}};
 let MODE=0; try{ const m=+localStorage.getItem("sv-mode"); if(m>0) MODE=m; }catch(e){}
 let T=THEME.k;
-const APP_VERSION="3.13";
+const APP_VERSION="3.14";
 const KEY="suivi-vehicules-v1";
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}}, lsSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 let STATE={fills:[],tyres:[],ent:[],rates:{},range:[925,350],tank:[60,20],buy:[3500,10000],fixed:[{},{}],trip:null};
@@ -3140,10 +3140,10 @@ function swipeDel(r){ const fid=r.dataset.id, eid=r.dataset.eid;
 })();
 
 // ---------- timeline sobre, une case par type d'événement
-const TLT={fill:["gas-pump","Pleins","#4FA8FF"],E:["wrench","Garage / mécanique","#F5A623"],S:["drop","Fournitures","#FF7AA8"],P:["tire","Pneus","#F5A623"],F:["receipt","Frais fixes","#E8C062"],buy:["hand-coins","Achat","#6CB0FF"]};
+const TLT={fill:["gas-pump","Pleins","#4FA8FF"],E:["wrench","Garage / mécanique","#F5A623"],S:["drop","Fournitures","#FF7AA8"],P:["tire","Pneus","#F5A623"],F:["receipt","Frais fixes","#E8C062"],buy:["hand-coins","Achat","#6CB0FF"],doc:["file-pdf","Documents","#A58CFF"]};
 let tlMax=80;
 // raccourcis repris de l'ancien Journal : ils cochent les bonnes cases
-const TLQ=[["all","Tout",["fill","E","S","P","F","buy"]],["fill","Pleins",["fill"]],["ent","Entretien",["E","S","P"]],["fix","Frais fixes",["F"]]];
+const TLQ=[["all","Tout",["fill","E","S","P","F","buy","doc"]],["fill","Pleins",["fill"]],["ent","Entretien",["E","S","P"]],["fix","Frais fixes",["F"]],["docs","Documents",["doc"]]];
 function tlEvents(v){
   const out=[], u=U(v);
   A.all[v].forEach(f=>{ const opt=Object.keys(f.opts||{}).filter(k=>f.opts[k]).map(k=>{ const o=OPTS.find(o=>o[0]===k); return o?" "+ic(o[2]):""; }).join("");
@@ -3157,11 +3157,14 @@ function tlEvents(v){
       s:`${e.k==="F"?(e.d?"année "+e.d.slice(0,4)+" · ":"")+(FXN[e.fk]||"frais fixe").toLowerCase()+(perOf(e)>1&&+e.m>0?` · ${fmt(+e.m/perOf(e),2)} CHF ${perN(e)[2]} · ${fmt(+e.m)} CHF par an`:" · par an"):K[1].toLowerCase()}${e.km?` · ${fmt(+e.km)} km`:""}${e.d?"":" · date non notée"}`,m:e.m!=null&&e.m!==""?+e.m:null}); });
   STATE.tyres.filter(x=>x.v===v).forEach(x=>{ const T=TTYPE[tyreType(x)]; out.push({k:"P",d:x.d,km:+x.km||0,t:`Pneus ${T.n.toLowerCase()} montés`,s:[x.mod?esc(x.mod):"",x.pos?TPOS[x.pos]:""].filter(Boolean).join(" · "),m:null}); });
   if(STATE.buyD[v]) out.push({k:"buy",d:STATE.buyD[v],km:0,t:`Achat : ${esc(V[v].nl||V[v].n)}`,s:"",m:+STATE.buy[v]||null});
+  docsOf(v).forEach(d=>{ const K=DOCK.find(x=>x[0]===d.k)||DOCK[0];
+    out.push({k:"doc",d:d.d||"0000-00-00",km:0,doc:d,i:d.pdf?"file-pdf":K[2],c:K[3],t:esc(d.t||K[1]),s:`${K[1]}${d.pdf?" · PDF":""}${d.np?" · "+d.np+" page"+(d.np>1?"s":""):""}`,m:d.m!=null&&d.m!==""?+d.m:null}); });
   return out.sort((a,b)=>b.d.localeCompare(a.d)||(b.km||0)-(a.km||0)); }
-function tlOn(){ const on=STATE.tlTypes||(STATE.tlTypes={fill:true,E:true,S:true,P:true,F:true,buy:true}); if(on.S==null) on.S=on.E!==false;
+function tlOn(){ const on=STATE.tlTypes||(STATE.tlTypes={fill:true,E:true,S:true,P:true,F:true,buy:true,doc:true}); if(on.S==null) on.S=on.E!==false; if(on.doc==null) on.doc=true; // 3.14 : documents (PDF, images) dans la Timeline
   if(!STATE.tlJ){ on.fill=true; STATE.tlJ=true; } // 3.6 : le Journal est dans la Timeline, les pleins s'affichent (une seule fois, ensuite ton choix reste)
   return on; }
 function tlSet(keys){ const on=tlOn(); Object.keys(TLT).forEach(k=>on[k]=keys.includes(k)); persist(); }
+async function tlDocThumbs(){ for(const r of $("#tlBody").querySelectorAll("[data-doc]")){ const id=r.dataset.doc; try{ const p=(await docPages(id))[0]; if(p&&p.prev){ let u=DOCU.get(id); if(!u){ u=URL.createObjectURL(p.prev); DOCU.set(id,u); } const e=r.querySelector(".e"); if(e) e.innerHTML=`<img src="${u}" alt="" style="width:34px;height:44px;object-fit:cover;border-radius:6px">`; } }catch(e){} } }
 function renderTl(){
   const v=MODE, on=tlOn(), ks=Object.keys(TLT); let cur=ks.filter(k=>on[k]).join();
   if(!TLQ.some(q=>q[2].join()===cur)){ tlSet(TLQ[0][2]); cur=ks.join(); } // 3.11 : plus de cases, un mélange d'avant revient à « Tout »
@@ -3172,7 +3175,7 @@ function renderTl(){
   ev.forEach(x=>{ const nd=!+x.d.slice(0,4);
     if(x.d.slice(0,4)!==y){ y=x.d.slice(0,4); mo=""; h+=`<div class="tly">${nd?"Sans date":y}</div>`; }
     if(!fx&&!nd&&x.d.slice(5,7)!==mo){ mo=x.d.slice(5,7); h+=`<div class="tlm">${MOIS[+mo-1]}</div>`; }
-    const c=x.c||TLT[x.k][2], col=x.f?V[v].c:c, att=x.f?`data-id="${x.f.id}" role="button" tabindex="0"`:x.e?`data-eid="${x.e.id}" role="button" tabindex="0"`:"";
+    const c=x.c||TLT[x.k][2], col=x.f?V[v].c:c, att=x.f?`data-id="${x.f.id}" role="button" tabindex="0"`:x.e?`data-eid="${x.e.id}" role="button" tabindex="0"`:x.doc?`data-doc="${x.doc.id}" role="button" tabindex="0"`:"";
     h+=`<div class="tle" style="--c:${col}" ${att}><span class="dot"></span><span class="e">${x.f&&x.f.kmOnly?ic("speedometer",col):ic(x.i||TLT[x.k][0],c)}</span><span class="t">${x.t}${x.s?`<small>${x.s}</small>`:""}</span><span class="v">${nd?"–":dshort(day(x.d))}${x.m!=null?`<small>${fmt(x.m,x.m>=1000?0:2)} CHF</small>`:""}${x.m2?`<small>${x.m2}</small>`:""}${att?`<small>${ic("pencil-simple","var(--fg-3)")}</small>`:""}</span></div>`; });
   const first=STATE.buyD[v]||(A.per[v][0]&&A.per[v].reduce((m,f)=>f.d<m?f.d:m,"9999")), anyOn=ks.some(k=>on[k]), click=ev.some(x=>x.f||x.e);
   $("#tlBody").innerHTML=(h?`<div class="tlist pgc">${h}</div>`:`<div class="muted">${!anyOn?"Rien à afficher : coche au moins un type.":fx?"Aucun frais fixe noté pour ce véhicule.":"Rien de noté."}</div>`)
@@ -3181,6 +3184,7 @@ function renderTl(){
     +`<div class="cap">Touche une ligne pour la modifier ou la supprimer. Le bouton + en haut note un plein ou un entretien. ${first&&first<"9999"?`Les données commencent le ${dfr(first)}${STATE.buyD[v]?", à l'achat":""}.`:""} ${STATE.buyD[v]?"":"La date d'achat se note dans Paramètres → Véhicules."}</div>`;
   $("#tlBody").querySelectorAll("[data-id]").forEach(r=>r.onclick=()=>{ const f=fills.find(x=>x.id===r.dataset.id); if(f) openSheet(false,f); });
   $("#tlBody").querySelectorAll("[data-eid]").forEach(r=>r.onclick=()=>{ const e=STATE.ent.find(x=>x.id===r.dataset.eid); if(e) openEnt(e); });
+  $("#tlBody").querySelectorAll("[data-doc]").forEach(r=>r.onclick=()=>docOpenView(r.dataset.doc)); tlDocThumbs();
   const tm=$("#tlMore"); if(tm) tm.onclick=()=>{ tlMax+=100; renderTl(); };
 }
 
@@ -4413,6 +4417,90 @@ applyPad();
 go("home");
 shareInbox().catch(()=>{});
 if(lsGet("sv-seen")!==APP_VERSION){ if(fills.length) setTimeout(openNews,500); else lsSet("sv-seen",APP_VERSION); }
+/* === SAUVEGARDE ZIP VÉHICULES (page de test 3.14) : un seul zip, remplacé à chaque fois ; anciennes versions dans backup/ === */
+const ZIPV={nom:"Suivi-Vehicules-sauvegarde.zip",cle:"sv-zip-actuel",hist:"sv-zip-historique"};
+const zLS=(k,def)=>{try{const v=JSON.parse(localStorage.getItem(k));return v??def}catch(e){return def}};
+const zSet=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}};
+const zDec=u=>new TextDecoder().decode(u);
+const zKey=d=>new Date(d).toISOString().slice(0,19).replace("T","_").replace(/:/g,"-");
+const zLst=d=>new Date(d).toLocaleString("fr-CH",{dateStyle:"short",timeStyle:"short"});
+
+async function zipSauver(){
+  const dd=backupData(), don=Object.assign({},dd), reg=dd.reglages; delete don.reglages;
+  const d=new Date();
+  const l=(await phDo("readonly",s=>s.getAll()))||[], files=[], list=[];
+  for(const p of l){ const ext=(p.type.split("/")[1]||"jpg").replace("jpeg","jpg"), fichier=`photos/${p.id}.${ext}`;
+    files.push({name:fichier,data:new Uint8Array(await p.blob.arrayBuffer())});
+    list.push({id:p.id,ref:p.ref,date:p.t,nom:p.name,type:p.type,fichier,pg:p.pg??null}); }
+  const cur={date:d.toISOString(),resume:backupResume(dd),donnees:JSON.stringify(don),parametres:JSON.stringify(reg)};
+  let hist=zLS(ZIPV.hist,[]);
+  const prev=zLS(ZIPV.cle,null);
+  if(prev&&(prev.donnees!==cur.donnees||prev.parametres!==cur.parametres))
+    hist=[...hist,{key:zKey(prev.date),date:prev.date,resume:prev.resume,donnees:prev.donnees,parametres:prev.parametres}].slice(-30);
+  const index={format:"suivi-vehicules-zip",formatVersion:1,app:"Suivi Véhicules",appVersion:APP_VERSION,date:cur.date,
+    actuel:{date:cur.date,resume:cur.resume},versions:hist.map(h=>({date:h.date,resume:h.resume,dossier:"backup/"+h.key}))};
+  files.unshift({name:"suivi-photos.json",data:new TextEncoder().encode(JSON.stringify({format:"suivi-vehicules-photos",version:1,date:cur.date,photos:list},null,1))});
+  files.push({name:"index.json",data:new TextEncoder().encode(JSON.stringify(index,null,1))});
+  files.push({name:"actuel/donnees.json",data:new TextEncoder().encode(cur.donnees)});
+  files.push({name:"actuel/parametres.json",data:new TextEncoder().encode(cur.parametres)});
+  for(const h of hist){ files.push({name:"backup/"+h.key+"/donnees.json",data:new TextEncoder().encode(h.donnees)});
+    files.push({name:"backup/"+h.key+"/parametres.json",data:new TextEncoder().encode(h.parametres)}); }
+  const blob=phZip(files);
+  // vérification avant de remplacer : le zip doit se relire entièrement
+  try{ const z=phUnzip(await blob.arrayBuffer()); const x=JSON.parse(zDec(z["actuel/donnees.json"])); JSON.parse(zDec(z["index.json"]));
+       if(!Array.isArray(x.vehicules)) throw new Error("données incomplètes"); }
+  catch(e){ toast("⚠ Zip non vérifié ("+e.message+") : rien n'a été remplacé."); return false; }
+  const f=new File([blob],ZIPV.nom,{type:"application/zip"});
+  let fait=false;
+  try{ if(navigator.canShare&&navigator.canShare({files:[f]})){ await navigator.share({files:[f],title:ZIPV.nom}); fait=true; } }
+  catch(e){ if(e&&e.name==="AbortError"){ toast("Sauvegarde annulée"); return false; } }
+  if(!fait){ const a=document.createElement("a"); a.href=URL.createObjectURL(f); a.download=ZIPV.nom; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),60000); }
+  zSet(ZIPV.hist,hist); zSet(ZIPV.cle,cur);
+  toast(`Zip créé (${(blob.size/1048576).toFixed(1)} Mo, ${hist.length} ancienne(s) version(s) dedans)`);
+  refreshZip(); return true;
+}
+function refreshZip(){ const el=document.querySelector("#zipCarte"); if(el) zipCarte(el); }
+
+async function zipChoisir(f,out){
+  let z,idx;
+  try{ z=phUnzip(await f.arrayBuffer()); idx=JSON.parse(zDec(z["index.json"])); if(idx.format!=="suivi-vehicules-zip") throw new Error("pas un zip Suivi"); }
+  catch(e){ toast("Ce n'est pas une sauvegarde Suivi (zip) : rien n'a été changé."); return; }
+  const lignes=[{k:null,date:idx.actuel.date,resume:idx.actuel.resume,nom:"Version actuelle"}]
+    .concat((idx.versions||[]).slice().reverse().map(v=>({k:v.dossier.slice(7),date:v.date,resume:v.resume,nom:"Ancienne version"})));
+  out.innerHTML=`<div class="ph-note"><b>${esc(f.name)}</b> : choisis la version à remettre. Tes données actuelles seront d'abord gardées dans « Copies avant import ».</div>`
+    +lignes.map((l,i)=>`<div class="zip-ligne"><div><b>${zLst(l.date)}</b> · ${esc(l.nom)}<br><small>${esc(l.resume)}</small></div><button class="btn" type="button" data-i="${i}">Remettre</button></div>`).join("");
+  out.querySelectorAll("button[data-i]").forEach(b=>b.onclick=()=>zipRestaurer(f,z,lignes[+b.dataset.i]));
+}
+async function zipRestaurer(f,z,l){
+  if(!confirm(`Remettre « ${l.nom} » du ${zLst(l.date)} ?\nTes données actuelles seront gardées dans « Copies avant import ».`)) return;
+  const pre=l.k?"backup/"+l.k+"/":"actuel/";
+  let d, full;
+  try{ const don=JSON.parse(zDec(z[pre+"donnees.json"])), par=JSON.parse(zDec(z[pre+"parametres.json"]));
+       full=Object.assign({},don,{reglages:par}); d=backupFrom(full); }
+  catch(e){ toast("Restauration impossible : fichier abîmé. Rien n'a été changé."); return; }
+  if(!Sauvegarde.copieAvant("restauration du zip "+f.name)){ toast("⚠ Mémoire pleine : copie impossible, rien n'a été remplacé."); return; }
+  applyImport(d); if(d.aff) affApply(d.aff);
+  // l'historique du zip devient celui du téléphone
+  const idx=JSON.parse(zDec(z["index.json"])), hist=[];
+  for(const v of idx.versions||[]){ try{ hist.push({key:v.dossier.slice(7),date:v.date,resume:v.resume,donnees:zDec(z[v.dossier+"/donnees.json"]),parametres:zDec(z[v.dossier+"/parametres.json"])}); }catch(e){} }
+  zSet(ZIPV.hist,hist);
+  const dn=backupData(), dd=Object.assign({},dn), rg=dd.reglages; delete dd.reglages;
+  zSet(ZIPV.cle,{date:new Date().toISOString(),resume:backupResume(dn),donnees:JSON.stringify(dd),parametres:JSON.stringify(rg)});
+  await phImport(f); // photos et documents du zip (rien n'est effacé)
+  toast("Sauvegarde remise"); refreshZip();
+}
+function zipCarte(el){
+  const cur=zLS(ZIPV.cle,null), hist=zLS(ZIPV.hist,[]);
+  el.innerHTML=`<div class="sv-carte"><div class="sv-titre">🗜️ Sauvegarde Suivi (un seul zip)</div>
+    <div class="sv-info">${cur?`Dernière : <b>${zLst(cur.date)}</b> · ${esc(cur.resume)}`:"Pas encore de zip créé."}<br><small>${hist.length} ancienne(s) version(s) gardée(s) dans le zip (dossier backup/).</small></div>
+    <div class="sv-btns"><button class="sv-btn sv-save" type="button" id="zipSave">💾 Créer le zip</button>
+    <label class="sv-btn sv-imp">📂 Restaurer un zip<input type="file" accept=".zip,application/zip" hidden id="zipImp"></label></div>
+    <div class="sv-aide">Un seul fichier « ${ZIPV.nom} » : il est remplacé à chaque sauvegarde, l'ancien contenu passe dans backup/. Les photos et documents restent dedans, une seule fois.</div>
+    <div id="zipVer"></div></div>`;
+  el.querySelector("#zipSave").onclick=()=>zipSauver();
+  el.querySelector("#zipImp").onchange=e=>{ const f=e.target.files[0]; e.target.value=""; if(f) zipChoisir(f,el.querySelector("#zipVer")); };
+}
+{ const orig=Sauvegarde.panneau; Sauvegarde.panneau=function(el){ orig(el); const c=document.createElement("div"); c.id="zipCarte"; el.appendChild(c); zipCarte(c); }; }
 })();
 </script>
 <script>
