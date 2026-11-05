@@ -2,9 +2,9 @@
 // Tout est gardé dans le téléphone dès la première ouverture : page, icônes, polices, graphiques, export.
 // La page : réseau d'abord (nouvelle version au lancement suivant), mais si le réseau ne répond pas
 // en 4 s, la copie du téléphone s'ouvre tout de suite (mode avion, réseau faible).
-const CACHE = "suivi-vehicules-v3.12";
+const CACHE = "suivi-vehicules-v3.14";
 const PREFIX = "suivi-vehicules-";
-const CORE = ["./index.html", "./manifest.json", "./recherche.js", "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png", "./vendor/chart.umd.min.js", "./vendor/xlsx.full.min.js", "./fonts/fonts.css", "./fonts/Inter-latin-ext-cf3eb50f.woff2", "./fonts/Inter-latin-f11d729b.woff2", "./fonts/JetBrainsMono-latin-4f27206c.woff2", "./fonts/JetBrainsMono-latin-ext-06ad3600.woff2"];
+const CORE = ["./index.html", "./manifest.json", "./recherche.js", "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png", "./vendor/chart.umd.min.js", "./vendor/xlsx.full.min.js", "./vendor/pdf-lib.min.js", "./fonts/fonts.css", "./fonts/Inter-latin-ext-cf3eb50f.woff2", "./fonts/Inter-latin-f11d729b.woff2", "./fonts/JetBrainsMono-latin-4f27206c.woff2", "./fonts/JetBrainsMono-latin-ext-06ad3600.woff2"];
 const TIMEOUT = 4000;
 
 self.addEventListener("install", e => {
@@ -12,7 +12,7 @@ self.addEventListener("install", e => {
   self.skipWaiting();
 });
 self.addEventListener("activate", e => {
-  e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith(PREFIX) && k !== CACHE).map(k => caches.delete(k)))));
+  e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith(PREFIX) && k !== CACHE && k !== "suivi-vehicules-partage").map(k => caches.delete(k)))));
   self.clients.claim();
 });
 
@@ -29,6 +29,21 @@ function fromCache(req) {
 
 self.addEventListener("fetch", e => {
   const req = e.request;
+  // Partager › Suivi Véhicules : les fichiers sont gardés un instant, l'app les range à l'ouverture
+  if (req.method === "POST" && new URL(req.url).pathname.endsWith("/partage")) {
+    e.respondWith((async () => {
+      try {
+        const fd = await req.formData(), c = await caches.open("suivi-vehicules-partage");
+        let n = 0;
+        for (const f of fd.getAll("files")) {
+          if (!f || typeof f === "string") continue;
+          await c.put(new Request("./partage/" + Date.now() + "-" + (n++)), new Response(f, { headers: { "content-type": f.type || "application/octet-stream", "x-nom": encodeURIComponent(f.name || "document") } }));
+        }
+      } catch (err) {}
+      return Response.redirect("./index.html?partage=1", 303);
+    })());
+    return;
+  }
   if (req.method !== "GET") return;
   const url = new URL(req.url);
   if (url.origin !== location.origin) return;                    // le reste d'internet, taux du jour €→CHF compris (dernier taux gardé sinon) : toujours en direct
