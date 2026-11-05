@@ -460,6 +460,25 @@ html[data-theme="liseuse"]{color-scheme:light;
   --ok:#000000;--warn:#000000;--bad:#000000;--volt:#000000;--volt-hi:#000000;--volt-glow:rgba(0,0,0,.15);
   --sh:0 0 0 2px #111111;--rail-sh:0 0 0 2px #111111}
 html[data-theme="liseuse"] body{background:#FFFFFF;color:#000000}
+
+/* 3.17 (test) : roulette horizontale des thèmes */
+.thscroll{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;max-width:100%}
+.thscroll::-webkit-scrollbar{display:none}
+.thscroll button{flex:0 0 auto;scroll-snap-align:center;white-space:nowrap}
+/* 3.17 (test) : Liseuse renforcée (fond blanc imposé) */
+html[data-theme="liseuse"],html[data-theme="liseuse"] body{background:#FFFFFF!important;color:#000000!important}
+/* 3.17 (test) : barre Kindle en papier */
+html[data-theme="kindle"] nav.tabs,html[data-theme="kindle"] .rail{background:#F7F3E6!important;border:1.5px solid #1A1A1A!important}
+/* 3.17 (test) : thème Kindle : papier beige, encre noire, chiffres très contrastés, trame LCD discrète */
+html[data-theme="kindle"]{color-scheme:light;--ink:#EFEADB!important;--navy:#F7F3E6!important;--navy-2:#E9E3CF!important;--line:#1A1A1A!important;--fg:#0E0E0E!important;--fg-2:#1E1E1E!important;--fg-3:#4A4A44!important;--volt:#111111!important;--volt-hi:#111111!important;--volt-glow:rgba(0,0,0,.12)!important;--ok:#111111!important;--warn:#111111!important;--bad:#111111!important;--navbg:#111111!important;--sh:0 0 0 2px #1A1A1A;--rail-sh:0 0 0 2px #1A1A1A}
+html[data-theme="kindle"] body{background:#EFEADB!important;color:#0E0E0E!important}
+html[data-theme="kindle"] body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.035) 0 1px,transparent 1px 3px)}
+html[data-theme="kindle"] .card,html[data-theme="kindle"] .tu,html[data-theme="kindle"] .hero{background:#F7F3E6!important;border:1.5px solid #1A1A1A!important;box-shadow:none!important}
+html[data-theme="kindle"] .btn{background:#F7F3E6;color:#0E0E0E;border:1.5px solid #0E0E0E;box-shadow:none}
+html[data-theme="kindle"] .btn.primary,html[data-theme="kindle"] button[aria-pressed="true"]{background:#0E0E0E;color:#EFEADB}
+html[data-theme="kindle"] .tle .v .vd,html[data-theme="kindle"] .tm .mn,html[data-theme="kindle"] .mn{font-family:ui-monospace,"JetBrains Mono",Menlo,monospace;font-weight:800;letter-spacing:.3px}
+html[data-theme="kindle"] .tle .v .vp{color:#0E0E0E;font-weight:800}
+html[data-theme="kindle"] .tlist{border-left:1.5px solid #1A1A1A}
 html[data-theme="liseuse"] .card,html[data-theme="liseuse"] .tu,html[data-theme="liseuse"] .hero{background:#FFFFFF;border:2px solid #111111;border-radius:6px;box-shadow:none}
 html[data-theme="liseuse"] .btn{background:#FFFFFF;color:#000000;border:2px solid #000000;box-shadow:none}
 html[data-theme="liseuse"] .btn.primary,html[data-theme="liseuse"] button[aria-pressed="true"]{background:#000000;color:#FFFFFF}
@@ -1197,7 +1216,7 @@ html[data-theme="neon"] .toast{background:linear-gradient(135deg,#2a1d7a,#1f6fd8
     <div class="card vform" id="vehForm" hidden></div>
     <div class="h2">Affichage</div>
     <div class="card" style="display:flex;flex-direction:column;gap:12px">
-      <div class="switch"><span>Thème</span><span class="seg2" id="setTheme"><button type="button" data-x="fonce">Foncé</button><button type="button" data-x="clair">Clair</button><button type="button" data-x="grim">Grimoire</button><button type="button" data-x="neon">Néon</button><button type="button" data-x="liseuse">Liseuse</button></span></div>
+      <div class="switch"><span>Thème</span><span class="seg2 thscroll" id="setTheme"><button type="button" data-x="fonce">Foncé</button><button type="button" data-x="clair">Clair</button><button type="button" data-x="grim">Grimoire</button><button type="button" data-x="neon">Néon</button><button type="button" data-x="liseuse">Liseuse</button><button type="button" data-x="kindle">Kindle</button></span></div>
       <div class="switch"><span>Magie <small class="muted">(étincelles, chiffres qui roulent, ciel, tuiles qui flottent)</small></span><span class="seg2" id="setMagic"><button type="button" data-x="on">Oui</button><button type="button" data-x="off">Non</button></span></div>
       <div class="switch"><span>Bêtises <small class="muted">(petites farces de l'app, par jour)</small></span><span class="seg2" id="setBet"><button type="button" data-x="0">Aucune</button><button type="button" data-x="1">1</button><button type="button" data-x="3">3</button><button type="button" data-x="5">5</button><button type="button" data-x="fete">Fête 🎉</button></span></div>
       <div class="switch"><span>Page vivante <small class="muted">(sans toucher l'écran : un petit quelque chose toutes les 5 s)</small></span><span class="seg2" id="setViv"><button type="button" data-x="on">Oui</button><button type="button" data-x="off">Non</button></span></div>
@@ -1215,10 +1234,7 @@ html[data-theme="neon"] .toast{background:linear-gradient(135deg,#2a1d7a,#1f6fd8
     <div class="card"><div class="field"><label>Saisie des chiffres</label><div class="seg" id="sPad"><button type="button" data-p="on"><span class="ico" style="--ic:#F5A623"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M216 48v160a8 8 0 0 1-8 8H48a8 8 0 0 1-8-8V48a8 8 0 0 1 8-8h160a8 8 0 0 1 8 8" opacity=".2"/><path d="M208 32H48a16 16 0 0 0-16 16v160a16 16 0 0 0 16 16h160a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16m0 176H48V48h160zM140 80v96a8 8 0 0 1-16 0V95l-11.56 7.71a8 8 0 1 1-8.88-13.32l24-16A8 8 0 0 1 140 80"/></svg></span> Pavé de l'app</button><button type="button" data-p="off"><span class="ico" style="--ic:#6FD3DC"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M192 56v144H64V56Z" opacity=".2"/><path d="M176 16H80a24 24 0 0 0-24 24v176a24 24 0 0 0 24 24h96a24 24 0 0 0 24-24V40a24 24 0 0 0-24-24M72 64h112v128H72Zm8-32h96a8 8 0 0 1 8 8v8H72v-8a8 8 0 0 1 8-8m96 192H80a8 8 0 0 1-8-8v-8h112v8a8 8 0 0 1-8 8"/></svg></span> Clavier du tél.</button></div></div></div>
     <div class="h2">Sauvegarde</div>
     <div id="svBox"></div>
-    <div id="phBox"></div>
-    <button class="btn" type="button" id="btnImport"><span class="ico" style="--ic:#E8C062"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M208 88h-56V32Z" opacity=".2"/><path d="m213.66 82.34l-56-56A8 8 0 0 0 152 24H56a16 16 0 0 0-16 16v176a16 16 0 0 0 16 16h144a16 16 0 0 0 16-16V88a8 8 0 0 0-2.34-5.66M160 51.31L188.69 80H160ZM200 216H56V40h88v48a8 8 0 0 0 8 8h48zm-42.34-77.66a8 8 0 0 1-11.32 11.32L136 139.31V184a8 8 0 0 1-16 0v-44.69l-10.34 10.35a8 8 0 0 1-11.32-11.32l24-24a8 8 0 0 1 11.32 0Z"/></svg></span> Importer un ancien fichier</button>
-    <input type="file" id="fileImport" accept=".txt,.json,.xlsx,.xls,text/plain,application/json" hidden>
-    <div class="cap">Ancien fichier = une sauvegarde d'avant la v1.5 (<span style="font-family:var(--f-num)">Vehicules_sauvegarde_AAAA-MM-JJ.txt</span>) ou ton fichier <span style="font-family:var(--f-num)">Vehicules.xlsx</span> d'origine. Tes données actuelles sont d'abord gardées dans « Copies avant import ».</div>
+    <div id="phBox" hidden></div>
     <div class="h2">Données</div>
     <button class="btn danger" type="button" id="btnWipe">Effacer toutes les données</button>
     <div class="h2">À propos</div>
@@ -1268,6 +1284,7 @@ html[data-theme="neon"] .toast{background:linear-gradient(135deg,#2a1d7a,#1f6fd8
   <div class="in"><span id="rdrop" aria-hidden="true"></span>
     <span class="rqbox" id="rqBox"><i class="rsep"></i><button type="button" class="rqb" id="rqBtn" aria-label="Rechercher" title="Rechercher"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M192 112a80 80 0 1 1-80-80a80 80 0 0 1 80 80" opacity=".2"/><path d="m229.66 218.34l-50.06-50.06a88.21 88.21 0 1 0-11.32 11.31l50.06 50.07a8 8 0 0 0 11.32-11.32M40 112a72 72 0 1 1 72 72a72.08 72.08 0 0 1-72-72"/></svg></button><i class="rsep"></i></span>
     <button type="button" data-v="more" aria-label="Paramètres" title="Paramètres"><svg style="color:#A58CFF" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="m230.1 108.76l-31.85-18.14c-.64-1.16-1.31-2.29-2-3.41l-.12-36A104.6 104.6 0 0 0 162 32l-32 17.89h-4L94 32a104.6 104.6 0 0 0-34.11 19.25l-.16 36c-.7 1.12-1.37 2.26-2 3.41l-31.84 18.1a99.2 99.2 0 0 0 0 38.46l31.85 18.14c.64 1.16 1.31 2.29 2 3.41l.12 36A104.6 104.6 0 0 0 94 224l32-17.87h4L162 224a104.6 104.6 0 0 0 34.08-19.25l.16-36c.7-1.12 1.37-2.26 2-3.41l31.84-18.1a99.2 99.2 0 0 0 .02-38.48M128 168a40 40 0 1 1 40-40a40 40 0 0 1-40 40" opacity=".2"/><path d="M128 80a48 48 0 1 0 48 48a48.05 48.05 0 0 0-48-48m0 80a32 32 0 1 1 32-32a32 32 0 0 1-32 32m109.94-52.79a8 8 0 0 0-3.89-5.4l-29.83-17l-.12-33.62a8 8 0 0 0-2.83-6.08a111.9 111.9 0 0 0-36.72-20.67a8 8 0 0 0-6.46.59L128 41.85L97.88 25a8 8 0 0 0-6.47-.6a111.9 111.9 0 0 0-36.68 20.75a8 8 0 0 0-2.83 6.07l-.15 33.65l-29.83 17a8 8 0 0 0-3.89 5.4a106.5 106.5 0 0 0 0 41.56a8 8 0 0 0 3.89 5.4l29.83 17l.12 33.63a8 8 0 0 0 2.83 6.08a111.9 111.9 0 0 0 36.72 20.67a8 8 0 0 0 6.46-.59L128 214.15L158.12 231a7.9 7.9 0 0 0 3.9 1a8.1 8.1 0 0 0 2.57-.42a112.1 112.1 0 0 0 36.68-20.73a8 8 0 0 0 2.83-6.07l.15-33.65l29.83-17a8 8 0 0 0 3.89-5.4a106.5 106.5 0 0 0-.03-41.52m-15 34.91l-28.57 16.25a8 8 0 0 0-3 3c-.58 1-1.19 2.06-1.81 3.06a7.94 7.94 0 0 0-1.22 4.21l-.15 32.25a95.9 95.9 0 0 1-25.37 14.3L134 199.13a8 8 0 0 0-3.91-1h-3.83a8.1 8.1 0 0 0-4.1 1l-28.84 16.1A96 96 0 0 1 67.88 201l-.11-32.2a8 8 0 0 0-1.22-4.22c-.62-1-1.23-2-1.8-3.06a8.1 8.1 0 0 0-3-3.06l-28.6-16.29a90.5 90.5 0 0 1 0-28.26l28.52-16.28a8 8 0 0 0 3-3c.58-1 1.19-2.06 1.81-3.06a7.94 7.94 0 0 0 1.22-4.21l.15-32.25a95.9 95.9 0 0 1 25.37-14.3L122 56.87a8 8 0 0 0 4.1 1h3.64a8 8 0 0 0 4.1-1l28.84-16.1A96 96 0 0 1 188.12 55l.11 32.2a8 8 0 0 0 1.22 4.22c.62 1 1.23 2 1.8 3.06a8.1 8.1 0 0 0 3 3.06l28.6 16.29a90.5 90.5 0 0 1 .05 28.29Z"/></svg></button>
+    <button type="button" id="railDisk" aria-label="Sauvegarder (zip)" title="Sauvegarder (zip)" style="color:#A58CFF;background:none;border:0;padding:4px;margin:0"><svg viewBox="0 0 256 256" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M216 40H40a16 16 0 0 0-16 16v144a16 16 0 0 0 16 16h176a16 16 0 0 0 16-16V56a16 16 0 0 0-16-16ZM168 216H88v-48h80Zm40 0h-16v-56a8 8 0 0 0-8-8H88a8 8 0 0 0-8 8v56H40V56h16v48a8 8 0 0 0 8 8h96a8 8 0 0 0 8-8V56h16.97L208 77.03Z"/></svg></button>
     <i class="sp"></i>
     <button type="button" data-v="home" aria-label="Bord" title="Bord" aria-current="page"><svg style="color:#FF6B5A" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M232 152v24a8 8 0 0 1-8 8H32a8 8 0 0 1-8-8v-22.87C24 95.65 70.15 48.2 127.63 48A104 104 0 0 1 232 152" opacity=".2"/><path d="M207.06 72.67A111.24 111.24 0 0 0 128 40h-.4C66.07 40.21 16 91 16 153.13V176a16 16 0 0 0 16 16h192a16 16 0 0 0 16-16v-24a111.25 111.25 0 0 0-32.94-79.33M224 176H119.71l54.76-75.3a8 8 0 0 0-12.94-9.42L99.92 176H32v-22.87c0-3.08.15-6.12.43-9.13H56a8 8 0 0 0 0-16H35.27c10.32-38.86 44-68.24 84.73-71.66V80a8 8 0 0 0 16 0V56.33A96.14 96.14 0 0 1 221 128h-21a8 8 0 0 0 0 16h23.67c.21 2.65.33 5.31.33 8Z"/></svg></button>
     <button type="button" data-v="tl" aria-label="Timeline" title="Timeline"><svg style="color:#F5D04C" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M216 128a88 88 0 1 1-88-88a88 88 0 0 1 88 88" opacity=".2"/><path d="M136 80v43.47l36.12 21.67a8 8 0 0 1-8.24 13.72l-40-24A8 8 0 0 1 120 128V80a8 8 0 0 1 16 0m-8-48a95.44 95.44 0 0 0-67.92 28.15C52.81 67.51 46.35 74.59 40 82V64a8 8 0 0 0-16 0v40a8 8 0 0 0 8 8h40a8 8 0 0 0 0-16H49c7.15-8.42 14.27-16.35 22.39-24.57a80 80 0 1 1 1.66 114.75a8 8 0 1 0-11 11.64A96 96 0 1 0 128 32"/></svg></button>
@@ -1305,7 +1322,7 @@ html[data-theme="neon"] .toast{background:linear-gradient(135deg,#2a1d7a,#1f6fd8
       </div>
       <div class="field full fuelOnly"><label>Station</label><div class="chiprow" id="fSt"></div>
         <input class="txt" id="fStOther" type="text" placeholder="Nom de la station" hidden><div class="hint" id="hSt"></div>
-        <label style="margin-top:8px">Type de lieu (facultatif)</label><div class="chiprow" id="fLieu"></div></div>
+        <label style="margin-top:8px" for="fLieuTxt">Lieu (facultatif)</label><input class="txt" id="fLieuTxt" type="text" placeholder="ex. Lausanne, Carrefour Divonne"></div>
       <div class="typ seg fuelOnly" id="fType"><button type="button" aria-pressed="true" data-t="1">Plein complet</button><button type="button" aria-pressed="false" data-t="0">Partiel</button><button type="button" aria-pressed="false" data-t="?">Je ne sais plus</button></div>
       <div class="live fuelOnly"><div><b id="lPL">–</b><small>CHF / L</small></div><div><b id="lKm">–</b><small>Km parcourus</small></div><div><b id="lPK">–</b><small>CHF / km</small></div><div><b id="lC">–</b><small>L / 100 km</small></div></div>
       <div class="field full fuelOnly"><div class="hint" id="hC"></div><div class="hint" id="hP"></div></div>
@@ -1560,7 +1577,7 @@ const THEME = { // v1.8 : même fond foncé pour tous, un accent par véhicule
   k:{txt:"#B3B8C2",grid:"rgba(255,255,255,.06)",tipBg:"#20242B",tipFg:"#EEF0F4",tipBd:"#E5484D",track:"#262A32",needle:"#EEF0F4",muted:"#8B92A0",bad:"#FF9F43",warn:"#F5D04C",acc:"#E5484D",fg:"#EEF0F4"}};
 let MODE=0; try{ const m=+localStorage.getItem("sv-mode"); if(m>0) MODE=m; }catch(e){}
 let T=THEME.k;
-const APP_VERSION="3.16";
+const APP_VERSION="3.17";
 const KEY="suivi-vehicules-v1";
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}}, lsSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 let STATE={fills:[],tyres:[],ent:[],rates:{},range:[925,350],tank:[60,20],buy:[3500,10000],fixed:[{},{}],trip:null};
@@ -1697,7 +1714,7 @@ const used = ()=>V.map((_,i)=>i).filter(i=>A.stat[i]);
 const hexMix=(a,b,t)=>{ const p=x=>[1,3,5].map(i=>parseInt(x.slice(i,i+2),16)), A=p(a), B=p(b); return "#"+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,"0")).join(""); };
 const rgba=(x,a)=>`rgba(${[1,3,5].map(i=>parseInt(x.slice(i,i+2),16)).join(",")},${a})`;
 function applyTheme(){
-  const H=document.documentElement, x=V[MODE], light=H.dataset.theme==="clair"||H.dataset.theme==="grim"||H.dataset.theme==="liseuse", grim=H.dataset.theme==="grim", neon=H.dataset.theme==="neon";
+  const H=document.documentElement, x=V[MODE], light=H.dataset.theme==="clair"||H.dataset.theme==="grim"||H.dataset.theme==="liseuse"||H.dataset.theme==="kindle", grim=H.dataset.theme==="grim", neon=H.dataset.theme==="neon";
   T=Object.assign({},THEME.k);
   const std=x.id==="k"&&x.c==="#E5484D"?"k":x.id==="b"&&x.c==="#3D86F8"?"b":null;
   H.dataset.mode=std||"x";
@@ -2017,7 +2034,7 @@ function renderHome(){
     $("#homeEmpty").innerHTML=`<div style="font-size:40px;line-height:1">${none?ic("gas-pump","var(--volt-hi)"):vIc(i)}</div><div class="big">${none?"Bienvenue !":`Pas encore de ${hasFuel(i)?U(i).plein:"relevé"} pour ${esc(V[i].n)}`}</div>
       <p>${none?"Importe ton fichier <b>Vehicules.xlsx</b> pour reprendre tout ton historique, ou commence directement avec le bouton <b>+</b> en haut.":`Touche le bouton <b>+</b> en haut pour noter ${hasFuel(i)?"le premier "+U(i).plein:"le compteur"} de ce véhicule.`}</p>
       ${none?`<button class="btn primary" type="button" id="homeImport">⬆ Importer Vehicules.xlsx</button>`:""}`;
-    if(none) $("#homeImport").onclick=()=>$("#fileImport").click();
+    if(none) $("#homeImport").onclick=()=>toast("Restaurer un zip : Paramètres › Sauvegarde.");
     return; }
   renderFeatured();
   const u=U(i);
@@ -2325,7 +2342,7 @@ let budSel=null; // mois touché dans le graphique
 let planSel=null; // « h3 » = les 3 prochains mois, « m2026-12 » = un mois : touché dans À prévoir
 function planMonths(vs,items,B){ // les 12 prochains mois (le mois en cours compte à partir d'aujourd'hui) : carburant au rythme des 12 derniers mois + ce qui tombe
   const T1=TODAY+1, a12=Math.max(B.st,T1-365), d12=T1-a12;
-  const fu=vs.filter(hasFuel).map(v=>{ const F=A.all[v].filter(f=>f.P>0&&day(f.d)>=a12&&day(f.d)<T1); return {v,perD:F.reduce((t,f)=>t+f.P,0)/d12,nD:F.length/d12,avg:F.length?F.reduce((t,f)=>t+f.P,0)/F.length:0}; });
+  const fu=vs.filter(hasFuel).map(v=>{ const F=A.all[v].filter(f=>f.P>0&&day(f.d)>=a12&&day(f.d)<T1), F3=A.all[v].filter(f=>f.P>0&&day(f.d)>=T1-91&&day(f.d)<T1); const r12=F.reduce((t,f)=>t+f.P,0)/d12, r3=F3.length?F3.reduce((t,f)=>t+f.P,0)/91:r12; return {v,perD:(r12+r3)/2,nD:F.length/d12,avg:F.length?F.reduce((t,f)=>t+f.P,0)/F.length:0}; }); // 3.17 : moyenne du rythme 12 mois et des 3 derniers mois
   const out=[]; let k=mKey(TODAY);
   for(let i=0;i<12;i++,k=mNext(k)){ const a=i?day(k+"-01"):TODAY, b=day(mNext(k)+"-01"), d=b-a, its=items.filter(x=>!x.info&&x.d>=a&&x.d<b);
     const o={k,a,b,d,first:!i,carb:fu.reduce((t,f)=>t+f.perD*d,0),ent:0,four:0,pneu:0,fixe:0,its,late:its.some(x=>x.late),fu:fu.map(f=>({v:f.v,n:f.nD*d,avg:f.avg,m:f.perD*d}))};
@@ -2379,7 +2396,24 @@ function renderBudSimple(vs){ // 3.14 (test) : un seul budget, moyennes des 12 d
     <div class="bsc">À mettre de côté par mois : <b>${fmt(cote/N)} CHF</b> (hors essence)</div>
     <div class="cap">Moyenne des 12 derniers mois, tirée de ta Timeline. Pas de prévision de dates.</div>`;
   el.querySelectorAll("#bsN button").forEach(bn=>bn.onclick=()=>{ window.budSimpleN=+bn.dataset.n; renderBudget(); });
-  box.hidden=true; pc.hidden=true; tc.hidden=true;
+  box.hidden=true; tc.hidden=true; renderOracle(Array.isArray(vs)?vs:[MODE]);
+}
+function oracleConf(vs){ const n=vs.reduce((t,v)=>t+A.all[v].filter(f=>f.P>0&&day(f.d)>=TODAY-365).length,0); return n>=12?{k:"bon",s:.1,l:"bon"}:n>=6?{k:"moyen",s:.2,l:"moyenne"}:{k:"faible",s:.35,l:"faible"}; }
+function renderOracle(vs){ // 3.17 (test) : À prévoir = oracle : prévisions avec fourchette et niveau de confiance
+  const pc=$("#planCard"); A=analyse(); const B=budget(vs), all=budAll(); if(!B){ pc.hidden=true; return; }
+  const items=vs.flatMap(planItems).sort((a,b)=>a.d-b.d), PM=planMonths(vs,items,B), cf=oracleConf(vs);
+  const HZ=[[1,"Ce mois"],[3,"3 mois"],[6,"6 mois"],[12,"12 mois"]], ms=k=>MOIS[+k.slice(5)-1]+".";
+  const rng=n=>{ const s=PM.slice(0,n).reduce((t,m)=>t+m.t,0); return {s, lo:s*(1-cf.s), hi:s*(1+cf.s)}; };
+  const who=all?"Tous les véhicules":esc(V[MODE].n), pmx=Math.max(1,B.m12,...PM.map(m=>m.t));
+  pc.hidden=false;
+  pc.innerHTML=`<div class="hd2">${ic("calendar-check","#3DD39B")} Oracle · à prévoir · ${who}</div>
+    <div class="bkpi pl pl4">${HZ.map(([n,l])=>{ const r=rng(n); return `<button type="button" data-h="${n}" aria-pressed="${planSel==="h"+n}"><small>${l}</small><b class="num">${fmt(r.s)}</b><span>CHF · ${fmt(r.lo)}–${fmt(r.hi)}</span></button>`; }).join("")}</div>
+    <div class="bline">Confiance : <b>${cf.l}</b> (${cf.k==="bon"?"assez de pleins pour une estimation serrée":cf.k==="moyen"?"quelques pleins, la fourchette est plus large":"peu de pleins, estimation large"}). Carburant : moyenne du rythme des 12 derniers mois et des 3 derniers.</div>
+    <div class="bch pch" style="--avgf:${(Math.min(1,B.m12/pmx)).toFixed(3)}"><div class="bavg"><span>mois normal ${fmt(B.m12)}</span></div>${PM.map(m=>`<button type="button" class="bb${m.late?" late":""}" data-m="${m.k}" aria-pressed="${planSel==="m"+m.k}" aria-label="${ms(m.k)} ${fmt(m.t)} CHF"><span class="bs"><i style="height:${(m.t/pmx*100).toFixed(1)}%;background:#3DD39B"></i></span><small>${MOIS[+m.k.slice(5)-1].slice(0,3)}</small></button>`).join("")}</div>
+    <div id="planDet"></div>
+    <div class="plist">${items.length?items.map(x=>`<div class="pit${x.late?" late":""}"><span class="pd"><b>${x.late?"!":dOf(x.d).slice(8)*1}</b><small>${x.late?"à voir":MOIS[+dOf(x.d).slice(5,7)-1]}</small></span><span class="pt">${esc(x.t)}<small>${esc(x.s||"")}</small></span><span class="pv">${fmt(x.m)} CHF</span></div>`).join(""):`<div class="muted">Rien de prévu dans les frais fixes ou l'entretien.</div>`}</div>
+    <div class="cap">L'oracle prévoit les dépenses à venir : carburant, frais fixes et entretien. Le Budget, lui, reste le bilan réel de ce qui a été dépensé.</div>`;
+  planBind(PM,B,all);
 }
 function renderBudget(){
   const box=$("#budCard"), pc=$("#planCard"), tc=$("#tipCard"), vs=budVs(), B=budget(vs), all=budAll(), who=all?"Tous les véhicules":esc(V[MODE].n);
@@ -2781,7 +2815,7 @@ async function phShow(){
   const box=$("#shPh");if(!box)return;
   const l=await phList(phCur());phRevoke();
   for(const p of l)PHU.set(p.id,URL.createObjectURL(p.prev));
-  box.innerHTML=`<div class="ph-strip">${l.map((p,i)=>`<button class="ph-thumb" type="button" data-ph="${p.id}" aria-label="Photo ${i+1}, agrandir"><img src="${PHU.get(p.id)}" alt=""></button>`).join("")}<label class="ph-add"><input type="file" accept="image/*" multiple hidden id="phIn"><span>📷</span>${l.length?"Ajouter":"Ajouter une photo"}</label></div>`;
+  box.innerHTML=`<div class="ph-strip">${l.map((p,i)=>`<button class="ph-thumb" type="button" data-ph="${p.id}" aria-label="Photo ${i+1}, agrandir"><img src="${PHU.get(p.id)}" alt=""></button>`).join("")}<label class="ph-add"><input type="file" accept="image/*" multiple hidden id="phIn"><span>📷</span>${l.length?"Ajouter":"Ajouter une photo"}</label><label class="ph-add"><input type="file" accept="application/pdf,image/*" multiple hidden class="pdf-in"><span>📄</span>PDF</label></div>`;
 }
 async function phView(id){const p=await phDo("readonly",s=>s.get(id));if(!p)return;if(PHVIEW)URL.revokeObjectURL(PHVIEW);PHVIEW=URL.createObjectURL(p.blob);$("#phImg").src=PHVIEW;$("#phView").dataset.id=id;$("#phView").hidden=false}
 function phClose(){$("#phView").hidden=true;$("#phImg").removeAttribute("src");if(PHVIEW){URL.revokeObjectURL(PHVIEW);PHVIEW=null}}
@@ -2824,6 +2858,7 @@ $("#phDel").onclick=()=>confirmTap($("#phDel"),"Toucher encore pour supprimer la
 document.addEventListener("click",e=>{const t=e.target.closest(".ph-thumb[data-ph]");if(t)phView(t.dataset.ph)});
 document.addEventListener("change",e=>{
   if(e.target.id==="phIn"&&e.target.files.length){phAdd([...e.target.files]);e.target.value=""}
+  if(e.target.classList.contains("pdf-in")&&e.target.files.length){const files=[...e.target.files];e.target.value="";DOCLIEN=(ENTEDIT&&ENTEDIT.id)||(EDIT&&EDIT.id)||null;docImport(files,sv)}
   if(e.target.classList.contains("nph-in")&&e.target.files.length){const files=[...e.target.files];e.target.value="";phAdd(files,e.target.dataset.ref||(NEWREF=uid()))}
   if(e.target.id==="phImp"&&e.target.files[0]){phImport(e.target.files[0]);e.target.value=""}});
 
@@ -2917,13 +2952,14 @@ async function renderDocs(){ const v=MODE, B=$("#vehBody"), L=docsOf(v);
 }
 
 // ----- enregistrer un document (pages = Blobs)
-async function docSave(meta,blobs){ const v=meta.v, d={id:uid(),k:meta.k||"fac",t:meta.t||"",d:meta.d||dOf(TODAY),m:meta.m??null,pdf:blobs.some(b=>isPdf(b)),np:0};
+let DOCLIEN=null;
+async function docSave(meta,blobs){ const v=meta.v, d={id:uid(),k:meta.k||"fac",t:meta.t||"",d:meta.d||dOf(TODAY),m:meta.m??null,pdf:blobs.some(b=>isPdf(b)),np:0,lien:DOCLIEN||null};
   let pg=0;
   for(const b of blobs){ const pdf=isPdf(b); let prev=null; if(!pdf) prev=await phPrev(b);
     try{ await phDo("readwrite",s=>s.put({id:uid(),ref:docRef(d.id),pg:pg++,t:new Date().toISOString(),name:b.name||(pdf?"document.pdf":"page.jpg"),type:pdf?"application/pdf":(b.type||"image/jpeg"),blob:b,prev})); }
     catch(e){ toast("Mémoire pleine : document non gardé"); await phDelRef(docRef(d.id)); return null; } }
   d.np=d.pdf?await pdfCount(blobs):pg;
-  docsOf(v).push(d); persist(); return d; }
+  docsOf(v).push(d); DOCLIEN=null; persist(); return d; }
 async function pdfCount(blobs){ let n=0; for(const b of blobs){ if(!isPdf(b)){ n++; continue; }
   try{ const PL=await loadPdfLib(); n+=(await PL.PDFDocument.load(await b.arrayBuffer(),{ignoreEncryption:true,updateMetadata:false})).getPageCount(); continue; }catch(e){}
   try{ const t=new TextDecoder("latin1").decode(await b.arrayBuffer()); const m=t.match(/\/Type\s*\/Page[^s]/g); n+=m?m.length:1; }catch(e){ n++; } } return n; }
@@ -3196,12 +3232,12 @@ function tlEvents(v){
   A.all[v].forEach(f=>{ const opt=Object.keys(f.opts||{}).filter(k=>f.opts[k]).map(k=>{ const o=OPTS.find(o=>o[0]===k); return o?" "+ic(o[2]):""; }).join("");
     if(f.kmOnly){ out.push({k:"fill",d:f.d,km:+f.km||0,f,t:`${fmt(f.km)} km`,s:`relevé du compteur${f.dist?` · +${fmt(f.dist)} km`:""}`,m:null}); return; }
     const pills=(f.conso!=null?`<span class="pill ok">${fmt(f.conso,2)} ${u.c100}</span>`:"")+(f.eur!=null?`<span class="pill" style="color:var(--volt-hi);border-color:color-mix(in srgb,var(--volt) 50%,transparent)">€</span>`:"")
-      +(f.ign&&f.ign.length?f.ign.map(x=>`<span class="pill w">⚠ ignoré : ${x}</span>`).join(""):"")+(f.weird?`<span class="pill w">conso inhabituelle</span>`:"")+(f.force?`<span class="pill ok">compté quand même</span>`:"")+(f.alert?`<span class="pill" style="color:var(--fg-3);border-color:var(--line)">${f.alert}</span>`:"");
+      +(f.ign&&f.ign.length?f.ign.map(x=>`<span class="pill w">⚠ ignoré : ${x}</span>`).join(""):"")+(f.weird?`<span class="pill w">conso inhabituelle</span>`:"")+(f.force?`<span class="pill ok">compté quand même</span>`:"")+"";
     out.push({k:"fill",d:f.d,km:+f.km||0,f,t:`${hasFuel(v)?(u.plein==="recharge"?"Recharge":"Plein"):"Relevé"} ${f.L!=null?fmt(f.L,2)+" "+u.vol:"– "+u.vol}${pills}`,
-      s:`${CTRY[f.ctry||"CH"].f} ${hasKm(f)?fmt(f.km)+" km":"km non noté"} · ${f.vague?"je ne sais plus":f.full?u.plein:"partiel"}${f.dist?` · +${fmt(f.dist)} km`:""}${f.st?` · ${esc(f.st)}`:""}${f.lieu?` (${esc(f.lieu)})`:""}${opt}`,m:f.P,m2:f.eur!=null?fmt(f.eur,2)+" €":""}); });
+      s:`${CTRY[f.ctry||"CH"].f} ${hasKm(f)?fmt(f.km)+" km":"km non noté"} · ${f.vague?"je ne sais plus":f.full?u.plein:"partiel"}${f.dist?` · +${fmt(f.dist)} km`:""}${f.st?` · ${esc(f.st)}`:""}${f.lieu?` (${esc(f.lieu)})`:""}${docsOf(v).some(d=>d.lien===f.id)?" · 📎 document":""}${opt}`,m:f.P,m2:f.eur!=null?fmt(f.eur,2)+" €":""}); });
   STATE.ent.filter(e=>e.v===v).forEach(e=>{ const K=EKIND[ekOf(e)], fi=e.k==="F"?FXI[e.fk||"aut"]:null;
     out.push({k:ekOf(e),d:e.d||"0000-00-00",km:+e.km||0,e,i:fi?fi[0]:null,c:fi?fi[1]:null,t:esc(e.t),
-      s:`${e.k==="F"?(e.d?"année "+e.d.slice(0,4)+" · ":"")+(FXN[e.fk]||"frais fixe").toLowerCase()+(perOf(e)>1&&+e.m>0?` · ${fmt(+e.m/perOf(e),2)} CHF ${perN(e)[2]} · ${fmt(+e.m)} CHF par an`:" · par an"):K[1].toLowerCase()}${e.km?` · ${fmt(+e.km)} km`:""}${e.d?"":" · date non notée"}`,m:e.m!=null&&e.m!==""?+e.m:null}); });
+      s:`${e.k==="F"?(e.d?"année "+e.d.slice(0,4)+" · ":"")+(FXN[e.fk]||"frais fixe").toLowerCase()+(perOf(e)>1&&+e.m>0?` · ${fmt(+e.m/perOf(e),2)} CHF ${perN(e)[2]} · ${fmt(+e.m)} CHF par an`:" · par an"):K[1].toLowerCase()}${e.km?` · ${fmt(+e.km)} km`:""}${e.d?"":" · date non notée"}${docsOf(v).some(d=>d.lien===e.id)?" · 📎 document":""}`,m:e.m!=null&&e.m!==""?+e.m:null}); });
   (()=>{ let rv=[]; try{ rv=JSON.parse(localStorage.getItem("sv-res-ev-"+v)||"[]"); }catch(e){}
     rv.forEach(r=>out.push({k:"res",d:r.d||"0000-00-00",km:+r.km||0,t:"Voyant de réserve",s:`${fmt(r.km)} km${r.dist?` · ${fmt(r.dist)} km après le plein`:""}`,m:null})); })();
   STATE.tyres.filter(x=>x.v===v).forEach(x=>{ const T=TTYPE[tyreType(x)]; out.push({k:"P",d:x.d,km:+x.km||0,t:`Pneus ${T.n.toLowerCase()} montés`,s:[x.mod?esc(x.mod):"",x.pos?TPOS[x.pos]:""].filter(Boolean).join(" · "),m:null}); });
@@ -3249,7 +3285,9 @@ function renderTl(){ tlIcone();
     const c=x.c||TLT[x.k][2], col=x.f?V[v].c:c, att=x.f?`data-id="${x.f.id}" role="button" tabindex="0"`:x.e?`data-eid="${x.e.id}" role="button" tabindex="0"`:x.doc?`data-doc="${x.doc.id}" role="button" tabindex="0"`:"";
     h+=`<div class="tle" style="--c:${col}" ${att}><span class="dot"></span><span class="e">${x.f&&x.f.kmOnly?ic("speedometer",col):ic(x.i||TLT[x.k][0],c)}</span><span class="t">${x.t}${x.s?`<small>${x.s}</small>`:""}</span><span class="v"><b class="vd" style="color:var(--c)">${nd?"–":dshort(day(x.d))}</b>${x.m!=null?`<small class="vp">${fmt(x.m,x.m>=1000?0:2)} CHF</small>`:""}${x.m2?`<small>${x.m2}</small>`:""}${att?`<small>${ic("pencil-simple","var(--fg-3)")}</small>`:""}</span></div>`; });
   const first=STATE.buyD[v]||(A.per[v][0]&&A.per[v].reduce((m,f)=>f.d<m?f.d:m,"9999")), anyOn=ks.some(k=>on[k]), click=ev.some(x=>x.f||x.e);
-  $("#tlBody").innerHTML=(h?`<div class="tlist pgc">${h}</div>`:`<div class="muted">${!anyOn?"Rien à afficher : coche au moins un type.":fx?"Aucun frais fixe noté pour ce véhicule.":"Rien de noté."}</div>`)
+  const kmL=fills.filter(f=>f.v===v&&f.km>0).map(f=>f.km).sort((a,b)=>a-b), dd=[]; for(let i=1;i<kmL.length;i++){ const g=kmL[i]-kmL[i-1]; if(g>0) dd.push(g); }
+  const kmLine=dd.length?`<div class="cap" style="margin:0 0 8px">Moyenne : <b>${fmt(Math.round(dd.reduce((a,b)=>a+b,0)/dd.length))} km</b> entre deux notes de km.</div>`:"";
+  $("#tlBody").innerHTML=kmLine+(h?`<div class="tlist pgc">${h}</div>`:`<div class="muted">${!anyOn?"Rien à afficher : coche au moins un type.":fx?"Aucun frais fixe noté pour ce véhicule.":"Rien de noté."}</div>`)
     +(all.length>ev.length?`<button class="btn" type="button" id="tlMore" style="margin-top:10px">Afficher plus (${all.length-ev.length} de plus)</button>`:"")
     +(click?`<div class="swtip">← Glisse une ligne vers la gauche pour la supprimer</div>`:"")
     +`<div class="cap">Touche une ligne pour la modifier ou la supprimer. Le bouton + en haut note un plein ou un entretien. ${first&&first<"9999"?`Les données commencent le ${dfr(first)}${STATE.buyD[v]?", à l'achat":""}.`:""} ${STATE.buyD[v]?"":"La date d'achat se note dans Paramètres → Véhicules."}</div>`;
@@ -3420,7 +3458,7 @@ async function notesPhotos(){
   for(const box of document.querySelectorAll("#vehBody [data-nph]")){
     const ref=box.dataset.nph==="new"?NEWREF:box.dataset.nph, l=await phList(ref);
     l.forEach(p=>NPU.set(p.id,URL.createObjectURL(p.prev)));
-    box.innerHTML=`<div class="ph-strip">${l.map((p,i)=>`<button class="ph-thumb" type="button" data-ph="${p.id}" aria-label="Photo ${i+1}, agrandir"><img src="${NPU.get(p.id)}" alt=""></button>`).join("")}<label class="ph-add"><input type="file" accept="image/*" multiple hidden class="nph-in" data-ref="${ref||""}"><span>📷</span>${l.length?"Ajouter":"Ajouter une photo"}</label></div>`;
+    box.innerHTML=`<div class="ph-strip">${l.map((p,i)=>`<button class="ph-thumb" type="button" data-ph="${p.id}" aria-label="Photo ${i+1}, agrandir"><img src="${NPU.get(p.id)}" alt=""></button>`).join("")}<label class="ph-add"><input type="file" accept="image/*" multiple hidden class="nph-in" data-ref="${ref||""}"><span>📷</span>${l.length?"Ajouter":"Ajouter une photo"}</label><label class="ph-add"><input type="file" accept="application/pdf,image/*" multiple hidden class="pdf-in"><span>📄</span>PDF</label></div>`;
   }
 }
 let nEdit=null, nQ="";
@@ -3962,7 +4000,7 @@ function renderSt(){
   $("#fSt").querySelectorAll("button").forEach(b=>b.onclick=()=>{ sSt = sSt===b.dataset.s?null:b.dataset.s; renderSt(); live(); });
 }
 let sLieu=null; const LIEUX=["Pays","Ville","Village","Centre commercial"];
-function renderLieu(){ $("#fLieu").innerHTML=LIEUX.map(x=>`<button type="button" aria-pressed="${x===sLieu}" data-l="${x}">${x}</button>`).join(""); $("#fLieu").querySelectorAll("button").forEach(b=>b.onclick=()=>{ sLieu = sLieu===b.dataset.l?null:b.dataset.l; renderLieu(); }); }
+function renderLieu(){ /* 3.17 : lieu en texte libre (champ #fLieuTxt) */ }
 function curStation(){ return sSt==="__autre" ? ($("#fStOther").value.trim()||null) : sSt; }
 function renderOpts(){ $("#fOpts").innerHTML=OPTS.map(o=>`<button type="button" aria-pressed="${!!sOpts[o[0]]}" data-k="${o[0]}">${optL(o)}</button>`).join("");
   $("#fOpts").querySelectorAll("button").forEach(b=>b.onclick=()=>{ sOpts[b.dataset.k]=!sOpts[b.dataset.k]; renderOpts(); }); }
@@ -3987,10 +4025,10 @@ function openSheet(fresh,edit){
     $("#fDate").value=e.d; $("#fKm").value=hasKm(e)?e.km:""; $("#fL").value=e.L??""; sCtry=e.ctry||"CH";
     sCur = e.eur!=null?"EUR":"CHF"; $("#fP").value = e.eur!=null?e.eur:(e.P??""); $("#fR").value = e.rate??""; rateManual = e.rate!=null;
     sFull=!!e.full; sVague=!!e.vague; sOpts={...(e.opts||{})};
-    sLieu=e.lieu||null; const known=(STATIONS[sCtry]||[]).includes(e.st); sSt = e.st?(known?e.st:"__autre"):null; $("#fStOther").value = e.st&&!known?e.st:"";
+    sLieu=null; const lt=$("#fLieuTxt"); if(lt) lt.value=e.lieu||""; const known=(STATIONS[sCtry]||[]).includes(e.st); sSt = e.st?(known?e.st:"__autre"):null; $("#fStOther").value = e.st&&!known?e.st:"";
   } else {
     $("#fDate").value=dOf(TODAY); $("#fKm").value=""; $("#fL").value=""; $("#fP").value="";
-    sOpts={}; sSt=null; sLieu=null; sFull=true; sVague=false; $("#fStOther").value=""; rateManual=false;
+    sOpts={}; sSt=null; sLieu=null; $("#fLieuTxt").value=""; sFull=true; sVague=false; $("#fStOther").value=""; rateManual=false;
     const lastC=lastOf(sv); sCtry = "CH"; sCur="CHF";
   }
   const l=lastOf(sv); $("#fKm").placeholder=l?String(l.km):"km";
@@ -4087,13 +4125,13 @@ function live(){ const r=preview();
 function save(){
   const r=preview(); if(!live()) return;
   if(EDIT){
-    Object.assign(EDIT,{d:$("#fDate").value,v:sv,km:r.km||null,L:r.L,P:r.P,eur:r.eur,rate:r.rate,full:r.kmOnly?false:sFull,ctry:sCtry,st:r.kmOnly?null:curStation(),lieu:r.kmOnly?null:sLieu,opts:r.kmOnly?{}:{...sOpts},force:!$("#forceBox").hidden&&$("#fForce").checked}); if(r.kmOnly) EDIT.kmOnly=true; else delete EDIT.kmOnly; if(sVague&&!r.kmOnly) EDIT.vague=true; else delete EDIT.vague;
+    Object.assign(EDIT,{d:$("#fDate").value,v:sv,km:r.km||null,L:r.L,P:r.P,eur:r.eur,rate:r.rate,full:r.kmOnly?false:sFull,ctry:sCtry,st:r.kmOnly?null:curStation(),lieu:r.kmOnly?null:((($("#fLieuTxt")||{}).value||"").trim()||null),opts:r.kmOnly?{}:{...sOpts},force:!$("#forceBox").hidden&&$("#fForce").checked}); if(r.kmOnly) EDIT.kmOnly=true; else delete EDIT.kmOnly; if(sVague&&!r.kmOnly) EDIT.vague=true; else delete EDIT.vague;
     if(r.rate) STATE.lastRate=r.rate;
     persist(); A=analyse(); closeSheet(); views[curView](); toast("✓ Plein modifié"); return;
   }
   const prevBest=Math.min(...A.per[sv].filter(f=>f.conso!=null).map(f=>f.conso)), lastKm=lastOf(sv)?lastOf(sv).km:0;
   let verdict=""; try{ const pr=predict(sv); if(pr&&pr.due!=null&&sFull){ const e=day($("#fDate").value)-pr.due; verdict=Math.abs(e)<=2?` · 🧠 L'IA avait prévu le ${dshort(pr.due)} : 🎯 dans le mille !`:Math.abs(e)<=pr.win?` · 🧠 Prévu le ${dshort(pr.due)} : à ${Math.abs(e)} j près 👍`:` · 🧠 Prévu le ${dshort(pr.due)} : raté de ${Math.abs(e)} j 😅`; } }catch(_){}
-  const nf={id:phTake(),d:$("#fDate").value,v:sv,km:r.km||null,L:r.L,P:r.P,eur:r.eur,rate:r.rate,full:r.kmOnly?false:sFull,ctry:sCtry,st:r.kmOnly?null:curStation(),lieu:r.kmOnly?null:sLieu,opts:r.kmOnly?{}:{...sOpts}}; if(r.kmOnly) nf.kmOnly=true; if(sVague&&!r.kmOnly) nf.vague=true; fills.push(nf);
+  const nf={id:phTake(),d:$("#fDate").value,v:sv,km:r.km||null,L:r.L,P:r.P,eur:r.eur,rate:r.rate,full:r.kmOnly?false:sFull,ctry:sCtry,st:r.kmOnly?null:curStation(),lieu:r.kmOnly?null:((($("#fLieuTxt")||{}).value||"").trim()||null),opts:r.kmOnly?{}:{...sOpts}}; if(r.kmOnly) nf.kmOnly=true; if(sVague&&!r.kmOnly) nf.vague=true; fills.push(nf);
   if(r.rate) STATE.lastRate=r.rate;
   persist(); ORACLE_CACHE={}; A=analyse(); closeSheet(); go(curView==="more"?"home":curView);
   const bornes=lastKm&&r.km>lastKm&&Math.floor(r.km/5000)>Math.floor(lastKm/5000)?` · 🎉 ${fmt(Math.floor(r.km/5000)*5000)} km franchis !`:"";
@@ -4105,7 +4143,7 @@ function save(){
 
 // ---------- 💾 sauvegarde Drive commune (bloc SAUVEGARDE ATELIER v2) + import des anciens fichiers
 // réglages d'affichage (gardés dans ce téléphone) : aussi dans la sauvegarde, pour tout retrouver après une réinstallation
-const AFF={theme:["sv-theme",["fonce","clair","grim","neon","liseuse"]],magie:["sv-magic",["on","off"]],barre:["sv-rail",["g","d","b"]],iconesBarre:["sv-ricons",["h","b"]],barreCachee:["sv-rhide",["e","c"]],
+const AFF={theme:["sv-theme",["fonce","clair","grim","neon","liseuse","kindle"]],magie:["sv-magic",["on","off"]],barre:["sv-rail",["g","d","b"]],iconesBarre:["sv-ricons",["h","b"]],barreCachee:["sv-rhide",["e","c"]],
   defilement:["sv-snap",["f","l"]],ouvrirTuile:["sv-topen",["p","s"]],pave:["sv-pad",["on","off"]],budget:["sv-bud",["v","t"]],bilanFrais:["sv-bilfx",["r","p"]],betises:["sv-bet",["3","0","1","5","fete"]],genreBetises:["sv-betd",["toutes","discretes"]],pageVivante:["sv-viv",["on","off"]]};
 function affRead(){ const o={}; Object.keys(AFF).forEach(k=>{ const v=lsGet(AFF[k][0]); o[k]=AFF[k][1].includes(v)?v:AFF[k][1][0]; }); o.ordreBarre=railOrder(); return o; } // sans réglage : la valeur par défaut (la première)
 function affOk(g){ if(!g||typeof g!=="object") return null; const o={};
@@ -4203,8 +4241,7 @@ function backupFrom(j){ // relit les données d'une sauvegarde (ancien .txt ou s
   (j.entretien||[]).forEach(e=>{ const v=vi(e.v); if(v>=0&&e.t){ const x={id:okId(e.id),d:okD(e.d),v,t:okS(e.t,120),m:okN(e.m),km:okN(e.km)}; if(e.k==="E"||e.k==="S"||e.k==="P"||e.k==="F") x.k=e.k; if(x.k==="F"){ x.fk=FXN[e.fk]?e.fk:guessFk(e.t); if([2,4,12].includes(+e.per)) x.per=+e.per; } out.ent.push(x); } });
   return out; }
 let pendingImport=null;
-$("#btnImport").onclick=()=>$("#fileImport").click();
-$("#fileImport").onchange=async e=>{ const file=e.target.files[0]; e.target.value=""; if(!file) return;
+const _ancienImport=async e=>{ const file=e.target.files[0]; e.target.value=""; if(!file) return;
   try{ let d;
     const txt=/\.(txt|json)$/i.test(file.name)||file.type.startsWith("text")||file.type.includes("json");
     if(txt){ const t=await file.text(); if(t.startsWith("SAUVEGARDE ATELIER")){ toast("C'est une sauvegarde Drive : utilise 📂 Importer dans la carte verte juste au-dessus."); return; } d=parseBackup(t); }
@@ -4562,22 +4599,23 @@ async function zipSauver(){
   files.push({name:"actuel/parametres.json",data:new TextEncoder().encode(cur.parametres)});
   for(const h of hist){ files.push({name:"backup/"+h.key+"/donnees.json",data:new TextEncoder().encode(h.donnees)});
     files.push({name:"backup/"+h.key+"/parametres.json",data:new TextEncoder().encode(h.parametres)}); }
+  const carte=["SAUVEGARDE SUIVI VÉHICULES",`Date : ${zLst(cur.date)}`,`Version de l'app : ${APP_VERSION}`,cur.resume,`Fichier : ${ZIPV.nom}`,`Anciennes versions gardées dans le zip : ${hist.length}`,"Pour restaurer : Paramètres › Restaurer un zip."].join("\n");
+  files.push({name:"carte.txt",data:new TextEncoder().encode(carte)});
   const blob=phZip(files);
   // vérification avant de remplacer : le zip doit se relire entièrement
   try{ const z=phUnzip(await blob.arrayBuffer()); const x=JSON.parse(zDec(z["actuel/donnees.json"])); JSON.parse(zDec(z["index.json"]));
        if(!Array.isArray(x.vehicules)) throw new Error("données incomplètes"); }
   catch(e){ toast("⚠ Zip non vérifié ("+e.message+") : rien n'a été remplacé."); return false; }
   const f=new File([blob],ZIPV.nom,{type:"application/zip"});
-  const carte=["SAUVEGARDE SUIVI VÉHICULES",`Date : ${zLst(cur.date)}`,`Version de l'app : ${APP_VERSION}`,cur.resume,`Fichier : ${ZIPV.nom}`,`Anciennes versions gardées dans le zip : ${hist.length}`,"Pour restaurer : Paramètres › Restaurer un zip (ou Importer)."].join("\n");
-  const ft=new File([carte],"Suivi-Vehicules-carte.txt",{type:"text/plain"});
   let fait=false;
-  try{ if(navigator.canShare&&navigator.canShare({files:[f,ft]})){ await navigator.share({files:[f,ft],title:ZIPV.nom}); fait=true; } }
+  try{ if(navigator.canShare&&navigator.canShare({files:[f]})){ await navigator.share({files:[f],title:ZIPV.nom}); fait=true; } }
   catch(e){ if(e&&e.name==="AbortError"){ toast("Sauvegarde annulée"); return false; } }
-  if(!fait){ for(const x of [f,ft]){ const a=document.createElement("a"); a.href=URL.createObjectURL(x); a.download=x.name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),60000); } }
+  if(!fait){ const a=document.createElement("a"); a.href=URL.createObjectURL(f); a.download=f.name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),60000); }
   zSet(ZIPV.hist,hist); zSet(ZIPV.cle,cur);
   toast(`Zip créé (${(blob.size/1048576).toFixed(1)} Mo, ${hist.length} ancienne(s) version(s) dedans)`);
   refreshZip(); return true;
 }
+document.addEventListener("click",e=>{ if(e.target.closest&&e.target.closest("#railDisk")) zipSauver(); });
 function refreshZip(){ const el=document.querySelector("#zipCarte"); if(el) zipCarte(el); }
 
 async function zipChoisir(f,out){
