@@ -1577,7 +1577,7 @@ const THEME = { // v1.8 : même fond foncé pour tous, un accent par véhicule
   k:{txt:"#B3B8C2",grid:"rgba(255,255,255,.06)",tipBg:"#20242B",tipFg:"#EEF0F4",tipBd:"#E5484D",track:"#262A32",needle:"#EEF0F4",muted:"#8B92A0",bad:"#FF9F43",warn:"#F5D04C",acc:"#E5484D",fg:"#EEF0F4"}};
 let MODE=0; try{ const m=+localStorage.getItem("sv-mode"); if(m>0) MODE=m; }catch(e){}
 let T=THEME.k;
-const APP_VERSION="3.16";
+const APP_VERSION="3.17";
 const KEY="suivi-vehicules-v1";
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}}, lsSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 let STATE={fills:[],tyres:[],ent:[],rates:{},range:[925,350],tank:[60,20],buy:[3500,10000],fixed:[{},{}],trip:null};
