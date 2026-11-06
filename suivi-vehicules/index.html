@@ -4614,7 +4614,7 @@ async function zipSauver(){
   const f=new File([blob],ZIPV.nom,{type:"application/zip"}), ft=new File([blob],ZIPV.nom+".txt",{type:"text/plain"});
   // Android exige que le partage parte tout de suite après un toucher : la préparation du zip est trop longue pour ça.
   // On prépare donc le zip, puis un second bouton « Envoyer » ouvre le menu Partager (Chrome refuse un .zip : repli en .zip.txt).
-  const tente=async x=>{ try{ if(navigator.canShare&&navigator.canShare({files:[x]})){ await navigator.share({files:[x],title:ZIPV.nom}); return true; } }catch(e){ if(e&&e.name==="AbortError") throw e; } return false; };
+  let dbg=[]; const tente=async x=>{ const ext=x.name.split(".").pop(); try{ if(!navigator.share){ dbg.push(ext+":pas de partage"); return false; } if(!(navigator.canShare&&navigator.canShare({files:[x]}))){ dbg.push(ext+":refusé"); return false; } await navigator.share({files:[x],title:ZIPV.nom}); return true; }catch(e){ if(e&&e.name==="AbortError") throw e; dbg.push(ext+":"+((e&&e.name)||"erreur")); } return false; };
   const telecharge=()=>{ const a=document.createElement("a"); a.href=URL.createObjectURL(f); a.download=f.name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),60000); };
   return await new Promise(res=>{
     const o=document.createElement("div"); o.className="tl-recap"; o.id="zipSend";
@@ -4625,7 +4625,7 @@ async function zipSauver(){
     o.querySelector(".tlr-x").onclick=annule;
     o.querySelector("#zipDl").onclick=()=>{ telecharge(); fin("téléchargement dans le téléphone"); };
     o.querySelector("#zipGo").onclick=async()=>{ try{ if(await tente(f)) return fin(f.name); if(await tente(ft)) return fin(ft.name); }catch(e){ return annule(); }
-      toast("Le menu Partager n'accepte pas ce fichier : téléchargement à la place."); telecharge(); fin("téléchargement dans le téléphone"); };
+      toast("Partager refusé ("+dbg.join(", ")+") : téléchargement à la place."); telecharge(); fin("téléchargement dans le téléphone"); };
   });
 }
 document.addEventListener("click",e=>{ if(e.target.closest&&e.target.closest("#railDisk")) zipSauver(); });
