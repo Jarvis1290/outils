@@ -1578,7 +1578,7 @@ const THEME = { // v1.8 : même fond foncé pour tous, un accent par véhicule
   k:{txt:"#B3B8C2",grid:"rgba(255,255,255,.06)",tipBg:"#20242B",tipFg:"#EEF0F4",tipBd:"#E5484D",track:"#262A32",needle:"#EEF0F4",muted:"#8B92A0",bad:"#FF9F43",warn:"#F5D04C",acc:"#E5484D",fg:"#EEF0F4"}};
 let MODE=0; try{ const m=+localStorage.getItem("sv-mode"); if(m>0) MODE=m; }catch(e){}
 let T=THEME.k;
-const APP_VERSION="3.18";
+const APP_VERSION="3.19";
 const KEY="suivi-vehicules-v1";
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}}, lsSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 let STATE={fills:[],tyres:[],ent:[],rates:{},range:[925,350],tank:[60,20],buy:[3500,10000],fixed:[{},{}],trip:null};
@@ -3685,6 +3685,7 @@ function renderMore(){
 
 // ---------- Quoi de neuf : la version en grand, une carte par version ; s'ouvre une fois après chaque mise à jour
 const CHANGELOG=[
+  ["3.19","06.11.2026","Disquette en deux temps",["La disquette prépare le zip, puis un bouton « Envoyer » ouvre le menu Partager (Android exige un toucher juste avant)","« Télécharger à la place » reste disponible"]],
   ["3.18","06.11.2026","Disquette : menu Partager",["La disquette et « Créer le zip » ouvrent le menu Partager d'Android : tu choisis le dossier (Drive, Fichiers) et tu remplaces l'ancien fichier","Si Android refuse le .zip, le même fichier est envoyé sous le nom .zip.txt (il se restaure pareil)","Paramètres › Sauvegarde rappelle le dernier fichier envoyé","Thèmes clairs (Clair, Grimoire, Liseuse, Kindle) : Chrome ne doit plus les assombrir avec « thème sombre pour les sites »"]],
   ["3.16","05.11.2026","Réserve, Timeline, lieux, sauvegarde",["Réserve : estimation d'après l'autonomie mesurée et la distance depuis le dernier plein (plein complet, partiel ou non)","Chaque voyant de réserve apparaît dans la Timeline, avec une icône","Pleins : type de lieu (pays, ville, village, centre commercial) à côté du nom de la station","Timeline : date et prix en deux couleurs, bouton Timeline au bon format dès l'ouverture","Thème Liseuse : fond blanc partout","Sauvegarde : un seul zip, avec un petit fichier carte.txt à côté"]],
   ["3.15","05.11.2026","Timeline, saisie, stats, budget, réserve",["Timeline : icône liste, filtre par année, un appui ouvre le récapitulatif avec le bouton Modifier","Saisie : prix du litre facultatif (calcule le total), affichage CHF/km, conso estimée sur un plein partiel après un plein complet","Stats : plus de stats communes ; 1 et 3 mois affichent « pas de plein complet » quand il faut ; prix Suisse (bleu) et France (orange) sur le même graphique","Budget : un seul écran (ce mois, 3, 6, 12 mois), moyennes des 12 derniers mois, « À mettre de côté par mois (hors essence) »","Paramètres › Thème : nouveau thème Liseuse (papier blanc, texte noir, contrastes forts)","⛽ Réserve en haut du tableau de bord : tu entres le km quand le voyant s'allume, l'app estime ce qu'il reste d'après tes voyants"]],
@@ -4609,15 +4610,21 @@ async function zipSauver(){
        if(!Array.isArray(x.vehicules)) throw new Error("données incomplètes"); }
   catch(e){ toast("⚠ Zip non vérifié ("+e.message+") : rien n'a été remplacé."); return false; }
   const f=new File([blob],ZIPV.nom,{type:"application/zip"}), ft=new File([blob],ZIPV.nom+".txt",{type:"text/plain"});
-  let fait=false, via="";
-  // Chrome Android refuse de partager un .zip : on essaie le zip, puis le même fichier nommé .zip.txt (accepté par le menu Partager)
+  // Android exige que le partage parte tout de suite après un toucher : la préparation du zip est trop longue pour ça.
+  // On prépare donc le zip, puis un second bouton « Envoyer » ouvre le menu Partager (Chrome refuse un .zip : repli en .zip.txt).
   const tente=async x=>{ try{ if(navigator.canShare&&navigator.canShare({files:[x]})){ await navigator.share({files:[x],title:ZIPV.nom}); return true; } }catch(e){ if(e&&e.name==="AbortError") throw e; } return false; };
-  try{ fait=await tente(f); if(fait) via=f.name; else { fait=await tente(ft); if(fait) via=ft.name; } }
-  catch(e){ toast("Sauvegarde annulée"); return false; }
-  if(!fait){ const a=document.createElement("a"); a.href=URL.createObjectURL(f); a.download=f.name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),60000); }
-  cur.via=via||"téléchargement dans le téléphone"; zSet(ZIPV.hist,hist); zSet(ZIPV.cle,cur);
-  toast(`Zip créé (${(blob.size/1048576).toFixed(1)} Mo, ${hist.length} ancienne(s) version(s) dedans)`);
-  refreshZip(); return true;
+  const telecharge=()=>{ const a=document.createElement("a"); a.href=URL.createObjectURL(f); a.download=f.name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),60000); };
+  return await new Promise(res=>{
+    const o=document.createElement("div"); o.className="tl-recap"; o.id="zipSend";
+    o.innerHTML=`<div class="tlr-box"><div class="tlr-hd"><b>Sauvegarde prête</b><button type="button" class="tlr-x" aria-label="Fermer">✕</button></div><div class="tlr-body"><p>${(blob.size/1048576).toFixed(1)} Mo · ${hist.length} ancienne(s) version(s) dedans.</p><p>Touche « Envoyer » : choisis Drive ou Fichiers et le dossier, puis remplace l'ancien fichier du même nom.</p></div><div class="tlr-bt"><button type="button" class="btn primary" id="zipGo">📤 Envoyer</button> <button type="button" class="btn" id="zipDl">⬇ Télécharger à la place</button></div></div>`;
+    document.body.appendChild(o);
+    const fin=via=>{ o.remove(); cur.via=via; zSet(ZIPV.hist,hist); zSet(ZIPV.cle,cur); toast(`Sauvegarde envoyée (${(blob.size/1048576).toFixed(1)} Mo, ${hist.length} ancienne(s) version(s) dedans)`); refreshZip(); res(true); };
+    const annule=()=>{ o.remove(); toast("Sauvegarde annulée"); res(false); };
+    o.querySelector(".tlr-x").onclick=annule;
+    o.querySelector("#zipDl").onclick=()=>{ telecharge(); fin("téléchargement dans le téléphone"); };
+    o.querySelector("#zipGo").onclick=async()=>{ try{ if(await tente(f)) return fin(f.name); if(await tente(ft)) return fin(ft.name); }catch(e){ return annule(); }
+      toast("Le menu Partager n'accepte pas ce fichier : téléchargement à la place."); telecharge(); fin("téléchargement dans le téléphone"); };
+  });
 }
 document.addEventListener("click",e=>{ if(e.target.closest&&e.target.closest("#railDisk")) zipSauver(); });
 function refreshZip(){ const el=document.querySelector("#zipCarte"); if(el) zipCarte(el); }
