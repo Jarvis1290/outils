@@ -1577,7 +1577,7 @@ const THEME = { // v1.8 : même fond foncé pour tous, un accent par véhicule
   k:{txt:"#B3B8C2",grid:"rgba(255,255,255,.06)",tipBg:"#20242B",tipFg:"#EEF0F4",tipBd:"#E5484D",track:"#262A32",needle:"#EEF0F4",muted:"#8B92A0",bad:"#FF9F43",warn:"#F5D04C",acc:"#E5484D",fg:"#EEF0F4"}};
 let MODE=0; try{ const m=+localStorage.getItem("sv-mode"); if(m>0) MODE=m; }catch(e){}
 let T=THEME.k;
-const APP_VERSION="3.17";
+const APP_VERSION="3.18";
 const KEY="suivi-vehicules-v1";
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}}, lsSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 let STATE={fills:[],tyres:[],ent:[],rates:{},range:[925,350],tank:[60,20],buy:[3500,10000],fixed:[{},{}],trip:null};
@@ -3684,6 +3684,7 @@ function renderMore(){
 
 // ---------- Quoi de neuf : la version en grand, une carte par version ; s'ouvre une fois après chaque mise à jour
 const CHANGELOG=[
+  ["3.18","06.11.2026","Disquette : menu Partager",["La disquette et « Créer le zip » ouvrent le menu Partager d'Android : tu choisis le dossier (Drive, Fichiers) et tu remplaces l'ancien fichier","Si Android refuse le .zip, le même fichier est envoyé sous le nom .zip.txt (il se restaure pareil)","Paramètres › Sauvegarde rappelle le dernier fichier envoyé"]],
   ["3.16","05.11.2026","Réserve, Timeline, lieux, sauvegarde",["Réserve : estimation d'après l'autonomie mesurée et la distance depuis le dernier plein (plein complet, partiel ou non)","Chaque voyant de réserve apparaît dans la Timeline, avec une icône","Pleins : type de lieu (pays, ville, village, centre commercial) à côté du nom de la station","Timeline : date et prix en deux couleurs, bouton Timeline au bon format dès l'ouverture","Thème Liseuse : fond blanc partout","Sauvegarde : un seul zip, avec un petit fichier carte.txt à côté"]],
   ["3.15","05.11.2026","Timeline, saisie, stats, budget, réserve",["Timeline : icône liste, filtre par année, un appui ouvre le récapitulatif avec le bouton Modifier","Saisie : prix du litre facultatif (calcule le total), affichage CHF/km, conso estimée sur un plein partiel après un plein complet","Stats : plus de stats communes ; 1 et 3 mois affichent « pas de plein complet » quand il faut ; prix Suisse (bleu) et France (orange) sur le même graphique","Budget : un seul écran (ce mois, 3, 6, 12 mois), moyennes des 12 derniers mois, « À mettre de côté par mois (hors essence) »","Paramètres › Thème : nouveau thème Liseuse (papier blanc, texte noir, contrastes forts)","⛽ Réserve en haut du tableau de bord : tu entres le km quand le voyant s'allume, l'app estime ce qu'il reste d'après tes voyants"]],
   ["3.13","05.11.2026","Documents et dossier PDF",["Onglet du véhicule › Documents : factures, pneus, assurance, carte grise, contrôles, doc technique…, rangés par véhicule puis par type","Scanner une facture : photo, tu places les 4 coins, l'app la redresse et la rend nette en noir et blanc (plusieurs pages possibles)","Importer des photos ou des PDF, ou les partager vers Suivi Véhicules depuis une autre app (scanner Google Drive, mail…)","Export PDF : tu coches ce que tu veux (résumé, pleins, entretiens, frais fixes, totaux, documents) et l'année, ou « Dossier complet »","Les documents partent avec la sauvegarde des photos (.zip)"]],
@@ -4606,12 +4607,14 @@ async function zipSauver(){
   try{ const z=phUnzip(await blob.arrayBuffer()); const x=JSON.parse(zDec(z["actuel/donnees.json"])); JSON.parse(zDec(z["index.json"]));
        if(!Array.isArray(x.vehicules)) throw new Error("données incomplètes"); }
   catch(e){ toast("⚠ Zip non vérifié ("+e.message+") : rien n'a été remplacé."); return false; }
-  const f=new File([blob],ZIPV.nom,{type:"application/zip"});
-  let fait=false;
-  try{ if(navigator.canShare&&navigator.canShare({files:[f]})){ await navigator.share({files:[f],title:ZIPV.nom}); fait=true; } }
-  catch(e){ if(e&&e.name==="AbortError"){ toast("Sauvegarde annulée"); return false; } }
+  const f=new File([blob],ZIPV.nom,{type:"application/zip"}), ft=new File([blob],ZIPV.nom+".txt",{type:"text/plain"});
+  let fait=false, via="";
+  // Chrome Android refuse de partager un .zip : on essaie le zip, puis le même fichier nommé .zip.txt (accepté par le menu Partager)
+  const tente=async x=>{ try{ if(navigator.canShare&&navigator.canShare({files:[x]})){ await navigator.share({files:[x],title:ZIPV.nom}); return true; } }catch(e){ if(e&&e.name==="AbortError") throw e; } return false; };
+  try{ fait=await tente(f); if(fait) via=f.name; else { fait=await tente(ft); if(fait) via=ft.name; } }
+  catch(e){ toast("Sauvegarde annulée"); return false; }
   if(!fait){ const a=document.createElement("a"); a.href=URL.createObjectURL(f); a.download=f.name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),60000); }
-  zSet(ZIPV.hist,hist); zSet(ZIPV.cle,cur);
+  cur.via=via||"téléchargement dans le téléphone"; zSet(ZIPV.hist,hist); zSet(ZIPV.cle,cur);
   toast(`Zip créé (${(blob.size/1048576).toFixed(1)} Mo, ${hist.length} ancienne(s) version(s) dedans)`);
   refreshZip(); return true;
 }
@@ -4649,9 +4652,9 @@ async function zipRestaurer(f,z,l){
 function zipCarte(el){
   const cur=zLS(ZIPV.cle,null), hist=zLS(ZIPV.hist,[]);
   el.innerHTML=`<div class="sv-carte"><div class="sv-titre">🗜️ Sauvegarde Suivi (un seul zip)</div>
-    <div class="sv-info">${cur?`Dernière : <b>${zLst(cur.date)}</b> · ${esc(cur.resume)}`:"Pas encore de zip créé."}<br><small>${hist.length} ancienne(s) version(s) gardée(s) dans le zip (dossier backup/).</small></div>
+    <div class="sv-info">${cur?`Dernière : <b>${zLst(cur.date)}</b> · ${esc(cur.resume)}`:"Pas encore de zip créé."}<br><small>${hist.length} ancienne(s) version(s) gardée(s) dans le zip (dossier backup/).</small><br><small>Dernier envoi : ${cur&&cur.via?esc(cur.via):"pas encore"}. À chaque sauvegarde, choisis le même dossier et remplace l'ancien fichier du même nom.</small></div>
     <div class="sv-btns"><button class="sv-btn sv-save" type="button" id="zipSave">💾 Créer le zip</button>
-    <label class="sv-btn sv-imp">📂 Restaurer un zip<input type="file" accept=".zip,application/zip" hidden id="zipImp"></label></div>
+    <label class="sv-btn sv-imp">📂 Restaurer un zip<input type="file" accept=".zip,.txt,application/zip,text/plain,application/octet-stream" hidden id="zipImp"></label></div>
     <div class="sv-aide">Un seul fichier « ${ZIPV.nom} » : il est remplacé à chaque sauvegarde, l'ancien contenu passe dans backup/. Les photos et documents restent dedans, une seule fois.</div>
     <div id="zipVer"></div></div>`;
   el.querySelector("#zipSave").onclick=()=>zipSauver();
