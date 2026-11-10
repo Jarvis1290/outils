@@ -846,7 +846,7 @@ const Sauvegarde = (() => {
   function copieAvant(raison){
     const l = copies();
     l.unshift({date:new Date().toISOString(), raison, resume:C.resume(C.lire()), donnees:C.lire()});
-    return ecrireLS(kCopies(), l);
+    return ecrireLS(kCopies(), l.slice(0, 10)); // 10 copies max : la mémoire ne se remplit pas
   }
   function remplacer(donnees, raison){
     if(!copieAvant(raison)){ message("Mémoire du téléphone pleine : copie impossible, rien n'a été remplacé. Sauvegarde d'abord sur Drive.", true); return false; }
@@ -951,8 +951,23 @@ const Sauvegarde = (() => {
    - Report des heures (⏱) : tout vendredi, jour suivant, étalé, ou Perso (cases). Semaine = graphe en barres pour les exceptions.
    - Historique éditable : une correction recalcule le pot des semaines suivantes. */
 
-var APP_VERSION = "2.6.1", APP_DATE = "03.11.2026";
+var APP_VERSION = "2.6.2", APP_DATE = "10.11.2026";
 var KEY = "planning-horaire-v3";
+// Message qui reste affiché tant qu'on ne le ferme pas (mémoire pleine, données illisibles, bug)
+function alerte(t){
+  var go=function(){ var b=document.getElementById("ph-alerte");
+    if(!b){ b=document.createElement("div"); b.id="ph-alerte"; b.setAttribute("role","alert");
+      b.style.cssText="position:fixed;left:12px;right:12px;top:calc(12px + env(safe-area-inset-top,0px));z-index:200;background:#7a1730;color:#fff;padding:12px 44px 12px 14px;border-radius:14px;font:600 14px/1.4 Inter,system-ui,sans-serif;box-shadow:0 10px 30px -8px rgba(0,0,0,.7)";
+      var x=document.createElement("button"); x.type="button"; x.textContent="✕"; x.setAttribute("aria-label","Fermer");
+      x.style.cssText="position:absolute;top:6px;right:6px;width:36px;height:36px;border:0;border-radius:10px;background:rgba(255,255,255,.15);color:#fff;font-size:16px";
+      x.onclick=function(){ b.remove(); }; b.appendChild(x); b.appendChild(document.createElement("span")); document.body.appendChild(b); }
+    b.lastChild.textContent=t; };
+  if(document.body) go(); else document.addEventListener("DOMContentLoaded",go);
+}
+var bugVu=false;
+function bug(){ if(bugVu) return; bugVu=true; alerte("Petit bug dans l'app : tes données sont gardées. Ferme et rouvre l'app ; si ça revient, fais une sauvegarde Drive."); }
+window.addEventListener("error",function(e){ if(e && e.target && e.target!==window) return; bug(); });
+window.addEventListener("unhandledrejection",bug);
 var DAYS = ["lundi","mardi","mercredi","jeudi","vendredi"];
 var SH = {lundi:"Lun",mardi:"Mar",mercredi:"Mer",jeudi:"Jeu",vendredi:"Ven"};
 var LB = {lundi:"Lundi",mardi:"Mardi",mercredi:"Mercredi",jeudi:"Jeudi",vendredi:"Vendredi"};
@@ -1046,9 +1061,14 @@ function migrate(d){
   }
   return n;
 }
-function load(){ try{ var r=localStorage.getItem(KEY); if(r) return migrate(JSON.parse(r)); }catch(e){} return defState(); }
+function load(){ var r=null;
+  try{ r=localStorage.getItem(KEY); if(r) return migrate(JSON.parse(r)); }catch(e){
+    if(r){ var k=KEY+"-illisible-"+iso(new Date()); try{ localStorage.setItem(k,r); }catch(e2){}
+      alerte("Tes données étaient illisibles : l'app repart à zéro. L'ancienne version est gardée à part ("+k+"). Restaure ta dernière sauvegarde Drive dans Paramètres."); }
+  }
+  return defState(); }
 var S = load();
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ toast("Mémoire du téléphone pleine : pas enregistré"); } if(typeof Hist!=="undefined") Hist.ping(); }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); var a=document.getElementById("ph-alerte"); if(a&&a.dataset.plein) a.remove(); }catch(e){ alerte("Mémoire du téléphone pleine : ton dernier changement N'EST PAS enregistré. Fais une sauvegarde Drive, puis libère de la place."); var b=document.getElementById("ph-alerte"); if(b) b.dataset.plein="1"; } if(typeof Hist!=="undefined") Hist.ping(); }
 
 // ---------- calculs d'une journée ----------
 function ref(day){ return day==="vendredi" ? S.settings.friday : S.settings.weekday; }
@@ -1892,7 +1912,11 @@ function renderBets(sh){
 function renderAbout(sh){
   sh.appendChild(sheetHead("Quoi de neuf"));
   var n=el("div","notes");
-  n.innerHTML='<h3>v2.6.1 · 03.11.2026</h3><ul>'+
+  n.innerHTML='<h3>v2.6.2 · 10.11.2026</h3><ul>'+
+    '<li><b>Plus sûr</b> : si la mémoire du téléphone est pleine ou si un bug arrive, un message rouge reste affiché jusqu\'à ce que tu le fermes.</li>'+
+    '<li><b>Données protégées</b> : si elles deviennent illisibles, l\'ancienne version est gardée à part au lieu d\'être écrasée.</li>'+
+    '<li><b>Copies avant restauration</b> : les 10 dernières sont gardées, les plus vieilles partent.</li>'+
+    '</ul><h3>v2.6.1 · 03.11.2026</h3><ul>'+
     '<li><b>Couleurs éclatantes</b> : Chrome n\'assombrit plus l\'app tout seul (son « thème sombre pour les sites » ternissait les dégradés et les lueurs).</li>'+
     '</ul><h3>v2.6 · 03.11.2026</h3><ul>'+
     '<li><b>Jolis boutons partout</b> : boutons en relief qui s\'enfoncent, contours lumineux, pastilles pour les petites actions, + et − du pot en dégradé.</li>'+

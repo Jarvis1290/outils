@@ -2,6 +2,7 @@
   "name": "Planning Horaire",
   "short_name": "Planning",
   "description": "Planning horaire hebdomadaire avec pot d'heures sup/insup",
+  "lang": "fr",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
