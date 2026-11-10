@@ -1019,8 +1019,12 @@ function defState(){
     remind:{on:true, freq:"hebdo", hour:"07:30", snooze:null}
   };
 }
+// Import : on ne garde que des valeurs sûres (heure HH:MM, date AAAA-MM-JJ, nombres), jamais de texte libre.
+function okTime(v){ return (typeof v==="string" && /^\d{1,2}:\d{2}$/.test(v)) ? v : null; }
+function okDate(v){ return (typeof v==="string" && /^\d{4}-\d{2}-\d{2}$/.test(v)) ? v : null; }
 function normDay(o){
-  return {arrival:o.arrival||null, lunchStart:o.lunchStart||null, lunchEnd:o.lunchEnd||null, departure:o.departure||null,
+  o=o||{};
+  return {arrival:okTime(o.arrival), lunchStart:okTime(o.lunchStart), lunchEnd:okTime(o.lunchEnd), departure:okTime(o.departure),
     skipM:!!(o.skipM||o.skipMorningBreak), skipA:!!(o.skipA||o.skipAfternoonBreak), absMin:+o.absMin||0, noLunch:!!o.noLunch, apero:+o.apero||0, touched:!!o.touched, auto:!!o.auto};
 }
 // Données v1.x (ou fichier de sauvegarde ancien) → v2. Ne perd rien : jours validés, pot, historique.
@@ -1031,31 +1035,42 @@ function migrate(d){
     ["weekday","friday"].forEach(function(k){
       var o=d.settings[k]||{}, t=n.settings[k];
       if(o.refMin) t.refMin=+o.refMin;
-      ["arrival","lunchStart","lunchEnd"].forEach(function(f){ if(o[f]) t[f]=o[f]; });
+      ["arrival","lunchStart","lunchEnd"].forEach(function(f){ if(okTime(o[f])) t[f]=o[f]; });
     });
-    if(d.settings.breaks) n.settings.breaks = Object.assign(n.settings.breaks, d.settings.breaks);
+    var b=d.settings.breaks||{}; ["morning","afternoon"].forEach(function(f){ if(okTime(b[f])) n.settings.breaks[f]=b[f]; });
   }
   if(d.pot) n.pot = {totalMin:+d.pot.totalMin||0, spreadWeeks:+d.pot.spreadWeeks||0, manualMin:+d.pot.manualMin||0};
-  if(d.remind) n.remind = Object.assign(n.remind, d.remind);
-  if(d.report) n.report = Object.assign(n.report, d.report);
+  if(d.remind){ var rm=d.remind;
+    if("on" in rm) n.remind.on=!!rm.on;
+    if(typeof rm.freq==="string" && /^[a-z0-9]{1,12}$/.test(rm.freq)) n.remind.freq=rm.freq;
+    if(okTime(rm.hour)) n.remind.hour=rm.hour;
+    n.remind.snooze = (typeof rm.snooze==="string" && !isNaN(Date.parse(rm.snooze))) ? rm.snooze : null; }
+  if(d.report){ var rp=d.report;
+    if(typeof rp.mode==="string" && /^[a-z]{1,12}$/.test(rp.mode)) n.report.mode=rp.mode;
+    if("allFriday" in rp) n.report.allFriday=!!rp.allFriday;
+    if("bars" in rp) n.report.bars=!!rp.bars;
+    if(rp.perso && typeof rp.perso==="object"){ var pp={}; DAYS.forEach(function(k){ var a=rp.perso[k]; if(Array.isArray(a)) pp[k]=a.filter(function(x){ return DAYS.indexOf(x)>=0; }); }); n.report.perso=pp; } }
   else if(d.reportMode==="repartir") n.report.mode = "etale";
   n.history = (Array.isArray(d.history)?d.history:[]).map(function(h){
     var days={};
-    Object.keys(h.days||{}).forEach(function(k){ var x=normDay(h.days[k]); x.touched=true; x.ecartMin=h.days[k].ecartMin; days[k]=x; });
-    var start = h.start || mondayISO(new Date(new Date(h.closedAt||Date.now()).getTime()-2*864e5));
-    return {start:start, week:h.week||weekNum(fromIso(start)), closedAt:h.closedAt||null, days:days,
+    h=h||{};
+    Object.keys(h.days||{}).forEach(function(k){ if(DAYS.indexOf(k)<0) return; var x=normDay(h.days[k]); x.touched=true; x.ecartMin=+(h.days[k]||{}).ecartMin||0; days[k]=x; });
+    var ca = (typeof h.closedAt==="string" && !isNaN(Date.parse(h.closedAt))) ? h.closedAt : null;
+    var start = okDate(h.start) || mondayISO(new Date(new Date(ca||Date.now()).getTime()-2*864e5));
+    return {start:start, week:Math.round(+h.week)||weekNum(fromIso(start)), closedAt:ca, days:days,
       weekEcartMin:+h.weekEcartMin||0, potAppliedMin:+h.potAppliedMin||0, potBeforeMin:+h.potBeforeMin||0, potAfterMin:+h.potAfterMin||0, spreadWeeks:+h.spreadWeeks||0};
   });
   var cw = d.currentWeek||{};
   if(d.v>=2){
-    n.currentWeek = {start:cw.start||mondayISO(new Date()), days:{}, adj:cw.adj||{}};
-    Object.keys(cw.days||{}).forEach(function(k){ n.currentWeek.days[k]=normDay(cw.days[k]); });
+    n.currentWeek = {start:okDate(cw.start)||mondayISO(new Date()), days:{}, adj:{}};
+    Object.keys(cw.adj||{}).forEach(function(k){ if(DAYS.indexOf(k)>=0) n.currentWeek.adj[k]=+cw.adj[k]||0; });
+    Object.keys(cw.days||{}).forEach(function(k){ if(DAYS.indexOf(k)>=0) n.currentWeek.days[k]=normDay(cw.days[k]); });
   } else {
     // v1 : les heures par défaut étaient pré-remplies ; on ne garde que ce qui a vraiment été pointé ou validé
     DAYS.forEach(function(day){
       var o=cw[day]; if(!o) return; var p=o.punched||{};
       if(o.touched){ var x=normDay(o); x.touched=true; n.currentWeek.days[day]=x; }
-      else if(p.arrival){ n.currentWeek.days[day]={arrival:o.arrival, lunchStart:p.lunchStart?o.lunchStart:null, lunchEnd:p.lunchEnd?o.lunchEnd:null,
+      else if(p.arrival){ n.currentWeek.days[day]={arrival:okTime(o.arrival), lunchStart:p.lunchStart?okTime(o.lunchStart):null, lunchEnd:p.lunchEnd?okTime(o.lunchEnd):null,
         departure:null, skipM:!!o.skipMorningBreak, skipA:!!o.skipAfternoonBreak, absMin:0, touched:false, auto:false}; }
     });
   }
@@ -1706,7 +1721,7 @@ function renderPot(v){
   if(!list.length) hc.appendChild(el("div","small","Aucune semaine clôturée pour l'instant. Chaque dimanche à minuit, la semaine vient se ranger ici."));
   list.forEach(function(x){
     var h=x[0], ds=weekDates(h.start), r=el("div","wk");
-    r.innerHTML='<div>Semaine '+h.week+'<small>'+dmy(ds[0])+' – '+dmy(ds[4])+'.'+ds[4].getFullYear()+' · pot '+fhm(h.potBeforeMin)+' → '+fhm(h.potAfterMin)+'</small></div><span class="v '+cls(h.weekEcartMin)+'">'+fhm(h.weekEcartMin)+' '+ic("pencil-simple")+'</span>';
+    r.innerHTML='<div>Semaine '+esc(h.week)+'<small>'+dmy(ds[0])+' – '+dmy(ds[4])+'.'+ds[4].getFullYear()+' · pot '+fhm(h.potBeforeMin)+' → '+fhm(h.potAfterMin)+'</small></div><span class="v '+cls(h.weekEcartMin)+'">'+fhm(h.weekEcartMin)+' '+ic("pencil-simple")+'</span>';
     r.onclick=function(){ pushSheet({type:"hweek",i:x[1]}); };
     hc.appendChild(r);
   });
@@ -1715,7 +1730,7 @@ function renderPot(v){
 function renderHistWeek(sh,i){
   var h=S.history[i]; if(!h){ closeSheet(); return; }
   var ds=weekDates(h.start);
-  sh.appendChild(sheetHead("Semaine "+h.week+" · "+dmy(ds[0])+" – "+dmy(ds[4])));
+  sh.appendChild(sheetHead("Semaine "+esc(h.week)+" · "+dmy(ds[0])+" – "+dmy(ds[4])));
   var c=el("div","card"); c.style.padding="6px 8px";
   DAYS.forEach(function(day,k){
     var d=h.days[day], r=el("div","dr");
@@ -1740,7 +1755,7 @@ function renderHistWeek(sh,i){
 function renderHistDelete(sh,i){
   var h=S.history[i]; if(!h){ closeSheet(); return; }
   var ds=weekDates(h.start), nj=Object.keys(h.days||{}).length, before=S.pot.totalMin, after=potIfDeleted(i);
-  sh.appendChild(sheetHead(ic("trash")+" Supprimer la semaine "+h.week+" ?"));
+  sh.appendChild(sheetHead(ic("trash")+" Supprimer la semaine "+esc(h.week)+" ?"));
   var c=el("div","card");
   c.innerHTML='<div class="row"><span>Semaine</span><b>'+dmy(ds[0])+' – '+dmy(ds[4])+'.'+ds[4].getFullYear()+'</b></div>'+
     '<div class="row" style="margin-top:6px"><span>Jours travaillés</span><b>'+(nj?nj:'aucun')+'</b></div>'+
@@ -1916,6 +1931,7 @@ function renderAbout(sh){
     '<li><b>Plus sûr</b> : si la mémoire du téléphone est pleine ou si un bug arrive, un message rouge reste affiché jusqu\'à ce que tu le fermes.</li>'+
     '<li><b>Données protégées</b> : si elles deviennent illisibles, l\'ancienne version est gardée à part au lieu d\'être écrasée.</li>'+
     '<li><b>Copies avant restauration</b> : les 10 dernières sont gardées, les plus vieilles partent.</li>'+
+    '<li><b>Import sécurisé</b> : une sauvegarde modifiée ou piégée ne peut plus lancer de code ; seules les heures, dates et nombres sont repris.</li>'+
     '</ul><h3>v2.6.1 · 03.11.2026</h3><ul>'+
     '<li><b>Couleurs éclatantes</b> : Chrome n\'assombrit plus l\'app tout seul (son « thème sombre pour les sites » ternissait les dégradés et les lueurs).</li>'+
     '</ul><h3>v2.6 · 03.11.2026</h3><ul>'+
