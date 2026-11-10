@@ -1578,7 +1578,7 @@ const THEME = { // v1.8 : même fond foncé pour tous, un accent par véhicule
   k:{txt:"#B3B8C2",grid:"rgba(255,255,255,.06)",tipBg:"#20242B",tipFg:"#EEF0F4",tipBd:"#E5484D",track:"#262A32",needle:"#EEF0F4",muted:"#8B92A0",bad:"#FF9F43",warn:"#F5D04C",acc:"#E5484D",fg:"#EEF0F4"}};
 let MODE=0; try{ const m=+localStorage.getItem("sv-mode"); if(m>0) MODE=m; }catch(e){}
 let T=THEME.k;
-const APP_VERSION="3.20";
+const APP_VERSION="3.21";
 const KEY="suivi-vehicules-v1";
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}}, lsSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 let STATE={fills:[],tyres:[],ent:[],rates:{},range:[925,350],tank:[60,20],buy:[3500,10000],fixed:[{},{}],trip:null};
@@ -1595,6 +1595,10 @@ function fixVeh(){ // véhicules et réglages par véhicule toujours alignés
     if(!Array.isArray(STATE[k])) STATE[k]=[]; while(STATE[k].length<V.length) STATE[k].push(d(STATE[k].length)); STATE[k].length=V.length; });
   if(MODE>=V.length||MODE<0) MODE=0; }
 fixVeh();
+// 3.21 : voyants de réserve rangés dans les données (par véhicule), donc dans la sauvegarde ; reprise unique des anciens voyants
+if(!STATE.res||typeof STATE.res!=="object") STATE.res={};
+if(!STATE.resMig){ V.forEach((x,i)=>{ try{ const a=JSON.parse(lsGet("sv-res-ev-"+i)||"[]"); if(Array.isArray(a)&&a.length&&!STATE.res[x.id]) STATE.res[x.id]=a; }catch(e){} }); STATE.resMig=true; }
+const resOf=v=>(V[v]&&Array.isArray(STATE.res[V[v].id]))?STATE.res[V[v].id]:[];
 fills.forEach(f=>{ if(!f.id) f.id=uid(); f.opts=f.opts||{}; f.ctry=f.ctry||"CH"; });
 const hasFuel=v=>!!(V[v]&&FUELS[V[v].fuel].u);
 const U=v=>{ const u=V[v]?FUELS[V[v].fuel].u:"L"; return {vol:u||"L",c100:(u||"L")+"/100",plein:V[v]&&V[v].fuel==="electrique"?"recharge":"plein"}; };
@@ -1604,7 +1608,7 @@ function bounds(v){ const x=V[v];
   return {pmin:1.2,pmax:3.5,cmin:{voiture:3,moto:2.5,scooter:1.5}[x.type]||1.5,cmax:{voiture:15,moto:10,scooter:6}[x.type]||30}; }
 const defRange=v=>STATE.range[v]||(V[v]?TYPES[V[v].type].range:500), defTank=v=>STATE.tank[v]||(V[v]?TYPES[V[v].type].tank:40);
 function persist(){
-  STATE.fills=fills.map(f=>{ const o={id:f.id,d:f.d,v:f.v,km:f.km,L:f.L,P:f.P,full:f.full,ctry:f.ctry||"CH",st:f.st||null,eur:f.eur??null,rate:f.rate??null,opts:f.opts||{},force:!!f.force}; if(f.kmOnly) o.kmOnly=true; return o; });
+  STATE.fills=fills.map(f=>{ const o={id:f.id,d:f.d,v:f.v,km:f.km,L:f.L,P:f.P,full:f.full,ctry:f.ctry||"CH",st:f.st||null,eur:f.eur??null,rate:f.rate??null,opts:f.opts||{},force:!!f.force}; if(f.lieu) o.lieu=f.lieu; if(f.kmOnly) o.kmOnly=true; if(f.vague) o.vague=true; return o; });
   if(!lsSet(KEY,JSON.stringify(STATE))) toast("⚠ Impossible d'enregistrer dans le téléphone (mémoire pleine ?)");
 }
 try{ navigator.storage && navigator.storage.persist && navigator.storage.persist(); }catch(e){}
@@ -3240,7 +3244,7 @@ function tlEvents(v){
   STATE.ent.filter(e=>e.v===v).forEach(e=>{ const K=EKIND[ekOf(e)], fi=e.k==="F"?FXI[e.fk||"aut"]:null;
     out.push({k:ekOf(e),d:e.d||"0000-00-00",km:+e.km||0,e,i:fi?fi[0]:null,c:fi?fi[1]:null,t:esc(e.t),
       s:`${e.k==="F"?(e.d?"année "+e.d.slice(0,4)+" · ":"")+(FXN[e.fk]||"frais fixe").toLowerCase()+(perOf(e)>1&&+e.m>0?` · ${fmt(+e.m/perOf(e),2)} CHF ${perN(e)[2]} · ${fmt(+e.m)} CHF par an`:" · par an"):K[1].toLowerCase()}${e.km?` · ${fmt(+e.km)} km`:""}${e.d?"":" · date non notée"}${docsOf(v).some(d=>d.lien===e.id)?" · 📎 document":""}`,m:e.m!=null&&e.m!==""?+e.m:null}); });
-  (()=>{ let rv=[]; try{ rv=JSON.parse(localStorage.getItem("sv-res-ev-"+v)||"[]"); }catch(e){}
+  (()=>{ const rv=resOf(v);
     rv.forEach(r=>out.push({k:"res",d:r.d||"0000-00-00",km:+r.km||0,t:"Voyant de réserve",s:`${fmt(r.km)} km${r.dist?` · ${fmt(r.dist)} km après le plein`:""}`,m:null})); })();
   STATE.tyres.filter(x=>x.v===v).forEach(x=>{ const T=TTYPE[tyreType(x)]; out.push({k:"P",d:x.d,km:+x.km||0,t:`Pneus ${T.n.toLowerCase()} montés`,s:[x.mod?esc(x.mod):"",x.pos?TPOS[x.pos]:""].filter(Boolean).join(" · "),m:null}); });
   if(STATE.buyD[v]) out.push({k:"buy",d:STATE.buyD[v],km:0,t:`Achat : ${esc(V[v].nl||V[v].n)}`,s:"",m:+STATE.buy[v]||null});
@@ -3670,7 +3674,7 @@ function delVeh(k){ if(V.length<2) return;
   const re=a=>a.filter(x=>x.v!==k).map(x=>{ if(x.v>k) x.v--; return x; });
   const nf=re(fills); fills.length=0; nf.forEach(f=>fills.push(f)); STATE.ent=re(STATE.ent); STATE.tyres=re(STATE.tyres);
   ["range","tank","buy","buyD","fixed"].forEach(x=>{ if(Array.isArray(STATE[x])) STATE[x].splice(k,1); });
-  if(STATE.vx) delete STATE.vx[V[k].id]; STATE.veh.splice(k,1); comV.splice(k,1); if(MODE>=k&&MODE>0) MODE--; lsSet("sv-mode",String(MODE)); fixVeh();
+  if(STATE.vx) delete STATE.vx[V[k].id]; if(STATE.res) delete STATE.res[V[k].id]; STATE.veh.splice(k,1); comV.splice(k,1); if(MODE>=k&&MODE>0) MODE--; lsSet("sv-mode",String(MODE)); fixVeh();
   VF=null; persist(); ORACLE_CACHE={}; IA_CACHE={}; A=analyse(); applyTheme(); renderMore(); toast(`${n} supprimé (une copie est dans « Copies avant import »)`); }
 function renderMore(){
   renderAff(); renderVehList(); renderVehForm();
@@ -3686,6 +3690,7 @@ function renderMore(){
 
 // ---------- Quoi de neuf : la version en grand, une carte par version ; s'ouvre une fois après chaque mise à jour
 const CHANGELOG=[
+  ["3.21","10.11.2026","Rien ne se perd à la sauvegarde",["Le lieu et « je ne sais plus » d'un plein restent après la fermeture de l'app et vont dans le zip","Les voyants de réserve sont rangés avec tes données et partent dans le zip","Le lien 📎 entre un document et son plein ou entretien revient quand tu restaures une sauvegarde"]],
   ["3.20","06.11.2026","Thèmes clairs : consigne à Chrome",["L'en-tête de la page dit à Chrome « page claire uniquement » pour Clair, Grimoire, Liseuse et Kindle, pour qu'il ne les assombrisse plus"]],
   ["3.19","06.11.2026","Disquette en deux temps",["La disquette prépare le zip, puis un bouton « Envoyer » ouvre le menu Partager (Android exige un toucher juste avant)","« Télécharger à la place » reste disponible"]],
   ["3.18","06.11.2026","Disquette : menu Partager",["La disquette et « Créer le zip » ouvrent le menu Partager d'Android : tu choisis le dossier (Drive, Fichiers) et tu remplaces l'ancien fichier","Si Android refuse le .zip, le même fichier est envoyé sous le nom .zip.txt (il se restaure pareil)","Paramètres › Sauvegarde rappelle le dernier fichier envoyé","Thèmes clairs (Clair, Grimoire, Liseuse, Kindle) : Chrome ne doit plus les assombrir avec « thème sombre pour les sites »"]],
@@ -4164,9 +4169,10 @@ function backupData(){ // ce que contient chaque sauvegarde (noms lisibles)
   return {app:"Suivi Véhicules",version:APP_VERSION,
     vehicules:V.map(x=>({id:x.id,n:x.n,nl:x.nl,type:x.type,c:x.c,fuel:x.fuel,ico:x.ico,tyre:x.tyre||"",atelier:!!x.atelier})),
     reglages:{autonomie:per(STATE.range),reservoir:per(STATE.tank),achat:per(STATE.buy),trajet:STATE.trip||null,tuiles:STATE.tiles||null,fun:STATE.fun||null,dateAchat:per(STATE.buyD),timeline:STATE.tlTypes||null,ongletsVehicule:(()=>{ const o={}; V.forEach((x,i)=>{ const d=vx(i); o[x.n]={couples:d.couples,comparatif:d.cmp,notes:d.notes,documents:Array.isArray(d.docs)?d.docs:[]}; }); return o; })(),affichage:affRead()},
-    pleins:fills.map(f=>{ const o={id:f.id,d:f.d,v:V[f.v].n,km:f.km,L:f.L,P:f.P,full:f.full,ctry:f.ctry||"CH",st:f.st||null,eur:f.eur??null,rate:f.rate??null,opts:f.opts||{},force:!!f.force}; if(f.kmOnly) o.kmOnly=true; if(f.vague) o.vague=true; return o; }),
+    pleins:fills.map(f=>{ const o={id:f.id,d:f.d,v:V[f.v].n,km:f.km,L:f.L,P:f.P,full:f.full,ctry:f.ctry||"CH",st:f.st||null,eur:f.eur??null,rate:f.rate??null,opts:f.opts||{},force:!!f.force}; if(f.lieu) o.lieu=f.lieu; if(f.kmOnly) o.kmOnly=true; if(f.vague) o.vague=true; return o; }),
     pneus:STATE.tyres.map(t=>({id:t.id,d:t.d,v:V[t.v].n,t:t.t,pos:t.pos??null,mod:t.mod??null,km:t.km??null})),
-    entretien:STATE.ent.map(e=>({id:e.id,d:e.d,v:V[e.v].n,t:e.t,m:e.m??null,km:e.km??null,k:e.k??null,fk:e.fk??null,per:e.per??null}))};
+    entretien:STATE.ent.map(e=>({id:e.id,d:e.d,v:V[e.v].n,t:e.t,m:e.m??null,km:e.km??null,k:e.k??null,fk:e.fk??null,per:e.per??null})),
+    voyants:per(V.map((x,i)=>resOf(i)))};
 }
 function backupResume(d){ const p=d.pleins||[], names=Array.isArray(d.vehicules)&&d.vehicules.length?d.vehicules.map(x=>String(x&&x.n||"")):["Kangoo","BMW"];
   const n=x=>p.filter(f=>String(f.v)===x||(!d.vehicules&&vehOf(f.v)===names.indexOf(x))).length;
@@ -4226,7 +4232,7 @@ function backupFrom(j){ // relit les données d'une sauvegarde (ancien .txt ou s
   const named=VL.length>0; if(!named) VL=JSON.parse(JSON.stringify(VDEF));
   const vi=n=>{ const s=String(n??"").toLowerCase(), k=VL.findIndex(x=>x.n.toLowerCase()===s); return k>=0?k:named?-1:vehOf(n); };
   const out={fills:[],tyres:[],ent:[],veh:VL}, per=(o,d)=>VL.map(x=>okN(o&&o[x.n])??d);
-  (j.pleins||[]).forEach(f=>{ const v=vi(f.v), d=okD(f.d), km=okN(f.km); if(v<0||!d||(km==null&&okN(f.L)==null&&okN(f.P)==null)) return; const x={id:okId(f.id),d,v,km,L:okN(f.L),P:okN(f.P),full:!!f.full,ctry:Object.hasOwn(CTRY,f.ctry)?f.ctry:"CH",st:okS(f.st,60),eur:okN(f.eur),rate:okN(f.rate),opts:okOpts(f.opts),force:!!f.force}; if(f.kmOnly) x.kmOnly=true; if(f.vague&&!f.full) x.vague=true; out.fills.push(x); });
+  (j.pleins||[]).forEach(f=>{ const v=vi(f.v), d=okD(f.d), km=okN(f.km); if(v<0||!d||(km==null&&okN(f.L)==null&&okN(f.P)==null)) return; const x={id:okId(f.id),d,v,km,L:okN(f.L),P:okN(f.P),full:!!f.full,ctry:Object.hasOwn(CTRY,f.ctry)?f.ctry:"CH",st:okS(f.st,60),eur:okN(f.eur),rate:okN(f.rate),opts:okOpts(f.opts),force:!!f.force}; if(okS(f.lieu,80)) x.lieu=okS(f.lieu,80); if(f.kmOnly) x.kmOnly=true; if(f.vague&&!f.full) x.vague=true; out.fills.push(x); });
   if(j.reglages){ const g=j.reglages; out.range=per(g.autonomie,0).map((x,i)=>x||TYPES[VL[i].type].range); out.tank=per(g.reservoir,0).map((x,i)=>x||TYPES[VL[i].type].tank);
     if(g.achat) out.buy=per(g.achat,0);
     if(g.frais) out.fixed=VL.map(x=>okFix(g.frais[x.n]));
@@ -4240,8 +4246,9 @@ function backupFrom(j){ // relit les données d'une sauvegarde (ancien .txt ou s
     if(g.ongletsVehicule&&typeof g.ongletsVehicule==="object"){ out.vx={}; VL.forEach(x=>{ const o=g.ongletsVehicule[x.n]; if(!o||typeof o!=="object") return;
       out.vx[x.id]={couples:Array.isArray(o.couples)?okRows(o.couples,BTAB.couples.cols):[],cmp:Array.isArray(o.comparatif)?okRows(o.comparatif,BTAB.pneus.cols):[],bmw:!!x.atelier,
         notes:Array.isArray(o.notes)?o.notes.slice(0,500).filter(n=>n&&typeof n==="object").map(n=>({id:okId(n.id),d:okD(n.d),t:okS(n.t,80)||"",x:okS(n.x,4000)||"",pin:!!n.pin})):[],
-        docs:Array.isArray(o.documents)?o.documents.slice(0,2000).filter(n=>n&&typeof n==="object").map(n=>({id:okId(n.id),k:DOCK.some(x=>x[0]===n.k)?n.k:"aut",t:okS(n.t,80)||"",d:okD(n.d),m:okN(n.m),pdf:!!n.pdf,np:okN(n.np)||0})):[]}; }); }
+        docs:Array.isArray(o.documents)?o.documents.slice(0,2000).filter(n=>n&&typeof n==="object").map(n=>({id:okId(n.id),k:DOCK.some(x=>x[0]===n.k)?n.k:"aut",t:okS(n.t,80)||"",d:okD(n.d),m:okN(n.m),pdf:!!n.pdf,np:okN(n.np)||0,lien:/^[\w-]{1,40}$/.test(String(n.lien??""))?String(n.lien):null})):[]}; }); }
     out.aff=affOk(g.affichage); }
+  if(j.voyants&&typeof j.voyants==="object"){ out.res={}; VL.forEach(x=>{ const a=j.voyants[x.n]; if(Array.isArray(a)) out.res[x.id]=a.filter(r=>r&&typeof r==="object"&&okN(r.km)!=null).slice(-20).map(r=>({km:okN(r.km),dist:okN(r.dist),d:okD(r.d)})); }); }
   (j.pneus||[]).forEach(t=>{ const v=vi(t.v), d=okD(t.d); if(v>=0&&d) out.tyres.push(tyreFrom(okId(t.id),d,v,t.t,t.pos,t.mod,t.km)); });
   (j.entretien||[]).forEach(e=>{ const v=vi(e.v); if(v>=0&&e.t){ const x={id:okId(e.id),d:okD(e.d),v,t:okS(e.t,120),m:okN(e.m),km:okN(e.km)}; if(e.k==="E"||e.k==="S"||e.k==="P"||e.k==="F") x.k=e.k; if(x.k==="F"){ x.fk=FXN[e.fk]?e.fk:guessFk(e.t); if([2,4,12].includes(+e.per)) x.per=+e.per; } out.ent.push(x); } });
   return out; }
@@ -4261,6 +4268,7 @@ function showImportConfirm(name,d){
 function setData(d){ fills.length=0; d.fills.forEach(f=>fills.push(f)); STATE.tyres=d.tyres; STATE.ent=d.ent;
   if(d.veh){ STATE.veh=d.veh; ["range","tank","buy","buyD","fixed"].forEach(k=>{ if(!d[k]) STATE[k]=[]; }); }
   ["range","tank","buy","fixed","trip","tiles","fun","buyD","tlTypes","couples","pneusCmp"].forEach(k=>{ if(d[k]) STATE[k]=d[k]; });
+  if(d.res) STATE.res=d.res;
   STATE.vx=d.vx||{}; // ancienne sauvegarde : la BMW reprend couples et comparatif, les autres partent vides
   if(d.fixed) STATE.fx2=false; fixVeh(); migrateFix(); comV=[];
   persist(); ORACLE_CACHE={}; IA_CACHE={}; A=analyse(); affApply(d.aff); applyTheme(); }
@@ -4538,8 +4546,8 @@ applyPad();
 // 3.14 (test) : oracle réserve. Tu entres le km quand le voyant s'allume : l'app estime ce qu'il reste.
 function oracleRender(){
   const box=document.getElementById("oracleRes"); if(!box) return;
-  const v=MODE, key="sv-res-ev-"+v;
-  const ev=(()=>{ try{ return JSON.parse(localStorage.getItem(key)||"[]"); }catch(e){ return []; } })();
+  const v=MODE;
+  const ev=resOf(v);
   const kms=fills.filter(f=>f.v===v&&f.km>0).map(f=>f.km).sort((a,b)=>a-b);
   const fu=fills.filter(f=>f.v===v&&f.full&&f.km>0).map(f=>f.km).sort((a,b)=>a-b);
   const gaps=[]; for(let i=1;i<fu.length;i++){ const g=fu[i]-fu[i-1]; if(g>50&&g<5000) gaps.push(g); }
@@ -4565,7 +4573,7 @@ function oracleRender(){
     if(!k||base==null){ toast("Entre le km du voyant (il faut au moins un plein avant)."); return; }
     const d=new Date().toISOString().slice(0,10);
     const e=[...ev,{km:k,dist:k-base,d}].slice(-20);
-    try{ localStorage.setItem(key,JSON.stringify(e)); }catch(x){}
+    STATE.res[V[v].id]=e; persist();
     oracleRender(); toast("Voyant enregistré"); };
 }
 
