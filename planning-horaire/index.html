@@ -741,6 +741,23 @@ button:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
 .frise .knob.on{background:radial-gradient(circle at 35% 30%,#fff,var(--cy));border-color:#fff;box-shadow:0 0 0 5px rgba(63,195,255,.25),0 0 18px 2px rgba(63,195,255,.85)}
 @media (prefers-reduced-motion:reduce){.frise .lunch .hd.on,.chip.on,.grid .c.on,.wd.sel::after{animation:none}}
 
+
+/* v2.7 : fin de journée / fin de semaine */
+.btn.fin{width:100%;min-height:56px;font-size:17px;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:10px}
+.btn.fin .ico{width:24px;height:24px}
+.dayok{display:flex;align-items:center;gap:10px;margin-top:12px;padding:12px 14px;border-radius:16px;font-weight:800;color:#fff;background:linear-gradient(135deg,#1f9d63,#2fbf8a);box-shadow:0 4px 0 #157a4b}
+.dayok .ico{width:24px;height:24px;flex:none}
+.dayok small{display:block;font-weight:600;opacity:.9;font-size:12px}
+.dayok span{flex:1}
+.finrec{text-align:center;padding:6px 0 2px}
+.finrec .bigok{font-size:46px;line-height:1}
+.finrec .big{font-size:30px;font-weight:800;margin-top:6px}
+.finrec .rowx{display:flex;justify-content:space-between;align-items:center;padding:9px 2px;border-top:1px solid var(--line);font-size:15px}
+.finrec .rowx:first-of-type{border-top:0}
+.wval{margin-top:12px}
+.wval .ok{display:flex;align-items:flex-start;gap:10px;font-weight:800;text-align:left}
+.wval .ok .ico{flex:none;width:24px;height:24px;color:#2fbf8a}
+.wval .small{font-weight:500;text-align:left}
 </style>
 </head>
 <body>
@@ -951,7 +968,7 @@ const Sauvegarde = (() => {
    - Report des heures (⏱) : tout vendredi, jour suivant, étalé, ou Perso (cases). Semaine = graphe en barres pour les exceptions.
    - Historique éditable : une correction recalcule le pot des semaines suivantes. */
 
-var APP_VERSION = "2.6.2", APP_DATE = "10.11.2026";
+var APP_VERSION = "2.7", APP_DATE = "16.11.2026";
 var KEY = "planning-horaire-v3";
 // Message qui reste affiché tant qu'on ne le ferme pas (mémoire pleine, données illisibles, bug)
 function alerte(t){
@@ -1063,6 +1080,7 @@ function migrate(d){
   var cw = d.currentWeek||{};
   if(d.v>=2){
     n.currentWeek = {start:okDate(cw.start)||mondayISO(new Date()), days:{}, adj:{}};
+    if(typeof cw.valid==="string" && !isNaN(Date.parse(cw.valid))) n.currentWeek.valid=cw.valid;
     Object.keys(cw.adj||{}).forEach(function(k){ if(DAYS.indexOf(k)>=0) n.currentWeek.adj[k]=+cw.adj[k]||0; });
     Object.keys(cw.days||{}).forEach(function(k){ if(DAYS.indexOf(k)>=0) n.currentWeek.days[k]=normDay(cw.days[k]); });
   } else {
@@ -1220,7 +1238,8 @@ function potIfDeleted(i){ var keep=S; S=clone(S); try{ deleteHistWeek(i); return
 var resetView = false; function topView(){ resetView=true; var v=$("#view"); if(v) v.scrollTop=0; }
 var tab = null, navStack = [], sheets = [], dragging = false, absOpen = null, fsel = null, selDay = null, dayShut = false, weekView = ls("ph-wview","liste");
 var H = document.documentElement.dataset;
-function tabOrder(){ var o=ls("ph-order","today,week,pot").split(",").filter(function(t){ return TABS[t]; }); ["today","week","pot"].forEach(function(t){ if(o.indexOf(t)<0) o.push(t); }); return o; }
+function tabHidden(t){ return (t==="week"||t==="pot") && ls("ph-hide","").split(",").indexOf(t)>=0; }
+function tabOrder(all){ var o=ls("ph-order","today,week,pot").split(",").filter(function(t){ return TABS[t]; }); ["today","week","pot"].forEach(function(t){ if(o.indexOf(t)<0) o.push(t); }); return all?o:o.filter(function(t){ return !tabHidden(t); }); }
 
 function buildRail(){
   var r=$("#rail"), fab=$("#fab"); if(fab) fab.remove(); r.innerHTML="";
@@ -1230,7 +1249,7 @@ function buildRail(){
   tb.appendChild(el("i","rsep")); if(fab) tb.appendChild(fab); tb.appendChild(el("i","rsep"));
   r.appendChild(sp1); r.appendChild(tb); r.appendChild(sp2);
   // v2.4 : bouton ↺ historique (entre ⚙ et ⏱) et mini semaine (entre ⏱ et les onglets)
-  if(H.rail!=="b"){ Hist.mount(sp1); var wm=el("button","wmini"); wm.setAttribute("aria-label","Ma semaine"); wm.onclick=function(){ go("week"); }; sp2.appendChild(wm); }
+  if(H.rail!=="b"){ Hist.mount(sp1); if(!tabHidden("week")){ var wm=el("button","wmini"); wm.setAttribute("aria-label","Ma semaine"); wm.onclick=function(){ go("week"); }; sp2.appendChild(wm); } }
   tabOrder().forEach(function(t){ var b=el("button",null,ic(TABS[t].i)); b.dataset.t=t; b.setAttribute("aria-label",TABS[t].t); r.appendChild(b); });
   r.querySelectorAll("button[data-t]").forEach(function(b){ b.onclick=function(){ go(b.dataset.t); }; });
   var tabs=r.querySelectorAll("button[data-t]:not(.set)");
@@ -1272,15 +1291,59 @@ function renderToday(v){
     var card=el("div","card");
     card.innerHTML='<div class="big" style="font-size:24px">Bon week-end ! '+ic("moon-stars")+'</div><p class="small">La semaine se clôture toute seule dimanche à minuit et son solde part dans le pot.</p>'+
       '<div class="row" style="margin-top:8px"><span class="k">Solde de la semaine</span><b class="big '+cls(c.solde)+'" style="font-size:26px">'+fhm(c.solde)+'</b></div>';
-    v.appendChild(card); return;
+    v.appendChild(card);
+    v.appendChild(weekValCard(c)); return;
   }
   var W=computeWeek(), day=selDay||DAYS[ti], c=W[day];
   v.appendChild(weekStrip(W));
   // v2.4.1 : jour refermé = la bande seule (toucher un jour le rouvre)
   if(dayShut){ var op=el("button","lnk back",ic("arrow-counter-clockwise")+" Ouvrir aujourd'hui"); op.onclick=function(){ dayShut=false; selDay=null; fsel=null; render(); }; v.appendChild(op); return; }
   if(selDay && selDay!==DAYS[ti]){ var bk=el("button","lnk back",ic("arrow-counter-clockwise")+" Revenir à aujourd'hui"); bk.onclick=function(){ selDay=null; fsel=null; render(); }; v.appendChild(bk); }
+  if(c.done){ var dok=el("div","dayok",ic("check-circle")+'<span>Journée terminée<small>'+fh(toMin(c.d.arrival))+' → '+fh(c.dep)+' · '+fdur(c.worked)+' travaillées · '+fsign(c.ecart)+'</small></span>'); v.appendChild(dok); }
   v.appendChild(dayPanel(day,c,{today:c.today,big:true}));
   var h=reportHint(W); if(h) v.appendChild(h);
+  if(ti===4 && !selDay) v.appendChild(weekValCard(W));
+}
+
+// ----- v2.7 : fin de journée et fin de semaine -----
+function renderFin(sh,top){
+  var W=computeWeek(), c=W[top.day], d=S.currentWeek.days[top.day]||{};
+  sh.appendChild(sheetHead("Fin de journée"));
+  var b=el("div","finrec");
+  b.innerHTML='<div class="bigok">'+ic("check-circle")+'</div><div class="big">Journée terminée ✓</div><div class="small">'+LB[top.day]+' est validé et clôturé</div>';
+  var box=el("div","card");
+  box.innerHTML='<div class="finrec"><div class="rowx"><span>Arrivée → départ</span><b>'+(d.arrival?fh(toMin(d.arrival)):"—")+' → '+(d.departure?fh(toMin(d.departure)):"—")+'</b></div>'+
+    '<div class="rowx"><span>Travaillé</span><b>'+(c.worked!=null?fdur(c.worked):"—")+'</b></div>'+
+    '<div class="rowx"><span>Écart du jour</span><b class="'+cls(c.ecart||0)+'">'+(c.ecart!=null?fsign(c.ecart):"—")+'</b></div>'+
+    '<div class="rowx"><span>Solde de la semaine</span><b class="'+cls(W.solde)+'">'+fhm(W.solde)+'</b></div>'+
+    '<div class="rowx"><span>Pot</span><b>'+fhm(S.pot.totalMin)+'</b></div></div>';
+  sh.appendChild(b); sh.appendChild(box);
+  var ok=el("button","btn fin",ic("check-circle")+"<span>OK</span>"); ok.onclick=closeSheet; sh.appendChild(ok);
+}
+function weekValCard(W){
+  var card=el("div","card wval"), v=S.currentWeek.valid;
+  if(v){
+    card.innerHTML='<div class="ok">'+ic("check-circle")+'<span>Semaine validée<br><small class="small">Le solde est calculé : rien à toucher pendant le week-end. Elle se range toute seule dans l\'historique dimanche à minuit.</small></span></div>';
+    var re=el("button","lnk","Rouvrir la semaine"); re.onclick=function(){ delete S.currentWeek.valid; save(); render(); toast("Semaine rouverte"); }; card.appendChild(re);
+  } else {
+    card.innerHTML='<div class="k">Fin de semaine</div><div class="small">Calcule le solde et range la semaine, pour ne rien avoir à toucher pendant le week-end.</div>';
+    var b=el("button","btn fin",ic("calendar-dots")+"<span>Valider la semaine</span>"); b.onclick=function(){ pushSheet({type:"wval"}); }; card.appendChild(b);
+  }
+  return card;
+}
+function renderWval(sh){
+  var W=computeWeek(); sh.appendChild(sheetHead("Valider la semaine"));
+  var box=el("div","card"), rows="", nd=0;
+  DAYS.forEach(function(x){ var c=W[x], d=S.currentWeek.days[x]||{};
+    var st = c.done ? '<b class="'+cls(c.ecart)+'">'+fsign(c.ecart)+'</b>' : d.arrival ? '<span class="muted">départ prévu '+fh(c.dep)+' retenu</span>' : '<span class="muted">pas pointé</span>';
+    if(c.done||d.arrival) nd++;
+    rows+='<div class="rowx"><span>'+LB[x]+'</span>'+st+'</div>'; });
+  rows+='<div class="rowx"><span>Solde de la semaine</span><b class="'+cls(W.solde)+'">'+fhm(W.solde)+'</b></div>';
+  box.innerHTML='<div class="finrec">'+rows+'</div>'; sh.appendChild(box);
+  sh.appendChild(el("div","small","Les jours pointés sans départ gardent leur départ prévu, comme à minuit. Tu pourras rouvrir la semaine."));
+  var ok=el("button","btn fin",ic("check-circle")+"<span>Valider la semaine</span>");
+  ok.onclick=function(){ keepPastDays(5); S.currentWeek.valid=new Date().toISOString(); save(); tick(); closeSheet(); toast("✓ Semaine validée · solde "+fhm(computeWeek().solde)); };
+  sh.appendChild(ok);
 }
 // bande des 5 jours (comme la maquette casino, en sobre) : toucher un jour = sa fiche
 function weekStrip(W){
@@ -1301,7 +1364,7 @@ function weekStrip(W){
     box.appendChild(b);
   });
   var sc=el("div","wsolde",'<div><span class="k">Solde semaine</span>'+(Math.abs(W.P)>0.5?'<small>dont '+fhm(W.P)+' du pot</small>':'<small>'+modeName()+'</small>')+'</div><b class="'+cls(W.solde)+'">'+fhm(W.solde)+'</b>');
-  sc.onclick=function(){ go("week"); };
+  sc.onclick=function(){ if(!tabHidden("week")) go("week"); };
   var ti=selDay?DAYS.indexOf(selDay):DAYS.findIndex(function(x){ return W[x].today; });
   if(dayShut) box.classList.add("shut");
   if(ti>=0 && !dayShut) box.style.gridTemplateColumns=DAYS.map(function(x,i){ return i===ti?"1.7fr":"1fr"; }).join(" ");
@@ -1403,14 +1466,17 @@ function dayPanel(day,c,o){
       dc.innerHTML='<div class="row">'+ring+'<div style="flex:1"><div class="k">Tu sors à</div><div class="big">'+fh(c.dep)+'</div></div><div class="detail">'+parts.join("<br>")+(c.skipsLunch&&!d.noLunch?"<br>pas besoin de midi":"")+(d.arrival?"":"<br><i>si tu arrives à "+fh(c.arr)+"</i>")+'</div></div>';
       // v2.4.2 : valider la journée finie (toucher = départ prévu ; appui long = roulette pour choisir l'heure)
       // v2.4.3 : aussi sans pointage (jour pas pointé) : arrivée et départ prévus retenus d'un coup
-      if(!o.hist){ var vb=el("button","lnk",ic("check-circle")+(d.arrival?" Valider la journée":" Valider avec mes heures habituelles")), vlong=false, vlp=null;
-        vb.title="Toucher : départ prévu. Appui long : choisir l'heure.";
+      if(!o.hist){
+        var nowMode=!!(o.today && d.arrival);
+        var vb=el("button","btn fin",ic("check-circle")+'<span>'+(nowMode?"Fin de journée · je pars":d.arrival?"Fin de journée · valider":"Fin de journée · heures habituelles")+'</span>'), vlong=false, vlp=null;
+        vb.title="Toucher : valider la fin de journée. Appui long : choisir l'heure.";
         vb.onpointerdown=function(){ vlong=false; clearTimeout(vlp); vlp=setTimeout(function(){ vlong=true; openDayWheel(day,"departure",o.refresh?{refresh:o.refresh}:null); },550); };
         vb.onpointerup=vb.onpointerleave=vb.onpointercancel=function(){ clearTimeout(vlp); };
         vb.oncontextmenu=function(e){ e.preventDefault(); };
-        vb.onclick=function(){ if(vlong){ vlong=false; return; } var dd=dayObj(day), m=Math.round(c.dep); if(!dd.arrival) dd.arrival=toClock(Math.round(c.arr)); dd.departure=toClock(m); dd.touched=true; dd.auto=false; commit(o); toast("✓ "+LB[day]+" validé · départ "+fh(m)); };
-        dc.appendChild(vb); }
-      if(o.today && d.arrival){ var now=el("button","lnk",ic("sign-out")+" Je pars maintenant"); now.onclick=function(){ var dd=dayObj(day); dd.departure=toClock(nowMin()); dd.touched=true; dd.auto=false; commit(o); toast("Départ noté à "+fh(nowMin())); }; dc.appendChild(now); }
+        vb.onclick=function(){ if(vlong){ vlong=false; return; } var dd=dayObj(day), m=nowMode?Math.round(nowMin()):Math.round(c.dep); if(!dd.arrival) dd.arrival=toClock(Math.round(c.arr)); dd.departure=toClock(m); dd.touched=true; dd.auto=false; commit(o); if(navigator.vibrate) try{ navigator.vibrate(40); }catch(e){} pushSheet({type:"fin",day:day}); };
+        dc.appendChild(vb);
+        if(nowMode){ var pl=el("button","lnk",ic("check-circle")+" Valider au départ prévu ("+fh(c.dep)+")"); pl.onclick=function(){ var dd=dayObj(day); dd.departure=toClock(Math.round(c.dep)); dd.touched=true; dd.auto=false; commit(o); pushSheet({type:"fin",day:day}); }; dc.appendChild(pl); }
+      }
     }
     wrap.appendChild(dc);
   }
@@ -1864,7 +1930,10 @@ function renderSettings(v){
   a.appendChild(segRow("Barre d'icônes",[["g","À gauche"],["d","À droite"],["b","En bas"]],H.rail,function(x){ H.rail=x; lsSet("ph-rail",x); buildRail(); render(); }));
   if(H.rail!=="b") a.appendChild(segRow("Icônes de la barre",[["h","En haut"],["b","En bas"]],H.ricons,function(x){ H.ricons=x; lsSet("ph-ricons",x); buildRail(); render(); }));
   var od=el("div"); od.appendChild(el("div","lbl","Ordre de la barre d'icônes"));
-  var o=tabOrder(), ord=el("div","rord");
+  [["week","Onglet Semaine (répartition des heures)"],["pot","Onglet Pot & historique"]].forEach(function(x){
+    a.appendChild(segRow(x[1],[["0","Affiché"],["1","Caché"]],tabHidden(x[0])?"1":"0",function(v){ var h=ls("ph-hide","").split(",").filter(function(k){ return k&&k!==x[0]; }); if(v==="1") h.push(x[0]); lsSet("ph-hide",h.join(",")); if(v==="1"&&tab===x[0]) tab="today"; buildRail(); render(); }));
+  });
+  var o=tabOrder(true), ord=el("div","rord");
   o.forEach(function(t,i){
     var r=el("div","it",ic(TABS[t].i)+'<span>'+TABS[t].t+'</span>');
     var up=el("button",null,"▲"), dn=el("button",null,"▼"); up.setAttribute("aria-label","Monter"); dn.setAttribute("aria-label","Descendre");
@@ -1927,7 +1996,11 @@ function renderBets(sh){
 function renderAbout(sh){
   sh.appendChild(sheetHead("Quoi de neuf"));
   var n=el("div","notes");
-  n.innerHTML='<h3>v2.6.2 · 10.11.2026</h3><ul>'+
+  n.innerHTML='<h3>v2.7 · 16.11.2026</h3><ul>'+
+    '<li><b>Fin de journée</b> : un gros bouton dans la carte du jour (toucher = je pars maintenant, appui long = choisir l\'heure), une bande verte « Journée terminée » en haut et un récap net.</li>'+
+    '<li><b>Fin de semaine</b> : le vendredi (et le week-end), « Valider la semaine » calcule le solde pour ne rien toucher pendant le week-end.</li>'+
+    '<li><b>Onglets cachables</b> : Paramètres → Affichage, tu peux cacher Semaine et Pot.</li>'+
+    '</ul><h3>v2.6.2 · 10.11.2026</h3><ul>'+
     '<li><b>Plus sûr</b> : si la mémoire du téléphone est pleine ou si un bug arrive, un message rouge reste affiché jusqu\'à ce que tu le fermes.</li>'+
     '<li><b>Données protégées</b> : si elles deviennent illisibles, l\'ancienne version est gardée à part au lieu d\'être écrasée.</li>'+
     '<li><b>Copies avant restauration</b> : les 10 dernières sont gardées, les plus vieilles partent.</li>'+
@@ -1993,6 +2066,8 @@ function redrawSheet(){
   else if(top.type==="hweek") renderHistWeek(sh,top.i);
   else if(top.type==="hday") renderHistDay(sh,top.i,top.day);
   else if(top.type==="hdel") renderHistDelete(sh,top.i);
+  else if(top.type==="fin") renderFin(sh,top);
+  else if(top.type==="wval") renderWval(sh);
   else if(top.type==="hist") Hist.renderList(sh);
   else if(top.type==="hstate") Hist.renderState(sh,top.i);
   else if(top.type==="about") renderAbout(sh);
